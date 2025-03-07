@@ -1,6 +1,7 @@
 import React from "react";
 import logo from "../assets/logo.png";
 import aplyNow from "../assets/applyNow.png";
+import NavBar from "../components/navBar";
 
 const Header = () => {
   return (
@@ -32,6 +33,7 @@ const Header = () => {
           />
         </button>
       </div>
+      <NavBar />
     </header>
   );
 };
