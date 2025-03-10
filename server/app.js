@@ -4,6 +4,7 @@ import bodyParser from "body-parser";
 import db from "./config/db.config.js";
 import studentRouter from "./routes/student.route.js";
 import teacherRoutes from './routes/teacher.routes.js';
+import classRoutes from './routes/classes.routes.js';
 
 const app = express();
 
@@ -24,6 +25,7 @@ app.get("/test-db", async (req, res) => {
 // Use the student routes under /api/students
 app.use("/api/students", studentRouter);
 app.use('/api/teachers', teacherRoutes);
+app.use('/api/classes', classRoutes);
 
 // Handle root URL (Welcome message)
 app.get("/", (req, res) => {
