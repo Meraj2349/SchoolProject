@@ -5,6 +5,7 @@ import db from "./config/db.config.js";
 import studentRouter from "./routes/student.route.js";
 import teacherRoutes from './routes/teacher.routes.js';
 import classRoutes from './routes/classes.routes.js';
+import subjectRoutes from './routes/subjects.routes.js';
 
 const app = express();
 
@@ -26,6 +27,7 @@ app.get("/test-db", async (req, res) => {
 app.use("/api/students", studentRouter);
 app.use('/api/teachers', teacherRoutes);
 app.use('/api/classes', classRoutes);
+app.use('/api/subjects', subjectRoutes);
 
 // Handle root URL (Welcome message)
 app.get("/", (req, res) => {
