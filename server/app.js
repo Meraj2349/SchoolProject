@@ -6,6 +6,7 @@ import studentRouter from "./routes/student.route.js";
 import teacherRoutes from './routes/teacher.routes.js';
 import classRoutes from './routes/classes.routes.js';
 import subjectRoutes from './routes/subjects.routes.js';
+import examsRoutes from './routes/exams.routes.js';
 
 const app = express();
 
@@ -28,6 +29,7 @@ app.use("/api/students", studentRouter);
 app.use('/api/teachers', teacherRoutes);
 app.use('/api/classes', classRoutes);
 app.use('/api/subjects', subjectRoutes);
+app.use('/api/exams', examsRoutes);
 
 // Handle root URL (Welcome message)
 app.get("/", (req, res) => {
