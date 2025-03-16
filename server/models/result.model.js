@@ -136,23 +136,31 @@ const getResultById = async (resultID) => {
 };
 
 const getResultsByStudent = async (studentID) => {
-  const sql = `
-    SELECT r.*, 
-      e.ExamName,
-      sub.SubjectName
-    FROM Results r
-    JOIN Exams e ON r.ExamID = e.ExamID
-    JOIN Subjects sub ON r.SubjectID = sub.SubjectID
-    WHERE r.StudentID = ?
-    ORDER BY e.ExamDate DESC, sub.SubjectName
-  `;
-
-  try {
-    const [results] = await db.query(sql, [studentID]);
-    return results;
-  } catch (error) {
-    throw new Error("Error fetching results for student: " + error.message);
-  }
+    try {
+        const [rows] = await db.query(`
+          SELECT 
+            es.ExamID,
+            es.SubjectID,
+            es.ExamDate,
+            s.StudentID,
+            CONCAT(s.FirstName, ' ', s.LastName) AS StudentName,
+            e.ExamName,
+            sub.SubjectName
+          FROM ExamSubject es
+          JOIN Students s ON es.StudentID = s.StudentID
+          JOIN Exams e ON es.MainExamID = e.ExamID
+          JOIN Subjects sub ON es.SubjectID = sub.SubjectID
+          WHERE es.StudentID = ?
+        `, [studentID]);
+    
+        if (rows.length === 0) {
+          throw new Error(`No ExamSubject results found for Student ID ${studentID}`);
+        }
+    
+        return rows;
+      } catch (err) {
+        throw new Error("Error fetching results: " + err.message);
+      }
 };
 
 const getResultsByExam = async (examID) => {
@@ -334,31 +342,50 @@ const getSubjectHighestMarksByClassAndExam = async (className, examName, year) =
   
 };
 
-const getStudentResultsByExam = async (studentID, className, examName, year) => {
+const getStudentResultsByExam = async (studentID, classID, examName, year) => {
     const sql = `
-      SELECT 
-        r.*, 
-        e.ExamName,
-        sub.SubjectName,
-        c.ClassName,
-        YEAR(e.ExamDate) AS ExamYear
-      FROM Results r
-      JOIN Students s ON r.StudentID = s.StudentID
-      JOIN Exams e ON r.ExamID = e.ExamID
-      JOIN Subjects sub ON r.SubjectID = sub.SubjectID
-      JOIN Classes c ON e.ClassID = c.ClassID
-      WHERE s.StudentID = ?
-        AND c.ClassName = ?
-        AND e.ExamName = ?
-        AND YEAR(e.ExamDate) = ?
-      ORDER BY sub.SubjectName
-    `;
+SELECT DISTINCT
+    r.ResultID,
+    r.StudentID,
+    r.ExamID,
+    r.SubjectID,
+    r.MarksObtained,
+    es.ExamDate,
+    s.FirstName,
+    s.LastName,
+    e.ExamName,
+    sub.SubjectName,
+    c.ClassName,
+    c.Section,
+    c.ClassId,
+    c.TeacherID,
+    YEAR(e.ExamDate) AS ExamYear,
+    -- Add the highest marks for each subject in the exam (with same ExamName and ExamYear)
+    (SELECT MAX(r2.MarksObtained)
+     FROM Results r2
+     JOIN Exams e2 ON r2.ExamID = e2.ExamID
+     WHERE r2.ExamID = r.ExamID
+       AND r2.SubjectID = r.SubjectID
+       AND e2.ExamName = e.ExamName
+       AND YEAR(e2.ExamDate) = YEAR(e.ExamDate)) AS HighestMarksInSubject
+FROM Results r
+JOIN Students s ON r.StudentID = s.StudentID
+JOIN Exams e ON r.ExamID = e.ExamID
+JOIN Subjects sub ON r.SubjectID = sub.SubjectID
+JOIN Classes c ON e.ClassID = c.ClassID
+JOIN ExamSubject es ON r.ExamID = es.MainExamID AND r.StudentID = es.StudentID
+WHERE r.StudentID = ?
+  AND c.ClassID = ?
+  AND e.ExamName = ?
+  AND YEAR(e.ExamDate) = ?
+ORDER BY sub.SubjectName;
+  `;
   
     try {
-      const [results] = await db.query(sql, [studentID, className, examName, year]);
+      const [results] = await db.query(sql, [studentID, classID, examName, year]);
   
       if (results.length === 0) {
-        throw new Error(`No results found for Student ID ${studentID} in Class ${className}, ${examName} ${year}`);
+        throw new Error(`No results found for Student ID ${studentID} in Class ${classID}, ${examName} ${year}`);
       }
   
       return results;
