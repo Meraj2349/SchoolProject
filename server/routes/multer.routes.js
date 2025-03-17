@@ -1,10 +1,5 @@
 import express from 'express';
-import  {
-    uploadFile,
-    getAllFiles,
-    getFileById,
-    deleteFile
-  } from '../controllers/multer.controller.js';
+import { uploadFile, getAllFiles, getFileById, deleteFile } from '../controllers/multer.controller.js';
 
 const router = express.Router();
 

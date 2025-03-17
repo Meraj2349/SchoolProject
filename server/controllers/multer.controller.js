@@ -30,7 +30,9 @@ const uploadFile = (req, res) => {
     try {
       // Save file metadata to the database
       const { filename, originalname, mimetype, size } = req.file;
-      const fileId = await File.saveFile(filename, originalname, mimetype, size);
+      const { title } = req.body; // Extract title from the request body
+
+      const fileId = await File.saveFile(title, filename, originalname, mimetype, size);
 
       res.status(201).json({
         message: 'File uploaded successfully',
@@ -85,10 +87,4 @@ const deleteFile = async (req, res) => {
   }
 };
 
-export {
-  uploadFile,
-  getAllFiles,
-  getFileById,
-  deleteFile
-};
-
+export { uploadFile, getAllFiles, getFileById, deleteFile };
