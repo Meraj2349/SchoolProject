@@ -5,7 +5,7 @@ import NavBar from "./components/navBar";
 import Home from "./pages/Home";
 import Header from "./components/Header";
 import ResultPage from "./pages/Result";
-import AllNotice from "./pages/AllNotice";
+import AllNotices from "./pages/AllNotice";
 
 
 
@@ -20,7 +20,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/result" element={<ResultPage />} />
-          <Route path="/notice"  element={<AllNotice/>} />
+          <Route path="/notice"  element={<AllNotices/>} />
 
           
         </Routes>

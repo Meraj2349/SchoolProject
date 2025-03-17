@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
+import Footer from '../components/footer';
 import axios from 'axios';
 
-const RecentNotices = () => {
+const AllNotices = () => {
   const [notices, setNotices] = useState([]);
   const [displayedNotices, setDisplayedNotices] = useState([]);
   const [showAll, setShowAll] = useState(false);
@@ -14,7 +15,7 @@ const RecentNotices = () => {
         const sortedNotices = response.data.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
         setNotices(sortedNotices);
         // Initially display only the first 5 notices
-        setDisplayedNotices(sortedNotices.slice(0, 5));
+        setDisplayedNotices(sortedNotices.slice(0, 11));
       } catch (error) {
         console.error('Error fetching notices:', error);
       }
@@ -31,7 +32,7 @@ const RecentNotices = () => {
 
   const handleSeeLess = () => {
     // Show only the first 5 notices
-    setDisplayedNotices(notices.slice(0, 5));
+    setDisplayedNotices(notices.slice(0, 11));
     setShowAll(false);
   };
 
@@ -78,8 +79,9 @@ const RecentNotices = () => {
           </button>
         )}
       </div>
+      <Footer/>
     </div>
   );
 };
 
-export default RecentNotices;
+export default AllNotices;
