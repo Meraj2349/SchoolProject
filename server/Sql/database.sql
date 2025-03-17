@@ -61,6 +61,22 @@ CREATE TABLE Exams (
     FOREIGN KEY (ClassID) REFERENCES Classes(ClassID)
 );
 
+-- Exam Subjects Table
+CREATE TABLE ExamSubject (
+    ExamID INT PRIMARY KEY AUTO_INCREMENT, 
+    SubjectID INT NOT NULL,       
+    StudentID INT NOT NULL,                
+    ExamDate DATE NOT NULL,             
+    MainExamID INT NOT NULL,            
+
+    -- Foreign key constraints
+    FOREIGN KEY (MainExamID) REFERENCES Exams(ExamID),
+    FOREIGN KEY (SubjectID) REFERENCES subjects(SubjectID),
+    FOREIGN KEY (StudentID) REFERENCES students(StudentID)
+
+  
+);
+
 -- Results Table
 CREATE TABLE Results (
     ResultID INT PRIMARY KEY AUTO_INCREMENT,

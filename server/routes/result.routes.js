@@ -37,6 +37,7 @@ router.get("/highest-marks/:className/:examName/:year/:subjectName", getHighestM
 // Get highest marks for all subjects in a class, exam and year
 router.get("/highest-marks/:className/:examName/:year", getSubjectHighestMarksByClassAndExamController);
 
+
 // Get results by student ID
 router.get("/student/:studentID", getResultsByStudentController);
 

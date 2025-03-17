@@ -1,24 +1,33 @@
-import './App.css'
-import Header from './components/header'
-import ImageCarousel from './components/imageCarousel'
-import Notice from './components/Notice'
-import NapBar from './components/napBar'
+import React from "react";
+import "./App.css";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import NavBar from "./components/navBar";
+import Home from "./pages/Home";
+import Header from "./components/Header";
+import ResultPage from "./pages/Result";
 
 
 
 function App() {
   return (
-    <div className="w-full"> 
-       <Header />
-       {/* <Notice /> */}
-       <NapBar/>
+   
+    <Router>
+       <Header/>
+     
+      <div className="p-4">
+      
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/result" element={<ResultPage />} />
+          
+        </Routes>
+        
+      </div>
+    </Router>
 
-      <ImageCarousel />
-
-       {/* <HeroSection /> */}
-      {/* Add other sections/components below */}
-    </div>
-  )
+    
+    
+  );
 }
 
-export default App
+export default App;

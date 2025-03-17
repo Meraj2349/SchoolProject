@@ -22,28 +22,30 @@ const ResultPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-
+  
     // Form validation
     if (!formData.classID || !formData.examName || !formData.studentId || !formData.year) {
       setError('Please fill all the required fields');
       return;
     }
-
+  
     // Show loading state
     setLoading(true);
-
+  
     try {
-      const encodedExamName = encodeURIComponent(formData.examName); // Encode exam name
-      // Debug: Log the request URL
-      const requestUrl = `http://localhost:3000/api/results/student/${formData.studentId}/${formData.classID}/${encodedExamName}/${formData.year}`;
-      console.log('Request URL:', requestUrl);   //
-
-      // Make API call to fetch results
-      const response = await axios.get(requestUrl);
-
+      // Call the server-side endpoint
+      const response = await axios.get('/api/fetch-results', {
+        params: {
+          studentId: formData.studentId,
+          classID: formData.classID,
+          examName: formData.examName,
+          year: formData.year,
+        },
+      });
+  
       // Debug: Log the response
       console.log('API Response:', response.data);
-
+  
       // Check if data is returned
       if (response.data && response.data.length > 0) {
         // Transform the API response into the required format
@@ -72,6 +74,7 @@ const ResultPage = () => {
 
     // Calculate total marks, max marks, and percentage
     const totalMarks = apiData.reduce((sum, result) => sum + result.MarksObtained, 0);
+    const minMarksInASubject = apiData.reduce((mn, result) => result.MarksObtained < mn ? result.MarksObtained : mn, 100);
     const maxMarks = apiData.length * 100; // Assuming each subject has a max of 100 marks
     const percentage = ((totalMarks / maxMarks) * 100).toFixed(2);
     const studentName = `${firstResult.FirstName} ${firstResult.LastName}`;
@@ -81,13 +84,15 @@ const ResultPage = () => {
    
     const section = firstResult.Section;
     const year = firstResult.Year;
+    
 
     // Map subjects
     const subjects = apiData.map((result) => ({
       name: result.SubjectName,
       marks: result.MarksObtained,
+      
       grade: calculateGrade(result.MarksObtained), // Calculate grade
-      highestMarks: 100, // Assuming highest marks is 100 for each subject
+      highestMarks: result.HighestMarksInSubject, // Assuming highest marks is 100 for each subject
     }));
 
     // Return transformed data
@@ -103,7 +108,7 @@ const ResultPage = () => {
       year,
       section,
       percentage,
-      result: percentage >= 40 ? 'PASS' : 'FAIL', // Example pass/fail logic
+      result: minMarksInASubject >= 33 ? 'PASS' : 'FAIL', // Example pass/fail logic
       rank: '-', // Example rank (you can calculate this if needed)
       remarks: percentage >= 80 ? 'Excellent performance. Keep it up!' : 'Good effort!', // Example remarks
     };
@@ -111,11 +116,12 @@ const ResultPage = () => {
 
   // Function to calculate grade based on marks
   const calculateGrade = (marks) => {
-    if (marks >= 90) return 'A+';
-    if (marks >= 80) return 'A';
-    if (marks >= 70) return 'B+';
-    if (marks >= 60) return 'B';
-    if (marks >= 50) return 'C';
+    if (marks >= 80) return 'A+';
+    if (marks >= 70) return 'A';
+    if (marks >= 60) return 'A-';
+    if (marks >= 50) return 'B';
+    if (marks >= 40) return 'C';
+    if(marks >= 33) return 'D';
     return 'F';
   };
 
@@ -319,7 +325,7 @@ const ResultPage = () => {
                   </div>
                   <div>
                     <p className="text-gray-500 text-sm">Examination</p>
-                    <p className="font-semibold">{resultData.examName} - {resultData.year}</p>
+                    <p className="font-semibold">{resultData.examName} - {formData.year}</p>
                   </div>
                 </div>
               </div>
@@ -348,14 +354,21 @@ const ResultPage = () => {
                                 subject.grade === 'A+'
                                   ? 'bg-green-500 text-white'
                                   : subject.grade === 'A'
+
                                   ? 'bg-green-400 text-white'
-                                  : subject.grade === 'B+'
+                                  : subject.grade === 'A-'
+
                                   ? 'bg-blue-400 text-white'
                                   : subject.grade === 'B'
+
                                   ? 'bg-blue-300 text-white'
                                   : subject.grade === 'C'
+
                                   ? 'bg-yellow-400 text-white'
-                                  : 'bg-red-400 text-white'
+                                  : subject.grade === 'D'
+                                  
+                                  ? 'bg-red-400 text-white'
+                                  : 'bg-red-600 text-white'
                               }`}
                             >
                               {subject.grade}
@@ -409,12 +422,7 @@ const ResultPage = () => {
                     </svg>
                     Download
                   </button>
-                  <button className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-md transition duration-200 flex items-center cursor-pointer">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-                    </svg>
-                    Print
-                  </button>
+
                 </div>
               </div>
             </div>
