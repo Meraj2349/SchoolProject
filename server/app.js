@@ -8,6 +8,9 @@ import classRoutes from './routes/classes.routes.js';
 import subjectRoutes from './routes/subjects.routes.js';
 import examsRoutes from './routes/exams.routes.js';
 import examResults from './routes/result.routes.js';
+import path from 'path';
+import fileRoutes from './routes/multer.routes.js';
+import { fileURLToPath } from 'url';
 
 const app = express();
 
@@ -32,6 +35,12 @@ app.use('/api/classes', classRoutes);
 app.use('/api/subjects', subjectRoutes);
 app.use('/api/exams', examsRoutes);
 app.use('/api/results', examResults);
+app.use('/api/multer', fileRoutes);
+
+// Serve static files from the "uploads" directory
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Handle root URL (Welcome message)
 app.get("/", (req, res) => {
