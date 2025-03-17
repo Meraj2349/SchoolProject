@@ -31,7 +31,7 @@ const Notice = () => {
   }, []);
 
   return (
-    <div className="sticky top-0 z-40 w-full bg-gray-100 text-black shadow-md h-7 md:h-8 flex items-center justify-between px-4 overflow-hidden">
+    <div className=" top-0 z-40 w-full bg-gray-100 text-black shadow-md h-7 md:h-10 flex items-center justify-between px-4 overflow-hidden">
       {/* Moving text */}
       {position  > (noticeRef.current?.getBoundingClientRect().left || window.innerWidth) ? (
         <div

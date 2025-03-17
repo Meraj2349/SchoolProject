@@ -4,6 +4,8 @@ import schoolGate from "../assets/schoolGate.jpg"
 import React, { useState, useEffect } from "react";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa"
 const images = [schoolGate, displayImage1, displayImage2];
+
+
 const ImageCarousel = () => {
     const [currentIndex, setCurrentIndex] = useState(0);
   
@@ -26,7 +28,7 @@ const ImageCarousel = () => {
     }, []);
   
     return (
-      <div className="relative w-full h-64 md:h-96 lg:h-[500px] overflow-hidden mt-2">
+      <div className="relative w-full h-64 md:h-96 lg:h-[500px] overflow-hidden ">
         {/* Images */}
         {images.map((img, index) => (
           <img
