@@ -22,35 +22,25 @@ const ResultPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-  
-    // Form validation
+
     if (!formData.classID || !formData.examName || !formData.studentId || !formData.year) {
       setError('Please fill all the required fields');
       return;
     }
-  
-    // Show loading state
+
     setLoading(true);
-  
+
     try {
-      // Call the server-side endpoint
-      const response = await axios.get('/api/fetch-results', {
-        params: {
-          studentId: formData.studentId,
-          classID: formData.classID,
-          examName: formData.examName,
-          year: formData.year,
-        },
-      });
-  
-      // Debug: Log the response
+      const encodedExamName = encodeURIComponent(formData.examName);
+      const requestUrl = `http://localhost:3000/api/results/student/${formData.studentId}/${formData.classID}/${encodedExamName}/${formData.year}`;
+      console.log('Request URL:', requestUrl);
+
+      const response = await axios.get(requestUrl);
       console.log('API Response:', response.data);
-  
-      // Check if data is returned
+
       if (response.data && response.data.length > 0) {
-        // Transform the API response into the required format
         const transformedData = transformResultData(response.data);
-        setResultData(transformedData); // Store the transformed data
+        setResultData(transformedData);
         setShowResult(true);
       } else {
         setError('No results found for the given details.');
@@ -62,7 +52,6 @@ const ResultPage = () => {
       setLoading(false);
     }
   };
-
   // Function to transform API response
   const transformResultData = (apiData) => {
     console.log('API Data:', apiData); // Debug: Log raw API data

@@ -5,8 +5,13 @@ import NavBar from "../components/navBar";
 
 const Header = () => {
   return (
+<<<<<<< Updated upstream
     <header className="sticky top-0 z-40 w-full bg-zinc-50 text-black shadow-md transition-all duration-300 items-center">
       <div className="flex h-22 items-center px-4 md:h-23 md:px-6 lg:max-w-7xl lg:px-8 justify-between">
+=======
+    <header className="sticky top-0 z-40 w-full bg-zinc-50 text-black shadow-md transition-all duration-200 items-center">
+      <div className=" sticky top-0 flex h-25 items-center px-4 md:h-23 md:px-6 lg:max-w-7xl lg:px-8 justify-between">
+>>>>>>> Stashed changes
         {/* Left Section: Logo & Info */}
         <div className="flex h-22 items-center px-4 md:h-23 md:px-6 lg:max-w-7xl lg:px-8">
           <img
