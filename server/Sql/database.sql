@@ -137,3 +137,14 @@ CREATE TABLE LatePaymentFines (
     FOREIGN KEY (StudentID) REFERENCES Students(StudentID),
     FOREIGN KEY (FeeID) REFERENCES Fees(FeeID)
 );
+
+
+--multer file table
+CREATE TABLE files (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  filename VARCHAR(255) NOT NULL,
+  originalname VARCHAR(255) NOT NULL,
+  mimetype VARCHAR(100) NOT NULL,
+  size INT NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
