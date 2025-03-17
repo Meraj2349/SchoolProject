@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 
@@ -13,7 +14,8 @@ const NavBar = () => {
     { name: "Result", path: "/result", content: "Check your results" },
     { name: "Assignment", path: "/assignment", content: "View and submit assignments" },
     { name: "ePayment", path: "/epayment", content: "Make online payments" },
-    { name: "Gallery", path: "/gallery", content: "View our photo gallery" }
+    { name: "Gallery", path: "/gallery", content: "View our photo gallery" },
+     {name: "Notice", path: "/notice" , content: "View all the notices" }
   ];
   
   const toggleMenu = () => {
