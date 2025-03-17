@@ -25,7 +25,7 @@ const RecentNotices = () => {
 
   const handleSeeMore = () => {
     // Show all notices
-    setDisplayedNotices(notices.slice(0,10));
+    setDisplayedNotices(notices);
     setShowAll(true);
   };
 
