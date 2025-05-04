@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 
 const RegisterForm = () => {
   const navigate = useNavigate(); // Hook for navigation
@@ -9,6 +9,7 @@ const RegisterForm = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(false); // Loading state
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -30,6 +31,8 @@ const RegisterForm = () => {
       Password: password,
     };
 
+    setIsLoading(true); // Set loading state
+
     try {
       // Make the POST request to create the admin
       const response = await fetch("http://localhost:3000/api/admin/createAdmin", {
@@ -47,8 +50,14 @@ const RegisterForm = () => {
         setSuccessMessage("Registration successful!");
         setErrorMessage(""); // Clear any previous error messages
 
+        // Clear form fields
+        setUsername("");
+        setEmail("");
+        setPassword("");
+        setConfirmPassword("");
+
         // Redirect to the login page after successful registration
-        navigate("/login");
+        navigate("/admin/login");
       } else {
         // If there was an error in the response
         setErrorMessage(result.error || "Something went wrong.");
@@ -58,6 +67,8 @@ const RegisterForm = () => {
       console.error("Error:", err);
       setErrorMessage("Something went wrong. Please try again.");
       setSuccessMessage(""); // Clear success message if error occurs
+    } finally {
+      setIsLoading(false); // Reset loading state
     }
   };
 
@@ -119,14 +130,14 @@ const RegisterForm = () => {
             />
           </div>
 
-          <button type="submit" className="submit-btn">
-            Register
+          <button type="submit" className="submit-btn" disabled={isLoading}>
+            {isLoading ? "Registering..." : "Register"}
           </button>
         </form>
 
         <div className="login-link">
           <p>
-            Already have an account? <a href="/login">Login</a>
+            Already have an account? <Link to="/admin/login">Login</Link>
           </p>
         </div>
       </div>

@@ -1,8 +1,12 @@
 import React, { useState } from "react";
+import Cookies from "js-cookie";
+import { useNavigate, Link } from "react-router-dom";
 
 const LoginForm = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false); // Loading state
+  const navigate = useNavigate(); // Corrected useNavigate usage
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -10,6 +14,9 @@ const LoginForm = () => {
       Email: email,
       Password: password,
     };
+
+    setIsLoading(true); // Set loading state
+
     try {
       const response = await fetch("http://localhost:3000/api/admin/login", {
         method: "POST",
@@ -18,16 +25,23 @@ const LoginForm = () => {
         },
         body: JSON.stringify(data),
       });
+
       const result = await response.json();
+      console.log("Response Result:", result); // Debugging response
+
       if (response.ok) {
         alert("Login successful!");
-        console.log(result.token); // Save the token for further use
+        console.log(result.token);
+        Cookies.set("token", result.token); // Save the token in cookies
+        navigate("/admin/notices",{replace:true}); // Corrected navigation
       } else {
         alert("Error: " + result.message);
       }
     } catch (err) {
       console.error("Error:", err);
       alert("Something went wrong. Please try again.");
+    } finally {
+      setIsLoading(false); // Reset loading state
     }
   };
 
@@ -58,10 +72,14 @@ const LoginForm = () => {
               required
             />
           </div>
-          <button type="submit" className="submit-btn">Login</button>
+          <button type="submit" className="submit-btn" disabled={isLoading}>
+            {isLoading ? "Logging in..." : "Login"}
+          </button>
         </form>
         <div className="signup-link">
-          <p>Don't have an account? <a href="/register">Sign up</a></p>
+          <p>
+            Don't have an account? <Link to="/admin/register">Sign up</Link>
+          </p>
         </div>
       </div>
     </div>

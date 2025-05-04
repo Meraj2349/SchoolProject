@@ -6,16 +6,20 @@ import "./StudentPage.css";
 
 const StudentPage = () => {
   const [students, setStudents] = useState([]);
+  const [organizedStudents, setOrganizedStudents] = useState({});
+  const [expandedClasses, setExpandedClasses] = useState({});
   const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
-    dateOfBirth: "",
-    gender: "Male",
-    class: "",
-    section: "",
-    admissionDate: "",
-    address: "",
-    parentContact: "",
+    FirstName: "",
+    LastName: "",
+    DateOfBirth: "",
+    Gender: "Male",
+    Class: "",
+    Section: "",
+    roll_number: "",
+    AdmissionDate: "",
+    Address: "",
+    ParentContact: "",
+    profile_image_id: null
   });
   const [editId, setEditId] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -23,18 +27,32 @@ const StudentPage = () => {
   const [success, setSuccess] = useState(null);
   const navigate = useNavigate();
 
-  // Check admin authentication
+  const organizeStudentsByClass = (students) => {
+    const organized = {};
+
+    students.forEach((student) => {
+      if (!organized[student.Class]) {
+        organized[student.Class] = {};
+      }
+
+      if (!organized[student.Class][student.Section]) {
+        organized[student.Class][student.Section] = [];
+      }
+
+      organized[student.Class][student.Section].push(student);
+    });
+
+    return organized;
+  };
+
   useEffect(() => {
     const token = Cookies.get("token");
     if (!token) {
       navigate("/admin/login");
+    } else {
+      fetchStudents();
     }
   }, [navigate]);
-
-  // Fetch all students
-  useEffect(() => {
-    fetchStudents();
-  }, []);
 
   const fetchStudents = async () => {
     setLoading(true);
@@ -48,6 +66,7 @@ const StudentPage = () => {
       if (response.ok) {
         const data = await response.json();
         setStudents(data);
+        setOrganizedStudents(organizeStudentsByClass(data));
       } else {
         throw new Error("Failed to fetch students");
       }
@@ -66,15 +85,15 @@ const StudentPage = () => {
 
   const validateForm = () => {
     const requiredFields = [
-      "firstName",
-      "lastName",
-      "dateOfBirth",
-      "gender",
-      "class",
-      "section",
-      "admissionDate",
-      "address",
-      "parentContact",
+      "FirstName",
+      "LastName",
+      "DateOfBirth",
+      "Gender",
+      "Class",
+      "Section",
+      "AdmissionDate",
+      "Address",
+      "ParentContact",
     ];
 
     for (const field of requiredFields) {
@@ -84,9 +103,15 @@ const StudentPage = () => {
       }
     }
 
-    // Validate parent contact format
-    if (!/^\d{10,15}$/.test(formData.parentContact)) {
+    if (!/^\d{10,15}$/.test(formData.ParentContact)) {
       setError("Parent contact must be 10-15 digits");
+      return false;
+    }
+
+    const currentDate = new Date();
+    const dobDate = new Date(formData.DateOfBirth);
+    if (dobDate >= currentDate) {
+      setError("Date of birth must be in the past");
       return false;
     }
 
@@ -96,51 +121,40 @@ const StudentPage = () => {
 
   const resetForm = () => {
     setFormData({
-      firstName: "",
-      lastName: "",
-      dateOfBirth: "",
-      gender: "Male",
-      class: "",
-      section: "",
-      admissionDate: "",
-      address: "",
-      parentContact: "",
+      FirstName: "",
+      LastName: "",
+      DateOfBirth: "",
+      Gender: "Male",
+      Class: "",
+      Section: "",
+      roll_number: "",
+      AdmissionDate: "",
+      Address: "",
+      ParentContact: "",
+      profile_image_id: null
     });
     setEditId(null);
-  };
-
-  const prepareBackendData = () => {
-    return {
-      FirstName: formData.firstName,
-      LastName: formData.lastName,
-      DateOfBirth: formData.dateOfBirth.split("T")[0],
-      Gender: formData.gender,
-      Class: formData.class,
-      Section: formData.section,
-      AdmissionDate: formData.admissionDate.split("T")[0],
-      Address: formData.address,
-      ParentContact: formData.parentContact
-    };
   };
 
   const handleAddStudent = async () => {
     if (!validateForm()) return;
 
-    const backendFormData = prepareBackendData();
-    console.log("Submitting to backend:", backendFormData);
-
     setLoading(true);
     try {
       const token = Cookies.get("token");
       const response = await fetch(
-        `http://localhost:3000/api/students/addStudents`,
+        "http://localhost:3000/api/students/addStudents",
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify(backendFormData),
+          body: JSON.stringify({
+            ...formData,
+            DateOfBirth: formData.DateOfBirth.split("T")[0],
+            AdmissionDate: formData.AdmissionDate.split("T")[0]
+          }),
         }
       );
 
@@ -164,22 +178,22 @@ const StudentPage = () => {
   const handleEditStudent = (student) => {
     setEditId(student.StudentID);
     setFormData({
-      firstName: student.FirstName,
-      lastName: student.LastName,
-      dateOfBirth: student.DateOfBirth ? student.DateOfBirth.split("T")[0] : "",
-      gender: student.Gender,
-      class: student.Class,
-      section: student.Section,
-      admissionDate: student.AdmissionDate ? student.AdmissionDate.split("T")[0] : "",
-      address: student.Address,
-      parentContact: student.ParentContact,
+      FirstName: student.FirstName,
+      LastName: student.LastName,
+      DateOfBirth: student.DateOfBirth ? student.DateOfBirth.split("T")[0] : "",
+      Gender: student.Gender,
+      Class: student.Class,
+      Section: student.Section,
+      roll_number: student.roll_number || "",
+      AdmissionDate: student.AdmissionDate ? student.AdmissionDate.split("T")[0] : "",
+      Address: student.Address,
+      ParentContact: student.ParentContact,
+      profile_image_id: student.profile_image_id || null
     });
   };
 
   const handleSaveEdit = async () => {
     if (!editId || !validateForm()) return;
-
-    const backendFormData = prepareBackendData();
 
     setLoading(true);
     try {
@@ -192,7 +206,11 @@ const StudentPage = () => {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify(backendFormData),
+          body: JSON.stringify({
+            ...formData,
+            DateOfBirth: formData.DateOfBirth.split("T")[0],
+            AdmissionDate: formData.AdmissionDate.split("T")[0]
+          }),
         }
       );
 
@@ -214,8 +232,9 @@ const StudentPage = () => {
   };
 
   const handleDeleteStudent = async (studentID) => {
-    if (!window.confirm("Are you sure you want to delete this student?")) return;
-    
+    if (!window.confirm("Are you sure you want to delete this student?"))
+      return;
+
     setLoading(true);
     try {
       const token = Cookies.get("token");
@@ -265,46 +284,57 @@ const StudentPage = () => {
         <div className="form-container">
           <h2>{editId ? "Edit Student" : "Add Student"}</h2>
           <div className="form-group">
-            <label htmlFor="firstName">First Name*</label>
+            <label htmlFor="FirstName">First Name*</label>
             <input
-              id="firstName"
-              name="firstName"
+              id="FirstName"
+              name="FirstName"
               type="text"
               placeholder="Enter first name"
-              value={formData.firstName}
+              value={formData.FirstName}
               onChange={handleInputChange}
               required
             />
           </div>
           <div className="form-group">
-            <label htmlFor="lastName">Last Name*</label>
+            <label htmlFor="LastName">Last Name*</label>
             <input
-              id="lastName"
-              name="lastName"
+              id="LastName"
+              name="LastName"
               type="text"
               placeholder="Enter last name"
-              value={formData.lastName}
+              value={formData.LastName}
               onChange={handleInputChange}
               required
             />
           </div>
           <div className="form-group">
-            <label htmlFor="dateOfBirth">Date of Birth*</label>
+            <label htmlFor="roll_number">Roll Number</label>
             <input
-              id="dateOfBirth"
-              name="dateOfBirth"
+              id="roll_number"
+              name="roll_number"
+              type="text"
+              placeholder="Auto-generated if empty"
+              value={formData.roll_number}
+              onChange={handleInputChange}
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="DateOfBirth">Date of Birth*</label>
+            <input
+              id="DateOfBirth"
+              name="DateOfBirth"
               type="date"
-              value={formData.dateOfBirth}
+              value={formData.DateOfBirth}
               onChange={handleInputChange}
               required
             />
           </div>
           <div className="form-group">
-            <label htmlFor="gender">Gender*</label>
+            <label htmlFor="Gender">Gender*</label>
             <select
-              id="gender"
-              name="gender"
-              value={formData.gender}
+              id="Gender"
+              name="Gender"
+              value={formData.Gender}
               onChange={handleInputChange}
               required
             >
@@ -314,59 +344,59 @@ const StudentPage = () => {
             </select>
           </div>
           <div className="form-group">
-            <label htmlFor="class">Class*</label>
+            <label htmlFor="Class">Class*</label>
             <input
-              id="class"
-              name="class"
+              id="Class"
+              name="Class"
               type="text"
               placeholder="Enter class"
-              value={formData.class}
+              value={formData.Class}
               onChange={handleInputChange}
               required
             />
           </div>
           <div className="form-group">
-            <label htmlFor="section">Section*</label>
+            <label htmlFor="Section">Section*</label>
             <input
-              id="section"
-              name="section"
+              id="Section"
+              name="Section"
               type="text"
               placeholder="Enter section"
-              value={formData.section}
+              value={formData.Section}
               onChange={handleInputChange}
               required
             />
           </div>
           <div className="form-group">
-            <label htmlFor="admissionDate">Admission Date*</label>
+            <label htmlFor="AdmissionDate">Admission Date*</label>
             <input
-              id="admissionDate"
-              name="admissionDate"
+              id="AdmissionDate"
+              name="AdmissionDate"
               type="date"
-              value={formData.admissionDate}
+              value={formData.AdmissionDate}
               onChange={handleInputChange}
               required
             />
           </div>
           <div className="form-group">
-            <label htmlFor="address">Address*</label>
+            <label htmlFor="Address">Address*</label>
             <textarea
-              id="address"
-              name="address"
+              id="Address"
+              name="Address"
               placeholder="Enter address"
-              value={formData.address}
+              value={formData.Address}
               onChange={handleInputChange}
               required
             ></textarea>
           </div>
           <div className="form-group">
-            <label htmlFor="parentContact">Parent Contact*</label>
+            <label htmlFor="ParentContact">Parent Contact*</label>
             <input
-              id="parentContact"
-              name="parentContact"
+              id="ParentContact"
+              name="ParentContact"
               type="tel"
               placeholder="Enter parent contact (10-15 digits)"
-              value={formData.parentContact}
+              value={formData.ParentContact}
               onChange={handleInputChange}
               required
             />
@@ -382,8 +412,89 @@ const StudentPage = () => {
               onClick={editId ? handleSaveEdit : handleAddStudent}
               disabled={loading}
             >
-              {loading ? "Processing..." : editId ? "Save Changes" : "Add Student"}
+              {loading
+                ? "Processing..."
+                : editId
+                ? "Save Changes"
+                : "Add Student"}
             </button>
+          </div>
+        </div>
+
+        <div className="class-section-container">
+          <div className="class-wise-container">
+            <h2>Students by Class and Section</h2>
+            {loading && students.length === 0 ? (
+              <p>Loading students...</p>
+            ) : Object.keys(organizedStudents).length === 0 ? (
+              <p>No students found</p>
+            ) : (
+              Object.keys(organizedStudents)
+                .sort()
+                .map((classNum) => (
+                  <div key={classNum} className="class-group">
+                    <h3>Class {classNum}</h3>
+                    {Object.keys(organizedStudents[classNum])
+                      .sort()
+                      .map((section) => (
+                        <div key={section} className="section-group">
+                          <h4>Section: {section}</h4>
+                          <table>
+                            <thead>
+                              <tr>
+                                <th>Roll No.</th>
+                                <th>First Name</th>
+                                <th>Last Name</th>
+                                <th>Date of Birth</th>
+                                <th>Gender</th>
+                                <th>Parent Contact</th>
+                                <th>Actions</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {organizedStudents[classNum][section].map(
+                                (student) => (
+                                  <tr key={student.StudentID}>
+                                    <td>{student.roll_number || '-'}</td>
+                                    <td>{student.FirstName}</td>
+                                    <td>{student.LastName}</td>
+                                    <td>
+                                      {new Date(
+                                        student.DateOfBirth
+                                      ).toLocaleDateString()}
+                                    </td>
+                                    <td>{student.Gender}</td>
+                                    <td>{student.ParentContact}</td>
+                                    <td className="action-buttons">
+                                      <button
+                                        className="edit-btn"
+                                        onClick={() =>
+                                          handleEditStudent(student)
+                                        }
+                                        disabled={loading}
+                                      >
+                                        Edit
+                                      </button>
+                                      <button
+                                        className="delete-btn"
+                                        onClick={() =>
+                                          handleDeleteStudent(student.StudentID)
+                                        }
+                                        disabled={loading}
+                                      >
+                                        Delete
+                                      </button>
+                                    </td>
+                                  </tr>
+                                )
+                              )}
+                            </tbody>
+                          </table>
+                        </div>
+                      ))}
+                  </div>
+                ))
+            )}
           </div>
         </div>
 
@@ -397,6 +508,7 @@ const StudentPage = () => {
             <table>
               <thead>
                 <tr>
+                  <th>Roll No.</th>
                   <th>First Name</th>
                   <th>Last Name</th>
                   <th>Date of Birth</th>
@@ -404,7 +516,6 @@ const StudentPage = () => {
                   <th>Class</th>
                   <th>Section</th>
                   <th>Admission Date</th>
-                  <th>Address</th>
                   <th>Parent Contact</th>
                   <th>Actions</th>
                 </tr>
@@ -412,14 +523,18 @@ const StudentPage = () => {
               <tbody>
                 {students.map((student) => (
                   <tr key={student.StudentID}>
+                    <td>{student.roll_number || '-'}</td>
                     <td>{student.FirstName}</td>
                     <td>{student.LastName}</td>
-                    <td>{new Date(student.DateOfBirth).toLocaleDateString()}</td>
+                    <td>
+                      {new Date(student.DateOfBirth).toLocaleDateString()}
+                    </td>
                     <td>{student.Gender}</td>
                     <td>{student.Class}</td>
                     <td>{student.Section}</td>
-                    <td>{new Date(student.AdmissionDate).toLocaleDateString()}</td>
-                    <td>{student.Address}</td>
+                    <td>
+                      {new Date(student.AdmissionDate).toLocaleDateString()}
+                    </td>
                     <td>{student.ParentContact}</td>
                     <td className="action-buttons">
                       <button
