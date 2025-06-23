@@ -2,28 +2,51 @@ import express from "express";
 import cors from "cors";
 import bodyParser from "body-parser";
 import db from "./config/db.config.js";
+import adminRouter from "./routes/admin.routes.js";
 import studentRouter from "./routes/student.route.js";
-import teacherRoutes from './routes/teacher.routes.js';
+import teacherRoutes from "./routes/teacher.routes.js";
+import noticeRoutes from "./routes/notices.routes.js";
+import userRoutes from "./routes/user.routes.js";
+import classRoutes from "./routes/classes.routes.js";
+import messageRoutes from "./routes/messages.routes.js";
+import subjectRoutes from "./routes/subjects.routes.js";
+import imageRoutes from "./routes/image.routes.js";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 const app = express();
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: "http://localhost:5173",
+  credentials: true
+}));
+app.use(bodyParser.urlencoded({ extended: true }));
+
 app.use(bodyParser.json());
 
 // Database connection check
-app.get("/test-db", async (req, res) => {
-  try {
-    const [rows] = await db.query("SELECT 1 + 1 AS solution");
-    res.send(`Database is working! Solution: ${rows[0].solution}`);
-  } catch (error) {
-    res.status(500).send("Database connection failed: " + error.message);
+db.connect((err) => {
+  if (err) {
+    console.error("Database connection failed: " + err.message);
+    return;
   }
-});
+  console.log("Connected to the database");
+}
+);
 
-// Use the student routes under /api/students
+
+// Use the routes under /api/
+app.use("/api/admin", adminRouter);
 app.use("/api/students", studentRouter);
-app.use('/api/teachers', teacherRoutes);
+app.use("/api/teachers", teacherRoutes);
+app.use("/api/users", userRoutes);
+app.use("/api/notices",noticeRoutes);
+app.use("/api/classes", classRoutes);
+app.use("/api/messages", messageRoutes);
+app.use("/api/subjects", subjectRoutes);
+app.use('/api/images', imageRoutes);
 
 // Handle root URL (Welcome message)
 app.get("/", (req, res) => {

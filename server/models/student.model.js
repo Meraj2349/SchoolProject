@@ -1,7 +1,4 @@
-// server/models/student.model.js
 import db from "../config/db.config.js";
-
-
 
 const getAllStudents = async () => {
   try {
@@ -23,9 +20,17 @@ const addStudent = async (studentData) => {
     AdmissionDate,
     Address,
     ParentContact,
+    RollNumber,
   } = studentData;
+
+  // Check if roll number already exists in the same class and section
+  const rollNumberExists = await checkRollNumberExists(RollNumber, Class, Section);
+  if (rollNumberExists) {
+    throw new Error(`Roll number ${RollNumber} already exists in Class ${Class}, Section ${Section}`);
+  }
+  
   const sql =
-    "INSERT INTO Students (FirstName, LastName, DateOfBirth, Gender, Class, Section, AdmissionDate, Address, ParentContact) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    "INSERT INTO Students (FirstName, LastName, DateOfBirth, Gender, Class, Section, AdmissionDate, Address, ParentContact, RollNumber) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
   try {
     const [result] = await db.query(sql, [
@@ -38,15 +43,21 @@ const addStudent = async (studentData) => {
       AdmissionDate,
       Address,
       ParentContact,
+      RollNumber,
     ]);
-    return { message: "Student added successfully", studentID: result.insertId };
+
+    return {
+      message: "Student added successfully",
+      studentID: result.insertId,
+      roll_number: RollNumber,
+    };
   } catch (err) {
     throw new Error("Error adding student: " + err.message);
   }
 };
 
 const deleteStudent = async (studentID) => {
-  const sql = "DELETE FROM Students WHERE StudentID= ?";
+  const sql = "DELETE FROM Students WHERE StudentID = ?";
 
   try {
     const [result] = await db.query(sql, [studentID]);
@@ -71,9 +82,30 @@ const updateStudent = async (studentID, studentData) => {
     AdmissionDate,
     Address,
     ParentContact,
+    RollNumber,
   } = studentData;
 
-  const sql = `UPDATE Students SET FirstName = ?, LastName = ?, DateOfBirth = ?, Gender = ?, Class = ?, Section = ?, AdmissionDate = ?, Address = ?, ParentContact = ? WHERE StudentID = ?`;
+  // Check if roll number already exists in the same class and section (excluding current student)
+  if (RollNumber) {
+    const rollNumberExists = await checkRollNumberExists(RollNumber, Class, Section, studentID);
+    if (rollNumberExists) {
+      throw new Error(`Roll number ${RollNumber} already exists in Class ${Class}, Section ${Section}`);
+    }
+  }
+
+  const sql = `UPDATE Students SET 
+    FirstName = ?, 
+    LastName = ?, 
+    DateOfBirth = ?, 
+    Gender = ?, 
+    Class = ?, 
+    Section = ?, 
+    AdmissionDate = ?, 
+    Address = ?, 
+    ParentContact = ?,
+    RollNumber = ?
+    WHERE StudentID = ?`;
+
   try {
     const [result] = await db.query(sql, [
       FirstName,
@@ -85,6 +117,7 @@ const updateStudent = async (studentID, studentData) => {
       AdmissionDate,
       Address,
       ParentContact,
+      RollNumber,
       studentID,
     ]);
 
@@ -99,7 +132,7 @@ const updateStudent = async (studentID, studentData) => {
 };
 
 const searchStudents = async (filters) => {
-  const { FirstName, Class, Section } = filters;
+  const { FirstName, Class, Section, RollNumber } = filters; // Fixed: changed roll_number to RollNumber
 
   let query = "SELECT * FROM Students WHERE 1=1";
   const params = [];
@@ -115,6 +148,10 @@ const searchStudents = async (filters) => {
   if (Section) {
     query += " AND Section = ?";
     params.push(Section);
+  }
+  if (RollNumber) {
+    query += " AND RollNumber = ?"; // Fixed: changed roll_number to RollNumber
+    params.push(RollNumber);
   }
 
   try {
@@ -137,6 +174,7 @@ const getStudentCount = async () => {
 };
 
 const getStudentById = async (studentID) => {
+  // Removed image join since you don't have image routes
   const sql = "SELECT * FROM Students WHERE StudentID = ?";
 
   try {
@@ -152,6 +190,46 @@ const getStudentById = async (studentID) => {
   }
 };
 
+// Added new utility functions for better functionality
+const getStudentsByClass = async (className) => {
+  const sql = "SELECT * FROM Students WHERE Class = ? ORDER BY RollNumber";
+
+  try {
+    const [rows] = await db.query(sql, [className]);
+    return rows;
+  } catch (error) {
+    throw new Error("Error fetching students by class: " + error.message);
+  }
+};
+
+const getStudentsByClassAndSection = async (className, section) => {
+  const sql = "SELECT * FROM Students WHERE Class = ? AND Section = ? ORDER BY RollNumber";
+
+  try {
+    const [rows] = await db.query(sql, [className, section]);
+    return rows;
+  } catch (error) {
+    throw new Error("Error fetching students by class and section: " + error.message);
+  }
+};
+
+const checkRollNumberExists = async (rollNumber, classValue, section, excludeStudentID = null) => {
+  let sql = "SELECT StudentID FROM Students WHERE RollNumber = ? AND Class = ? AND Section = ?";
+  const params = [rollNumber, classValue, section];
+
+  if (excludeStudentID) {
+    sql += " AND StudentID != ?";
+    params.push(excludeStudentID);
+  }
+
+  try {
+    const [rows] = await db.query(sql, params);
+    return rows.length > 0;
+  } catch (error) {
+    throw new Error("Error checking roll number: " + error.message);
+  }
+};
+
 export {
   getAllStudents,
   addStudent,
@@ -160,6 +238,8 @@ export {
   searchStudents,
   getStudentCount,
   getStudentById,
+  getStudentsByClass,
+  getStudentsByClassAndSection,
+  checkRollNumberExists,
+  // updateStudentProfileImage, // Commented out since no image routes
 };
-
-

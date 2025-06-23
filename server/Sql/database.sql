@@ -1,123 +1,235 @@
 -- School Management System Database
-
 -- Students Table
-CREATE TABLE Students (
-    StudentID INT PRIMARY KEY AUTO_INCREMENT,
-    FirstName VARCHAR(50),
-    LastName VARCHAR(50),
-    DateOfBirth DATE,
-    Gender ENUM('Male', 'Female', 'Other'),
-    Class VARCHAR(20),
-    Section VARCHAR(10),
-    AdmissionDate DATE,
-    Address TEXT,
-    ParentContact VARCHAR(15)
-);
+CREATE TABLE
+    Students (
+        StudentID INT PRIMARY KEY AUTO_INCREMENT,
+        FirstName VARCHAR(50),
+        LastName VARCHAR(50),
+        RollNumber VARCHAR(20),
+        DateOfBirth DATE,
+        Gender ENUM ('Male', 'Female'),
+        Class VARCHAR(20),
+        Section VARCHAR(10),
+        AdmissionDate DATE,
+        Address TEXT,
+        ParentContact VARCHAR(15)
+    );
 
--- Teachers Table
-CREATE TABLE Teachers (
-    TeacherID INT PRIMARY KEY AUTO_INCREMENT,
-    FirstName VARCHAR(50),
-    LastName VARCHAR(50),
-    Subject VARCHAR(50),
-    ContactNumber VARCHAR(15),
-    Email VARCHAR(100),
-    JoiningDate DATE,
-    Address TEXT
-);
+-- Teachers Table  
+CREATE TABLE
+    Teachers (
+        TeacherID INT PRIMARY KEY AUTO_INCREMENT,
+        FirstName VARCHAR(50),
+        LastName VARCHAR(50),
+        Subject VARCHAR(50),
+        ContactNumber VARCHAR(15),
+        Email VARCHAR(100),
+        JoiningDate DATE,
+        Address TEXT
+    );
 
 -- Classes Table
-CREATE TABLE Classes (
-    ClassID INT PRIMARY KEY AUTO_INCREMENT,
-    ClassName VARCHAR(20),
-    Section VARCHAR(10),
-    TeacherID INT,
-    FOREIGN KEY (TeacherID) REFERENCES Teachers(TeacherID)
-);
+CREATE TABLE
+    Classes (
+        ClassID INT PRIMARY KEY AUTO_INCREMENT,
+        ClassName VARCHAR(20),
+        Section VARCHAR(10),
+        TeacherID INT,
+        FOREIGN KEY (TeacherID) REFERENCES Teachers (TeacherID)
+    );
 
 -- Subjects Table
-CREATE TABLE Subjects (
-    SubjectID INT PRIMARY KEY AUTO_INCREMENT,
-    SubjectName VARCHAR(50),
-    ClassID INT,
-    FOREIGN KEY (ClassID) REFERENCES Classes(ClassID)
-);
+CREATE TABLE
+    Subjects (
+        SubjectID INT PRIMARY KEY AUTO_INCREMENT,
+        SubjectName VARCHAR(50),
+        ClassID INT,
+        FOREIGN KEY (ClassID) REFERENCES Classes (ClassID)
+    );
 
 -- Attendance Table
-CREATE TABLE Attendance (
-    AttendanceID INT PRIMARY KEY AUTO_INCREMENT,
-    StudentID INT,
-    ClassDate DATE,
-    Status ENUM('Present', 'Absent', 'Late'),
-    FOREIGN KEY (StudentID) REFERENCES Students(StudentID)
-);
+CREATE TABLE
+    Attendance (
+        AttendanceID INT PRIMARY KEY AUTO_INCREMENT,
+        StudentID INT,
+        ClassDate DATE,
+        Status ENUM ('Present', 'Absent', 'Late'),
+        FOREIGN KEY (StudentID) REFERENCES Students (StudentID)
+    );
 
 -- Exams Table
-CREATE TABLE Exams (
-    ExamID INT PRIMARY KEY AUTO_INCREMENT,
-    ExamName VARCHAR(50),
-    ClassID INT,
-    ExamDate DATE,
-    FOREIGN KEY (ClassID) REFERENCES Classes(ClassID)
-);
+CREATE TABLE
+    Exams (
+        ExamID INT PRIMARY KEY AUTO_INCREMENT,
+        ExamName VARCHAR(50),
+        ClassID INT,
+        ExamDate DATE,
+        FOREIGN KEY (ClassID) REFERENCES Classes (ClassID)
+    );
 
 -- Results Table
-CREATE TABLE Results (
-    ResultID INT PRIMARY KEY AUTO_INCREMENT,
-    StudentID INT,
-    ExamID INT,
-    SubjectID INT,
-    MarksObtained INT,
-    FOREIGN KEY (StudentID) REFERENCES Students(StudentID),
-    FOREIGN KEY (ExamID) REFERENCES Exams(ExamID),
-    FOREIGN KEY (SubjectID) REFERENCES Subjects(SubjectID)
-);
+CREATE TABLE
+    Results (
+        ResultID INT PRIMARY KEY AUTO_INCREMENT,
+        StudentID INT,
+        ExamID INT,
+        SubjectID INT,
+        MarksObtained INT,
+        FOREIGN KEY (StudentID) REFERENCES Students (StudentID),
+        FOREIGN KEY (ExamID) REFERENCES Exams (ExamID),
+        FOREIGN KEY (SubjectID) REFERENCES Subjects (SubjectID)
+    );
 
 -- Fee Structure Table
-CREATE TABLE FeeStructure (
-    FeeStructureID INT PRIMARY KEY AUTO_INCREMENT,
-    ClassID INT,
-    FeeType ENUM('Tuition', 'Exam', 'Library', 'Transport', 'Sports', 'Lab', 'Hostel', 'Other'),
-    Amount DECIMAL(10,2),
-    AcademicYear YEAR,
-    FOREIGN KEY (ClassID) REFERENCES Classes(ClassID)
-);
+CREATE TABLE
+    FeeStructure (
+        FeeStructureID INT PRIMARY KEY AUTO_INCREMENT,
+        ClassID INT,
+        FeeType ENUM (
+            'Tuition',
+            'Exam',
+            'Library',
+            'Transport',
+            'Sports',
+            'Lab',
+            'Hostel',
+            'Other'
+        ),
+        Amount DECIMAL(10, 2),
+        AcademicYear YEAR,
+        FOREIGN KEY (ClassID) REFERENCES Classes (ClassID)
+    );
 
 -- Fees Payment Table
-CREATE TABLE Fees (
-    FeeID INT PRIMARY KEY AUTO_INCREMENT,
-    StudentID INT,
-    FeeStructureID INT,
-    AmountDue DECIMAL(10,2),
-    AmountPaid DECIMAL(10,2),
-    PaymentDate DATE,
-    DueDate DATE,
-    PaymentStatus ENUM('Paid', 'Pending', 'Overdue'),
-    PaymentMethod ENUM('Cash', 'Bank Transfer', 'Credit Card', 'Mobile Payment'),
-    ReceiptNumber VARCHAR(50) UNIQUE,
-    FOREIGN KEY (StudentID) REFERENCES Students(StudentID),
-    FOREIGN KEY (FeeStructureID) REFERENCES FeeStructure(FeeStructureID)
-);
+CREATE TABLE
+    Fees (
+        FeeID INT PRIMARY KEY AUTO_INCREMENT,
+        StudentID INT,
+        FeeStructureID INT,
+        AmountDue DECIMAL(10, 2),
+        AmountPaid DECIMAL(10, 2),
+        PaymentDate DATE,
+        DueDate DATE,
+        PaymentStatus ENUM ('Paid', 'Pending', 'Overdue'),
+        PaymentMethod ENUM (
+            'Cash',
+            'Bank Transfer',
+            'Credit Card',
+            'Mobile Payment'
+        ),
+        ReceiptNumber VARCHAR(50) UNIQUE,
+        FOREIGN KEY (StudentID) REFERENCES Students (StudentID),
+        FOREIGN KEY (FeeStructureID) REFERENCES FeeStructure (FeeStructureID)
+    );
 
 -- Scholarships/Discounts Table
-CREATE TABLE Scholarships (
-    ScholarshipID INT PRIMARY KEY AUTO_INCREMENT,
-    StudentID INT,
-    FeeStructureID INT,
-    DiscountAmount DECIMAL(10,2),
-    Reason VARCHAR(255),
-    FOREIGN KEY (StudentID) REFERENCES Students(StudentID),
-    FOREIGN KEY (FeeStructureID) REFERENCES FeeStructure(FeeStructureID)
-);
+CREATE TABLE
+    Scholarships (
+        ScholarshipID INT PRIMARY KEY AUTO_INCREMENT,
+        StudentID INT,
+        FeeStructureID INT,
+        DiscountAmount DECIMAL(10, 2),
+        Reason VARCHAR(255),
+        FOREIGN KEY (StudentID) REFERENCES Students (StudentID),
+        FOREIGN KEY (FeeStructureID) REFERENCES FeeStructure (FeeStructureID)
+    );
 
 -- Late Payment Fine Table
-CREATE TABLE LatePaymentFines (
-    FineID INT PRIMARY KEY AUTO_INCREMENT,
-    StudentID INT,
-    FeeID INT,
-    FineAmount DECIMAL(10,2),
-    FineReason VARCHAR(255),
-    FineDate DATE,
-    FOREIGN KEY (StudentID) REFERENCES Students(StudentID),
-    FOREIGN KEY (FeeID) REFERENCES Fees(FeeID)
+CREATE TABLE
+    LatePaymentFines (
+        FineID INT PRIMARY KEY AUTO_INCREMENT,
+        StudentID INT,
+        FeeID INT,
+        FineAmount DECIMAL(10, 2),
+        FineReason VARCHAR(255),
+        FineDate DATE,
+        FOREIGN KEY (StudentID) REFERENCES Students (StudentID),
+        FOREIGN KEY (FeeID) REFERENCES Fees (FeeID)
+    );
+
+--admin
+CREATE TABLE
+    Admin (
+        AdminID INT PRIMARY KEY AUTO_INCREMENT,
+        Username VARCHAR(50),
+        Email VARCHAR(100),
+        Password VARCHAR(255)
+    );
+
+CREATE TABLE
+    Notices (
+        NoticeID INT PRIMARY KEY AUTO_INCREMENT, -- Unique identifier for each notice
+        Title VARCHAR(255) NOT NULL, -- Title of the notice
+        Description TEXT NOT NULL, -- Description of the notice
+        `Show` BOOLEAN NOT NULL DEFAULT FALSE, -- Whether the notice is visible or not
+        CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Timestamp for when the notice was created
+        UpdatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP -- Timestamp for when the notice was last updated
+    );
+
+CREATE TABLE
+    Messages (
+        MessageID INT PRIMARY KEY AUTO_INCREMENT, -- Unique identifier for each message
+        Messages TEXT NOT NULL, -- The message content
+        Show BOOLEAN NOT NULL DEFAULT FALSE, -- Whether the message is visible or not
+        CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Timestamp for when the message was created
+        UpdatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP -- Timestamp for when the message was last updated
+    );
+
+-- Image Storage Table (for all images)
+CREATE TABLE Images (
+    ImageID INT PRIMARY KEY AUTO_INCREMENT,
+    ImagePath VARCHAR(255) NOT NULL,
+    PublicID VARCHAR(255) NOT NULL,
+    Description TEXT,
+    UploadDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UploadedBy INT COMMENT 'AdminID or TeacherID who uploaded',
+    ImageType ENUM('teacher', 'school', 'event', 'notice') NOT NULL,
+    AssociatedID INT COMMENT 'ID of the associated entity (StudentID, TeacherID, etc.)',
 );
+
+
+-- Teacher Images (connects teachers to images)
+CREATE TABLE TeacherImages (
+    TeacherImageID INT PRIMARY KEY AUTO_INCREMENT,
+    TeacherID INT NOT NULL,
+    ImageID INT NOT NULL,
+    ImageCategory ENUM(
+        'profile',
+        'class_photo',
+        'id_card',
+        'training',
+        'meeting',
+        'event_organization'
+    ) NOT NULL,
+    AcademicYear YEAR,
+    FOREIGN KEY (TeacherID) REFERENCES Teachers(TeacherID),
+    FOREIGN KEY (ImageID) REFERENCES Images(ImageID)
+);
+
+-- School Event Images (for general school photos)
+CREATE TABLE SchoolEventImages (
+    EventImageID INT PRIMARY KEY AUTO_INCREMENT,
+    ImageID INT NOT NULL,
+    EventName VARCHAR(100) NOT NULL,
+    EventType ENUM(
+        'sports_day',
+        'annual_function',
+        'cultural_program',
+        'science_fair',
+        'independence_day',
+        'victory_day',
+        'language_day',
+        'other'
+    ) NOT NULL,
+    EventDate DATE,
+    AcademicYear YEAR,
+    FOREIGN KEY (ImageID) REFERENCES Images(ImageID)
+);
+
+-- Add to existing tables
+CREATE INDEX idx_student_class_section ON Students(Class, Section);
+CREATE INDEX idx_attendance_date ON Attendance(ClassDate);
+CREATE INDEX idx_exam_date ON Exams(ExamDate);
+-- Add these to make image relationships more explicit
+ALTER TABLE Students ADD COLUMN ProfileImageID INT NULL REFERENCES Images(ImageID);
+ALTER TABLE Teachers ADD COLUMN ProfileImageID INT NULL REFERENCES Images(ImageID);

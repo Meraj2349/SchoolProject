@@ -1,13 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import Cookies from "js-cookie";
 import Sidebar from "../../../components/Sidebar";
 import "./StudentPage.css";
 
 const StudentPage = () => {
   const [students, setStudents] = useState([]);
   const [organizedStudents, setOrganizedStudents] = useState({});
-  const [expandedClasses, setExpandedClasses] = useState({});
   const [formData, setFormData] = useState({
     FirstName: "",
     LastName: "",
@@ -15,60 +12,46 @@ const StudentPage = () => {
     Gender: "Male",
     Class: "",
     Section: "",
-    roll_number: "",
+    RollNumber: "",
     AdmissionDate: "",
     Address: "",
     ParentContact: "",
-    profile_image_id: null
   });
   const [editId, setEditId] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
-  const navigate = useNavigate();
 
   const organizeStudentsByClass = (students) => {
     const organized = {};
-
     students.forEach((student) => {
       if (!organized[student.Class]) {
         organized[student.Class] = {};
       }
-
       if (!organized[student.Class][student.Section]) {
         organized[student.Class][student.Section] = [];
       }
-
       organized[student.Class][student.Section].push(student);
     });
-
     return organized;
   };
 
   useEffect(() => {
-    const token = Cookies.get("token");
-    if (!token) {
-      navigate("/admin/login");
-    } else {
-      fetchStudents();
-    }
-  }, [navigate]);
+    fetchStudents();
+  }, []);
 
   const fetchStudents = async () => {
     setLoading(true);
     try {
-      const token = Cookies.get("token");
-      const response = await fetch("http://localhost:3000/api/students", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await fetch("http://localhost:3000/api/students");
       if (response.ok) {
-        const data = await response.json();
-        setStudents(data);
-        setOrganizedStudents(organizeStudentsByClass(data));
+        const result = await response.json();
+        const studentsData = result.success ? result.data : result;
+        setStudents(studentsData);
+        setOrganizedStudents(organizeStudentsByClass(studentsData));
       } else {
-        throw new Error("Failed to fetch students");
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to fetch students");
       }
     } catch (error) {
       console.error("Error fetching students:", error);
@@ -91,30 +74,24 @@ const StudentPage = () => {
       "Gender",
       "Class",
       "Section",
-      "AdmissionDate",
-      "Address",
-      "ParentContact",
+      "RollNumber",
     ];
-
     for (const field of requiredFields) {
-      if (!formData[field] || formData[field].trim() === "") {
+      if (!formData[field] || formData[field].toString().trim() === "") {
         setError(`The field "${field}" is required.`);
         return false;
       }
     }
-
-    if (!/^\d{10,15}$/.test(formData.ParentContact)) {
+    if (formData.ParentContact && !/^\d{10,15}$/.test(formData.ParentContact)) {
       setError("Parent contact must be 10-15 digits");
       return false;
     }
-
     const currentDate = new Date();
     const dobDate = new Date(formData.DateOfBirth);
     if (dobDate >= currentDate) {
       setError("Date of birth must be in the past");
       return false;
     }
-
     setError(null);
     return true;
   };
@@ -127,46 +104,36 @@ const StudentPage = () => {
       Gender: "Male",
       Class: "",
       Section: "",
-      roll_number: "",
+      RollNumber: "",
       AdmissionDate: "",
       Address: "",
       ParentContact: "",
-      profile_image_id: null
     });
     setEditId(null);
   };
 
   const handleAddStudent = async () => {
     if (!validateForm()) return;
-
     setLoading(true);
     try {
-      const token = Cookies.get("token");
-      const response = await fetch(
-        "http://localhost:3000/api/students/addStudents",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            ...formData,
-            DateOfBirth: formData.DateOfBirth.split("T")[0],
-            AdmissionDate: formData.AdmissionDate.split("T")[0]
-          }),
-        }
-      );
-
+      const response = await fetch("http://localhost:3000/api/students", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          ...formData,
+          DateOfBirth: formData.DateOfBirth.split("T")[0],
+          AdmissionDate: formData.AdmissionDate ? formData.AdmissionDate.split("T")[0] : undefined,
+        }),
+      });
+      const result = await response.json();
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to add student");
+        throw new Error(result.message || "Failed to add student");
       }
-
-      const data = await response.json();
       fetchStudents();
       resetForm();
-      setSuccess(data.message || "Student added successfully!");
+      setSuccess(result.message || "Student added successfully!");
     } catch (error) {
       console.error("Error adding student:", error);
       setError(error.message || "Failed to add student. Please try again.");
@@ -184,45 +151,35 @@ const StudentPage = () => {
       Gender: student.Gender,
       Class: student.Class,
       Section: student.Section,
-      roll_number: student.roll_number || "",
+      RollNumber: student.RollNumber || "",
       AdmissionDate: student.AdmissionDate ? student.AdmissionDate.split("T")[0] : "",
-      Address: student.Address,
-      ParentContact: student.ParentContact,
-      profile_image_id: student.profile_image_id || null
+      Address: student.Address || "",
+      ParentContact: student.ParentContact || "",
     });
   };
 
   const handleSaveEdit = async () => {
     if (!editId || !validateForm()) return;
-
     setLoading(true);
     try {
-      const token = Cookies.get("token");
-      const response = await fetch(
-        `http://localhost:3000/api/students/updateStudent/${editId}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            ...formData,
-            DateOfBirth: formData.DateOfBirth.split("T")[0],
-            AdmissionDate: formData.AdmissionDate.split("T")[0]
-          }),
-        }
-      );
-
+      const response = await fetch(`http://localhost:3000/api/students/${editId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          ...formData,
+          DateOfBirth: formData.DateOfBirth.split("T")[0],
+          AdmissionDate: formData.AdmissionDate ? formData.AdmissionDate.split("T")[0] : undefined,
+        }),
+      });
+      const result = await response.json();
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to update student");
+        throw new Error(result.message || "Failed to update student");
       }
-
-      const data = await response.json();
       fetchStudents();
       resetForm();
-      setSuccess(data.message || "Student updated successfully!");
+      setSuccess(result.message || "Student updated successfully!");
     } catch (error) {
       console.error("Error updating student:", error);
       setError(error.message || "Failed to update student. Please try again.");
@@ -232,30 +189,18 @@ const StudentPage = () => {
   };
 
   const handleDeleteStudent = async (studentID) => {
-    if (!window.confirm("Are you sure you want to delete this student?"))
-      return;
-
+    if (!window.confirm("Are you sure you want to delete this student?")) return;
     setLoading(true);
     try {
-      const token = Cookies.get("token");
-      const response = await fetch(
-        `http://localhost:3000/api/students/deleteStudent/${studentID}`,
-        {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
+      const response = await fetch(`http://localhost:3000/api/students/${studentID}`, {
+        method: "DELETE",
+      });
+      const result = await response.json();
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to delete student");
+        throw new Error(result.message || "Failed to delete student");
       }
-
-      const data = await response.json();
       fetchStudents();
-      setSuccess(data.message || "Student deleted successfully!");
+      setSuccess(result.message || "Student deleted successfully!");
     } catch (error) {
       console.error("Error deleting student:", error);
       setError(error.message || "Failed to delete student. Please try again.");
@@ -269,7 +214,6 @@ const StudentPage = () => {
       <Sidebar />
       <div className="content">
         <h1 className="page-title">Manage Students</h1>
-
         {success && (
           <div className="alert success" onClick={() => setSuccess(null)}>
             {success}
@@ -280,7 +224,6 @@ const StudentPage = () => {
             {error}
           </div>
         )}
-
         <div className="form-container">
           <h2>{editId ? "Edit Student" : "Add Student"}</h2>
           <div className="form-group">
@@ -308,14 +251,15 @@ const StudentPage = () => {
             />
           </div>
           <div className="form-group">
-            <label htmlFor="roll_number">Roll Number</label>
+            <label htmlFor="RollNumber">Roll Number*</label>
             <input
-              id="roll_number"
-              name="roll_number"
+              id="RollNumber"
+              name="RollNumber"
               type="text"
-              placeholder="Auto-generated if empty"
-              value={formData.roll_number}
+              placeholder="Enter roll number"
+              value={formData.RollNumber}
               onChange={handleInputChange}
+              required
             />
           </div>
           <div className="form-group">
@@ -368,29 +312,27 @@ const StudentPage = () => {
             />
           </div>
           <div className="form-group">
-            <label htmlFor="AdmissionDate">Admission Date*</label>
+            <label htmlFor="AdmissionDate">Admission Date</label>
             <input
               id="AdmissionDate"
               name="AdmissionDate"
               type="date"
               value={formData.AdmissionDate}
               onChange={handleInputChange}
-              required
             />
           </div>
           <div className="form-group">
-            <label htmlFor="Address">Address*</label>
+            <label htmlFor="Address">Address</label>
             <textarea
               id="Address"
               name="Address"
               placeholder="Enter address"
               value={formData.Address}
               onChange={handleInputChange}
-              required
             ></textarea>
           </div>
           <div className="form-group">
-            <label htmlFor="ParentContact">Parent Contact*</label>
+            <label htmlFor="ParentContact">Parent Contact</label>
             <input
               id="ParentContact"
               name="ParentContact"
@@ -398,7 +340,6 @@ const StudentPage = () => {
               placeholder="Enter parent contact (10-15 digits)"
               value={formData.ParentContact}
               onChange={handleInputChange}
-              required
             />
           </div>
           <div className="form-actions">
@@ -420,7 +361,6 @@ const StudentPage = () => {
             </button>
           </div>
         </div>
-
         <div className="class-section-container">
           <div className="class-wise-container">
             <h2>Students by Class and Section</h2>
@@ -455,7 +395,7 @@ const StudentPage = () => {
                               {organizedStudents[classNum][section].map(
                                 (student) => (
                                   <tr key={student.StudentID}>
-                                    <td>{student.roll_number || '-'}</td>
+                                    <td>{student.RollNumber || '-'}</td>
                                     <td>{student.FirstName}</td>
                                     <td>{student.LastName}</td>
                                     <td>
@@ -464,7 +404,7 @@ const StudentPage = () => {
                                       ).toLocaleDateString()}
                                     </td>
                                     <td>{student.Gender}</td>
-                                    <td>{student.ParentContact}</td>
+                                    <td>{student.ParentContact || '-'}</td>
                                     <td className="action-buttons">
                                       <button
                                         className="edit-btn"
@@ -497,7 +437,6 @@ const StudentPage = () => {
             )}
           </div>
         </div>
-
         <div className="table-container">
           <h2>Student List</h2>
           {loading && students.length === 0 ? (
@@ -523,7 +462,7 @@ const StudentPage = () => {
               <tbody>
                 {students.map((student) => (
                   <tr key={student.StudentID}>
-                    <td>{student.roll_number || '-'}</td>
+                    <td>{student.RollNumber || '-'}</td>
                     <td>{student.FirstName}</td>
                     <td>{student.LastName}</td>
                     <td>
@@ -533,9 +472,9 @@ const StudentPage = () => {
                     <td>{student.Class}</td>
                     <td>{student.Section}</td>
                     <td>
-                      {new Date(student.AdmissionDate).toLocaleDateString()}
+                      {student.AdmissionDate ? new Date(student.AdmissionDate).toLocaleDateString() : '-'}
                     </td>
-                    <td>{student.ParentContact}</td>
+                    <td>{student.ParentContact || '-'}</td>
                     <td className="action-buttons">
                       <button
                         className="edit-btn"

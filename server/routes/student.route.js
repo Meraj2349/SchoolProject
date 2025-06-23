@@ -1,22 +1,29 @@
+// Routes file (student.routes.js)
 import express from 'express';
 import {
   getAllStudentsController,
   addStudentController,
-  deleteStudentController,
+  getStudentByIdController,
   updateStudentController,
+  deleteStudentController,
   searchStudentsController,
   getStudentCountController,
-  getStudentByIdController,
+  getStudentsByClassController,
+  getStudentsByClassAndSectionController,
+  checkRollNumberController,
 } from '../controllers/student.controller.js';
 
 const router = express.Router();
 
 router.get('/', getAllStudentsController);
-router.post('/addStudents', addStudentController);
-router.delete('/deleteStudent/:id', deleteStudentController);
-router.put('/updateStudent/:id', updateStudentController);
-router.get('/search', searchStudentsController);
+router.post('/', addStudentController);
 router.get('/count', getStudentCountController);
-router.get('/student/:id', getStudentByIdController);
+router.get('/search', searchStudentsController);
+router.get('/check-roll', checkRollNumberController);
+router.get('/class/:className', getStudentsByClassController);
+router.get('/class/:className/section/:section', getStudentsByClassAndSectionController);
+router.get('/:id', getStudentByIdController);
+router.put('/:id', updateStudentController);
+router.delete('/:id', deleteStudentController);
 
 export default router;

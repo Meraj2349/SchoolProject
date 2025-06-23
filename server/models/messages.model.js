@@ -85,4 +85,4 @@ export const toggleMessageVisibility = async (messageId, show) => {
       console.error("Error toggling visibility in database:", error); // Log the error
       throw error;
     }
-  };
+  }; 

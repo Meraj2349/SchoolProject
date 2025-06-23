@@ -1,0 +1,282 @@
+.leadership-section {
+  padding: 60px 0;
+  background-color: #f8f9fa;
+}
+
+.leadership-section .container {
+  max-width: 1400px; 
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.section-header {
+  text-align: center;
+  margin-bottom: 50px;
+}
+
+.section-header h2 {
+  font-size: 2.5rem;
+  color: #333;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.leadership-content {
+  display: grid;
+  grid-template-columns: 2.2fr 1fr; /* Slightly less aggressive than 2.5fr */
+  gap: 40px;
+  align-items: start;
+}
+
+/* Profile Cards Container */
+.profile-cards-container {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+}
+
+/* Profile Card Styles */
+.profile-card {
+  background: white;
+  border-radius: 12px;
+  padding: 30px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  display: flex;
+  align-items: flex-start;
+  gap: 25px;
+  text-align: left;
+}
+
+.profile-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+}
+
+.profile-image-container {
+  flex-shrink: 0;
+}
+
+.profile-image {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 4px solid #007bff;
+}
+
+.profile-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.profile-name {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #2ecc71;
+  margin-bottom: 3px;
+  line-height: 1.3;
+}
+
+.profile-title {
+  font-size: 1rem;
+  color: #666;
+  margin-bottom: 20px;
+  font-weight: 500;
+}
+
+.profile-message {
+  text-align: justify;
+  margin-bottom: 20px;
+  flex: 1;
+}
+
+.profile-message p {
+  color: #555;
+  line-height: 1.6;
+  font-size: 0.95rem;
+  margin-bottom: 15px;
+}
+
+.profile-more {
+  text-align: left;
+  margin-top: auto;
+}
+
+.more-link {
+  background: none;
+  border: none;
+  color: #007bff;
+  cursor: pointer;
+  font-size: 0.9rem;
+  text-decoration: underline;
+  transition: color 0.3s ease;
+}
+
+.more-link:hover {
+  color: #0056b3;
+}
+
+/* Quick Links Container */
+.quick-links-container {
+  background: white;
+  border-radius: 12px;
+  padding: 30px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  height: fit-content;
+}
+
+/* Magazine Info */
+.magazine-info {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+.qr-code img {
+  width: 60px;
+  height: 60px;
+  border-radius: 8px;
+}
+
+.magazine-text h4 {
+  font-size: 1rem;
+  color: #666;
+  margin: 0;
+  font-weight: 400;
+}
+
+.magazine-text h3 {
+  font-size: 1.3rem;
+  color: #333;
+  margin: 5px 0 0 0;
+  font-weight: 600;
+}
+
+/* Quick Links Grid */
+.quick-links-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.quick-link-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px 15px;
+  border-radius: 10px;
+  text-decoration: none;
+  color: white;
+  font-weight: 500;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  min-height: 80px;
+}
+
+.quick-link-item:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+  color: white;
+  text-decoration: none;
+}
+
+.quick-link-icon {
+  margin-bottom: 8px;
+}
+
+.quick-link-icon span {
+  font-size: 1.5rem;
+  background: rgba(255, 255, 255, 0.2);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.quick-link-text {
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+/* Responsive Design */
+@media (max-width: 992px) {
+  .leadership-content {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+  
+  .profile-cards-container {
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 768px) {
+  .leadership-section {
+    padding: 40px 0;
+  }
+  
+  .section-header h2 {
+    font-size: 2rem;
+  }
+  
+  .profile-card {
+    padding: 25px;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 15px;
+  }
+  
+  .profile-content {
+    align-items: center;
+  }
+  
+  .profile-image {
+    width: 80px;
+    height: 80px;
+  }
+  
+  .profile-name {
+    font-size: 1.2rem;
+  }
+  
+  .profile-more {
+    text-align: center;
+  }
+  
+  .quick-links-container {
+    padding: 25px;
+  }
+  
+  .magazine-info {
+    flex-direction: column;
+    text-align: center;
+    gap: 10px;
+  }
+  
+  .quick-links-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .leadership-section .container {
+    padding: 0 15px;
+  }
+  
+  .profile-card {
+    padding: 20px;
+  }
+  
+  .quick-links-container {
+    padding: 20px;
+  }
+}
