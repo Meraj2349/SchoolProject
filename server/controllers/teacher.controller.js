@@ -3,6 +3,7 @@ import {
   getAllTeachers,
   updateTeacher,
   deleteTeacher,
+  checkDuplicateTeacher,
 } from '../models/teacher.model.js';
 
 const addTeacherController = async (req, res) => {
@@ -41,9 +42,22 @@ const deleteTeacherController = async (req, res) => {
   }
 };
 
+const checkDuplicateTeacherController = async (req, res) => {
+  const { email, contactNumber } = req.query;  // Extract email and contactNumber from query params
+
+  try {
+    // Check if duplicate exists
+    const result = await checkDuplicateTeacher(email, contactNumber);
+    res.status(200).json(result); // Send result back (whether there's a duplicate or not)
+  } catch (error) {
+    console.error(error);  // Log error for debugging
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
 export {
   addTeacherController,
   getAllTeachersController,
   updateTeacherController,
   deleteTeacherController,
+  checkDuplicateTeacherController,
 };

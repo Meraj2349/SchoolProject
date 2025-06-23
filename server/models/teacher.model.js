@@ -58,4 +58,19 @@ const deleteTeacher = async (teacherID) => {
   return result;
 };
 
-export { addTeacher, getAllTeachers, updateTeacher, deleteTeacher };
+const checkDuplicateTeacher = async (email, contactNumber) => {
+  const sql = `
+    SELECT COUNT(*) as count FROM Teachers
+    WHERE Email = ? OR ContactNumber = ?
+  `;
+  const [rows] = await db.query(sql, [email, contactNumber]);
+  return { duplicate: rows[0].count > 0 }; // If count > 0, duplicate exists
+};
+
+export {
+  addTeacher,
+  getAllTeachers,
+  updateTeacher,
+  deleteTeacher,
+  checkDuplicateTeacher,
+};
