@@ -1,14 +1,14 @@
 import {
-  getAllStudents,
   addStudent,
+  checkRollNumberExists,
   deleteStudent,
-  updateStudent,
-  searchStudents,
-  getStudentCount,
+  getAllStudents,
   getStudentById,
+  getStudentCount,
   getStudentsByClass,
   getStudentsByClassAndSection,
-  checkRollNumberExists,
+  searchStudents,
+  updateStudent,
 } from "../models/student.model.js";
 
 // Get all students
@@ -24,7 +24,7 @@ const getAllStudentsController = async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: "Error retrieving students: " + error.message,
     });
   }
 };
@@ -37,8 +37,7 @@ const addStudentController = async (req, res) => {
       LastName,
       DateOfBirth,
       Gender,
-      Class,
-      Section,
+      ClassID,
       AdmissionDate,
       Address,
       ParentContact,
@@ -46,14 +45,14 @@ const addStudentController = async (req, res) => {
     } = req.body;
 
     // Validation
-    if (!FirstName || !LastName || !DateOfBirth || !Gender || !Class || !Section || !RollNumber) {
+    if (!FirstName || !LastName || !DateOfBirth || !Gender || !ClassID || !RollNumber) {
       return res.status(400).json({
         success: false,
-        message: "Required fields: FirstName, LastName, DateOfBirth, Gender, Class, Section, RollNumber",
+        message: "Required fields: FirstName, LastName, DateOfBirth, Gender, ClassID, RollNumber",
       });
     }
 
-    // Validate date format (optional - basic check)
+    // Validate date format
     const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
     if (!dateRegex.test(DateOfBirth)) {
       return res.status(400).json({
@@ -74,16 +73,15 @@ const addStudentController = async (req, res) => {
       LastName: LastName.trim(),
       DateOfBirth,
       Gender,
-      Class,
-      Section,
-      AdmissionDate: AdmissionDate || new Date().toISOString().split('T')[0],
+      ClassID,
+      AdmissionDate: AdmissionDate || new Date().toISOString().split("T")[0],
       Address: Address?.trim() || null,
       ParentContact: ParentContact?.trim() || null,
       RollNumber: RollNumber.toString().trim(),
     };
 
     const result = await addStudent(studentData);
-    
+
     res.status(201).json({
       success: true,
       message: result.message,
@@ -95,7 +93,7 @@ const addStudentController = async (req, res) => {
   } catch (error) {
     res.status(400).json({
       success: false,
-      message: error.message,
+      message: "Error adding student: " + error.message,
     });
   }
 };
@@ -113,24 +111,24 @@ const getStudentByIdController = async (req, res) => {
     }
 
     const student = await getStudentById(parseInt(id));
-    
+
+    if (!student) {
+      return res.status(404).json({
+        success: false,
+        message: "Student not found",
+      });
+    }
+
     res.status(200).json({
       success: true,
       message: "Student retrieved successfully",
       data: student,
     });
   } catch (error) {
-    if (error.message === "Student not found") {
-      res.status(404).json({
-        success: false,
-        message: error.message,
-      });
-    } else {
-      res.status(500).json({
-        success: false,
-        message: error.message,
-      });
-    }
+    res.status(500).json({
+      success: false,
+      message: "Error retrieving student: " + error.message,
+    });
   }
 };
 
@@ -143,8 +141,7 @@ const updateStudentController = async (req, res) => {
       LastName,
       DateOfBirth,
       Gender,
-      Class,
-      Section,
+      ClassID,
       AdmissionDate,
       Address,
       ParentContact,
@@ -179,8 +176,7 @@ const updateStudentController = async (req, res) => {
       LastName: LastName?.trim(),
       DateOfBirth,
       Gender,
-      Class,
-      Section,
+      ClassID,
       AdmissionDate,
       Address: Address?.trim(),
       ParentContact: ParentContact?.trim(),
@@ -188,23 +184,23 @@ const updateStudentController = async (req, res) => {
     };
 
     const result = await updateStudent(parseInt(id), studentData);
-    
-    res.status(200).json({
-      success: true,
-      message: result.message,
-    });
-  } catch (error) {
-    if (error.message === "Student not found") {
-      res.status(404).json({
+
+    if (!result) {
+      return res.status(404).json({
         success: false,
-        message: error.message,
-      });
-    } else {
-      res.status(400).json({
-        success: false,
-        message: error.message,
+        message: "Student not found",
       });
     }
+
+    res.status(200).json({
+      success: true,
+      message: "Student updated successfully",
+    });
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      message: "Error updating student: " + error.message,
+    });
   }
 };
 
@@ -221,47 +217,46 @@ const deleteStudentController = async (req, res) => {
     }
 
     const result = await deleteStudent(parseInt(id));
-    
-    res.status(200).json({
-      success: true,
-      message: result.message,
-    });
-  } catch (error) {
-    if (error.message === "Student not found") {
-      res.status(404).json({
+
+    if (!result) {
+      return res.status(404).json({
         success: false,
-        message: error.message,
-      });
-    } else {
-      res.status(500).json({
-        success: false,
-        message: error.message,
+        message: "Student not found",
       });
     }
+
+    res.status(200).json({
+      success: true,
+      message: "Student deleted successfully",
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Error deleting student: " + error.message,
+    });
   }
 };
 
 // Search students
 const searchStudentsController = async (req, res) => {
   try {
-    const { FirstName, Class, Section, RollNumber } = req.query;
+    const { FirstName, ClassID, RollNumber } = req.query;
 
-    if (!FirstName && !Class && !Section && !RollNumber) {
+    if (!FirstName && !ClassID && !RollNumber) {
       return res.status(400).json({
         success: false,
-        message: "At least one search parameter is required: FirstName, Class, Section, or RollNumber",
+        message: "At least one search parameter is required: FirstName, ClassID, or RollNumber",
       });
     }
 
     const filters = {
       FirstName: FirstName?.trim(),
-      Class: Class?.trim(),
-      Section: Section?.trim(),
+      ClassID: ClassID ? parseInt(ClassID) : null,
       RollNumber: RollNumber?.trim(),
     };
 
     const students = await searchStudents(filters);
-    
+
     res.status(200).json({
       success: true,
       message: "Search completed successfully",
@@ -271,7 +266,7 @@ const searchStudentsController = async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: "Error searching students: " + error.message,
     });
   }
 };
@@ -280,7 +275,7 @@ const searchStudentsController = async (req, res) => {
 const getStudentCountController = async (req, res) => {
   try {
     const result = await getStudentCount();
-    
+
     res.status(200).json({
       success: true,
       message: "Student count retrieved successfully",
@@ -289,7 +284,7 @@ const getStudentCountController = async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: "Error retrieving student count: " + error.message,
     });
   }
 };
@@ -307,7 +302,14 @@ const getStudentsByClassController = async (req, res) => {
     }
 
     const students = await getStudentsByClass(className);
-    
+
+    if (!students || students.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: `No students found for class ${className}`,
+      });
+    }
+
     res.status(200).json({
       success: true,
       message: `Students from class ${className} retrieved successfully`,
@@ -317,35 +319,7 @@ const getStudentsByClassController = async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: error.message,
-    });
-  }
-};
-
-// Get students by class and section
-const getStudentsByClassAndSectionController = async (req, res) => {
-  try {
-    const { className, section } = req.params;
-
-    if (!className || !section) {
-      return res.status(400).json({
-        success: false,
-        message: "Both class name and section are required",
-      });
-    }
-
-    const students = await getStudentsByClassAndSection(className, section);
-    
-    res.status(200).json({
-      success: true,
-      message: `Students from class ${className}, section ${section} retrieved successfully`,
-      data: students,
-      count: students.length,
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message,
+      message: "Error retrieving students by class: " + error.message,
     });
   }
 };
@@ -369,7 +343,7 @@ const checkRollNumberController = async (req, res) => {
       section,
       excludeStudentID ? parseInt(excludeStudentID) : null
     );
-    
+
     res.status(200).json({
       success: true,
       message: "Roll number check completed",
@@ -383,20 +357,48 @@ const checkRollNumberController = async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: "Error checking roll number: " + error.message,
+    });
+  }
+};
+
+
+//class and section based students
+const getStudentsByClassAndSectionController = async (req, res) => {
+  try {
+    const { className, sectionName } = req.params;
+
+    if (!className || !sectionName) {
+      return res.status(400).json({
+        success: false,
+        message: "Class name and section are required",
+      });
+    }
+
+    const students = await getStudentsByClassAndSection(className, sectionName);
+
+    if (!students || students.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: `No students found for class ${className} and section ${sectionName}`,
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: `Students from class ${className} and section ${sectionName} retrieved successfully`,
+      data: students,
+      count: students.length,
+    });
+  }
+  catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Error retrieving students by class and section: " + error.message,
     });
   }
 };
 
 export {
-  getAllStudentsController,
-  addStudentController,
-  getStudentByIdController,
-  updateStudentController,
-  deleteStudentController,
-  searchStudentsController,
-  getStudentCountController,
-  getStudentsByClassController,
-  getStudentsByClassAndSectionController,
-  checkRollNumberController,
+  addStudentController, checkRollNumberController, deleteStudentController, getAllStudentsController, getStudentByIdController, getStudentCountController, getStudentsByClassAndSectionController, getStudentsByClassController, searchStudentsController, updateStudentController
 };

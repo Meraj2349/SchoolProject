@@ -1,19 +1,19 @@
 -- School Management System Database
 -- Students Table
-CREATE TABLE
-    Students (
-        StudentID INT PRIMARY KEY AUTO_INCREMENT,
-        FirstName VARCHAR(50),
-        LastName VARCHAR(50),
-        RollNumber VARCHAR(20),
-        DateOfBirth DATE,
-        Gender ENUM ('Male', 'Female'),
-        Class VARCHAR(20),
-        Section VARCHAR(10),
-        AdmissionDate DATE,
-        Address TEXT,
-        ParentContact VARCHAR(15)
-    );
+CREATE TABLE Students (
+    StudentID INT PRIMARY KEY AUTO_INCREMENT, 
+    FirstName VARCHAR(50) NOT NULL,           
+    LastName VARCHAR(50) NOT NULL,            
+    RollNumber VARCHAR(20) NOT NULL,          
+    DateOfBirth DATE NOT NULL,               
+    Gender ENUM('Male', 'Female') NOT NULL,
+    ClassID INT NOT NULL,                     
+    AdmissionDate DATE NOT NULL,              
+    Address TEXT,                           
+    ParentContact VARCHAR(15),                
+    FOREIGN KEY (ClassID) REFERENCES Classes(ClassID) 
+);
+
 
 -- Teachers Table  
 CREATE TABLE
@@ -35,8 +35,10 @@ CREATE TABLE
         ClassName VARCHAR(20),
         Section VARCHAR(10),
         TeacherID INT,
+        UNIQUE(className, Section),
         FOREIGN KEY (TeacherID) REFERENCES Teachers (TeacherID)
     );
+
 
 -- Subjects Table
 CREATE TABLE
@@ -47,15 +49,17 @@ CREATE TABLE
         FOREIGN KEY (ClassID) REFERENCES Classes (ClassID)
     );
 
--- Attendance Table
-CREATE TABLE
-    Attendance (
-        AttendanceID INT PRIMARY KEY AUTO_INCREMENT,
-        StudentID INT,
-        ClassDate DATE,
-        Status ENUM ('Present', 'Absent', 'Late'),
-        FOREIGN KEY (StudentID) REFERENCES Students (StudentID)
-    );
+CREATE TABLE Attendance (
+    AttendanceID INT PRIMARY KEY AUTO_INCREMENT,
+    StudentID INT NOT NULL,
+    ClassID INT NOT NULL,
+    ClassDate DATE NOT NULL,
+    Status ENUM('Present', 'Absent') NOT NULL,
+    FOREIGN KEY (StudentID) REFERENCES Students(StudentID),
+    FOREIGN KEY (ClassID) REFERENCES Classes(ClassID),
+    UNIQUE (StudentID, ClassID, ClassDate) -- prevent duplicate entries
+);
+
 
 -- Exams Table
 CREATE TABLE
@@ -226,10 +230,4 @@ CREATE TABLE SchoolEventImages (
     FOREIGN KEY (ImageID) REFERENCES Images(ImageID)
 );
 
--- Add to existing tables
-CREATE INDEX idx_student_class_section ON Students(Class, Section);
-CREATE INDEX idx_attendance_date ON Attendance(ClassDate);
-CREATE INDEX idx_exam_date ON Exams(ExamDate);
--- Add these to make image relationships more explicit
-ALTER TABLE Students ADD COLUMN ProfileImageID INT NULL REFERENCES Images(ImageID);
-ALTER TABLE Teachers ADD COLUMN ProfileImageID INT NULL REFERENCES Images(ImageID);
+
