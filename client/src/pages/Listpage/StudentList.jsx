@@ -1,411 +1,280 @@
-import React, { useState, useEffect } from "react";
-import studentAPI from "../../api/studentApi"; // Adjust the import path as needed
+import React, { useState } from "react";
+import axios from "axios";
 import "../../assets/styles/StudentListpage.css";
+import Navbar from "../../components/Navbar";
+import Footer from "../../components/Footer";
 
-const StudentListPage = () => {
-  const [students, setStudents] = useState([]);
-  const [filteredStudents, setFilteredStudents] = useState([]);
+const StudentSearch = () => {
   const [searchFilters, setSearchFilters] = useState({
-    name: "",
-    roll: "",
-    className: "",
-    section: "",
+    FirstName: "",
+    RollNumber: "",
+    ClassName: "",
+    SectionName: "",
   });
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [totalCount, setTotalCount] = useState(0);
 
-  // Fetch all students and student count on component mount
-  useEffect(() => {
-    const loadInitialData = async () => {
-      try {
-        setLoading(true);
-        setError(null);
+  const [students, setStudents] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [searched, setSearched] = useState(false);
 
-        // Fetch all students and total count
-        const [studentsResponse, countResponse] = await Promise.all([
-          getAllStudents(),
-          getStudentCount(),
-        ]);
+  // Base URL for your API
+  const API_BASE_URL = "http://localhost:3000/api/students";
 
-        // Handle different response structures
-        const studentsData = Array.isArray(studentsResponse.data)
-          ? studentsResponse.data
-          : Array.isArray(studentsResponse.data?.students)
-          ? studentsResponse.data.students
-          : [];
-
-        const countData = countResponse.data;
-
-        setStudents(studentsData);
-        setFilteredStudents(studentsData);
-        setTotalCount(
-          countData?.count || countData?.total || studentsData.length
-        );
-      } catch (error) {
-        console.error("Error loading initial data:", error);
-        setError(
-          error.response?.data?.message ||
-            error.message ||
-            "Failed to load students"
-        );
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadInitialData();
-  }, []);
-
-  // Handle search and filtering
-  useEffect(() => {
-    const performSearch = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-
-        // Check if any search filter is active
-        const hasActiveFilters = Object.values(searchFilters).some(
-          (value) => value.trim() !== ""
-        );
-
-        if (!hasActiveFilters) {
-          // No filters, show all students
-          setFilteredStudents(students);
-          setLoading(false);
-          return;
-        }
-
-        // Try API search first, fall back to client-side if it fails
-        try {
-          // Prepare filters for API (only send non-empty values)
-          const apiFilters = {};
-          Object.entries(searchFilters).forEach(([key, value]) => {
-            if (value.trim()) {
-              apiFilters[key] = value.trim();
-            }
-          });
-
-          const results = await studentAPI.searchStudents(apiFilters);
-          const searchResults = Array.isArray(results)
-            ? results
-            : Array.isArray(results?.students)
-            ? results.students
-            : [];
-
-          setFilteredStudents(searchResults);
-        } catch (apiError) {
-          console.log(
-            "API search failed, falling back to client-side search:",
-            apiError
-          );
-          // Fallback to client-side filtering
-          performClientSideFilter();
-        }
-      } catch (error) {
-        console.error("Error performing search:", error);
-        setError(
-          error.response?.data?.message || error.message || "Search failed"
-        );
-        // Still try client-side filtering as last resort
-        performClientSideFilter();
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    // Use specialized API endpoints for better performance
-    const performOptimizedSearch = async () => {
-      const { class: className, section } = searchFilters;
-      const hasNameOrRoll =
-        searchFilters.name.trim() || searchFilters.roll.trim();
-
-      try {
-        if (searchFilters.className && searchFilters.section && !hasNameOrRoll) {
-          // Use class and section specific endpoint
-          const response = await getStudentsByClassAndSection(
-            searchFilters.className,
-            searchFilters.section
-          );
-          const results = Array.isArray(response.data)
-            ? response.data
-            : Array.isArray(response.data?.students)
-            ? response.data.students
-            : [];
-          setFilteredStudents(results);
-        } else if (searchFilters.className && !searchFilters.section && !hasNameOrRoll) {
-          // Use class specific endpoint
-          const response = await getStudentsByClass(searchFilters.className);
-          const results = Array.isArray(response.data)
-            ? response.data
-            : Array.isArray(response.data?.students)
-            ? response.data.students
-            : [];
-          setFilteredStudents(results);
-        } else {
-          // Use general search or client-side filtering
-          await performSearch();
-        }
-      } catch (error) {
-        console.log("Optimized search failed, trying general search");
-        await performSearch();
-      }
-    };
-
-    // Debounce search to avoid too many API calls
-    const timeoutId = setTimeout(() => {
-      performOptimizedSearch();
-    }, 300);
-
-    return () => clearTimeout(timeoutId);
-  }, [searchFilters, students]);
-
-  // Client-side filtering as fallback
-  const performClientSideFilter = () => {
-    let filtered = Array.isArray(students) ? [...students] : [];
-
-    // Filter by name
-    if (searchFilters.name.trim()) {
-      filtered = filtered.filter((student) =>
-        student.name?.toLowerCase().includes(searchFilters.name.toLowerCase())
-      );
-    }
-
-    // Filter by roll
-    if (searchFilters.roll.trim()) {
-      filtered = filtered.filter((student) =>
-        student.roll
-          ?.toString()
-          .toLowerCase()
-          .includes(searchFilters.roll.toLowerCase())
-      );
-    }
-
-    // Filter by class
-    if (searchFilters.className.trim()) {
-      filtered = filtered.filter(
-        (student) =>
-          student.class?.toString().toLowerCase() ===
-          searchFilters.className.toLowerCase()
-      );
-    }
-
-    // Filter by section
-    if (searchFilters.section.trim()) {
-      filtered = filtered.filter(
-        (student) =>
-          student.section?.toString().toLowerCase() ===
-          searchFilters.section.toLowerCase()
-      );
-    }
-
-    setFilteredStudents(filtered);
-  };
-
-  // Get unique classes and sections for filter dropdowns
-  const uniqueClasses = Array.isArray(students)
-    ? [
-        ...new Set(students.map((student) => student.class).filter(Boolean)),
-      ].sort()
-    : [];
-  const uniqueSections = Array.isArray(students)
-    ? [
-        ...new Set(students.map((student) => student.section).filter(Boolean)),
-      ].sort()
-    : [];
-
-  const handleInputChange = (field, value) => {
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
     setSearchFilters((prev) => ({
       ...prev,
-      [field]: value,
+      [name]: value,
     }));
   };
 
-  const clearFilters = () => {
-    setSearchFilters({
-      name: "",
-      roll: "",
-      className: "",
-      section: "",
-    });
-  };
+  const handleSearch = async (e) => {
+    e.preventDefault();
 
-  const refreshData = async () => {
+    // Check if at least one field is filled
+    const hasSearchCriteria = Object.values(searchFilters).some(
+      (value) => value.trim() !== ""
+    );
+
+    if (!hasSearchCriteria) {
+      setError("Please enter at least one search criteria");
+      return;
+    }
+
+    setLoading(true);
+    setError("");
+    setSearched(true);
+
     try {
-      setLoading(true);
-      setError(null);
-      const response = await getAllStudents();
-      const studentsData = Array.isArray(response.data)
-        ? response.data
-        : Array.isArray(response.data?.students)
-        ? response.data.students
-        : [];
-      setStudents(studentsData);
-      setFilteredStudents(studentsData);
+      // Build query parameters
+      const params = new URLSearchParams();
+      Object.entries(searchFilters).forEach(([key, value]) => {
+        if (value.trim()) {
+          params.append(key, value.trim());
+        }
+      });
 
-      // Also refresh count
-      const countResponse = await getStudentCount();
-      setTotalCount(
-        countResponse.data?.count ||
-          countResponse.data?.total ||
-          studentsData.length
+      const response = await axios.get(
+        `${API_BASE_URL}/search/filter?${params.toString()}`
       );
-    } catch (error) {
-      console.error("Error refreshing data:", error);
+
+      if (response.data.success) {
+        setStudents(response.data.data);
+      } else {
+        setError(response.data.message || "Search failed");
+        setStudents([]);
+      }
+    } catch (err) {
       setError(
-        error.response?.data?.message ||
-          error.message ||
-          "Failed to refresh data"
+        err.response?.data?.message || "An error occurred while searching"
       );
+      setStudents([]);
     } finally {
       setLoading(false);
     }
   };
 
-  if (loading && students.length === 0) {
-    return (
-      <div className="student-list-container">
-        <div className="loading-spinner">
-          <div className="spinner"></div>
-          <p>Loading students...</p>
-        </div>
-      </div>
-    );
-  }
+  const handleReset = () => {
+    setSearchFilters({
+      FirstName: "",
+      RollNumber: "",
+      ClassName: "",
+      SectionName: "",
+    });
+    setStudents([]);
+    setError("");
+    setSearched(false);
+  };
 
-  if (error && students.length === 0) {
-    return (
-      <div className="student-list-container">
-        <div className="error-message">
-          <h3>Error Loading Students</h3>
-          <p>{error}</p>
-          <button onClick={refreshData}>Try Again</button>
-        </div>
-      </div>
-    );
-  }
+  const formatDate = (dateString) => {
+    if (!dateString) return "N/A";
+    return new Date(dateString).toLocaleDateString();
+  };
 
   return (
-    <div className="student-list-container">
-      <div className="header">
-        <h1>Student List</h1>
-        <p>Total Students: {totalCount}</p>
-      </div>
+    <div className="student-search-container">
+      <Navbar />
 
-      <div className="search-filters">
-        <div className="search-grid">
-          <div className="search-field">
-            <label htmlFor="name-search">Student Name</label>
-            <input
-              id="name-search"
-              type="text"
-              placeholder="Search by name..."
-              value={searchFilters.name}
-              onChange={(e) => handleInputChange("name", e.target.value)}
-              className="search-input"
-            />
-          </div>
-
-          <div className="search-field">
-            <label htmlFor="roll-search">Roll Number</label>
-            <input
-              id="roll-search"
-              type="text"
-              placeholder="Search by roll..."
-              value={searchFilters.roll}
-              onChange={(e) => handleInputChange("roll", e.target.value)}
-              className="search-input"
-            />
-          </div>
-
-          <div className="search-field">
-            <label htmlFor="class-search">Class</label>
-            <select
-              id="class-search"
-              value={searchFilters.className}
-              onChange={(e) => handleInputChange("className", e.target.value)}
-              className="filter-select"
-            >
-              <option value="">All Classes</option>
-              {uniqueClasses.map((cls) => (
-                <option key={cls} value={cls}>
-                  Class {cls}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="search-field">
-            <label htmlFor="section-search">Section</label>
-            <select
-              id="section-search"
-              value={searchFilters.section}
-              onChange={(e) => handleInputChange("section", e.target.value)}
-              className="filter-select"
-            >
-              <option value="">All Sections</option>
-              {uniqueSections.map((section) => (
-                <option key={section} value={section}>
-                  Section {section}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
-
-        <div className="action-buttons">
-          <button onClick={clearFilters} className="clear-filters-btn">
-            Clear Filters
-          </button>
-          <button onClick={refreshData} className="refresh-btn">
-            Refresh
-          </button>
-        </div>
-      </div>
-
-      {error && (
-        <div className="error-banner">
-          <p>⚠️ {error}</p>
-        </div>
-      )}
-
-      <div className="results-info">
-        <p>
-          Showing{" "}
-          {Array.isArray(filteredStudents) ? filteredStudents.length : 0} of{" "}
-          {Array.isArray(students) ? students.length : 0} students
-          {loading && <span className="loading-text"> (Loading...)</span>}
+      <div className="search-header">
+        <h1 className="search-title">Student Search</h1>
+        <p className="search-subtitle">
+          Search for students by name, roll number, class, or section
         </p>
       </div>
 
-      <div className="students-grid">
-        {!Array.isArray(filteredStudents) || filteredStudents.length === 0 ? (
-          <div className="no-results">
-            <p>No students found matching your criteria.</p>
-          </div>
-        ) : (
-          filteredStudents.map((student) => (
-            <div key={student.id || student._id} className="student-card">
-              <div className="student-info">
-                <h3 className="student-name">{student.name || "N/A"}</h3>
-                <div className="student-details">
-                  <span className="detail-item">
-                    <strong>Roll:</strong> {student.roll || "N/A"}
-                  </span>
-                  <span className="detail-item">
-                    <strong>Class:</strong> {student.class || "N/A"}
-                  </span>
-                  <span className="detail-item">
-                    <strong>Section:</strong> {student.section || "N/A"}
-                  </span>
-                </div>
-              </div>
+      <div className="search-form-container">
+        <form onSubmit={handleSearch} className="search-form">
+          <div className="form-grid">
+            <div className="form-group">
+              <label htmlFor="FirstName" className="form-label">
+                First Name
+              </label>
+              <input
+                type="text"
+                id="FirstName"
+                name="FirstName"
+                value={searchFilters.FirstName}
+                onChange={handleInputChange}
+                placeholder="Enter first name"
+                className="form-input"
+              />
             </div>
-          ))
+
+            <div className="form-group">
+              <label htmlFor="RollNumber" className="form-label">
+                Roll Number
+              </label>
+              <input
+                type="text"
+                id="RollNumber"
+                name="RollNumber"
+                value={searchFilters.RollNumber}
+                onChange={handleInputChange}
+                placeholder="Enter roll number"
+                className="form-input"
+              />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="ClassName" className="form-label">
+                Class Name
+              </label>
+              <input
+                type="text"
+                id="ClassName"
+                name="ClassName"
+                value={searchFilters.ClassName}
+                onChange={handleInputChange}
+                placeholder="Enter class name"
+                className="form-input"
+              />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="SectionName" className="form-label">
+                Section Name
+              </label>
+              <input
+                type="text"
+                id="SectionName"
+                name="SectionName"
+                value={searchFilters.SectionName}
+                onChange={handleInputChange}
+                placeholder="Enter section name"
+                className="form-input"
+              />
+            </div>
+          </div>
+
+          <div className="form-actions">
+            <button type="submit" className="btn btn-search" disabled={loading}>
+              {loading ? "Searching..." : "Search Students"}
+            </button>
+            <button
+              type="button"
+              onClick={handleReset}
+              className="btn btn-reset"
+            >
+              Reset
+            </button>
+          </div>
+        </form>
+
+        {error && (
+          <div className="error-message">
+            <i className="error-icon">⚠</i>
+            {error}
+          </div>
         )}
       </div>
+
+      {searched && (
+        <div className="results-container">
+          <div className="results-header">
+            <h2 className="results-title">Search Results</h2>
+            <span className="results-count">
+              {students.length} student{students.length !== 1 ? "s" : ""} found
+            </span>
+          </div>
+
+          {students.length > 0 ? (
+            <div className="students-grid">
+              {students.map((student) => (
+                <div key={student.StudentID} className="student-card">
+                  <div className="student-header">
+                    <h3 className="student-name">
+                      {student.FirstName} {student.LastName}
+                    </h3>
+                    <span className="student-id">ID: {student.StudentID}</span>
+                  </div>
+
+                  <div className="student-details">
+                    <div className="detail-row">
+                      <span className="detail-label">Roll Number:</span>
+                      <span className="detail-value">{student.RollNumber}</span>
+                    </div>
+
+                    <div className="detail-row">
+                      <span className="detail-label">Class Name:</span>
+                      <span className="detail-value">{student.ClassName}</span>
+                    </div>
+
+                    <div className="detail-row">
+                      <span className="detail-label">Section Name:</span>
+                      <span className="detail-value">{student.SectionName}</span>
+                    </div>
+
+                    <div className="detail-row">
+                      <span className="detail-label">Gender:</span>
+                      <span className="detail-value">{student.Gender}</span>
+                    </div>
+
+                    <div className="detail-row">
+                      <span className="detail-label">Date of Birth:</span>
+                      <span className="detail-value">
+                        {formatDate(student.DateOfBirth)}
+                      </span>
+                    </div>
+
+                    <div className="detail-row">
+                      <span className="detail-label">Admission Date:</span>
+                      <span className="detail-value">
+                        {formatDate(student.AdmissionDate)}
+                      </span>
+                    </div>
+
+                    {student.Address && (
+                      <div className="detail-row">
+                        <span className="detail-label">Address:</span>
+                        <span className="detail-value">{student.Address}</span>
+                      </div>
+                    )}
+
+                    {student.ParentContact && (
+                      <div className="detail-row">
+                        <span className="detail-label">Parent Contact:</span>
+                        <span className="detail-value">
+                          {student.ParentContact}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="no-results">
+              <div className="no-results-icon">🔍</div>
+              <h3>No students found</h3>
+              <p>Try adjusting your search criteria and search again.</p>
+            </div>
+          )}
+        </div>
+      )}
+
+      <Footer />
     </div>
   );
 };
 
-export default StudentListPage;
+export default StudentSearch;

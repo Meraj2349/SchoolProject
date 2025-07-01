@@ -18,6 +18,9 @@ import ImageUpload from "../pages/images/ImageUpload";
 import NotFound from "../pages/NotFound";
 import StudentListPage from "../pages/Listpage/StudentList";
 import TeacherListPage from "../pages/Listpage/TeacherList";
+import AttendancePage from "../pages/Listpage/AttendanceList";
+import AdminAttendancePage from "../pages/admin/attendance/AttendancePage";
+import AttendanceReports from "../pages/admin/attendance/AttendanceReports";
 
 const AppRoutes = () => {
   return (
@@ -25,6 +28,7 @@ const AppRoutes = () => {
       <Route path="/" element={<HomePage />} />
       <Route path="/students" element={<StudentListPage />} />
       <Route path="/teachers" element={<TeacherListPage />} />
+      <Route path="/attendance" element={<AttendancePage />} />
 
       {/* Image Gallery Route */}
       <Route path="/images" element={<ImageGallery />} />
@@ -40,6 +44,10 @@ const AppRoutes = () => {
         <Route path="class" element={<ClassesPage />} />
         <Route path="messages" element={<MessagesPage />} />
         <Route path="subject" element={<SubjectsPage />} />
+        <Route path="attendance" element={<AdminAttendancePage />} />
+        <Route path="attendance/reports" element={<AttendanceReports />} />
+        
+        {/* Protected routes */}
         <Route path="*" element={<NotFound />} />
       </Route>
 

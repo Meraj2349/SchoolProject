@@ -8,7 +8,7 @@ import {
   FaCalendarCheck,
   FaHandshake,
 } from "react-icons/fa";
-import { FaMessage, FaNoteSticky, FaPeopleGroup } from "react-icons/fa6";
+import { FaMessage, FaNoteSticky, FaPeopleGroup ,FaClipboardList} from "react-icons/fa6";
 import { RiListCheck, RiTimerLine } from "react-icons/ri";
 import { FiMenu, FiX } from "react-icons/fi";
 import "../assets/styles/Sidebar.css"; // Import the CSS file
@@ -139,6 +139,16 @@ const Sidebar = () => {
                   path: "/admin/subject",
                   icon: <FaEnvelope />,
                   label: "Subject",
+                },
+                {
+                  path: "/admin/attendance",
+                  icon: <FaClipboardList />,
+                  label: "Attendance",
+                },
+                {
+                  path: "/admin/attendance/reports",
+                  icon: <FaClipboardList />,
+                  label: "Attendance Reports",
                 },
                 {
                   path: "/admin/updateEmailPassword",

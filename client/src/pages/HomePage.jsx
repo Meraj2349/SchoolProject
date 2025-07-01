@@ -11,17 +11,6 @@ import chairmanImage from "../assets/images/photo.jpg";
 import qrCodeImage from "../assets/images/photo.jpg";
 
 export default function SchoolWebsite() {
-  // Navigation items configuration
-  const navigationItems = [
-    { name: "ABOUT", path: "/about" },
-    { name: "ADMISSIONS", path: "/admissions" },
-    { name: "ACADEMICS", path: "/academics" },
-    { name: "ARTS", path: "/arts" },
-    { name: "ATHLETICS", path: "/athletics" },
-    { name: "STUDENT LIFE", path: "/student-life" },
-    { name: "SUPPORT US", path: "/support-us" }
-  ];
-
   // Hero slides configuration
   const heroSlides = [
     {
@@ -29,21 +18,21 @@ export default function SchoolWebsite() {
       subtitle: "Conservation begins on campus.",
       btnText: "LEARN MORE",
       btnLink: "/green-design",
-      backgroundImage: null
+      backgroundImage: null,
     },
     {
       title: "Excellence in Education",
       subtitle: "Preparing students for the future.",
       btnText: "DISCOVER",
       btnLink: "/education",
-      backgroundImage: null
+      backgroundImage: null,
     },
     {
       title: "Innovative Learning",
       subtitle: "Hands-on experiences for all ages.",
       btnText: "EXPLORE",
       btnLink: "/learning",
-      backgroundImage: null
+      backgroundImage: null,
     },
   ];
 
@@ -55,7 +44,6 @@ export default function SchoolWebsite() {
       title: "Chairman",
       // message will be fetched from backend (first message)
     },
-    
   ];
 
   // Quick links configuration
@@ -65,24 +53,14 @@ export default function SchoolWebsite() {
     { name: "Attendance", icon: "✓", color: "#f39c12", path: "/attendance" },
     { name: "Result", icon: "📊", color: "#3498db", path: "/result" },
     { name: "Routine", icon: "📅", color: "#3498db", path: "/routine" },
-    { name: "Download", icon: "⭐", color: "#f39c12", path: "/download" }
+    { name: "Download", icon: "⭐", color: "#f39c12", path: "/download" },
   ];
 
   return (
     <div className="school-website">
-      <Navbar 
-        logo={logo}
-        schoolName="Star Academic School"
-        establishedYear="135479"
-        location="Natiapara, Delduar, Tangail"
-        navItems={navigationItems}
-        showCommunity={true}
-        showSearch={true}
-        showQuakerEducation={true}
-        showQuickLinks={true}
-      />
+      <Navbar />
 
-      <HeroSection 
+      <HeroSection
         slides={heroSlides}
         autoSlide={true}
         autoSlideInterval={5000}
@@ -92,7 +70,7 @@ export default function SchoolWebsite() {
         overlayOpacity={0.4}
       />
 
-      <LeadershipSection 
+      <LeadershipSection
         profiles={leadershipProfiles}
         qrCode={qrCodeImage}
         magazineTitle="Annual Magazine"

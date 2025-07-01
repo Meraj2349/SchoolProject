@@ -1,13 +1,14 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import Logo from "../assets/images/logo.png"; // Adjust the path to your logo image
 
 const Navbar = ({ 
-  logo, 
+  logo = Logo, 
   schoolName = "Star Academic School", 
   establishedYear = "135479", 
   location = "Natiapara, Delduar, Tangail",
   navItems = [
-    { name: "ABOUT", path: "/about" },
+    { name: "HOME", path: "/" },
     { name: "ADMISSIONS", path: "/admissions" },
     { name: "ACADEMICS", path: "/academics" },
     { name: "ARTS", path: "/arts" },

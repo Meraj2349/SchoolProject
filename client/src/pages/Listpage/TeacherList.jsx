@@ -2,6 +2,8 @@
 import React, { useState, useEffect } from 'react';
 import teacherApi from '../../api/teacherApi';
 import '../../assets/styles/listcss/teacherslist.css';
+import Navbar from '../../components/Navbar';
+import Footer from '../../components/Footer';
 
 const TeachersPage = () => {
   const [teachers, setTeachers] = useState([]);
@@ -109,6 +111,7 @@ const TeachersPage = () => {
 
   return (
     <div className="teachers-page">
+      <Navbar />
       <div className="page-header">
         <h1>Our Teachers</h1>
         <p className="page-subtitle">Meet our dedicated teaching staff</p>
@@ -217,6 +220,7 @@ const TeachersPage = () => {
           })}
         </div>
       )}
+      <Footer />
     </div>
   );
 };
