@@ -66,3 +66,38 @@ export const editClass = async (classId, { className, section, teacherId }) => {
     throw error;
   }
 };
+
+//add claasswise student count 
+
+export const getClasswiseStudentCount = async () => {
+  const sql = `
+    SELECT c.ClassName, c.Section, COUNT(s.StudentID) AS StudentCount
+    FROM Classes c
+    LEFT JOIN Students s ON c.ClassID = s.ClassID
+    GROUP BY c.ClassID
+  `;
+  try {
+    const [rows] = await db.query(sql);
+    return rows;
+  } catch (error) {
+    console.error("Error fetching classwise student count:", error);
+    throw error;
+  }
+}
+
+// Get total students in a class by class name
+export const getTotalStudentsInClassByName = async (className) => {
+  const sql = `
+    SELECT COUNT(s.StudentID) AS TotalStudents
+    FROM Students s
+    JOIN Classes c ON s.ClassID = c.ClassID
+    WHERE c.ClassName = ?
+  `;
+  try {
+    const [rows] = await db.query(sql, [className]);
+    return rows[0] ? rows[0].TotalStudents : 0;
+  } catch (error) {
+    console.error("Error fetching total students in class:", error);
+    throw error;
+  }
+};  

@@ -1,73 +1,50 @@
-import React from "react";
-import "../assets/styles/Footer.css"; // Import the CSS file for styling
+import logo1 from "../assets/images/logo1.png"; // Import the school logo
+import "../assets/styles/Footer.css";
+import sustLogo from "../assets/images/sustLogo.png" // Import the CSS file for styling
+
 const Footer = () => {
   return (
     <footer className="footer-container">
-      {/* Main footer with navigation links */}
+      {/* Main footer with school info, quick links, and maintained by */}
       <div className="footer-main">
+        {/* School Information */}
+        <div className="footer-info">
+          <img src={logo1} alt="School Logo" className="school-logo" />
+          <h3>Star Academic School</h3>
+          <p>Contact: 01997588476</p>
+          <p>Email: merajislam2349@gmail.com</p>
+          <p>Natiapara, Delduar, Tangail</p>
+        </div>
+
+        {/* Quick Links */}
         <div className="footer-links">
-          {/* Column 1 */}
-          <div className="footer-column">
-            <ul>
-              <li><a href="#">About BU</a></li>
-              <li><a href="#">Future and current students</a></li>
-              <li><a href="#">Academic programs</a></li>
-              <li><a href="#">Research</a></li>
-            </ul>
-          </div>
+          <h4>Quick Links</h4>
+          <ul>
+            <li><a href="#">DSHE</a></li>
+            <li><a href="#">BANBEIS</a></li>
+            <li><a href="#">BD National Portal</a></li>
+            <li><a href="#">Ministry of Education</a></li>
+            <li><a href="#">Sylhet Board</a></li>
+            <li><a href="#">Primary & Mass Education</a></li>
+            <li><a href="#">Form of BD. Govt</a></li>
+            <li><a href="#">Pathshala EMIS</a></li>
+            <li><a href="#">UGC</a></li>
+            <li><a href="#">Dhaka University</a></li>
+            <li><a href="#">SUST</a></li>
+          </ul>
+        </div>
 
-          {/* Column 2 */}
-          <div className="footer-column">
-            <ul>
-              <li><a href="#">Library</a></li>
-              <li><a href="#">Recreation</a></li>
-              <li><a href="#">Varsity Sports</a></li>
-              <li><a href="#">Alumni & Friends</a></li>
-            </ul>
-          </div>
-
-          {/* Column 3 */}
-          <div className="footer-column">
-            <ul>
-              <li><a href="#">Resources for Current Student</a></li>
-              <li><a href="#">Resources for Faculty & Staff</a></li>
-              <li><a href="#">Bookstore</a></li>
-              <li><a href="#">Campus Map</a></li>
-            </ul>
-          </div>
-
-          {/* Column 4 */}
-          <div className="footer-column">
-            <ul>
-              <li><a href="#">Careers@BU</a></li>
-              <li><a href="#">Communications Office</a></li>
-              <li><a href="#">Give Now</a></li>
-              <li><a href="#">Disclaimer</a></li>
-            </ul>
-          </div>
-
-          {/* Column 5 - Social Media Icons */}
-          <div className="footer-social">
-            <a href="#" className="social-icon twitter" aria-label="Twitter"></a>
-            <a href="#" className="social-icon facebook" aria-label="Facebook"></a>
-            <a href="#" className="social-icon youtube" aria-label="YouTube"></a>
-            <a href="#" className="social-icon linkedin" aria-label="LinkedIn"></a>
-            <a href="#" className="social-icon instagram" aria-label="Instagram"></a>
-          </div>
+        {/* Maintained By */}
+        <div className="footer-maintained">
+          <h4>Maintained By</h4>
+          <img src={sustLogo} alt="Pathshala Logo" className="maintained-logo" />
         </div>
       </div>
 
-      {/* Bottom footer with logo and copyright */}
+      {/* Bottom footer with developed by and helpline */}
       <div className="footer-bottom">
-        <div className="footer-bottom-content">
-          <div className="footer-logo">
-            <img src="/logo.png" alt="Bishop's University Logo" />
-          </div>
-          <div className="footer-copyright">
-            <p>Copyright ©2019 Bishop's University</p>
-            <a href="#">Disclaimer</a>
-          </div>
-        </div>
+        <p>Developed By: Md.Meraj Mridha</p>
+        <p>Helpline: +88 019 97588476</p>
       </div>
     </footer>
   );

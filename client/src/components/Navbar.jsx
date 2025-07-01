@@ -1,25 +1,39 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import Logo from "../assets/images/logo.png"; // Adjust the path to your logo image
+import Logo from "../assets/images/logo1.png";
+import "../assets/styles/Navbar.css"; // Adjust the path to your logo
 
-const Navbar = ({ 
-  logo = Logo, 
-  schoolName = "Star Academic School", 
-  establishedYear = "135479", 
+const Navbar = ({
+  logo = Logo,
+  schoolName = "Star Academic School",
+  establishedYear = "135479",
   location = "Natiapara, Delduar, Tangail",
   navItems = [
     { name: "HOME", path: "/" },
-    { name: "ADMISSIONS", path: "/admissions" },
+    { name: "ABOUT", path: "/about" },
+    //branchess has toggle functionality
+    {
+      name: "BRANCHES",
+      path: "/branches",
+      subItems: [
+        { name: "Branch 1", path: "/branch1" },
+        { name: "Branch 2", path: "/branch2" },
+        { name: "Branch 3", path: "/branch3" },
+      ],
+    },
+
+    { name: "GALLERY", path: "/gallery" },
+    { name: "EVENTS", path: "/events" },
+    { name: "NEWS", path: "/news" },
     { name: "ACADEMICS", path: "/academics" },
-    { name: "ARTS", path: "/arts" },
-    { name: "ATHLETICS", path: "/athletics" },
-    { name: "STUDENT LIFE", path: "/student-life" },
-    { name: "SUPPORT US", path: "/support-us" }
+    { name: "ADMISSIONS", path: "/admissions" },
+    { name: "STUDENTS", path: "/students" },
+    { name: "CONTACT", path: "/contact" },
   ],
   showCommunity = true,
   showSearch = true,
   showQuakerEducation = true,
-  showQuickLinks = true
+  showQuickLinks = true,
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -42,15 +56,9 @@ const Navbar = ({
 
         <div className="top-right-section">
           {showCommunity && (
-            <div className="community-dropdown">
-              <span>Community</span>
-              <span className="arrow-down">▼</span>
-            </div>
-          )}
-
-          {showSearch && (
-            <div className="search-button">
-              <span className="search-icon">🔍</span>
+            <div className="online-apply-dropdown">
+              <span>Online Apply</span>
+              
             </div>
           )}
 
@@ -75,42 +83,65 @@ const Navbar = ({
             {navItems.map((item, index) => (
               <li key={index} className="nav-item">
                 <Link to={item.path}>{item.name}</Link>
+                {item.subItems && (
+                  <ul className="sub-menu">
+                    {item.subItems.map((subItem, subIndex) => (
+                      <li key={subIndex} className="sub-menu-item">
+                        <Link to={subItem.path}>{subItem.name}</Link>
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </li>
             ))}
           </ul>
-
-          {/* QuickLinks */}
-          {showQuickLinks && (
-            <div className="quick-links">
-              <span>QUICKLINKS</span>
-              <span className="arrow-down">▼</span>
-            </div>
-          )}
         </div>
       </div>
 
       {/* Mobile Menu */}
       {mobileMenuOpen && (
         <div className="mobile-menu">
+          <div className="mobile-menu-header">
+            <h3 className="mobile-menu-title">Navigation Menu</h3>
+            <button className="mobile-menu-close" onClick={toggleMobileMenu}>
+              ✕
+            </button>
+          </div>
           <ul>
             {navItems.map((item, index) => (
               <li key={index}>
-                <Link to={item.path}>{item.name}</Link>
+                <Link to={item.path} onClick={toggleMobileMenu}>
+                  {item.name}
+                </Link>
+                {item.subItems &&
+                  item.subItems.map((subItem, subIndex) => (
+                    <li key={`sub-${subIndex}`} className="mobile-submenu-item">
+                      <Link to={subItem.path} onClick={toggleMobileMenu}>
+                        {subItem.name}
+                      </Link>
+                    </li>
+                  ))}
               </li>
             ))}
             {showCommunity && (
               <li>
-                <Link to="/community">COMMUNITY</Link>
+                <Link to="/community" onClick={toggleMobileMenu}>
+                  COMMUNITY
+                </Link>
               </li>
             )}
             {showQuickLinks && (
               <li>
-                <Link to="/quicklinks">QUICKLINKS</Link>
+                <Link to="/quicklinks" onClick={toggleMobileMenu}>
+                  QUICKLINKS
+                </Link>
               </li>
             )}
             {showQuakerEducation && (
               <li>
-                <Link to="/quaker-education">A QUAKER EDUCATION</Link>
+                <Link to="/quaker-education" onClick={toggleMobileMenu}>
+                  A QUAKER EDUCATION
+                </Link>
               </li>
             )}
           </ul>

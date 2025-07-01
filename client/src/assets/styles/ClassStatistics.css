@@ -1,0 +1,123 @@
+/* ClassStatistics Component Styles */
+.class-statistics-container {
+  background: linear-gradient(135deg, #6dbf6e, #5ba85d);
+  padding: 50px 20px;
+  text-align: center;
+  color: white;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.class-statistics-container h2 {
+  font-size: 28px;
+  font-weight: bold;
+  margin-bottom: 10px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.class-statistics-container p {
+  font-size: 18px;
+  margin-bottom: 40px;
+  opacity: 0.9;
+}
+
+.class-statistics {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 30px;
+  flex-wrap: wrap;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.class-statistics-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.circle {
+  width: 120px;
+  height: 120px;
+  border: 3px solid rgba(255, 255, 255, 0.8);
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.circle:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.count {
+  font-size: 32px;
+  font-weight: bold;
+  margin-bottom: 5px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.class-name {
+  font-size: 16px;
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .class-statistics-container {
+    padding: 30px 15px;
+  }
+
+  .class-statistics-container h2 {
+    font-size: 24px;
+  }
+
+  .class-statistics {
+    gap: 20px;
+  }
+
+  .circle {
+    width: 100px;
+    height: 100px;
+  }
+
+  .count {
+    font-size: 28px;
+  }
+
+  .class-name {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .class-statistics-container {
+    padding: 25px 10px;
+  }
+
+  .class-statistics {
+    gap: 15px;
+  }
+
+  .circle {
+    width: 90px;
+    height: 90px;
+  }
+
+  .count {
+    font-size: 24px;
+  }
+
+  .class-name {
+    font-size: 12px;
+  }
+}

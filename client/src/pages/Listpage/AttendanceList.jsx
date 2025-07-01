@@ -2,7 +2,8 @@ import axios from "axios";
 import { CheckCircle, RefreshCw, Save, Search, Users, X } from "lucide-react";
 import { useState } from "react";
 import "../../assets/styles/listcss/attendancelist.css";
-
+import Footer from "../../components/Footer";
+import Navbar from "../../components/Navbar";
 const AttendancePage = () => {
   const [formData, setFormData] = useState({
     className: "",
@@ -227,31 +228,33 @@ const AttendancePage = () => {
   const summary = getAttendanceSummary();
 
   return (
-    <div className="attendance-container">
-      <div className="attendance-header">
-        <h1 className="page-title">Attendance Management</h1>
-        <p className="page-subtitle">Mark student attendance and search records</p>
-      </div>
+    <>
+      <Navbar />
+      <div className="attendance-container">
+        <div className="attendance-header">
+          <h1 className="page-title">Attendance Management</h1>
+          <p className="page-subtitle">Mark student attendance and search records efficiently</p>
+        </div>
 
-      {/* Tab Navigation */}
-      <div className="tab-navigation">
-        <button 
-          className={`tab-btn ${activeTab === 'class' ? 'active' : ''}`}
-          onClick={() => setActiveTab('class')}
-        >
-          <Users className="tab-icon" />
-          Class Attendance
-        </button>
-        <button 
-          className={`tab-btn ${activeTab === 'search' ? 'active' : ''}`}
-          onClick={() => setActiveTab('search')}
-        >
-          <Search className="tab-icon" />
-          Search Records
-        </button>
-      </div>
+        {/* Tab Navigation */}
+        <div className="tab-navigation">
+          <button 
+            className={`tab-btn ${activeTab === 'class' ? 'active' : ''}`}
+            onClick={() => setActiveTab('class')}
+          >
+            <Users className="tab-icon" />
+            Class Attendance
+          </button>
+          <button 
+            className={`tab-btn ${activeTab === 'search' ? 'active' : ''}`}
+            onClick={() => setActiveTab('search')}
+          >
+            <Search className="tab-icon" />
+            Search Records
+          </button>
+        </div>
 
-      {/* Class Attendance Tab */}
+        {/* Class Attendance Tab */}
       {activeTab === 'class' && (
         <>
           {/* Input Form */}
@@ -675,7 +678,9 @@ const AttendancePage = () => {
           )}
         </>
       )}
-    </div>
+      </div>
+      <Footer />
+    </>
   );
 };
 

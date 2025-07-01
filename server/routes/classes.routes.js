@@ -4,6 +4,7 @@ import {
   deleteClassController,
   getClassesController,
   editClassController,
+  getTotalStudentsInClassByNameController,
 } from "../controllers/classes.controller.js";
 
 const router = express.Router();
@@ -19,5 +20,8 @@ router.get("/", getClassesController);
 
 // Edit a class by ID
 router.put("/edit/:id", editClassController);
+
+// Get total students in a class by class name
+router.get("/totalstudents/:className", getTotalStudentsInClassByNameController);
 
 export default router;

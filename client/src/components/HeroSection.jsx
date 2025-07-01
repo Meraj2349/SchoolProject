@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import backgroundImage from "../assets/images/School Gate Picture.jpg"; // Default background image
 
 const HeroSection = ({ 
   slides = [
@@ -7,21 +8,21 @@ const HeroSection = ({
       subtitle: "Conservation begins on campus.",
       btnText: "LEARN MORE",
       btnLink: "/green-design",
-      backgroundImage: null
+      backgroundImage: backgroundImage
     },
     {
       title: "Excellence in Education",
       subtitle: "Preparing students for the future.",
       btnText: "DISCOVER",
       btnLink: "/education",
-      backgroundImage: null
+      backgroundImage: backgroundImage
     },
     {
       title: "Innovative Learning",
       subtitle: "Hands-on experiences for all ages.",
       btnText: "EXPLORE",
       btnLink: "/learning",
-      backgroundImage: null
+      backgroundImage: backgroundImage
     }
   ],
   autoSlide = false,
@@ -79,37 +80,8 @@ const HeroSection = ({
       </div>
 
       {/* Slider Navigation */}
-      {showNavigation && slides.length > 1 && (
-        <div className="slider-navigation">
-          <button className="prev-slide" onClick={prevSlide}>
-            ❮
-          </button>
-          <button className="next-slide" onClick={nextSlide}>
-            ❯
-          </button>
-        </div>
-      )}
+   
 
-      {/* Slide Indicators */}
-      {slides.length > 1 && (
-        <div className="slide-indicators">
-          {slides.map((_, index) => (
-            <button
-              key={index}
-              className={`slide-indicator ${index === currentSlide ? 'active' : ''}`}
-              onClick={() => goToSlide(index)}
-              aria-label={`Go to slide ${index + 1}`}
-            />
-          ))}
-        </div>
-      )}
-
-      {/* Scroll Indicator */}
-      {showScrollIndicator && (
-        <div className="scroll-indicator">
-          ▼
-        </div>
-      )}
     </div>
   );
 };

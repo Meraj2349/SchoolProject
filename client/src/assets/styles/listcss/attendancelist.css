@@ -1,14 +1,19 @@
 .attendance-container {
-  max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
   background-color: #f8fafc;
-  min-height: 100vh;
+  min-height: calc(100vh - 160px); /* Account for navbar and footer */
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .attendance-header {
   text-align: center;
   margin-bottom: 30px;
+  padding: 20px 0;
 }
 
 .page-title {
@@ -16,11 +21,14 @@
   font-weight: bold;
   color: #1e293b;
   margin-bottom: 10px;
+  line-height: 1.2;
 }
 
 .page-subtitle {
   font-size: 1.1rem;
   color: #64748b;
+  max-width: 600px;
+  margin: 0 auto;
 }
 
 /* Tab Navigation */
@@ -109,11 +117,21 @@
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 20px;
   align-items: end;
+  margin-bottom: 20px;
+}
+
+@media (max-width: 768px) {
+  .form-grid {
+    grid-template-columns: 1fr;
+    gap: 15px;
+    margin-bottom: 15px;
+  }
 }
 
 .form-group {
   display: flex;
   flex-direction: column;
+  width: 100%;
 }
 
 .form-label {
@@ -354,6 +372,7 @@
 /* Table */
 .attendance-table {
   overflow-x: auto;
+  width: 100%;
 }
 
 .table-header {
@@ -361,18 +380,23 @@
   grid-template-columns: 100px 1fr 150px 150px;
   background-color: #1e293b;
   color: white;
+  min-width: 500px; /* Ensures minimum width for horizontal scroll */
 }
 
 .header-cell {
   padding: 15px;
   font-weight: 600;
   text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .table-row {
   display: grid;
   grid-template-columns: 100px 1fr 150px 150px;
   border-bottom: 1px solid #e5e7eb;
+  min-width: 500px; /* Ensures minimum width for horizontal scroll */
 }
 
 .table-row:hover {
@@ -384,6 +408,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  text-align: center;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 /* Status Badge */
@@ -470,6 +497,7 @@
 @media (max-width: 1200px) {
   .attendance-container {
     padding: 15px;
+    max-width: 100%;
   }
 
   .form-grid {
@@ -512,46 +540,51 @@
 @media (max-width: 768px) {
   .attendance-container {
     padding: 10px;
+    gap: 15px;
   }
 
   .form-grid {
     grid-template-columns: 1fr;
     gap: 15px;
+    margin-bottom: 15px;
   }
 
   .summary-stats {
     grid-template-columns: 1fr;
+    gap: 15px;
   }
 
   .sheet-header {
     flex-direction: column;
     gap: 15px;
     align-items: stretch;
+    padding: 20px;
   }
 
   .table-header,
   .table-row {
-    grid-template-columns: 80px 1fr 120px 120px;
+    grid-template-columns: 80px 1fr 100px 120px;
   }
 
   .header-cell,
   .table-cell {
-    padding: 10px 5px;
+    padding: 12px 8px;
     font-size: 0.85rem;
   }
 
   /* Mobile Search Results Table */
   .search-results-table {
     font-size: 0.8rem;
+    min-width: 650px;
   }
 
   .search-table-header th {
-    padding: 12px 6px;
+    padding: 12px 8px;
     font-size: 0.75rem;
   }
 
   .search-table-cell {
-    padding: 10px 6px;
+    padding: 10px 8px;
   }
 
   .student-name-table {
@@ -564,14 +597,15 @@
   }
 
   .status-badge-table {
-    padding: 5px 8px;
+    padding: 6px 8px;
     font-size: 0.7rem;
-    min-width: 60px;
+    min-width: 70px;
   }
 
   .date-header {
     font-size: 0.65rem;
     line-height: 1.2;
+    padding: 10px 6px;
   }
 
   .date-header .date-short {
@@ -610,19 +644,30 @@
   .page-subtitle {
     font-size: 1rem;
   }
+
+  .attendance-header {
+    margin-bottom: 20px;
+    padding: 15px 0;
+  }
 }
 
 @media (max-width: 640px) {
   .attendance-container {
     padding: 8px;
+    gap: 12px;
   }
 
   .page-title {
     font-size: 1.6rem;
   }
 
+  .attendance-header {
+    margin-bottom: 15px;
+    padding: 10px 0;
+  }
+
   .tab-navigation {
-    margin-bottom: 20px;
+    margin-bottom: 15px;
   }
 
   .tab-btn {
@@ -704,12 +749,25 @@
   .search-results-container {
     padding: 0 8px 15px 8px;
   }
+
+  .table-header,
+  .table-row {
+    grid-template-columns: 70px 1fr 90px 110px;
+  }
+
+  .header-cell,
+  .table-cell {
+    padding: 10px 5px;
+    font-size: 0.8rem;
+  }
 }
 
 @media (max-width: 480px) {
   .attendance-container {
     padding: 5px;
     margin: 0;
+    gap: 10px;
+    min-height: calc(100vh - 140px);
   }
 
   .page-title {
@@ -723,6 +781,7 @@
 
   .attendance-header {
     margin-bottom: 20px;
+    padding: 10px 0;
   }
 
   .form-section {
@@ -898,6 +957,7 @@
   overflow: hidden;
   margin-bottom: 25px;
   position: relative;
+  width: 100%;
 }
 
 /* Scroll indicator for mobile */
@@ -920,9 +980,13 @@
 }
 
 @media (max-width: 768px) {
+  .search-results::after {
+    opacity: 1;
+  }
+
   .search-results:hover::after,
   .search-results:focus-within::after {
-    opacity: 1;
+    opacity: 0.7;
   }
 }
 
@@ -942,18 +1006,21 @@
   padding: 0 25px 25px 25px;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+  width: 100%;
+  box-sizing: border-box;
 }
 
 /* Search Results Table */
 .search-results-table {
   width: 100%;
-  min-width: 600px; /* Minimum width to prevent cramping */
+  min-width: 700px; /* Increased minimum width to prevent cramping */
   border-collapse: separate;
   border-spacing: 0;
   border-radius: 12px;
   overflow: hidden;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   border: 1px solid #e2e8f0;
+  margin: 0 auto;
 }
 
 .search-table-header {

@@ -15,7 +15,7 @@ import ProtectedRoute from "../components/ProtectedRoute";
 import ImageGallery from "../pages/images/ImageGallery";
 import ImageDetail from "../pages/images/ImageDetail";
 import ImageUpload from "../pages/images/ImageUpload";
-import NotFound from "../pages/NotFound";
+import NotFound from "../components/NotFound";
 import StudentListPage from "../pages/Listpage/StudentList";
 import TeacherListPage from "../pages/Listpage/TeacherList";
 import AttendancePage from "../pages/Listpage/AttendanceList";

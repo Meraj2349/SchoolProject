@@ -3,14 +3,29 @@ import React, { useEffect, useState } from "react";
 import ProfileCard from "./ProfileCard";
 import QuickLinks from "./QuickLinks";
 import "../assets/styles/LeaderShipSection.css";
+import principalImage from "../assets/images/WhatsApp Image 2024-12-07 at 20.48.41_3423f492.jpg";
 import axios from "axios";
 
+const quickLinksData = [
+  { name: "Students", icon: "👥", color: "#2ecc71", path: "/students" },
+  { name: "Teachers", icon: "🎓", color: "#e74c3c", path: "/teachers" },
+  { name: "Attendance", icon: "✓", color: "#f39c12", path: "/attendance" },
+  { name: "Result", icon: "📊", color: "#3498db", path: "/result" },
+  { name: "Routine", icon: "📅", color: "#3498db", path: "/routine" },
+  { name: "Download", icon: "⭐", color: "#f39c12", path: "/download" },
+];
+
+const leadershipProfiles = [
+  {
+    image: principalImage,
+    name: "Md.Rashedul Islam",
+    title: "Chairman",
+  },
+];
 const LeadershipSection = ({
-  profiles = [],
-  qrCode,
-  magazineTitle,
-  magazineSubtitle,
-  quickLinks,
+  profiles = leadershipProfiles,
+
+  quickLinks = quickLinksData,
   sectionTitle = "Leadership & Quick Access",
 }) => {
   const [messages, setMessages] = useState([]);
@@ -24,18 +39,20 @@ const LeadershipSection = ({
         const response = await axios.get("http://localhost:3000/api/messages", {
           timeout: 10000, // 10 second timeout
         });
-        
+
         // Filter only visible messages and sort by MessageID
         const visibleMessages = response.data
           .filter((msg) => msg.Show === 1 || msg.Show === true)
           .sort((a, b) => a.MessageID - b.MessageID);
-        
+
         console.log("Fetched visible messages:", visibleMessages);
         setMessages(visibleMessages);
         setError(null);
       } catch (err) {
         console.error("Error fetching messages:", err);
-        setError("Failed to connect to server. Please check if backend is running on port 3000.");
+        setError(
+          "Failed to connect to server. Please check if backend is running on port 3000."
+        );
         setMessages([]); // Set empty array on error
       } finally {
         setLoading(false);
@@ -50,7 +67,9 @@ const LeadershipSection = ({
     const messageData = messages[index];
     return {
       ...profile,
-      message: messageData ? messageData.Messages : profile.message || "Welcome message will appear here soon.",
+      message: messageData
+        ? messageData.Messages
+        : profile.message || "Welcome message will appear here soon.",
       messageId: messageData ? messageData.MessageID : null,
     };
   });
@@ -71,23 +90,26 @@ const LeadershipSection = ({
       <div className="container">
         {sectionTitle && <h2 className="section-header">{sectionTitle}</h2>}
         {error && (
-          <div className="error-message" style={{
-            color: '#e74c3c',
-            backgroundColor: '#fadbd8',
-            padding: '10px',
-            borderRadius: '5px',
-            marginBottom: '20px',
-            textAlign: 'center'
-          }}>
+          <div
+            className="error-message"
+            style={{
+              color: "#e74c3c",
+              backgroundColor: "#fadbd8",
+              padding: "10px",
+              borderRadius: "5px",
+              marginBottom: "20px",
+              textAlign: "center",
+            }}
+          >
             {error}
           </div>
         )}
-        
+
         <div className="leadership-content">
           <div className="profile-cards-container">
             {mergedProfiles.map((profile, idx) => (
               <ProfileCard
-                key={`profile-${idx}-${profile.messageId || 'default'}`}
+                key={`profile-${idx}-${profile.messageId || "default"}`}
                 image={profile.image}
                 name={profile.name}
                 title={profile.title}
@@ -99,14 +121,9 @@ const LeadershipSection = ({
               />
             ))}
           </div>
-          
+
           <div className="quick-links-container">
-            <QuickLinks
-              qrCode={qrCode}
-              magazineTitle={magazineTitle}
-              magazineSubtitle={magazineSubtitle}
-              links={quickLinks}
-            />
+            <QuickLinks links={quickLinks} />
           </div>
         </div>
       </div>
