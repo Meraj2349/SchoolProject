@@ -1,9 +1,10 @@
 import express from "express";
 import {
-  addSubjectController,
-  deleteSubjectController,
-  getSubjectsController,
-  editSubjectController,
+    addSubjectController,
+    deleteSubjectController,
+    editSubjectController,
+    getAllClassesController,
+    getSubjectsController,
 } from "../controllers/subjects.controller.js";
 
 const router = express.Router();
@@ -19,5 +20,8 @@ router.get("/", getSubjectsController);
 
 // Edit a subject by ID
 router.put("/edit/:id", editSubjectController);
+
+// Get all classes
+router.get("/classes", getAllClassesController);
 
 export default router;

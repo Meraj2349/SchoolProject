@@ -1,13 +1,15 @@
-import React, { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+import { addSubject, deleteSubject, getAllClasses, getAllSubjects, updateSubject } from "../../../api/subjectsApi";
 import Sidebar from "../../../components/Sidebar";
-import Cookies from "js-cookie";
 import "./SubjectsPage.css";
 
 const SubjectsPage = () => {
   const [subjects, setSubjects] = useState([]);
+  const [classes, setClasses] = useState([]);
+  const [selectedClass, setSelectedClass] = useState(''); // For filtering
   const [formData, setFormData] = useState({
     subjectName: "",
-    classId: "",
+    className: "",
   });
   const [editId, setEditId] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -18,23 +20,7 @@ const SubjectsPage = () => {
   const fetchSubjects = async () => {
     setLoading(true);
     try {
-      const token = Cookies.get("token");
-      if (!token) {
-        setError("Unauthorized. Please log in.");
-        return;
-      }
-
-      const response = await fetch("http://localhost:3000/api/subjects", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch subjects");
-      }
-
-      const data = await response.json();
+      const data = await getAllSubjects();
       setSubjects(data);
     } catch (error) {
       console.error("Error fetching subjects:", error);
@@ -44,8 +30,20 @@ const SubjectsPage = () => {
     }
   };
 
+  // Fetch all classes
+  const fetchClasses = async () => {
+    try {
+      const data = await getAllClasses();
+      setClasses(data);
+    } catch (error) {
+      console.error("Error fetching classes:", error);
+      setError("Failed to fetch classes. Please try again.");
+    }
+  };
+
   useEffect(() => {
     fetchSubjects();
+    fetchClasses();
   }, []);
 
   // Handle form input changes
@@ -61,41 +59,24 @@ const SubjectsPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!formData.subjectName.trim() || !formData.classId) {
-      setError("All fields are required.");
+    if (!formData.subjectName.trim() || !formData.className.trim()) {
+      setError("Subject name and class name are required.");
       return;
     }
 
     setLoading(true);
     try {
-      const token = Cookies.get("token");
-      if (!token) {
-        setError("Unauthorized. Please log in.");
-        return;
+      if (editId) {
+        await updateSubject(editId, formData);
+        setSuccess("Subject updated successfully");
+      } else {
+        await addSubject(formData);
+        setSuccess("Subject added successfully");
       }
 
-      const url = editId
-        ? `http://localhost:3000/api/subjects/edit/${editId}`
-        : "http://localhost:3000/api/subjects/add";
-      const method = editId ? "PUT" : "POST";
-
-      const response = await fetch(url, {
-        method,
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(formData),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to save subject");
-      }
-
-      fetchSubjects();
+      await fetchSubjects();
+      await fetchClasses(); // Refresh classes in case a new one was created
       resetForm();
-      setSuccess(editId ? "Subject updated successfully" : "Subject added successfully");
     } catch (error) {
       console.error("Error saving subject:", error);
       setError(error.message || "Failed to save subject.");
@@ -110,24 +91,8 @@ const SubjectsPage = () => {
 
     setLoading(true);
     try {
-      const token = Cookies.get("token");
-      if (!token) {
-        setError("Unauthorized. Please log in.");
-        return;
-      }
-
-      const response = await fetch(`http://localhost:3000/api/subjects/delete/${id}`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to delete subject");
-      }
-
-      fetchSubjects();
+      await deleteSubject(id);
+      await fetchSubjects();
       setSuccess("Subject deleted successfully");
     } catch (error) {
       console.error("Error deleting subject:", error);
@@ -142,7 +107,7 @@ const SubjectsPage = () => {
     setEditId(subject.SubjectID);
     setFormData({
       subjectName: subject.SubjectName,
-      classId: subject.ClassID,
+      className: subject.ClassName,
     });
   };
 
@@ -150,11 +115,23 @@ const SubjectsPage = () => {
   const resetForm = () => {
     setFormData({
       subjectName: "",
-      classId: "",
+      className: "",
     });
     setEditId(null);
     setError(null);
     setSuccess(null);
+  };
+
+  // Get filtered subjects
+  const getFilteredSubjects = () => {
+    if (!selectedClass) return subjects;
+    return subjects.filter(subject => subject.ClassName === selectedClass);
+  };
+
+  // Get unique class names from subjects
+  const getUniqueClassNames = () => {
+    const classNames = [...new Set(subjects.map(subject => subject.ClassName))];
+    return classNames.sort();
   };
 
   return (
@@ -187,18 +164,25 @@ const SubjectsPage = () => {
               required
             />
           </div>
+          
           <div className="form-group">
-            <label htmlFor="classId">Class ID</label>
-            <input
-              type="number"
-              id="classId"
-              name="classId"
-              placeholder="Enter class ID"
-              value={formData.classId}
+            <label htmlFor="className">Class</label>
+            <select
+              id="className"
+              name="className"
+              value={formData.className}
               onChange={handleInputChange}
               required
-            />
+            >
+              <option value="">Select Class</option>
+              {classes.map((cls) => (
+                <option key={cls.ClassName} value={cls.ClassName}>
+                  {cls.ClassName}
+                </option>
+              ))}
+            </select>
           </div>
+
           <div className="form-actions">
             <button type="submit" disabled={loading}>
               {loading ? "Processing..." : editId ? "Update Subject" : "Add Subject"}
@@ -212,27 +196,42 @@ const SubjectsPage = () => {
         </form>
 
         <div className="table-container">
-          <h2>Subject List</h2>
+          <div className="table-header">
+            <h2>Subject List</h2>
+            <div className="class-filter">
+              <label htmlFor="classFilter">Filter by Class:</label>
+              <select 
+                id="classFilter" 
+                value={selectedClass} 
+                onChange={(e) => setSelectedClass(e.target.value)}
+              >
+                <option value="">All Classes</option>
+                {getUniqueClassNames().map((className) => (
+                  <option key={className} value={className}>
+                    {className}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
           {loading && subjects.length === 0 ? (
             <p>Loading subjects...</p>
-          ) : subjects.length === 0 ? (
-            <p>No subjects found</p>
+          ) : getFilteredSubjects().length === 0 ? (
+            <p>{selectedClass ? `No subjects found for ${selectedClass}` : "No subjects found"}</p>
           ) : (
             <table>
               <thead>
                 <tr>
                   <th>Subject Name</th>
                   <th>Class Name</th>
-                  <th>Section</th>
                   <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
-                {subjects.map((subject) => (
+                {getFilteredSubjects().map((subject) => (
                   <tr key={subject.SubjectID}>
                     <td>{subject.SubjectName}</td>
                     <td>{subject.ClassName}</td>
-                    <td>{subject.Section}</td>
                     <td>
                       <button onClick={() => handleEdit(subject)}>Edit</button>
                       <button onClick={() => handleDelete(subject.SubjectID)}>Delete</button>

@@ -1,26 +1,26 @@
-import { Routes, Route } from "react-router-dom";
+import { Route, Routes } from "react-router-dom";
 
-import HomePage from "../pages/HomePage";
-import AdminPage from "../pages/admin/AdminPage";
 import LoginForm from "../components/LoginForm";
-import RegisterForm from "../components/RegisterForm";
-import NoticesPage from "../pages/admin/notices/noticespage";
-import StudentPage from "../pages/admin/studentList/StudentPage";
-import TeacherPage from "../pages/admin/teacherList/TeacherPage";
-import UpdateEmailPassword from "../pages/admin/updateEmaillPassword/UpdateEmailPassword";
-import ClassesPage from "../pages/admin/class/ClassesPage";
-import MessagesPage from "../pages/admin/messages/MessagesPage";
-import SubjectsPage from "../pages/admin/subject/SubjectsPage";
-import ProtectedRoute from "../components/ProtectedRoute";
-import ImageGallery from "../pages/images/ImageGallery";
-import ImageDetail from "../pages/images/ImageDetail";
-import ImageUpload from "../pages/images/ImageUpload";
 import NotFound from "../components/NotFound";
+import RegisterForm from "../components/RegisterForm";
+import HomePage from "../pages/HomePage";
+import AttendancePage from "../pages/Listpage/AttendanceList";
 import StudentListPage from "../pages/Listpage/StudentList";
 import TeacherListPage from "../pages/Listpage/TeacherList";
-import AttendancePage from "../pages/Listpage/AttendanceList";
+import AdminPage from "../pages/admin/AdminPage";
 import AdminAttendancePage from "../pages/admin/attendance/AttendancePage";
+import AttendancePageGrid from "../pages/admin/attendance/AttendancePageGrid";
 import AttendanceReports from "../pages/admin/attendance/AttendanceReports";
+import ClassesPage from "../pages/admin/class/ClassesPage";
+import MessagesPage from "../pages/admin/messages/MessagesPage";
+import NoticesPage from "../pages/admin/notices/noticespage";
+import StudentPage from "../pages/admin/studentList/StudentPage";
+import SubjectsPage from "../pages/admin/subject/SubjectsPage";
+import TeacherPage from "../pages/admin/teacherList/TeacherPage";
+import UpdateEmailPassword from "../pages/admin/updateEmaillPassword/UpdateEmailPassword";
+import ImageDetail from "../pages/images/ImageDetail";
+import ImageGallery from "../pages/images/ImageGallery";
+import ImageUpload from "../pages/images/ImageUpload";
 
 const AppRoutes = () => {
   return (
@@ -45,6 +45,7 @@ const AppRoutes = () => {
         <Route path="messages" element={<MessagesPage />} />
         <Route path="subject" element={<SubjectsPage />} />
         <Route path="attendance" element={<AdminAttendancePage />} />
+        <Route path="attendance/grid" element={<AttendancePageGrid />} />
         <Route path="attendance/reports" element={<AttendanceReports />} />
         
         {/* Protected routes */}

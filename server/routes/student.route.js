@@ -1,15 +1,16 @@
 import express from "express";
 import {
-  getAllStudentsController,
   addStudentController,
-  getStudentByIdController,
-  updateStudentController,
-  deleteStudentController,
-  searchStudentsController,
-  getStudentCountController,
-  getStudentsByClassController,
   checkRollNumberController,
-  getStudentsByClassAndSectionController
+  deleteStudentController,
+  getAllClassesController,
+  getAllStudentsController,
+  getStudentByIdController,
+  getStudentCountController,
+  getStudentsByClassAndSectionController,
+  getStudentsByClassController,
+  searchStudentsController,
+  updateStudentController
 } from "../controllers/student.controller.js";
 
 const router = express.Router();
@@ -28,6 +29,9 @@ router.get("/search/filter", searchStudentsController);
 
 // Route to check if a roll number exists in a specific class and section
 router.get("/check-roll", checkRollNumberController);
+
+// Route to get all classes
+router.get("/classes", getAllClassesController);
 
 // Route to get students by class name
 router.get("/class/:className", getStudentsByClassController);

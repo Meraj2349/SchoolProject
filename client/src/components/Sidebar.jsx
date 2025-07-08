@@ -145,6 +145,12 @@ const Sidebar = () => {
                   icon: <FaClipboardList />,
                   label: "Attendance",
                 },
+                 {
+                  path: "/admin/attendance/grid",
+                  icon: <FaClipboardList />,
+                  label: "Attendance Grid",
+                },
+
                 {
                   path: "/admin/attendance/reports",
                   icon: <FaClipboardList />,

@@ -58,7 +58,6 @@ const Navbar = ({
           {showCommunity && (
             <div className="online-apply-dropdown">
               <span>Online Apply</span>
-              
             </div>
           )}
 
@@ -69,7 +68,7 @@ const Navbar = ({
             </div>
           )}
 
-          <button className="mobile-menu-toggle" onClick={toggleMobileMenu}>
+          <button className={`mobile-menu-toggle ${mobileMenuOpen ? 'hidden' : ''}`} onClick={toggleMobileMenu}>
             {mobileMenuOpen ? "✕" : "☰"}
           </button>
         </div>
@@ -102,10 +101,35 @@ const Navbar = ({
       {mobileMenuOpen && (
         <div className="mobile-menu">
           <div className="mobile-menu-header">
-            <h3 className="mobile-menu-title">Navigation Menu</h3>
+            <div className="mobile-logo-section">
+              <img src={logo} className="mobile-logo-image" alt={`${schoolName}
+  Logo`} />
+              <div className="mobile-logo-text">
+                <span className="mobile-logo-estd">ESTD : {establishedYear}</span>
+                <span className="mobile-logo-name">{schoolName}</span>
+                <span className="mobile-logo-location">{location}</span>
+              </div>
+            </div>
             <button className="mobile-menu-close" onClick={toggleMobileMenu}>
               ✕
             </button>
+          </div>
+          <div className="mobile-menu-actions">
+            {showQuakerEducation && (
+              <div className="quaker-education">
+                <span>A Quaker Education</span>
+                <span className="arrow-down">▼</span>
+              </div>
+            )}
+            {showSearch && (
+              <div className="search-bar">
+                <input type="text" placeholder="Search..." />
+              </div>
+            )}
+
+            <div className="online-apply-dropdown">
+              <span>Online Apply</span>
+            </div>
           </div>
           <ul>
             {navItems.map((item, index) => (

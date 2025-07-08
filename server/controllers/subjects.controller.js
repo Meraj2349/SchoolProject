@@ -1,17 +1,16 @@
-import { addSubject, deleteSubject, getSubjects, editSubject } from "../models/subjects.model.js";
+import { addSubject, deleteSubject, editSubject, getAllClasses, getSubjects } from "../models/subjects.model.js";
 
 // Add a new subject
-
 export const addSubjectController = async (req, res) => {
-  const { subjectName, classId } = req.body;
+  const { subjectName, className } = req.body;
 
-  if (!subjectName || !classId) {
-    return res.status(400).json({ error: "Subject name and class ID are required." });
+  if (!subjectName || !className) {
+    return res.status(400).json({ error: "Subject name and class name are required." });
   }
 
   try {
     console.log("Request body:", req.body); // Debugging log
-    const result = await addSubject({ subjectName, classId });
+    const result = await addSubject({ subjectName, className });
     res.status(201).json({ message: "Subject added successfully.", SubjectID: result.SubjectID });
   } catch (error) {
     console.error("Error adding subject:", error); // Log the error
@@ -45,18 +44,29 @@ export const getSubjectsController = async (req, res) => {
 // Edit a subject by ID
 export const editSubjectController = async (req, res) => {
     const { id } = req.params;
-    const { subjectName, classId } = req.body;
+    const { subjectName, className } = req.body;
   
-    if (!subjectName || !classId) {
-      return res.status(400).json({ error: "Subject name and class ID are required." });
+    if (!subjectName || !className) {
+      return res.status(400).json({ error: "Subject name and class name are required." });
     }
   
     try {
       console.log("Request body:", req.body); // Debugging log
-      const result = await editSubject(id, { subjectName, classId });
+      const result = await editSubject(id, { subjectName, className });
       res.status(200).json({ message: "Subject updated successfully.", success: result.success });
     } catch (error) {
       console.error("Error updating subject:", error); // Log the error
       res.status(500).json({ error: "Failed to update subject." });
     }
   };
+
+// Get all classes
+export const getAllClassesController = async (req, res) => {
+  try {
+    const classes = await getAllClasses();
+    res.status(200).json(classes);
+  } catch (error) {
+    console.error("Error fetching classes:", error);
+    res.status(500).json({ error: "Failed to fetch classes." });
+  }
+};
