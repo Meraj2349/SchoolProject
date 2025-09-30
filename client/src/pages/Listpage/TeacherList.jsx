@@ -4,6 +4,7 @@ import teacherApi from '../../api/teacherApi';
 import '../../assets/styles/listcss/teacherslist.css';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
+import LatestUpdatesNotice from './LatestUpdatesNotice';
 
 const TeachersPage = () => {
   const [teachers, setTeachers] = useState([]);
@@ -112,6 +113,7 @@ const TeachersPage = () => {
   return (
     <div className="teachers-page">
       <Navbar />
+      <LatestUpdatesNotice />
       <div className="page-header">
         <h1>Our Teachers</h1>
         <p className="page-subtitle">Meet our dedicated teaching staff</p>

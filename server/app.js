@@ -1,18 +1,20 @@
-import express from "express";
-import cors from "cors";
 import bodyParser from "body-parser";
+import cors from "cors";
+import dotenv from "dotenv";
+import express from "express";
 import db from "./config/db.config.js";
 import adminRouter from "./routes/admin.routes.js";
-import studentRouter from "./routes/student.route.js";
-import teacherRoutes from "./routes/teacher.routes.js";
-import noticeRoutes from "./routes/notices.routes.js";
-import userRoutes from "./routes/user.routes.js";
-import classRoutes from "./routes/classes.routes.js";
-import messageRoutes from "./routes/messages.routes.js";
-import subjectRoutes from "./routes/subjects.routes.js";
-import imageRoutes from "./routes/image.routes.js";
 import attendanceRoutes from "./routes/attendance.route.js";
-import dotenv from "dotenv";
+import classRoutes from "./routes/classes.routes.js";
+import examRoutes from "./routes/exam.routes.js";
+import imageRoutes from "./routes/image.routes.js";
+import messageRoutes from "./routes/messages.routes.js";
+import noticeRoutes from "./routes/notices.routes.js";
+import resultRoutes from "./routes/result.routes.js";
+import studentRouter from "./routes/student.route.js";
+import subjectRoutes from "./routes/subjects.routes.js";
+import teacherRoutes from "./routes/teacher.routes.js";
+import userRoutes from "./routes/user.routes.js";
 
 dotenv.config();
 
@@ -21,7 +23,7 @@ const app = express();
 // Middleware
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: process.env.FRONTEND_URL || "http://localhost:5173",
     credentials: true,
   })
 );
@@ -49,6 +51,8 @@ app.use("/api/messages", messageRoutes);
 app.use("/api/subjects", subjectRoutes);
 app.use("/api/images", imageRoutes);
 app.use("/api/attendance", attendanceRoutes);
+app.use("/api/exams", examRoutes);
+app.use("/api/results", resultRoutes);
 
 // Handle root URL (Welcome message)
 app.get("/", (req, res) => {

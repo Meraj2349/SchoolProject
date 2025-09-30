@@ -1,0 +1,471 @@
+/* LatestUpdatesNotice.css - Clean & Simplified */
+
+.latest-updates-container {
+  background: linear-gradient(
+    135deg,
+    #15803d 0%,
+    #16a34a 25%,
+    #22c55e 75%,
+    #4ade80 100%
+  );
+  color: #ffffff;
+  box-shadow: 0 6px 24px rgba(21, 128, 61, 0.3);
+  position: relative;
+  overflow: hidden;
+  border-radius: 8px;
+  margin: 16px 0;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
+}
+
+.latest-updates-container:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 28px rgba(21, 128, 61, 0.35);
+}
+
+.background-animation {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    45deg,
+    rgba(255, 255, 255, 0.08) 0%,
+    transparent 50%,
+    rgba(255, 255, 255, 0.08) 100%
+  );
+  background-size: 300% 300%;
+  animation: shimmer 3s ease-in-out infinite;
+  z-index: 1;
+}
+
+@keyframes shimmer {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+.content-wrapper {
+  position: relative;
+  padding: 14px 24px;
+  background: rgba(255, 255, 255, 0.06);
+  z-index: 2;
+}
+
+.content-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 1200px;
+  margin: 0 auto;
+  gap: 16px;
+}
+
+.left-section {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.bell-icon-container {
+  background: rgba(255, 255, 255, 0.2);
+  padding: 10px;
+  border-radius: 50%;
+  margin-right: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+}
+
+.bell-icon-container:hover {
+  transform: scale(1.05);
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.bell-icon {
+  height: 20px;
+  width: 20px;
+  color: #ffffff;
+}
+
+.updates-label {
+  font-weight: 700;
+  font-size: 16px;
+  color: #ffffff;
+  margin-right: 12px;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+}
+
+.updates-label-mobile {
+  font-weight: 700;
+  font-size: 14px;
+  display: none;
+  color: #ffffff;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.separator {
+  height: 24px;
+  width: 2px;
+  background: rgba(255, 255, 255, 0.5);
+  margin: 0 16px;
+  border-radius: 1px;
+}
+
+.content-section {
+  flex: 1;
+  margin: 0 16px;
+  overflow: hidden;
+  position: relative;
+}
+
+.slider-container {
+  position: relative;
+  height: 28px;
+  display: flex;
+  align-items: center;
+}
+
+.slider-wrapper {
+  display: flex;
+  transition: transform 1000ms cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform;
+}
+
+.slide {
+  width: 100%;
+  flex-shrink: 0;
+}
+
+.slide-content {
+  white-space: nowrap;
+  display: inline-block;
+  animation: marquee 20s linear infinite;
+  padding-left: 100%;
+  will-change: transform;
+}
+
+.slide-content:hover {
+  animation-play-state: paused;
+}
+
+@keyframes marquee {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    transform: translate3d(-100%, 0, 0);
+  }
+}
+
+.slider-container {
+  mask-image: linear-gradient(
+    to right,
+    transparent 0%,
+    black 5%,
+    black 95%,
+    transparent 100%
+  );
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent 0%,
+    black 5%,
+    black 95%,
+    transparent 100%
+  );
+}
+
+.slider-container {
+  overflow: hidden;
+  width: 100%;
+}
+
+.slide-title {
+  font-weight: 600;
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.98);
+  letter-spacing: 0.4px;
+}
+
+.slide-description {
+  font-size: 15px;
+  margin-left: 12px;
+  color: rgba(255, 255, 255, 0.9);
+  text-decoration: none;
+  font-weight: 400;
+  letter-spacing: 0.3px;
+}
+
+.controls-section {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.control-button {
+  padding: 6px;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: rgba(255, 255, 255, 0.9);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.control-button:hover {
+  background: rgba(255, 255, 255, 0.25);
+  color: rgba(255, 255, 255, 1);
+  border-color: rgba(255, 255, 255, 0.4);
+  transform: translateY(-1px);
+}
+
+.control-icon {
+  height: 16px;
+  width: 16px;
+}
+
+.dots-container {
+  display: flex;
+  gap: 6px;
+  margin-left: 12px;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.dot.active {
+  background: rgba(255, 255, 255, 0.85);
+  border-color: rgba(255, 255, 255, 1);
+  transform: scale(1.2);
+}
+
+.dot.inactive {
+  background: rgba(255, 255, 255, 0.35);
+}
+
+.dot:hover {
+  background: rgba(255, 255, 255, 0.65);
+  transform: scale(1.1);
+}
+
+.close-button {
+  padding: 5px;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+  margin-left: 12px;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: rgba(255, 255, 255, 0.9);
+  cursor: pointer;
+}
+
+.close-button:hover {
+  background: rgba(255, 255, 255, 0.25);
+  border-color: rgba(255, 255, 255, 0.4);
+  color: rgba(255, 255, 255, 1);
+  transform: scale(1.08);
+}
+
+.progress-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.25);
+  overflow: hidden;
+  border-radius: 0 0 8px 8px;
+}
+
+.progress-fill {
+  height: 100%;
+  background: rgba(255, 255, 255, 0.9);
+  transition: width 0.5s ease;
+  animation: progress 5s linear infinite;
+}
+
+.loading-container {
+  background: linear-gradient(90deg, #2563eb, #9333ea, #4f46e5);
+  color: white;
+  padding: 12px;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+.loading-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.loading-spinner {
+  animation: spin 1s linear infinite;
+  border-radius: 9999px;
+  height: 16px;
+  width: 16px;
+  border: 2px solid transparent;
+  border-bottom: 2px solid white;
+  margin-right: 8px;
+}
+
+.loading-text {
+  font-size: 14px;
+}
+
+.error-container {
+  background: #ef4444;
+  color: white;
+  padding: 12px;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+.error-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 80rem;
+  margin: 0 auto;
+}
+
+.error-left {
+  display: flex;
+  align-items: center;
+}
+
+.error-icon {
+  height: 16px;
+  width: 16px;
+  margin-right: 8px;
+}
+
+.error-text {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.error-close {
+  padding: 4px;
+  border-radius: 4px;
+  transition: background-color 200ms;
+  background: transparent;
+  border: none;
+  color: white;
+  cursor: pointer;
+}
+
+.error-close:hover {
+  background: #dc2626;
+}
+
+/* Animations */
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@keyframes bounce {
+  0%,
+  100% {
+    transform: translateY(-25%);
+    animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
+  }
+  50% {
+    transform: none;
+    animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes marquee {
+  0% {
+    transform: translateX(100%);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+@keyframes progress {
+  0% {
+    width: 0%;
+  }
+  100% {
+    width: 100%;
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .updates-label {
+    display: none;
+  }
+
+  .updates-label-mobile {
+    display: inline;
+  }
+
+  .dots-container {
+    display: none;
+  }
+
+  .slide-content {
+    animation: marquee 20s linear infinite;
+  }
+
+  .content-section {
+    margin: 0 8px;
+  }
+}
+
+@media (max-width: 640px) {
+  .content-wrapper {
+    padding: 8px 12px;
+  }
+
+  .bell-icon-container {
+    padding: 6px;
+    margin-right: 8px;
+  }
+
+  .bell-icon {
+    height: 14px;
+    width: 14px;
+  }
+
+  .slide-title,
+  .slide-description {
+    font-size: 14px;
+  }
+}

@@ -4,6 +4,7 @@ import studentAPI from "../../api/studentApi";
 import "../../assets/styles/StudentListpage.css";
 import Footer from "../../components/Footer";
 import Navbar from "../../components/Navbar";
+import LatestUpdatesNotice from "./LatestUpdatesNotice";
 
 const StudentSearch = () => {
   const [searchFilters, setSearchFilters] = useState({
@@ -181,7 +182,7 @@ const StudentSearch = () => {
   return (
     <div className="student-search-container">
       <Navbar />
-
+<LatestUpdatesNotice />
       <div className="search-header">
         <h1 className="search-title">Student Search</h1>
         <p className="search-subtitle">

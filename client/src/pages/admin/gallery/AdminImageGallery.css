@@ -1,0 +1,204 @@
+/* AdminImageGallery.css */
+
+.admin-gallery-page {
+  display: flex;
+  min-height: 100vh;
+  background-color: #f8f9fa;
+}
+
+.admin-content {
+  flex: 1;
+  margin-left: 250px; /* Space for sidebar */
+  padding: 0;
+  overflow-x: auto;
+}
+
+.admin-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 2rem 2rem 1.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.admin-page-title {
+  margin: 0 0 0.5rem 0;
+  font-size: 2.2rem;
+  font-weight: 600;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.admin-page-subtitle {
+  margin: 0;
+  font-size: 1.1rem;
+  opacity: 0.9;
+  font-weight: 300;
+}
+
+.admin-gallery-container {
+  padding: 0;
+  background: transparent;
+}
+
+/* Override ImageGallery container styles for admin */
+.admin-gallery-container .image-gallery-container {
+  max-width: none;
+  margin: 0;
+  padding: 2rem;
+  background: transparent;
+  font-family: inherit;
+}
+
+.admin-gallery-container .image-gallery-container h1 {
+  display: none; /* Hide the original title since we have our own admin header */
+}
+
+/* Admin-specific enhancements */
+.admin-gallery-container .upload-section {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e9ecef;
+  margin-bottom: 2rem;
+}
+
+.admin-gallery-container .filter-section {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e9ecef;
+  margin-bottom: 2rem;
+}
+
+.admin-gallery-container .image-card {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e9ecef;
+  transition: all 0.3s ease;
+}
+
+.admin-gallery-container .image-card:hover {
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  transform: translateY(-4px);
+}
+
+/* Admin breadcrumb styling */
+.admin-breadcrumb {
+  padding: 1rem 2rem;
+  background: white;
+  border-bottom: 1px solid #e9ecef;
+  font-size: 0.9rem;
+  color: #6c757d;
+}
+
+.admin-breadcrumb a {
+  color: #667eea;
+  text-decoration: none;
+}
+
+.admin-breadcrumb a:hover {
+  text-decoration: underline;
+}
+
+/* Responsive adjustments for admin */
+@media (max-width: 768px) {
+  .admin-content {
+    margin-left: 0;
+  }
+
+  .admin-header {
+    padding: 1.5rem 1rem 1rem;
+  }
+
+  .admin-page-title {
+    font-size: 1.8rem;
+  }
+
+  .admin-page-subtitle {
+    font-size: 1rem;
+  }
+
+  .admin-gallery-container .image-gallery-container {
+    padding: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-header {
+    padding: 1rem;
+  }
+
+  .admin-page-title {
+    font-size: 1.5rem;
+  }
+
+  .admin-page-subtitle {
+    font-size: 0.9rem;
+  }
+}
+
+/* Admin-specific modal enhancements */
+.admin-gallery-container .modal-overlay {
+  z-index: 1050; /* Higher than sidebar */
+}
+
+.admin-gallery-container .modal {
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+}
+
+/* Admin stats cards (if needed for future enhancement) */
+.admin-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+  padding: 0 2rem;
+}
+
+.admin-stat-card {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e9ecef;
+  text-align: center;
+}
+
+.admin-stat-number {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #667eea;
+  margin-bottom: 0.5rem;
+}
+
+.admin-stat-label {
+  font-size: 0.9rem;
+  color: #6c757d;
+  font-weight: 500;
+}
+
+/* Admin action buttons */
+.admin-actions {
+  display: flex;
+  gap: 1rem;
+  padding: 0 2rem 1rem;
+  justify-content: flex-end;
+}
+
+.admin-action-btn {
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 0.9rem;
+}
+
+.admin-action-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
+}

@@ -1,15 +1,24 @@
 import axios from "axios";
-import { CheckCircle, RefreshCw, Save, Search, Users, X, Calendar, BarChart } from "lucide-react";
-import { useState, useEffect } from "react";
+import {
+  BarChart,
+  Calendar,
+  RefreshCw,
+  Save,
+  Search,
+  Users,
+  X
+} from "lucide-react";
+import { useEffect, useState } from "react";
 import "../../assets/styles/listcss/attendancelist.css";
 import Footer from "../../components/Footer";
 import Navbar from "../../components/Navbar";
+import LatestUpdatesNotice from "./LatestUpdatesNotice";
 
 const AttendancePage = () => {
   const [formData, setFormData] = useState({
     className: "",
     section: "",
-    date: new Date().toISOString().split('T')[0], // Today's date
+    date: new Date().toISOString().split("T")[0], // Today's date
   });
 
   const [searchData, setSearchData] = useState({
@@ -23,7 +32,7 @@ const AttendancePage = () => {
     startDate: "",
     endDate: "",
   });
-  
+
   const [students, setStudents] = useState([]);
   const [attendance, setAttendance] = useState({});
   const [searchResults, setSearchResults] = useState([]);
@@ -50,12 +59,12 @@ const AttendancePage = () => {
   // Handle form input changes
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
     // Clear students when class/section changes
-    if (name === 'className' || name === 'section') {
+    if (name === "className" || name === "section") {
       setStudents([]);
       setAttendance({});
     }
@@ -64,25 +73,25 @@ const AttendancePage = () => {
   // Handle search input changes
   const handleSearchInputChange = (e) => {
     const { name, value } = e.target;
-    setSearchData(prev => ({
+    setSearchData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
   // Handle date range input changes
   const handleDateRangeInputChange = (e) => {
     const { name, value } = e.target;
-    setDateRangeData(prev => ({
+    setDateRangeData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
   // Fetch students by class and section using the correct route
   const fetchStudents = async () => {
     const { className, section } = formData;
-    
+
     if (!className.trim() || !section.trim()) {
       setError("Please enter both class name and section");
       return;
@@ -90,50 +99,54 @@ const AttendancePage = () => {
 
     setLoading(true);
     setError("");
-    
+
     try {
       // Using the correct route: /search/class/:className/section/:section
       const response = await axios.get(
-        `${API_BASE_URL}/attendance/search/class/${encodeURIComponent(className)}/section/${encodeURIComponent(section)}`
+        `${API_BASE_URL}/attendance/search/class/${encodeURIComponent(
+          className
+        )}/section/${encodeURIComponent(section)}`
       );
 
       if (response.data.success) {
         // Get unique students from attendance records
         const uniqueStudents = Array.from(
-          new Map(response.data.data.map(record => [
-            record.StudentID,
-            {
-              StudentID: record.StudentID,
-              FirstName: record.FirstName,
-              LastName: record.LastName,
-              RollNumber: record.RollNumber,
-              ClassID: record.ClassID,
-              ClassName: record.ClassName,
-              Section: record.Section
-            }
-          ])).values()
+          new Map(
+            response.data.data.map((record) => [
+              record.StudentID,
+              {
+                StudentID: record.StudentID,
+                FirstName: record.FirstName,
+                LastName: record.LastName,
+                RollNumber: record.RollNumber,
+                ClassID: record.ClassID,
+                ClassName: record.ClassName,
+                Section: record.Section,
+              },
+            ])
+          ).values()
         );
 
         setStudents(uniqueStudents);
-        
+
         // Initialize attendance state
         const initialAttendance = {};
-        uniqueStudents.forEach(student => {
-          initialAttendance[student.StudentID] = 'Present'; // Default to Present
+        uniqueStudents.forEach((student) => {
+          initialAttendance[student.StudentID] = "Present"; // Default to Present
         });
         setAttendance(initialAttendance);
 
         // Update attendance with existing records for the selected date
         const existingAttendance = {};
-        response.data.data.forEach(record => {
-          if (record.ClassDate.split('T')[0] === formData.date) {
+        response.data.data.forEach((record) => {
+          if (record.ClassDate.split("T")[0] === formData.date) {
             existingAttendance[record.StudentID] = record.Status;
           }
         });
-        
-        setAttendance(prev => ({
+
+        setAttendance((prev) => ({
           ...prev,
-          ...existingAttendance
+          ...existingAttendance,
         }));
       } else {
         setError(response.data.message || "Failed to fetch students");
@@ -143,14 +156,16 @@ const AttendancePage = () => {
       // If no attendance records exist, try to get students from student API
       try {
         const studentResponse = await axios.get(
-          `${API_BASE_URL}/students/class/${encodeURIComponent(className)}/section/${encodeURIComponent(section)}`
+          `${API_BASE_URL}/students/class/${encodeURIComponent(
+            className
+          )}/section/${encodeURIComponent(section)}`
         );
-        
+
         if (studentResponse.data.success) {
           setStudents(studentResponse.data.data);
           const initialAttendance = {};
-          studentResponse.data.data.forEach(student => {
-            initialAttendance[student.StudentID] = 'Present';
+          studentResponse.data.data.forEach((student) => {
+            initialAttendance[student.StudentID] = "Present";
           });
           setAttendance(initialAttendance);
         } else {
@@ -168,7 +183,12 @@ const AttendancePage = () => {
 
   // Search attendance by name, roll, class, and section
   const searchAttendance = async () => {
-    const { name = "", roll = "", className = "", section = "" } = searchData || {};
+    const {
+      name = "",
+      roll = "",
+      className = "",
+      section = "",
+    } = searchData || {};
 
     if (!name.trim() || !roll.trim() || !className.trim() || !section.trim()) {
       setSearchError("Please fill in all search fields");
@@ -177,22 +197,24 @@ const AttendancePage = () => {
 
     setSearchLoading(true);
     setSearchError("");
-    
+
     try {
       // Using the correct route: /search/name/:firstName/roll/:roll/class/:class/section/:section
       const encodedName = encodeURIComponent(name.trim());
       const encodedRoll = encodeURIComponent(roll.trim());
       const encodedClassName = encodeURIComponent(className.trim());
       const encodedSection = encodeURIComponent(section.trim());
-      
+
       const searchUrl = `${API_BASE_URL}/attendance/search/name/${encodedName}/roll/${encodedRoll}/class/${encodedClassName}/section/${encodedSection}`;
-      
+
       const response = await axios.get(searchUrl);
 
       if (response.data.success) {
         setSearchResults(response.data.data);
         if (response.data.data.length === 0) {
-          setSearchError("No attendance records found for the specified criteria");
+          setSearchError(
+            "No attendance records found for the specified criteria"
+          );
         }
       } else {
         setSearchError(response.data.message || "No attendance records found");
@@ -200,7 +222,8 @@ const AttendancePage = () => {
       }
     } catch (err) {
       setSearchError(
-        err.response?.data?.message || `Error searching attendance: ${err.message}`
+        err.response?.data?.message ||
+          `Error searching attendance: ${err.message}`
       );
       setSearchResults([]);
     } finally {
@@ -224,7 +247,7 @@ const AttendancePage = () => {
 
     setDateRangeLoading(true);
     setDateRangeError("");
-    
+
     try {
       // Using the route: /search/daterange/:startDate/:endDate
       const response = await axios.get(
@@ -234,15 +257,20 @@ const AttendancePage = () => {
       if (response.data.success) {
         setDateRangeResults(response.data.data);
         if (response.data.data.length === 0) {
-          setDateRangeError("No attendance records found for the specified date range");
+          setDateRangeError(
+            "No attendance records found for the specified date range"
+          );
         }
       } else {
-        setDateRangeError(response.data.message || "No attendance records found");
+        setDateRangeError(
+          response.data.message || "No attendance records found"
+        );
         setDateRangeResults([]);
       }
     } catch (err) {
       setDateRangeError(
-        err.response?.data?.message || `Error searching attendance: ${err.message}`
+        err.response?.data?.message ||
+          `Error searching attendance: ${err.message}`
       );
       setDateRangeResults([]);
     } finally {
@@ -264,9 +292,9 @@ const AttendancePage = () => {
 
   // Toggle attendance status for a student
   const toggleAttendance = (studentId) => {
-    setAttendance(prev => ({
+    setAttendance((prev) => ({
       ...prev,
-      [studentId]: prev[studentId] === 'Present' ? 'Absent' : 'Present'
+      [studentId]: prev[studentId] === "Present" ? "Absent" : "Present",
     }));
   };
 
@@ -296,20 +324,20 @@ const AttendancePage = () => {
     try {
       // Check for existing records first
       const attendanceRecords = [];
-      
+
       for (const student of students) {
         const exists = await checkAttendanceExists(
           student.StudentID,
           student.ClassID,
           formData.date
         );
-        
+
         if (!exists) {
           attendanceRecords.push({
             studentID: student.StudentID,
             classID: student.ClassID,
             classDate: formData.date,
-            status: attendance[student.StudentID] || 'Present'
+            status: attendance[student.StudentID] || "Present",
           });
         }
       }
@@ -320,22 +348,21 @@ const AttendancePage = () => {
       }
 
       // Use bulk create endpoint
-      const response = await axios.post(
-        `${API_BASE_URL}/attendance/bulk`,
-        { attendanceRecords }
-      );
+      const response = await axios.post(`${API_BASE_URL}/attendance/bulk`, {
+        attendanceRecords,
+      });
 
       if (response.data.success) {
-        setSuccess(`Attendance saved successfully for ${attendanceRecords.length} students!`);
+        setSuccess(
+          `Attendance saved successfully for ${attendanceRecords.length} students!`
+        );
         // Refresh statistics after saving
         fetchStatistics();
       } else {
         setError(response.data.message || "Error saving attendance");
       }
     } catch (err) {
-      setError(
-        err.response?.data?.message || "Error saving attendance"
-      );
+      setError(err.response?.data?.message || "Error saving attendance");
     } finally {
       setSaving(false);
     }
@@ -344,49 +371,56 @@ const AttendancePage = () => {
   // Get attendance summary
   const getAttendanceSummary = () => {
     const total = students.length;
-    const present = Object.values(attendance).filter(status => status === 'Present').length;
+    const present = Object.values(attendance).filter(
+      (status) => status === "Present"
+    ).length;
     const absent = total - present;
-    
+
     return { total, present, absent };
   };
 
   const summary = getAttendanceSummary();
 
   return (
-    <>
+    <div className="attendance-search-container">
       <Navbar />
-      <div className="attendance-container">
-        <div className="attendance-header">
-          <h1 className="page-title">Attendance Management</h1>
-          <p className="page-subtitle">Mark student attendance and search records efficiently</p>
-        </div>
+      <LatestUpdatesNotice />
+      
+      <div className="search-header">
+        <h1 className="search-title">Attendance Management</h1>
+        <p className="search-subtitle">
+          Mark student attendance and search records efficiently
+        </p>
+      </div>
+
+      <div className="search-form-container">
 
         {/* Tab Navigation */}
         <div className="tab-navigation">
-          <button 
-            className={`tab-btn ${activeTab === 'class' ? 'active' : ''}`}
-            onClick={() => setActiveTab('class')}
+          <button
+            className={`tab-btn ${activeTab === "class" ? "active" : ""}`}
+            onClick={() => setActiveTab("class")}
           >
             <Users className="tab-icon" />
             Class Attendance
           </button>
-          <button 
-            className={`tab-btn ${activeTab === 'search' ? 'active' : ''}`}
-            onClick={() => setActiveTab('search')}
+          <button
+            className={`tab-btn ${activeTab === "search" ? "active" : ""}`}
+            onClick={() => setActiveTab("search")}
           >
             <Search className="tab-icon" />
             Search Records
           </button>
-          <button 
-            className={`tab-btn ${activeTab === 'dateRange' ? 'active' : ''}`}
-            onClick={() => setActiveTab('dateRange')}
+          <button
+            className={`tab-btn ${activeTab === "dateRange" ? "active" : ""}`}
+            onClick={() => setActiveTab("dateRange")}
           >
             <Calendar className="tab-icon" />
             Date Range
           </button>
-          <button 
-            className={`tab-btn ${activeTab === 'statistics' ? 'active' : ''}`}
-            onClick={() => setActiveTab('statistics')}
+          <button
+            className={`tab-btn ${activeTab === "statistics" ? "active" : ""}`}
+            onClick={() => setActiveTab("statistics")}
           >
             <BarChart className="tab-icon" />
             Statistics
@@ -394,14 +428,17 @@ const AttendancePage = () => {
         </div>
 
         {/* Class Attendance Tab */}
-        {activeTab === 'class' && (
-          <>
-            {/* Input Form */}
-            <div className="form-section">
+        {activeTab === "class" && (
+          <div>
+            <div className="search-form-container">
+              <div className="search-instruction">
+                <p>Fill in the class details below to load students and mark their attendance.</p>
+              </div>
+              
               <div className="form-grid">
                 <div className="form-group">
                   <label htmlFor="className" className="form-label">
-                    Class Name
+                    Class Name <span className="required">*</span>
                   </label>
                   <input
                     type="text"
@@ -411,12 +448,13 @@ const AttendancePage = () => {
                     onChange={handleInputChange}
                     placeholder="Enter class name (e.g., 10th Grade)"
                     className="form-input"
+                    required
                   />
                 </div>
 
                 <div className="form-group">
                   <label htmlFor="section" className="form-label">
-                    Section
+                    Section <span className="required">*</span>
                   </label>
                   <input
                     type="text"
@@ -426,12 +464,13 @@ const AttendancePage = () => {
                     onChange={handleInputChange}
                     placeholder="Enter section (e.g., A, B, C)"
                     className="form-input"
+                    required
                   />
                 </div>
 
                 <div className="form-group">
                   <label htmlFor="date" className="form-label">
-                    Date
+                    Date <span className="required">*</span>
                   </label>
                   <input
                     type="date"
@@ -440,37 +479,31 @@ const AttendancePage = () => {
                     value={formData.date}
                     onChange={handleInputChange}
                     className="form-input"
+                    required
                   />
                 </div>
-
-                <div className="form-group">
-                  <button
-                    onClick={fetchStudents}
-                    disabled={loading}
-                    className="btn btn-primary"
-                  >
-                    {loading ? (
-                      <>
-                        <RefreshCw className="btn-icon spinning" />
-                        Loading...
-                      </>
-                    ) : (
-                      "Load Students"
-                    )}
-                  </button>
-                </div>
+              </div>
+              
+              <div className="form-actions">
+                <button
+                  onClick={fetchStudents}
+                  disabled={loading}
+                  className="btn btn-search"
+                >
+                  {loading ? "Loading..." : "Load Students"}
+                </button>
               </div>
 
               {error && (
                 <div className="error-message">
-                  <X className="error-icon" />
+                  <i className="error-icon">⚠</i>
                   {error}
                 </div>
               )}
 
               {success && (
                 <div className="success-message">
-                  <CheckCircle className="success-icon" />
+                  <i className="success-icon">✓</i>
                   {success}
                 </div>
               )}
@@ -510,15 +543,15 @@ const AttendancePage = () => {
                     className="btn btn-success"
                   >
                     {saving ? (
-                      <>
+                      <span>
                         <RefreshCw className="btn-icon spinning" />
                         Saving...
-                      </>
+                      </span>
                     ) : (
-                      <>
+                      <span>
                         <Save className="btn-icon" />
                         Save Attendance
-                      </>
+                      </span>
                     )}
                   </button>
                 </div>
@@ -538,19 +571,17 @@ const AttendancePage = () => {
                         {student.FirstName} {student.LastName}
                       </div>
                       <div className="table-cell">
-                        <span className={`status-badge ${
-                          attendance[student.StudentID] === 'Present' ? 'present' : 'absent'
-                        }`}>
-                          {attendance[student.StudentID] === 'Present' ? (
-                            <>
-                              ✅
-                              Present
-                            </>
+                        <span
+                          className={`status-badge ${
+                            attendance[student.StudentID] === "Present"
+                              ? "present"
+                              : "absent"
+                          }`}
+                        >
+                          {attendance[student.StudentID] === "Present" ? (
+                            <span>✅ Present</span>
                           ) : (
-                            <>
-                              ❌
-                              Absent
-                            </>
+                            <span>❌ Absent</span>
                           )}
                         </span>
                       </div>
@@ -558,10 +589,15 @@ const AttendancePage = () => {
                         <button
                           onClick={() => toggleAttendance(student.StudentID)}
                           className={`toggle-btn ${
-                            attendance[student.StudentID] === 'Present' ? 'present' : 'absent'
+                            attendance[student.StudentID] === "Present"
+                              ? "present"
+                              : "absent"
                           }`}
                         >
-                          Mark {attendance[student.StudentID] === 'Present' ? 'Absent' : 'Present'}
+                          Mark{" "}
+                          {attendance[student.StudentID] === "Present"
+                            ? "Absent"
+                            : "Present"}
                         </button>
                       </div>
                     </div>
@@ -571,117 +607,121 @@ const AttendancePage = () => {
             )}
 
             {/* No Students Message */}
-            {!loading && students.length === 0 && formData.className && formData.section && (
-              <div className="no-students">
-                <div className="no-students-icon">👥</div>
-                <h3>No Students Found</h3>
-                <p>No students found for class "{formData.className}" and section "{formData.section}".</p>
-                <p>Please check the class and section names and try again.</p>
-              </div>
-            )}
-          </>
-        )}
-
-        {/* Search Records Tab */}
-        {activeTab === 'search' && (
-          <>
-            {/* Search Form */}
-            <div className="form-section">
-              <h3 className="section-title">Search Attendance Records</h3>
-              <div className="form-grid">
-                <div className="form-group">
-                  <label htmlFor="searchName" className="form-label">
-                    Student Name
-                  </label>
-                  <input
-                    type="text"
-                    id="searchName"
-                    name="name"
-                    value={searchData.name}
-                    onChange={handleSearchInputChange}
-                    placeholder="Enter student name"
-                    className="form-input"
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label htmlFor="searchRoll" className="form-label">
-                    Roll Number
-                  </label>
-                  <input
-                    type="text"
-                    id="searchRoll"
-                    name="roll"
-                    value={searchData.roll}
-                    onChange={handleSearchInputChange}
-                    placeholder="Enter roll number"
-                    className="form-input"
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label htmlFor="searchClassName" className="form-label">
-                    Class Name
-                  </label>
-                  <input
-                    type="text"
-                    id="searchClassName"
-                    name="className"
-                    value={searchData.className}
-                    onChange={handleSearchInputChange}
-                    placeholder="Enter class name"
-                    className="form-input"
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label htmlFor="searchSection" className="form-label">
-                    Section
-                  </label>
-                  <input
-                    type="text"
-                    id="searchSection"
-                    name="section"
-                    value={searchData.section}
-                    onChange={handleSearchInputChange}
-                    placeholder="Enter section"
-                    className="form-input"
-                  />
-                </div>
-
-                <div className="form-group">
-                  <button
-                    onClick={searchAttendance}
-                    disabled={searchLoading}
-                    className="btn btn-primary"
-                  >
-                    {searchLoading ? (
-                      <>
-                        <RefreshCw className="btn-icon spinning" />
-                        Searching...
-                      </>
-                    ) : (
-                      <>
-                        <Search className="btn-icon" />
-                        Search Records
-                      </>
-                    )}
-                  </button>
-                </div>
-              </div>
-
-              {searchError && (
-                <div className="error-message">
-                  <X className="error-icon" />
-                  {searchError}
+            {!loading &&
+              students.length === 0 &&
+              formData.className &&
+              formData.section && (
+                <div className="no-students">
+                  <div className="no-students-icon">👥</div>
+                  <h3>No Students Found</h3>
+                  <p>
+                    No students found for class "{formData.className}" and
+                    section "{formData.section}".
+                  </p>
+                  <p>Please check the class and section names and try again.</p>
                 </div>
               )}
+          </div>
+        )}        {/* Search Records Tab */}
+        {activeTab === "search" && (
+          <div className="search-form-container">
+            <h3 className="section-title">Search Attendance Records</h3>
+            <div className="form-grid">
+              <div className="form-group">
+                <label htmlFor="searchName" className="form-label">
+                  Student Name
+                </label>
+                <input
+                  type="text"
+                  id="searchName"
+                  name="name"
+                  value={searchData.name}
+                  onChange={handleSearchInputChange}
+                  placeholder="Enter student name"
+                  className="form-input"
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="searchRoll" className="form-label">
+                  Roll Number
+                </label>
+                <input
+                  type="text"
+                  id="searchRoll"
+                  name="roll"
+                  value={searchData.roll}
+                  onChange={handleSearchInputChange}
+                  placeholder="Enter roll number"
+                  className="form-input"
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="searchClassName" className="form-label">
+                  Class Name
+                </label>
+                <input
+                  type="text"
+                  id="searchClassName"
+                  name="className"
+                  value={searchData.className}
+                  onChange={handleSearchInputChange}
+                  placeholder="Enter class name"
+                  className="form-input"
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="searchSection" className="form-label">
+                  Section
+                </label>
+                <input
+                  type="text"
+                  id="searchSection"
+                  name="section"
+                  value={searchData.section}
+                  onChange={handleSearchInputChange}
+                  placeholder="Enter section"
+                  className="form-input"
+                />
+              </div>
             </div>
+            
+            <div className="form-actions">
+              <button
+                onClick={searchAttendance}
+                disabled={searchLoading}
+                className="btn btn-primary search-btn"
+              >
+                {searchLoading ? (
+                  <span>
+                    <RefreshCw className="btn-icon spinning" />
+                    Searching...
+                  </span>
+                ) : (
+                  <span>
+                    <Search className="btn-icon" />
+                    Search Records
+                  </span>
+                )}
+              </button>
+            </div>
+
+            {searchError && (
+              <div className="error-message">
+                <X className="error-icon" />
+                {searchError}
+              </div>
+            )}
 
             {/* Search Results */}
             {searchResults.length > 0 && (
               <div className="search-results">
-                <h3 className="section-title">Search Results ({searchResults.length} record{searchResults.length > 1 ? 's' : ''} found)</h3>
+                <h3 className="section-title">
+                  Search Results ({searchResults.length} record
+                  {searchResults.length > 1 ? "s" : ""} found)
+                </h3>
                 <div className="search-results-container">
                   <table className="search-results-table">
                     <thead className="search-table-header">
@@ -717,17 +757,19 @@ const AttendancePage = () => {
                             {new Date(record.ClassDate).toLocaleDateString()}
                           </td>
                           <td className="search-table-cell attendance-status-cell">
-                            <span className={`status-badge-table ${
-                              record.Status && record.Status.toLowerCase() === 'present' ? 'present' : 'absent'
-                            }`}>
-                              {record.Status && record.Status.toLowerCase() === 'present' ? (
-                                <>
-                                  ✅ Present
-                                </>
+                            <span
+                              className={`status-badge-table ${
+                                record.Status &&
+                                record.Status.toLowerCase() === "present"
+                                  ? "present"
+                                  : "absent"
+                              }`}
+                            >
+                              {record.Status &&
+                              record.Status.toLowerCase() === "present" ? (
+                                <span>✅ Present</span>
                               ) : (
-                                <>
-                                  ❌ Absent
-                                </>
+                                <span>❌ Absent</span>
                               )}
                             </span>
                           </td>
@@ -740,85 +782,88 @@ const AttendancePage = () => {
             )}
 
             {/* No Search Results Message */}
-            {!searchLoading && searchResults.length === 0 && searchData.name && searchData.roll && (
-              <div className="no-students">
-                <div className="no-students-icon">🔍</div>
-                <h3>No Records Found</h3>
-                <p>No attendance records found for the specified criteria.</p>
-                <p>Please check the search parameters and try again.</p>
-              </div>
-            )}
-          </>
+            {!searchLoading &&
+              searchResults.length === 0 &&
+              searchData.name &&
+              searchData.roll && (
+                <div className="no-students">
+                  <div className="no-students-icon">🔍</div>
+                  <h3>No Records Found</h3>
+                  <p>No attendance records found for the specified criteria.</p>
+                  <p>Please check the search parameters and try again.</p>
+                </div>
+              )}
+          </div>
         )}
 
         {/* Date Range Tab */}
-        {activeTab === 'dateRange' && (
-          <>
-            {/* Date Range Form */}
-            <div className="form-section">
-              <h3 className="section-title">Search by Date Range</h3>
-              <div className="form-grid">
-                <div className="form-group">
-                  <label htmlFor="startDate" className="form-label">
-                    Start Date
-                  </label>
-                  <input
-                    type="date"
-                    id="startDate"
-                    name="startDate"
-                    value={dateRangeData.startDate}
-                    onChange={handleDateRangeInputChange}
-                    className="form-input"
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label htmlFor="endDate" className="form-label">
-                    End Date
-                  </label>
-                  <input
-                    type="date"
-                    id="endDate"
-                    name="endDate"
-                    value={dateRangeData.endDate}
-                    onChange={handleDateRangeInputChange}
-                    className="form-input"
-                  />
-                </div>
-
-                <div className="form-group">
-                  <button
-                    onClick={searchByDateRange}
-                    disabled={dateRangeLoading}
-                    className="btn btn-primary"
-                  >
-                    {dateRangeLoading ? (
-                      <>
-                        <RefreshCw className="btn-icon spinning" />
-                        Searching...
-                      </>
-                    ) : (
-                      <>
-                        <Calendar className="btn-icon" />
-                        Search Range
-                      </>
-                    )}
-                  </button>
-                </div>
+        {activeTab === "dateRange" && (
+          <div className="search-form-container">
+            <h3 className="section-title">Search by Date Range</h3>
+            <div className="form-grid date-range-grid">
+              <div className="form-group">
+                <label htmlFor="startDate" className="form-label">
+                  Start Date
+                </label>
+                <input
+                  type="date"
+                  id="startDate"
+                  name="startDate"
+                  value={dateRangeData.startDate}
+                  onChange={handleDateRangeInputChange}
+                  className="form-input"
+                />
               </div>
 
-              {dateRangeError && (
-                <div className="error-message">
-                  <X className="error-icon" />
-                  {dateRangeError}
-                </div>
-              )}
+              <div className="form-group">
+                <label htmlFor="endDate" className="form-label">
+                  End Date
+                </label>
+                <input
+                  type="date"
+                  id="endDate"
+                  name="endDate"
+                  value={dateRangeData.endDate}
+                  onChange={handleDateRangeInputChange}
+                  className="form-input"
+                />
+              </div>
             </div>
+            
+            <div className="form-actions">
+              <button
+                onClick={searchByDateRange}
+                disabled={dateRangeLoading}
+                className="btn btn-primary date-range-btn"
+              >
+                {dateRangeLoading ? (
+                  <span>
+                    <RefreshCw className="btn-icon spinning" />
+                    Searching...
+                  </span>
+                ) : (
+                  <span>
+                    <Calendar className="btn-icon" />
+                    Search Range
+                  </span>
+                )}
+              </button>
+            </div>
+
+            {dateRangeError && (
+              <div className="error-message">
+                <X className="error-icon" />
+                {dateRangeError}
+              </div>
+            )}
 
             {/* Date Range Results */}
             {dateRangeResults.length > 0 && (
               <div className="search-results">
-                <h3 className="section-title">Date Range Results ({dateRangeResults.length} record{dateRangeResults.length > 1 ? 's' : ''} found)</h3>
+                <h3 className="section-title">
+                  Date Range Results ({dateRangeResults.length} record
+                  {dateRangeResults.length > 1 ? "s" : ""} found)
+                </h3>
                 <div className="search-results-container">
                   <table className="search-results-table">
                     <thead className="search-table-header">
@@ -852,17 +897,19 @@ const AttendancePage = () => {
                             {new Date(record.ClassDate).toLocaleDateString()}
                           </td>
                           <td className="search-table-cell attendance-status-cell">
-                            <span className={`status-badge-table ${
-                              record.Status && record.Status.toLowerCase() === 'present' ? 'present' : 'absent'
-                            }`}>
-                              {record.Status && record.Status.toLowerCase() === 'present' ? (
-                                <>
-                                  ✅ Present
-                                </>
+                            <span
+                              className={`status-badge-table ${
+                                record.Status &&
+                                record.Status.toLowerCase() === "present"
+                                  ? "present"
+                                  : "absent"
+                              }`}
+                            >
+                              {record.Status &&
+                              record.Status.toLowerCase() === "present" ? (
+                                <span>✅ Present</span>
                               ) : (
-                                <>
-                                  ❌ Absent
-                                </>
+                                <span>❌ Absent</span>
                               )}
                             </span>
                           </td>
@@ -875,54 +922,60 @@ const AttendancePage = () => {
             )}
 
             {/* No Date Range Results Message */}
-            {!dateRangeLoading && dateRangeResults.length === 0 && dateRangeData.startDate && dateRangeData.endDate && (
-              <div className="no-students">
-                <div className="no-students-icon">📅</div>
-                <h3>No Records Found</h3>
-                <p>No attendance records found for the specified date range.</p>
-                <p>Please try a different date range.</p>
-              </div>
-            )}
-          </>
+            {!dateRangeLoading &&
+              dateRangeResults.length === 0 &&
+              dateRangeData.startDate &&
+              dateRangeData.endDate && (
+                <div className="no-students">
+                  <div className="no-students-icon">📅</div>
+                  <h3>No Records Found</h3>
+                  <p>
+                    No attendance records found for the specified date range.
+                  </p>
+                  <p>Please try a different date range.</p>
+                </div>
+              )}
+          </div>
         )}
 
         {/* Statistics Tab */}
-        {activeTab === 'statistics' && (
-          <>
-            <div className="form-section">
-              <h3 className="section-title">Attendance Statistics</h3>
-              {statistics ? (
-                <div className="summary-stats">
-                  <div className="stat-card">
-                    <div className="stat-number">{statistics.TotalRecords}</div>
-                    <div className="stat-label">Total Records</div>
-                  </div>
-                  <div className="stat-card present">
-                    <div className="stat-number">{statistics.TotalPresent}</div>
-                    <div className="stat-label">Total Present</div>
-                  </div>
-                  <div className="stat-card absent">
-                    <div className="stat-number">{statistics.TotalAbsent}</div>
-                    <div className="stat-label">Total Absent</div>
-                  </div>
-                  <div className="stat-card">
-                    <div className="stat-number">{statistics.OverallAttendancePercentage}%</div>
-                    <div className="stat-label">Overall Attendance</div>
-                  </div>
+        {activeTab === "statistics" && (
+          <div className="search-form-container">
+            <h3 className="section-title">Attendance Statistics</h3>
+            {statistics ? (
+              <div className="summary-stats">
+                <div className="stat-card">
+                  <div className="stat-number">{statistics.TotalRecords}</div>
+                  <div className="stat-label">Total Records</div>
                 </div>
-              ) : (
-                <div className="no-students">
-                  <div className="no-students-icon">📊</div>
-                  <h3>Loading Statistics...</h3>
-                  <p>Please wait while we fetch the attendance statistics.</p>
+                <div className="stat-card present">
+                  <div className="stat-number">{statistics.TotalPresent}</div>
+                  <div className="stat-label">Total Present</div>
                 </div>
-              )}
-            </div>
-          </>
+                <div className="stat-card absent">
+                  <div className="stat-number">{statistics.TotalAbsent}</div>
+                  <div className="stat-label">Total Absent</div>
+                </div>
+                <div className="stat-card">
+                  <div className="stat-number">
+                    {statistics.OverallAttendancePercentage}%
+                  </div>
+                  <div className="stat-label">Overall Attendance</div>
+                </div>
+              </div>
+            ) : (
+              <div className="no-students">
+                <div className="no-students-icon">📊</div>
+                <h3>Loading Statistics...</h3>
+                <p>Please wait while we fetch the attendance statistics.</p>
+              </div>
+            )}
+          </div>
         )}
       </div>
+      
       <Footer />
-    </>
+    </div>
   );
 };
 

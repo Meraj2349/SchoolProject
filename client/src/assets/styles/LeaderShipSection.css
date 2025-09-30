@@ -1,10 +1,11 @@
 .leadership-section {
+  margin-top: 70px;
   padding: 60px 0;
   background-color: #f8f9fa;
 }
 
 .leadership-section .container {
-  max-width: 1400px; 
+  max-width: 1400px;
   margin: 0 auto;
   padding: 0 20px;
 }
@@ -25,7 +26,7 @@
   display: grid;
   grid-template-columns: 2.2fr 1fr; /* Slightly less aggressive than 2.5fr */
   gap: 40px;
-  align-items: start;
+  align-items: start; /* Changed back to start for natural height */
 }
 
 /* Profile Cards Container */
@@ -46,6 +47,8 @@
   align-items: flex-start;
   gap: 25px;
   text-align: left;
+  min-height: 400px; /* Minimum height to match QuickLinks */
+  position: relative; /* For absolute positioning of "More" button */
 }
 
 .profile-card:hover {
@@ -62,13 +65,28 @@
   height: 100px;
   border-radius: 50%;
   object-fit: cover;
-  border: 4px solid #007bff;
+  border: 4px solid #10b981;
+  transition: border-color 0.3s ease;
+}
+
+.profile-card:hover .profile-image {
+  border-color: #059669;
+}
+
+.profile-image-placeholder {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 4px solid #10b981;
 }
 
 .profile-content {
   flex: 1;
   display: flex;
   flex-direction: column;
+  min-height: 0; /* Allow content to shrink */
+  width: 100%; /* Ensure full width */
 }
 
 .profile-name {
@@ -89,33 +107,51 @@
 .profile-message {
   text-align: justify;
   margin-bottom: 20px;
-  flex: 1;
+  flex: 1; /* Take remaining space to expand message area */
+  overflow: visible; /* Ensure content is visible */
+  width: 100%;
 }
 
-.profile-message p {
+.profile-message p,
+.message-text {
   color: #555;
-  line-height: 1.6;
-  font-size: 0.95rem;
-  margin-bottom: 15px;
+  line-height: 1.8;
+  font-size: 15px;
+  margin: 0;
+  padding: 0;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
+  white-space: pre-wrap; /* Preserve line breaks and spacing */
+  text-align: justify;
+  font-family: inherit;
+  max-width: 100%;
 }
 
 .profile-more {
-  text-align: left;
-  margin-top: auto;
+  position: absolute;
+  bottom: 15px;
+  right: 15px;
+  z-index: 10;
 }
 
 .more-link {
-  background: none;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
   border: none;
-  color: #007bff;
+  color: white;
   cursor: pointer;
-  font-size: 0.9rem;
-  text-decoration: underline;
-  transition: color 0.3s ease;
+  font-size: 12px;
+  padding: 6px 12px;
+  border-radius: 15px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
 }
 
 .more-link:hover {
-  color: #0056b3;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
 }
 
 /* Quick Links Container */
@@ -124,7 +160,15 @@
   border-radius: 12px;
   padding: 30px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  height: fit-content;
+  min-height: 400px; /* Same minimum height as profile card */
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.quick-links-container:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.12);
 }
 
 /* Magazine Info */
@@ -205,62 +249,195 @@
   text-align: center;
 }
 
+/* Chairman Section */
+.chairman-section {
+  margin-bottom: 48px;
+}
+
+.chairman-section .profile-card {
+  max-width: 100%;
+  margin: 0 auto;
+}
+
+/* Three Column Layout */
+.three-column-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 32px;
+  margin-top: 20px;
+}
+
+.quick-links-wrapper,
+.events-wrapper,
+.news-wrapper {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  padding: 18px 10px;
+  min-height: 320px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.quick-links-wrapper:hover,
+.events-wrapper:hover,
+.news-wrapper:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.quick-links-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 /* Responsive Design */
+@media (max-width: 1200px) {
+  .three-column-container {
+    gap: 24px;
+  }
+
+  .quick-links-wrapper,
+  .events-wrapper,
+  .news-wrapper {
+    padding: 16px 8px;
+    min-height: 280px;
+  }
+}
+
 @media (max-width: 992px) {
+  .three-column-container {
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+
+  .quick-links-wrapper {
+    grid-column: 1 / -1; /* Full width on tablet */
+    min-height: 240px;
+  }
+
+  .events-wrapper,
+  .news-wrapper {
+    min-height: 300px;
+  }
+
   .leadership-content {
     grid-template-columns: 1fr;
     gap: 40px;
   }
-  
+
   .profile-cards-container {
     flex-direction: column;
+  }
+
+  .quick-links-container {
+    order: 2; /* Ensure QuickLinks appear after profiles on mobile */
   }
 }
 
 @media (max-width: 768px) {
+  .chairman-section {
+    margin-bottom: 32px;
+  }
+
+  .chairman-section .profile-card {
+    padding: 20px;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .chairman-section .profile-content {
+    align-items: center;
+    text-align: center;
+  }
+
+  .chairman-section .profile-message {
+    text-align: center;
+  }
+
+  .chairman-section .profile-message p,
+  .chairman-section .message-text {
+    text-align: center;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  .three-column-container {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .quick-links-wrapper,
+  .events-wrapper,
+  .news-wrapper {
+    padding: 15px;
+    min-height: 250px;
+  }
+
   .leadership-section {
     padding: 40px 0;
   }
-  
+
   .section-header h2 {
     font-size: 2rem;
   }
-  
+
   .profile-card {
     padding: 25px;
     flex-direction: column;
     align-items: center;
     text-align: center;
     gap: 15px;
+    min-height: auto; /* Remove fixed height on mobile */
   }
-  
+
   .profile-content {
     align-items: center;
+    width: 100%;
   }
-  
+
   .profile-image {
     width: 80px;
     height: 80px;
   }
-  
+
   .profile-name {
     font-size: 1.2rem;
   }
-  
-  .profile-more {
+
+  .profile-message {
+    text-align: center; /* Center text on mobile */
+    margin-bottom: 15px;
+  }
+
+  .profile-message p,
+  .message-text {
+    font-size: 14px;
+    line-height: 1.6;
     text-align: center;
   }
-  
+
+  .profile-more {
+    text-align: center;
+    position: static; /* Remove absolute positioning on mobile */
+    margin-top: 15px;
+  }
+
   .quick-links-container {
     padding: 25px;
+    min-height: auto; /* Remove fixed height on mobile */
   }
-  
+
   .magazine-info {
     flex-direction: column;
     text-align: center;
     gap: 10px;
   }
-  
+
   .quick-links-grid {
     grid-template-columns: 1fr;
     gap: 10px;
@@ -268,14 +445,25 @@
 }
 
 @media (max-width: 480px) {
+  .three-column-container {
+    gap: 12px;
+  }
+
+  .quick-links-wrapper,
+  .events-wrapper,
+  .news-wrapper {
+    padding: 12px;
+    min-height: 200px;
+  }
+
   .leadership-section .container {
     padding: 0 15px;
   }
-  
+
   .profile-card {
     padding: 20px;
   }
-  
+
   .quick-links-container {
     padding: 20px;
   }

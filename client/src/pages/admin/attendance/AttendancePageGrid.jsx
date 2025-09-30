@@ -587,7 +587,7 @@ const AttendancePageGrid = () => {
                     ✅{" "}
                     {
                       Object.values(attendance).filter(
-                        (status) => status === "Present"
+                        (status) => status === "present"
                       ).length
                     }{" "}
                     present today
@@ -596,7 +596,7 @@ const AttendancePageGrid = () => {
                     ❌{" "}
                     {
                       Object.values(attendance).filter(
-                        (status) => status === "Absent"
+                        (status) => status === "absent"
                       ).length
                     }{" "}
                     absent today

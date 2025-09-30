@@ -94,7 +94,6 @@
 
 .community-dropdown,
 .online-apply-dropdown,
-.search-button,
 .quaker-education {
   display: flex;
   align-items: center;
@@ -142,9 +141,8 @@
 }
 
 .community-dropdown:hover,
-.search-button:hover,
 .quaker-education:hover {
-  color: #3b82f6; /* Professional blue on hover */
+  color: #10b981; /* Professional green on hover */
   background-color: #f8fafc;
   transform: translateY(-1px);
 }
@@ -170,21 +168,11 @@
   border-color: #d1d5db;
 }
 
-.search-button {
-  background-color: #f8fafc;
-  padding: 8px 12px;
-  border-radius: 8px;
-  border: 1px solid #e5e7eb;
-}
-
-.search-button:hover {
-  background-color: #e5e7eb;
-  border-color: #d1d5db;
-}
+/* Search button styles removed */
 
 .mobile-menu-toggle {
   display: none;
-  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  background: linear-gradient(135deg, #059669 0%, #047857 100%) !important;
   border: none;
   color: white;
   font-size: 20px;
@@ -192,7 +180,7 @@
   padding: 12px;
   border-radius: 12px;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+  box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
   position: relative;
   overflow: hidden;
 }
@@ -219,7 +207,7 @@
 
 .mobile-menu-toggle:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
+  box-shadow: 0 8px 20px rgba(5, 150, 105, 0.4);
 }
 
 .mobile-menu-toggle:active {
@@ -264,7 +252,37 @@
 }
 
 .nav-item a:hover {
-  color: #3b82f6; /* Professional blue */
+  color: #10b981; /* Professional green */
+}
+
+/* Active link styles */
+.nav-item.active > a,
+.nav-item a.active-link {
+  color: #10b981; /* Green for active state */
+  font-weight: 600;
+  position: relative;
+}
+
+.nav-item.active > a::after,
+.nav-item a.active-link::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  border-radius: 2px;
+}
+
+/* Active sub-menu item styles */
+.sub-menu-item a.active-link {
+  background-color: #f0fdf4; /* Very light green background */
+  color: #10b981; /* Green text */
+  font-weight: 600;
+  border-left: 3px solid #10b981;
+  padding-left: 21px; /* Adjust for border */
 }
 
 .quick-links {
@@ -278,7 +296,7 @@
 }
 
 .quick-links:hover {
-  color: #3b82f6;
+  color: #10b981;
 }
 
 /* Mobile Menu */
@@ -340,20 +358,28 @@
 
 .sub-menu-item a:hover {
   background-color: #f8fafc; /* Light hover background */
-  color: #3b82f6; /* Professional blue */
+  color: #10b981; /* Professional green */
   padding-left: 24px; /* Slight indent on hover */
 }
 
 /* Responsive Navbar Styles */
 @media (max-width: 900px) {
   .top-right-section .community-dropdown,
-  .top-right-section .search-button,
   .top-right-section .quaker-education {
     display: none;
   }
 
   .mobile-menu-toggle {
     display: block;
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    border: none;
+    color: white;
+    font-size: 20px;
+    cursor: pointer;
+    padding: 12px;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
   }
 
   .nav-items {
@@ -392,7 +418,7 @@
 
   /* Mobile Menu Header */
   .mobile-menu-header {
-    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
     padding: 20px;
     color: white;
     display: flex;
@@ -476,10 +502,10 @@
 
   .mobile-menu a:hover,
   .mobile-menu a:active {
-    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
     color: white;
     transform: translateX(8px);
-    box-shadow: 0 4px 16px rgba(59, 130, 246, 0.3);
+    box-shadow: 0 4px 16px rgba(5, 150, 105, 0.3);
   }
 
   .mobile-menu a::after {
@@ -489,6 +515,19 @@
   }
 
   .mobile-menu a:hover::after {
+    transform: translateX(4px);
+  }
+
+  /* Active mobile link styles */
+  .mobile-menu a.active-mobile-link {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+    color: white !important;
+    transform: translateX(8px);
+    box-shadow: 0 4px 16px rgba(16, 185, 129, 0.4);
+    font-weight: 600;
+  }
+
+  .mobile-menu a.active-mobile-link::after {
     transform: translateX(4px);
   }
 
@@ -515,7 +554,7 @@
 
   /* Close button for mobile menu */
   .mobile-menu-close {
-    background: rgba(255, 255, 255, 0.2);
+    background: linear-gradient(135deg, #059669 0%, #047857 100%) !important;
     border: 2px solid rgba(255, 255, 255, 0.3);
     color: white;
     font-size: 18px;
@@ -523,7 +562,7 @@
     padding: 8px 10px;
     border-radius: 8px;
     transition: all 0.3s ease;
-    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
     width: 36px;
     height: 36px;
     display: flex;
@@ -532,9 +571,10 @@
   }
 
   .mobile-menu-close:hover {
-    background: rgba(255, 255, 255, 0.3);
+    background: linear-gradient(135deg, #047857 0%, #065f46 100%) !important;
     border-color: rgba(255, 255, 255, 0.5);
     transform: rotate(90deg);
+    box-shadow: 0 6px 16px rgba(5, 150, 105, 0.4);
   }
 
   /* Mobile Menu Actions */
@@ -592,17 +632,17 @@
     width: 50px;
     height: 50px;
     z-index: 10000;
-    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    background: linear-gradient(135deg, #059669 0%, #047857 100%) !important;
     border: none;
     color: white;
     padding: 12px;
     border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
   }
 
   .mobile-menu-toggle:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
+    box-shadow: 0 8px 20px rgba(5, 150, 105, 0.4);
   }
 
   /* Hide mobile menu toggle when mobile menu is open */
@@ -632,7 +672,6 @@
 
   .community-dropdown,
   .online-apply-dropdown,
-  .search-button,
   .quaker-education {
     padding: 6px 12px;
     font-size: 12px;

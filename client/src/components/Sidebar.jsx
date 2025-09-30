@@ -1,16 +1,16 @@
-import React, { useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
 import Cookies from "js-cookie";
+import { useState } from "react";
 import {
-  FaBell,
-  FaImage,
-  FaEnvelope,
-  FaCalendarCheck,
-  FaHandshake,
+    FaBell,
+    FaCalendarCheck,
+    FaEnvelope,
+    FaHandshake,
+    FaImage,
 } from "react-icons/fa";
-import { FaMessage, FaNoteSticky, FaPeopleGroup ,FaClipboardList} from "react-icons/fa6";
-import { RiListCheck, RiTimerLine } from "react-icons/ri";
+import { FaClipboardList, FaMessage, FaNoteSticky, FaPeopleGroup } from "react-icons/fa6";
 import { FiMenu, FiX } from "react-icons/fi";
+import { RiListCheck, RiTimerLine } from "react-icons/ri";
+import { useLocation, useNavigate } from "react-router-dom";
 import "../assets/styles/Sidebar.css"; // Import the CSS file
 
 const Sidebar = () => {
@@ -91,9 +91,9 @@ const Sidebar = () => {
                   label: "Chair Message",
                 },
                 {
-                  path: "/admin/uploadImage",
+                  path: "/admin/gallery",
                   icon: <FaImage />,
-                  label: "Image",
+                  label: "Image Gallery",
                 },
                 {
                   path: "/admin/sponsor",

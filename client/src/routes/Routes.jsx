@@ -3,6 +3,9 @@ import { Route, Routes } from "react-router-dom";
 import LoginForm from "../components/LoginForm";
 import NotFound from "../components/NotFound";
 import RegisterForm from "../components/RegisterForm";
+import AboutPage from "../pages/AboutPage";
+import ChairmanMessagePage from "../pages/ChairmanMessagePage";
+import GallaryPage from "../pages/GallaryPage/GallaryPage";
 import HomePage from "../pages/HomePage";
 import AttendancePage from "../pages/Listpage/AttendanceList";
 import StudentListPage from "../pages/Listpage/StudentList";
@@ -12,26 +15,27 @@ import AdminAttendancePage from "../pages/admin/attendance/AttendancePage";
 import AttendancePageGrid from "../pages/admin/attendance/AttendancePageGrid";
 import AttendanceReports from "../pages/admin/attendance/AttendanceReports";
 import ClassesPage from "../pages/admin/class/ClassesPage";
+import AdminImageGallery from "../pages/admin/gallery/AdminImageGallery";
 import MessagesPage from "../pages/admin/messages/MessagesPage";
 import NoticesPage from "../pages/admin/notices/noticespage";
 import StudentPage from "../pages/admin/studentList/StudentPage";
 import SubjectsPage from "../pages/admin/subject/SubjectsPage";
 import TeacherPage from "../pages/admin/teacherList/TeacherPage";
 import UpdateEmailPassword from "../pages/admin/updateEmaillPassword/UpdateEmailPassword";
-import ImageDetail from "../pages/images/ImageDetail";
-import ImageGallery from "../pages/images/ImageGallery";
-import ImageUpload from "../pages/images/ImageUpload";
 
 const AppRoutes = () => {
   return (
     <Routes>
       <Route path="/" element={<HomePage />} />
+      <Route path="/chairman-message" element={<ChairmanMessagePage />} />
       <Route path="/students" element={<StudentListPage />} />
       <Route path="/teachers" element={<TeacherListPage />} />
       <Route path="/attendance" element={<AttendancePage />} />
+      <Route path="/about" element={<AboutPage />} />
+      <Route path="/gallery" element={<GallaryPage />} />
+      <Route path="/imageGallary" element={<GallaryPage />} />
+      <Route path="*" element={<NotFound />} />
 
-      {/* Image Gallery Route */}
-      <Route path="/images" element={<ImageGallery />} />
 
       {/* Admin Routes */}
       <Route path="/admin" element={<AdminPage />}>
@@ -47,18 +51,11 @@ const AppRoutes = () => {
         <Route path="attendance" element={<AdminAttendancePage />} />
         <Route path="attendance/grid" element={<AttendancePageGrid />} />
         <Route path="attendance/reports" element={<AttendanceReports />} />
-        
+        <Route path="gallery" element={<AdminImageGallery />} />
+        <Route path="*" element={<NotFound />} />
         {/* Protected routes */}
         <Route path="*" element={<NotFound />} />
       </Route>
-
-      {/* Protected routes */}
-
-      <Route path="/upload" element={<ImageUpload />} />
-
-      <Route path="/gallery" element={<ImageGallery />} />
-      <Route path="/images/:id" element={<ImageDetail />} />
-      <Route path="*" element={<NotFound />} />
     </Routes>
   );
 };

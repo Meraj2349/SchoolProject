@@ -1,0 +1,72 @@
+services:
+  backend:
+    build: ./server
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - DB_HOST=db
+      - DB_USER=root
+      - DB_PASS=schoolproject123
+      - DB_NAME=School_Management
+      - JWT_SECRET_KEY=q9R2$$hQv6jB
+      - JWT_EXPIRES_IN=30h
+      - CLOUDINARY_CLOUD_NAME=ddwezcham
+      - CLOUDINARY_API_KEY=597838886274737
+      - CLOUDINARY_API_SECRET=c3de7UcLEyMeS9U7hi-cN7kOp9w
+      - FRONTEND_URL=http://localhost:5174
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - school-network
+
+  frontend:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    ports:
+      - "5174:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+    networks:
+      - school-network
+
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_DATABASE: School_Management
+      MYSQL_ROOT_PASSWORD: schoolproject123
+      MYSQL_ROOT_HOST: "%"
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./server/Sql/database.sql:/docker-entrypoint-initdb.d/database.sql
+    restart: unless-stopped
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "mysqladmin",
+          "ping",
+          "-h",
+          "localhost",
+          "-u",
+          "root",
+          "-pschoolproject123",
+        ]
+      timeout: 20s
+      retries: 10
+    networks:
+      - school-network
+
+volumes:
+  mysql_data:
+
+networks:
+  school-network:
+    driver: bridge

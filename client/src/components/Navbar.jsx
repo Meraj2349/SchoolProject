@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import Logo from "../assets/images/logo1.png";
 import "../assets/styles/Navbar.css"; // Adjust the path to your logo
 
@@ -31,14 +31,25 @@ const Navbar = ({
     { name: "CONTACT", path: "/contact" },
   ],
   showCommunity = true,
-  showSearch = true,
+  showSearch = false,
   showQuakerEducation = true,
   showQuickLinks = true,
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const currentLocation = useLocation();
 
   const toggleMobileMenu = () => {
     setMobileMenuOpen(!mobileMenuOpen);
+  };
+
+  // Function to check if a nav item is active
+  const isActiveLink = (path) => {
+    return currentLocation.pathname === path;
+  };
+
+  // Function to check if any sub-item is active (for parent highlighting)
+  const hasActiveSubItem = (subItems) => {
+    return subItems && subItems.some(subItem => currentLocation.pathname === subItem.path);
   };
 
   return (
@@ -63,7 +74,14 @@ const Navbar = ({
 
           {showQuakerEducation && (
             <div className="quaker-education">
-              <span>A Quaker Education</span>
+              <a 
+                href="http://localhost:5002" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                style={{ textDecoration: 'none', color: 'inherit' }}
+              >
+                <span>A Quaker Education</span>
+              </a>
               <span className="arrow-down">▼</span>
             </div>
           )}
@@ -80,13 +98,23 @@ const Navbar = ({
           {/* Navigation items */}
           <ul className="nav-items">
             {navItems.map((item, index) => (
-              <li key={index} className="nav-item">
-                <Link to={item.path}>{item.name}</Link>
+              <li key={index} className={`nav-item ${isActiveLink(item.path) || hasActiveSubItem(item.subItems) ? 'active' : ''}`}>
+                <Link 
+                  to={item.path}
+                  className={isActiveLink(item.path) ? 'active-link' : ''}
+                >
+                  {item.name}
+                </Link>
                 {item.subItems && (
                   <ul className="sub-menu">
                     {item.subItems.map((subItem, subIndex) => (
                       <li key={subIndex} className="sub-menu-item">
-                        <Link to={subItem.path}>{subItem.name}</Link>
+                        <Link 
+                          to={subItem.path}
+                          className={isActiveLink(subItem.path) ? 'active-link' : ''}
+                        >
+                          {subItem.name}
+                        </Link>
                       </li>
                     ))}
                   </ul>
@@ -134,13 +162,21 @@ const Navbar = ({
           <ul>
             {navItems.map((item, index) => (
               <li key={index}>
-                <Link to={item.path} onClick={toggleMobileMenu}>
+                <Link 
+                  to={item.path} 
+                  onClick={toggleMobileMenu}
+                  className={isActiveLink(item.path) ? 'active-mobile-link' : ''}
+                >
                   {item.name}
                 </Link>
                 {item.subItems &&
                   item.subItems.map((subItem, subIndex) => (
                     <li key={`sub-${subIndex}`} className="mobile-submenu-item">
-                      <Link to={subItem.path} onClick={toggleMobileMenu}>
+                      <Link 
+                        to={subItem.path} 
+                        onClick={toggleMobileMenu}
+                        className={isActiveLink(subItem.path) ? 'active-mobile-link' : ''}
+                      >
                         {subItem.name}
                       </Link>
                     </li>
@@ -163,9 +199,15 @@ const Navbar = ({
             )}
             {showQuakerEducation && (
               <li>
-                <Link to="/quaker-education" onClick={toggleMobileMenu}>
+                <a 
+                  href="http://localhost:5002" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  onClick={toggleMobileMenu}
+                  className="quaker-education-link"
+                >
                   A QUAKER EDUCATION
-                </Link>
+                </a>
               </li>
             )}
           </ul>

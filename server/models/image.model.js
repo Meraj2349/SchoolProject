@@ -35,8 +35,13 @@ export const deleteImage = async (id) => {
 };
 
 export const getImagesByType = async (type) => {
+  if (type === 'all') {
+    const [rows] = await db.execute('SELECT * FROM Images ORDER BY ImageID DESC');
+    return rows;
+  }
+  
   const [rows] = await db.execute(
-    'SELECT * FROM Images WHERE ImageType = ?',
+    'SELECT * FROM Images WHERE ImageType = ? ORDER BY ImageID DESC',
     [type]
   );
   return rows;
