@@ -188,17 +188,20 @@ CREATE TABLE
     );
 
 -- Image Storage Table (for all images)
-CREATE TABLE
-    Images (
-        ImageID INT PRIMARY KEY AUTO_INCREMENT,
-        ImagePath VARCHAR(255) NOT NULL,
-        PublicID VARCHAR(255) NOT NULL,
-        Description TEXT,
-        UploadDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        UploadedBy INT COMMENT 'AdminID or TeacherID who uploaded',
-        ImageType ENUM ('teacher', 'school', 'event', 'notice') NOT NULL,
-        AssociatedID INT COMMENT 'ID of the associated entity (StudentID, TeacherID, etc.)',
-    );
+CREATE TABLE Images (
+    ImageID INT PRIMARY KEY AUTO_INCREMENT,
+    ImagePath VARCHAR(255) NOT NULL,
+    PublicID VARCHAR(255) NOT NULL,
+    Description TEXT,
+    UploadDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UploadedBy INT COMMENT 'AdminID or TeacherID who uploaded',
+    ImageType ENUM ('student', 'teacher', 'school', 'event', 'notice') NOT NULL,
+    StudentID INT NULL COMMENT 'Reference to Students table if image belongs to student',
+    TeacherID INT NULL COMMENT 'Reference to Teachers table if image belongs to teacher',
+    AssociatedID INT COMMENT 'ID of the associated entity (for other types)',
+    FOREIGN KEY (StudentID) REFERENCES Students (StudentID) ON DELETE CASCADE,
+    FOREIGN KEY (TeacherID) REFERENCES Teachers (TeacherID) ON DELETE CASCADE
+);
 
 -- Teacher Images (connects teachers to images)
 CREATE TABLE

@@ -1,21 +1,22 @@
 import {
-    addMultipleResults,
-    addResult,
-    addResultByStudentDetails,
-    advancedSearchResults,
-    checkResultExists,
-    deleteResult,
-    deleteResultsByExam,
-    getAllResults,
-    getResultById,
-    getResultCount,
-    getResultsByClass,
-    getResultsByExam,
-    getResultsByStudent,
-    getResultsBySubject,
-    getStudentResultSummary,
-    searchResults,
-    updateResult
+  addMultipleResults,
+  addResult,
+  addResultByStudentDetails,
+  advancedSearchResults,
+  checkResultExists,
+  deleteResult,
+  deleteResultsByExam,
+  findResultByComposite,
+  getAllResults,
+  getResultById,
+  getResultCount,
+  getResultsByClass,
+  getResultsByExam,
+  getResultsByStudent,
+  getResultsBySubject,
+  getStudentResultSummary,
+  searchResults,
+  updateResult
 } from "../models/result.model.js";
 
 // Utility function for validation
@@ -25,6 +26,11 @@ const validateResultData = (data) => {
 
   if (missingFields.length > 0) {
     return `Missing required fields: ${missingFields.join(", ")}`;
+  }
+
+  // Check if MarksObtained is a valid number
+  if (isNaN(data.MarksObtained)) {
+    return "MarksObtained must be a valid number";
   }
 
   if (data.MarksObtained < 0) {
@@ -203,15 +209,18 @@ const getResultsBySubjectController = async (req, res) => {
 const addResultController = async (req, res) => {
   try {
     const resultData = req.body;
+    console.log('🔍 Received result data:', resultData);
 
     // Validate input data
     const validationError = validateResultData(resultData);
     if (validationError) {
+      console.log('❌ Validation error:', validationError);
       return res.status(400).json({
         success: false,
         message: validationError,
       });
     }
+    console.log('✅ Validation passed');
 
     // Check if result already exists
     const resultExists = await checkResultExists(
@@ -228,17 +237,20 @@ const addResultController = async (req, res) => {
     }
 
     const result = await addResult(resultData);
+    console.log('🔍 Database result:', result);
     
-    if (result.affectedRows > 0) {
+    if (result && result.affectedRows > 0) {
+      console.log('✅ Result added successfully, ID:', result.insertId);
       res.status(201).json({
         success: true,
         message: "Result added successfully",
         data: { resultId: result.insertId },
       });
     } else {
+      console.log('❌ Database operation failed, result:', result);
       res.status(400).json({
         success: false,
-        message: "Failed to add result",
+        message: "Failed to add result - No rows affected",
       });
     }
   } catch (error) {
@@ -505,10 +517,14 @@ const checkResultExistsController = async (req, res) => {
     }
 
     const exists = await checkResultExists(studentId, examId, subjectId);
+    let result = null;
+    if (exists) {
+      result = await findResultByComposite(studentId, examId, subjectId);
+    }
     res.status(200).json({
       success: true,
       message: "Result existence checked successfully",
-      data: { exists },
+      data: { exists, result, resultId: result?.ResultID },
     });
   } catch (error) {
     res.status(500).json({
@@ -712,19 +728,19 @@ const advancedSearchResultsController = async (req, res) => {
 };
 
 export {
-    addMultipleResultsController, addResultByStudentDetailsController, addResultController, advancedSearchResultsController,
-    checkResultExistsController,
-    deleteResultController,
-    deleteResultsByExamController,
-    getAllResultsController,
-    getResultByIdController,
-    getResultCountController,
-    getResultsByClassController,
-    getResultsByExamController,
-    getResultsByStudentController,
-    getResultsBySubjectController,
-    getStudentResultSummaryController,
-    searchResultsController,
-    updateResultController
+  addMultipleResultsController, addResultByStudentDetailsController, addResultController, advancedSearchResultsController,
+  checkResultExistsController,
+  deleteResultController,
+  deleteResultsByExamController,
+  getAllResultsController,
+  getResultByIdController,
+  getResultCountController,
+  getResultsByClassController,
+  getResultsByExamController,
+  getResultsByStudentController,
+  getResultsBySubjectController,
+  getStudentResultSummaryController,
+  searchResultsController,
+  updateResultController
 };
 

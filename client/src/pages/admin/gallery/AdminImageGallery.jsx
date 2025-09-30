@@ -2,7 +2,7 @@ import Cookies from 'js-cookie';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import imageService from '../../../api/imageService';
-import ImageGallery from '../../../components/ImageGallery';
+import EnhancedImageGallery from '../../../components/EnhancedImageGallery';
 import Sidebar from '../../../components/Sidebar';
 import './AdminImageGallery.css';
 
@@ -31,7 +31,7 @@ const AdminImageGallery = () => {
     const loadStats = async () => {
       try {
         setLoading(true);
-        const allImages = await imageService.getImagesByType('all');
+        const allImages = await imageService.getImagesWithDetails();
         
         const stats = {
           total: allImages.length,
@@ -45,6 +45,21 @@ const AdminImageGallery = () => {
         setStats(stats);
       } catch (error) {
         console.error('Error loading stats:', error);
+        // Fallback to old API if new one fails
+        try {
+          const allImages = await imageService.getImagesByType('all');
+          const stats = {
+            total: allImages.length,
+            student: allImages.filter(img => img.ImageType === 'student').length,
+            teacher: allImages.filter(img => img.ImageType === 'teacher').length,
+            school: allImages.filter(img => img.ImageType === 'school').length,
+            event: allImages.filter(img => img.ImageType === 'event').length,
+            notice: allImages.filter(img => img.ImageType === 'notice').length
+          };
+          setStats(stats);
+        } catch (fallbackError) {
+          console.error('Error loading stats with fallback:', fallbackError);
+        }
       } finally {
         setLoading(false);
       }
@@ -116,7 +131,7 @@ const AdminImageGallery = () => {
         </div>
         
         <div className="admin-gallery-container">
-          <ImageGallery />
+          <EnhancedImageGallery />
         </div>
       </div>
     </div>

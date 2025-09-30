@@ -199,7 +199,9 @@ const getResultsBySubject = async (subjectId) => {
 // Add new result with validation
 const addResult = async (resultData) => {
   try {
+    console.log('🔍 Model addResult called with:', resultData);
     const { StudentID, ExamID, SubjectID, ClassID, MarksObtained } = resultData;
+    console.log('🔍 Extracted values:', { StudentID, ExamID, SubjectID, ClassID, MarksObtained });
     
     // Validate required fields
     if (!StudentID || !ExamID || !SubjectID || !ClassID || MarksObtained === undefined || MarksObtained === null) {
@@ -224,26 +226,32 @@ const addResult = async (resultData) => {
     `, [StudentID, ClassID]);
 
     if (studentCheck.length === 0) {
+      console.log('❌ Student not found for StudentID:', StudentID, 'ClassID:', ClassID);
       throw new Error("Student not found or does not belong to the specified class");
     }
+    console.log('✅ Student found:', studentCheck[0]);
 
-    // Check if exam exists and belongs to the specified class
+    // Check if exam exists (remove class restriction for now)
     const [examCheck] = await db.query(`
-      SELECT ExamID, ExamName, ExamType FROM Exams WHERE ExamID = ? AND ClassID = ?
-    `, [ExamID, ClassID]);
+      SELECT ExamID, ExamName, ExamType, ClassID FROM Exams WHERE ExamID = ?
+    `, [ExamID]);
 
     if (examCheck.length === 0) {
-      throw new Error("Exam not found or does not belong to the specified class");
+      console.log('❌ Exam not found for ExamID:', ExamID);
+      throw new Error("Exam not found");
     }
+    console.log('✅ Exam found:', examCheck[0]);
 
-    // Check if subject exists and belongs to the specified class
+    // Check if subject exists (remove class restriction for now)  
     const [subjectCheck] = await db.query(`
-      SELECT SubjectID, SubjectName FROM Subjects WHERE SubjectID = ? AND ClassID = ?
-    `, [SubjectID, ClassID]);
+      SELECT SubjectID, SubjectName, ClassID FROM Subjects WHERE SubjectID = ?
+    `, [SubjectID]);
 
     if (subjectCheck.length === 0) {
-      throw new Error("Subject not found or does not belong to the specified class");
+      console.log('❌ Subject not found for SubjectID:', SubjectID);
+      throw new Error("Subject not found");
     }
+    console.log('✅ Subject found:', subjectCheck[0]);
 
     // Check if result already exists
     const exists = await checkResultExists(StudentID, ExamID, SubjectID);
@@ -255,14 +263,18 @@ const addResult = async (resultData) => {
     }
 
     // Insert the result
+    console.log('🔄 Executing INSERT query...');
     const [result] = await db.query(`
       INSERT INTO Results (StudentID, ExamID, SubjectID, ClassID, MarksObtained)
       VALUES (?, ?, ?, ?, ?)
     `, [StudentID, ExamID, SubjectID, ClassID, MarksObtained]);
 
+    console.log('📊 INSERT result:', result);
+
     return {
+      affectedRows: result.affectedRows,
+      insertId: result.insertId,
       success: true,
-      resultId: result.insertId,
       message: "Result added successfully",
       data: {
         StudentID,
@@ -667,6 +679,27 @@ const checkResultExists = async (studentId, examId, subjectId) => {
   }
 };
 
+// Find a result row by composite keys (StudentID + ExamID + SubjectID)
+const findResultByComposite = async (studentId, examId, subjectId) => {
+  try {
+    const [rows] = await db.query(`
+      SELECT 
+        r.ResultID,
+        r.StudentID,
+        r.ExamID,
+        r.SubjectID,
+        r.ClassID,
+        r.MarksObtained
+      FROM Results r
+      WHERE r.StudentID = ? AND r.ExamID = ? AND r.SubjectID = ?
+      LIMIT 1
+    `, [studentId, examId, subjectId]);
+    return rows[0] || null;
+  } catch (err) {
+    throw new Error("Error finding result by composite keys: " + err.message);
+  }
+};
+
 // Get student result summary (all subjects for a specific exam) with complete information
 const getStudentResultSummary = async (studentId, examId) => {
   try {
@@ -1003,10 +1036,8 @@ export {
   addResult,
   addResultByStudentDetails,
   advancedSearchResults,
-  checkResultExists,
-  deleteResult,
-  deleteResultsByExam,
-  getAllResults,
+  checkResultExists, deleteResult,
+  deleteResultsByExam, findResultByComposite, getAllResults,
   getResultById,
   getResultCount,
   getResultsByClass,

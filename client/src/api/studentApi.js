@@ -137,8 +137,11 @@ const studentAPI = {
   // Get students by class and section - FIXED TO MATCH YOUR ROUTE
   getStudentsByClassAndSection: async (className, sectionName) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/class/${encodeURIComponent(className)}/section/${encodeURIComponent(sectionName)}`);
+      const url = `${API_BASE_URL}/class/${encodeURIComponent(className)}/section/${encodeURIComponent(sectionName)}`;
+      console.log('API URL:', url); // Debug log
+      const response = await fetch(url);
       if (!response.ok) {
+        console.log('API Response status:', response.status); // Debug log
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const data = await response.json();

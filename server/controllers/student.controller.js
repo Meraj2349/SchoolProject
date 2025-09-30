@@ -1,15 +1,15 @@
 import {
-    addStudent,
-    checkRollNumberExists,
-    deleteStudent,
-    getAllClasses,
-    getAllStudents,
-    getStudentById,
-    getStudentCount,
-    getStudentsByClass,
-    getStudentsByClassAndSection,
-    searchStudents,
-    updateStudent
+  addStudent,
+  checkRollNumberExists,
+  deleteStudent,
+  getAllClasses,
+  getAllStudents,
+  getStudentById,
+  getStudentCount,
+  getStudentsByClass,
+  getStudentsByClassAndSection,
+  searchStudents,
+  updateStudent
 } from "../models/student.model.js";
 
 // Utility function for validation
@@ -276,20 +276,22 @@ const getStudentsByClassController = async (req, res) => {
 // Get students by class and section
 const getStudentsByClassAndSectionController = async (req, res) => {
   try {
-    const { className, section } = req.params;
+    const { className, sectionName } = req.params;
+    console.log('Received params:', { className, sectionName }); // Debug log
 
-    if (!className || !section) {
+    if (!className || !sectionName) {
+      console.log('Missing params:', { className, sectionName }); // Debug log
       return res.status(400).json({
         success: false,
         message: "Both class name and section are required",
       });
     }
 
-    const students = await getStudentsByClassAndSection(className, section);
+    const students = await getStudentsByClassAndSection(className, sectionName);
 
     res.status(200).json({
       success: true,
-      message: `Students from class ${className}, section ${section} retrieved successfully`,
+      message: `Students from class ${className}, section ${sectionName} retrieved successfully`,
       data: students,
       count: students.length,
     });
@@ -351,5 +353,6 @@ const getAllClassesController = async (req, res) => {
 };
 
 export {
-    addStudentController, checkRollNumberController, deleteStudentController, getAllClassesController, getAllStudentsController, getStudentByIdController, getStudentCountController, getStudentsByClassAndSectionController, getStudentsByClassController, searchStudentsController, updateStudentController
+  addStudentController, checkRollNumberController, deleteStudentController, getAllClassesController, getAllStudentsController, getStudentByIdController, getStudentCountController, getStudentsByClassAndSectionController, getStudentsByClassController, searchStudentsController, updateStudentController
 };
+

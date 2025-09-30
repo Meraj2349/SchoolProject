@@ -108,3 +108,52 @@ export const getAllClasses = async () => {
     throw error;
   }
 };
+
+// Get subjects by class ID
+export const getSubjectsByClass = async (classId) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/class/${classId}`, {
+      headers: getAuthHeaders(),
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch subjects by class");
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Error fetching subjects by class:", error);
+    throw error;
+  }
+};
+
+// Get subjects by class name
+export const getSubjectsByClassName = async (className) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/by-class-name/${encodeURIComponent(className)}`, {
+      headers: getAuthHeaders(),
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch subjects by class name");
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Error fetching subjects by class name:", error);
+    throw error;
+  }
+};
+
+// Default export object for easier imports
+const subjectsApi = {
+  getAllSubjects,
+  addSubject,
+  updateSubject,
+  deleteSubject,
+  getAllClasses,
+  getSubjectsByClass,
+  getSubjectsByClassName
+};
+
+export default subjectsApi;

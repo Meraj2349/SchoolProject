@@ -18,6 +18,7 @@ const GallaryPage = () => {
 
   const categories = [
     { value: "all", label: "All Images", icon: "🖼️" },
+    { value: "general", label: "General", icon: "📸" },
     { value: "school", label: "School Campus", icon: "🏫" },
     { value: "student", label: "Student Life", icon: "🎓" },
     { value: "teacher", label: "Faculty", icon: "👨‍🏫" },
@@ -37,7 +38,8 @@ const GallaryPage = () => {
     try {
       setLoading(true);
       setError("");
-      const data = await imageService.getImagesByType("all");
+      // Use getImagesWithDetails to get student/teacher information
+      const data = await imageService.getImagesWithDetails();
       setImages(data);
     } catch (err) {
       setError("Failed to load images. Please try again later.");
@@ -46,6 +48,8 @@ const GallaryPage = () => {
       setLoading(false);
     }
   };
+
+
 
   const filterImages = () => {
     if (selectedCategory === "all") {
@@ -118,29 +122,11 @@ const GallaryPage = () => {
       <Navbar />
       <LatestUpdatesNotice />
 
-      {/* Hero Section */}
-      <section className="gallery-hero">
-        <div className="hero-overlay">
-          <div className="hero-content">
-            <motion.h1
-              initial={{ opacity: 0, y: -30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8 }}
-              className="hero-title"
-            >
-              School Gallery
-            </motion.h1>
-            <motion.p
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.2 }}
-              className="hero-subtitle"
-            >
-              Capturing moments, preserving memories of our educational journey
-            </motion.p>
-          </div>
+      {/* Simple Header */}
+      <section className="gallery-header">
+        <div className="container">
+          <h1 className="gallery-title">Gallery</h1>
         </div>
-        <div className="hero-background"></div>
       </section>
 
       {/* Main Content */}
@@ -292,6 +278,20 @@ const GallaryPage = () => {
                             {image.Description}
                           </p>
                         )}
+                        {(image.StudentFirstName || image.TeacherFirstName) && (
+                          <div className="image-associations">
+                            {image.StudentFirstName && (
+                              <p className="association-tag">
+                                🎓 {image.StudentFirstName} {image.StudentLastName}
+                              </p>
+                            )}
+                            {image.TeacherFirstName && (
+                              <p className="association-tag">
+                                👨‍🏫 {image.TeacherFirstName} {image.TeacherLastName}
+                              </p>
+                            )}
+                          </div>
+                        )}
                       </div>
                     </motion.div>
                   ))}
@@ -360,21 +360,51 @@ const GallaryPage = () => {
                       ?.label || selectedImage.ImageType}
                   </span>
                 </div>
+                
                 {selectedImage.Description && (
                   <p className="lightbox-description">
                     {selectedImage.Description}
                   </p>
                 )}
+                
+                {(selectedImage.StudentFirstName || selectedImage.TeacherFirstName) && (
+                  <div className="lightbox-associations">
+                    {selectedImage.StudentFirstName && (
+                      <p className="association-info">
+                        <span className="association-label">👨‍🎓 Student:</span>
+                        {selectedImage.StudentFirstName} {selectedImage.StudentLastName}
+                        {selectedImage.RollNumber && (
+                          <span className="roll-number"> (Roll: {selectedImage.RollNumber})</span>
+                        )}
+                      </p>
+                    )}
+                    {selectedImage.TeacherFirstName && (
+                      <p className="association-info">
+                        <span className="association-label">👨‍🏫 Teacher:</span>
+                        {selectedImage.TeacherFirstName} {selectedImage.TeacherLastName}
+                        {selectedImage.Subject && (
+                          <span className="subject"> ({selectedImage.Subject})</span>
+                        )}
+                      </p>
+                    )}
+                  </div>
+                )}
+                
                 <div className="lightbox-meta">
-                  <span>
-                    {currentImageIndex + 1} of {filteredImages.length}
-                  </span>
+                  <span>{currentImageIndex + 1} of {filteredImages.length}</span>
+                  {selectedImage.UploadDate && (
+                    <span className="upload-date">
+                      📅 {new Date(selectedImage.UploadDate).toLocaleDateString()}
+                    </span>
+                  )}
                 </div>
               </div>
             </motion.div>
           </div>
         </motion.div>
       )}
+
+
 
       <Footer />
     </div>

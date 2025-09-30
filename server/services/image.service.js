@@ -1,4 +1,4 @@
-import { uploadToCloudinary, deleteFromCloudinary } from "../config/cloudinary.config.js";
+import { deleteFromCloudinary, uploadToCloudinary } from "../config/cloudinary.config.js";
 import * as ImageModel from "../models/image.model.js";
 
 export const uploadImage = async (file, imageData) => {
@@ -8,7 +8,10 @@ export const uploadImage = async (file, imageData) => {
     ImagePath: result.secure_url,
     PublicID: result.public_id,
     Description: imageData.Description,
-    ImageType: imageData.ImageType
+    ImageType: imageData.ImageType,
+    StudentID: imageData.StudentID,
+    TeacherID: imageData.TeacherID,
+    AssociatedID: imageData.AssociatedID
   });
 
   return image;
@@ -30,7 +33,10 @@ export const replaceImage = async (id, file) => {
     ImagePath: result.secure_url,
     PublicID: result.public_id,
     Description: existingImage.Description,
-    ImageType: existingImage.ImageType
+    ImageType: existingImage.ImageType,
+    StudentID: existingImage.StudentID,
+    TeacherID: existingImage.TeacherID,
+    AssociatedID: existingImage.AssociatedID
   });
 
   // Delete old image from Cloudinary
@@ -55,4 +61,16 @@ export const getImagesByType = async (type) => {
 
 export const getImageDetails = async (id) => {
   return await ImageModel.getImageById(id);
+};
+
+export const getImagesByStudentId = async (studentId) => {
+  return await ImageModel.getImagesByStudentId(studentId);
+};
+
+export const getImagesByTeacherId = async (teacherId) => {
+  return await ImageModel.getImagesByTeacherId(teacherId);
+};
+
+export const getImagesWithDetails = async (type) => {
+  return await ImageModel.getImagesWithDetails(type);
 };

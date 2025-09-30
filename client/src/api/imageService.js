@@ -107,6 +107,55 @@ const imageService = {
       }
     }
   },
+
+  // Get images by student ID
+  getImagesByStudent: async (studentId) => {
+    try {
+      const response = await axios.get(`${API_URL}/student/${studentId}`);
+      return response.data;
+    } catch (error) {
+      if (error.response) {
+        throw new Error(error.response.data.message || 'Failed to fetch student images');
+      } else if (error.request) {
+        throw new Error('Network error - please check your connection');
+      } else {
+        throw new Error('Failed to fetch student images');
+      }
+    }
+  },
+
+  // Get images by teacher ID
+  getImagesByTeacher: async (teacherId) => {
+    try {
+      const response = await axios.get(`${API_URL}/teacher/${teacherId}`);
+      return response.data;
+    } catch (error) {
+      if (error.response) {
+        throw new Error(error.response.data.message || 'Failed to fetch teacher images');
+      } else if (error.request) {
+        throw new Error('Network error - please check your connection');
+      } else {
+        throw new Error('Failed to fetch teacher images');
+      }
+    }
+  },
+
+  // Get all images with student/teacher details
+  getImagesWithDetails: async (type = null) => {
+    try {
+      const url = type ? `${API_URL}/details?type=${type}` : `${API_URL}/details`;
+      const response = await axios.get(url);
+      return response.data;
+    } catch (error) {
+      if (error.response) {
+        throw new Error(error.response.data.message || 'Failed to fetch images with details');
+      } else if (error.request) {
+        throw new Error('Network error - please check your connection');
+      } else {
+        throw new Error('Failed to fetch images with details');
+      }
+    }
+  },
 };
 
 export default imageService;

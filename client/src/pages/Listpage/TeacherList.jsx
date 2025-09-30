@@ -1,13 +1,16 @@
 // components/TeachersPage.js
-import React, { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import imageService from '../../api/imageService';
 import teacherApi from '../../api/teacherApi';
 import '../../assets/styles/listcss/teacherslist.css';
-import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
+import LottieLoader from '../../components/LottieLoader';
+import Navbar from '../../components/Navbar';
 import LatestUpdatesNotice from './LatestUpdatesNotice';
 
 const TeachersPage = () => {
   const [teachers, setTeachers] = useState([]);
+  const [teacherImages, setTeacherImages] = useState({});
   const [filteredTeachers, setFilteredTeachers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -28,10 +31,35 @@ const TeachersPage = () => {
     try {
       const data = await teacherApi.getAllTeachers();
       setTeachers(data);
+      // Fetch images for each teacher
+      await fetchTeacherImages(data);
     } catch (err) {
       setError('Failed to fetch teachers: ' + (err.error || err.message || 'Unknown error'));
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchTeacherImages = async (teachersList) => {
+    try {
+      const imagePromises = teachersList.map(async (teacher) => {
+        try {
+          const images = await imageService.getImagesByTeacher(teacher.TeacherID);
+          return { teacherId: teacher.TeacherID, images };
+        } catch (err) {
+          console.warn(`No images found for teacher ${teacher.TeacherID}`);
+          return { teacherId: teacher.TeacherID, images: [] };
+        }
+      });
+      
+      const results = await Promise.all(imagePromises);
+      const imagesMap = {};
+      results.forEach(({ teacherId, images }) => {
+        imagesMap[teacherId] = images;
+      });
+      setTeacherImages(imagesMap);
+    } catch (error) {
+      console.error('Error fetching teacher images:', error);
     }
   };
 
@@ -91,10 +119,11 @@ const TeachersPage = () => {
   if (loading) {
     return (
       <div className="teachers-page">
-        <div className="loading-spinner">
-          <div className="spinner"></div>
-          <p>Loading teachers...</p>
-        </div>
+        <LottieLoader 
+          size="medium"
+          text="Loading teachers..."
+          className="teachers-loading"
+        />
       </div>
     );
   }
@@ -116,7 +145,6 @@ const TeachersPage = () => {
       <LatestUpdatesNotice />
       <div className="page-header">
         <h1>Our Teachers</h1>
-        <p className="page-subtitle">Meet our dedicated teaching staff</p>
       </div>
 
       <div className="search-section">
@@ -164,19 +192,32 @@ const TeachersPage = () => {
       ) : (
         <div className="teachers-grid">
           {filteredTeachers.map(teacher => {
+            const teacherImage = teacherImages[teacher.TeacherID]?.[0]; // Get first image
             const avatar = generateAvatar(teacher.FirstName, teacher.LastName);
             return (
               <div key={teacher.TeacherID} className="teacher-card">
                 <div className="card-header">
-                  <div 
-                    className="teacher-avatar"
-                    style={{ backgroundColor: avatar.color }}
-                  >
-                    {avatar.initials}
-                  </div>
-                  <div className="teacher-status">
-                    <span className="status-dot"></span>
-                    Active
+                  <div className="teacher-image-container">
+                    {teacherImage ? (
+                      <img 
+                        src={teacherImage.ImagePath} 
+                        alt={`${teacher.FirstName} ${teacher.LastName}`}
+                        className="teacher-profile-image"
+                        onError={(e) => {
+                          e.target.style.display = 'none';
+                          e.target.nextSibling.style.display = 'flex';
+                        }}
+                      />
+                    ) : null}
+                    <div 
+                      className="teacher-avatar-fallback"
+                      style={{ 
+                        backgroundColor: avatar.color,
+                        display: teacherImage ? 'none' : 'flex'
+                      }}
+                    >
+                      {avatar.initials}
+                    </div>
                   </div>
                 </div>
 

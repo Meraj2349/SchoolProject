@@ -18,10 +18,12 @@ import ClassesPage from "../pages/admin/class/ClassesPage";
 import AdminImageGallery from "../pages/admin/gallery/AdminImageGallery";
 import MessagesPage from "../pages/admin/messages/MessagesPage";
 import NoticesPage from "../pages/admin/notices/noticespage";
+import StudentResultEntry from "../pages/admin/results/StudentResultEntry";
 import StudentPage from "../pages/admin/studentList/StudentPage";
 import SubjectsPage from "../pages/admin/subject/SubjectsPage";
 import TeacherPage from "../pages/admin/teacherList/TeacherPage";
 import UpdateEmailPassword from "../pages/admin/updateEmaillPassword/UpdateEmailPassword";
+import ResultsList from "../pages/Listpage/ResultsList";
 
 const AppRoutes = () => {
   return (
@@ -31,6 +33,7 @@ const AppRoutes = () => {
       <Route path="/students" element={<StudentListPage />} />
       <Route path="/teachers" element={<TeacherListPage />} />
       <Route path="/attendance" element={<AttendancePage />} />
+      <Route path="/result" element={<ResultsList />} />
       <Route path="/about" element={<AboutPage />} />
       <Route path="/gallery" element={<GallaryPage />} />
       <Route path="/imageGallary" element={<GallaryPage />} />
@@ -52,6 +55,7 @@ const AppRoutes = () => {
         <Route path="attendance/grid" element={<AttendancePageGrid />} />
         <Route path="attendance/reports" element={<AttendanceReports />} />
         <Route path="gallery" element={<AdminImageGallery />} />
+        <Route path="results" element={<StudentResultEntry />} />
         <Route path="*" element={<NotFound />} />
         {/* Protected routes */}
         <Route path="*" element={<NotFound />} />

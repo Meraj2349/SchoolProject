@@ -1,10 +1,65 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import attendanceAPI from "../../api/attendanceApi";
+import imageService from "../../api/imageService";
 import studentAPI from "../../api/studentApi";
 import "../../assets/styles/StudentListpage.css";
 import Footer from "../../components/Footer";
 import Navbar from "../../components/Navbar";
 import LatestUpdatesNotice from "./LatestUpdatesNotice";
+
+const StudentImage = ({ studentId, firstName, lastName }) => {
+  const [imageUrl, setImageUrl] = useState(null);
+
+  useEffect(() => {
+    const fetchImage = async () => {
+      try {
+        console.log('Fetching image for student ID:', studentId);
+        const response = await imageService.getImagesByStudent(studentId);
+        console.log('Image API response:', response);
+        if (response && Array.isArray(response) && response.length > 0) {
+          console.log('Setting image URL:', response[0].ImagePath);
+          setImageUrl(response[0].ImagePath);
+        } else {
+          console.log('No image found for student:', studentId);
+        }
+      } catch (error) {
+        console.log('Error fetching image for student:', studentId, error);
+      }
+    };
+    if (studentId) fetchImage();
+  }, [studentId]);
+
+  return imageUrl ? (
+    <img 
+      src={imageUrl} 
+      alt={`${firstName} ${lastName}`}
+      style={{
+        width: "60px", 
+        height: "60px", 
+        objectFit: "cover", 
+        borderRadius: "50%",
+        border: "2px solid #e5e7eb",
+        display: "block"
+      }}
+      onError={() => setImageUrl(null)}
+    />
+  ) : (
+    <div className="avatar-placeholder" style={{
+      width: "60px",
+      height: "60px",
+      borderRadius: "50%",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      backgroundColor: "#f3f4f6",
+      color: "#6b7280",
+      fontSize: "1.2rem",
+      fontWeight: "bold"
+    }}>
+      {firstName?.charAt(0)}{lastName?.charAt(0)}
+    </div>
+  );
+};
 
 const StudentSearch = () => {
   const [searchFilters, setSearchFilters] = useState({
@@ -293,14 +348,16 @@ const StudentSearch = () => {
           </div>
 
           {students.length > 0 ? (
-            <div className="students-grid">
+            <div className="students-grid" style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
               {students.map((student) => (
-                <div key={student.StudentID} className="student-profile-card">
+                <div key={student.StudentID} className="student-profile-card" style={{ width: "100%", maxWidth: "700px", margin: "0 auto 1rem" }}>
                   <div className="profile-header">
                     <div className="profile-avatar">
-                      <div className="avatar-placeholder">
-                        {student.FirstName?.charAt(0)}{student.LastName?.charAt(0)}
-                      </div>
+                      <StudentImage 
+                        studentId={student.StudentID}
+                        firstName={student.FirstName}
+                        lastName={student.LastName}
+                      />
                     </div>
                     <div className="profile-info">
                       <h3 className="student-name">
@@ -310,6 +367,7 @@ const StudentSearch = () => {
                         Class {student.ClassName} - Section {student.Section}
                       </p>
                       <p className="student-roll">Roll Number: {student.RollNumber}</p>
+                      <p className="student-id">Student ID: {student.StudentID}</p>
                     </div>
                   </div>
 
@@ -371,35 +429,9 @@ const StudentSearch = () => {
                     </div>
                   </div>
 
-                  <div className="profile-actions">
-                    <button 
-                      className="action-btn view-profile"
-                      onClick={() => handleViewProfile(student)}
-                    >
-                      <span className="btn-icon">👁️</span>
-                      View Full Profile
-                    </button>
-                    <button 
-                      className="action-btn view-attendance"
-                      onClick={() => handleViewAttendance(student)}
-                    >
-                      <span className="btn-icon">📊</span>
-                      Attendance
-                    </button>
-                    <button 
-                      className="action-btn view-results"
-                      onClick={() => handleViewResults(student)}
-                    >
-                      <span className="btn-icon">📈</span>
-                      Results
-                    </button>
-                    <button 
-                      className="action-btn view-subjects"
-                      onClick={() => handleViewSubjects(student)}
-                    >
-                      <span className="btn-icon">📚</span>
-                      Subjects
-                    </button>
+                  <div className="profile-actions" style={{ display: "flex", justifyContent: "center", gap: "1rem" }}>
+            
+                   
                   </div>
                 </div>
               ))}

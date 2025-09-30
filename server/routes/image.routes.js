@@ -8,7 +8,10 @@ const router = express.Router();
 router.post("/", upload.single("image"), ImageController.uploadImage);
 
 // Read
+router.get("/details", ImageController.getAllImagesWithDetails); // Get all images with student/teacher details
 router.get("/type/:type", ImageController.getImagesByType);
+router.get("/student/:studentId", ImageController.getImagesByStudent); // Get images by student ID
+router.get("/teacher/:teacherId", ImageController.getImagesByTeacher); // Get images by teacher ID
 router.get("/:id", ImageController.getImage);
 
 // Update

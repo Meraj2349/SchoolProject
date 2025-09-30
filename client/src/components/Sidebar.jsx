@@ -101,14 +101,14 @@ const Sidebar = () => {
                   label: "Sponsors",
                 },
                 {
-                  path: "/admin/importantDates",
+                  path: "/admin/latestNews",
                   icon: <FaCalendarCheck />,
-                  label: "Important Dates",
+                  label: "Latest News",
                 },
                 {
-                  path: "/admin/importantUpdate",
+                  path: "/admin/events/announcements",
                   icon: <FaNoteSticky />,
-                  label: "Important Update",
+                  label: "Event Announcements",
                 },
                 {
                   path: "/admin/schedule",
@@ -139,6 +139,16 @@ const Sidebar = () => {
                   path: "/admin/subject",
                   icon: <FaEnvelope />,
                   label: "Subject",
+                },
+                {
+                  path: "/admin/results",
+                  icon: <FaClipboardList />,
+                  label: "Results",
+                },
+                {
+                  path: "/admin/exams",
+                  icon: <FaClipboardList />,
+                  label: "Exams",
                 },
                 {
                   path: "/admin/attendance",

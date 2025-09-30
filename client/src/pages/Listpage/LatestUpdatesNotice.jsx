@@ -1,6 +1,7 @@
 import { Bell, ChevronLeft, ChevronRight, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import "../../assets/styles/listcss/noticlist.css";
+import LottieLoader from "../../components/LottieLoader";
 
 const LatestUpdatesNotice = () => {
   const [notices, setNotices] = useState([]);
@@ -171,12 +172,12 @@ const LatestUpdatesNotice = () => {
   // Loading state
   if (loading) {
     return (
-      <div className="loading-container">
-        <div className="loading-content">
-          <div className="loading-spinner"></div>
-          <span className="loading-text">Loading updates...</span>
-        </div>
-      </div>
+      <LottieLoader
+        size="small"
+        text="Loading updates..."
+        className="notice-loading"
+        type="dots"
+      />
     );
   }
 
@@ -206,9 +207,6 @@ const LatestUpdatesNotice = () => {
 
   return (
     <div className="latest-updates-container">
-      {/* Background animation */}
-      <div className="background-animation"></div>
-
       <div className="content-wrapper">
         <div className="content-container">
           {/* Left side - Icon and Latest Updates label */}
