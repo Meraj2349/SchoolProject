@@ -6,14 +6,14 @@
 }
 
 /* Header Styles - Matching StudentList */
-.search-header {
+.attendance-search-container .search-header {
   text-align: center;
   margin-bottom: 30px;
   padding: 20px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
   border-radius: 12px;
   color: white;
-  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3) !important;
 }
 
 .search-title {
@@ -118,10 +118,10 @@
   background-color: #fff;
 }
 
-.form-input:focus {
+.attendance-search-container .form-input:focus {
   outline: none;
-  border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  border-color: #10b981 !important;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1) !important;
   transform: translateY(-1px);
 }
 
@@ -149,45 +149,54 @@
 }
 
 /* Tab Navigation */
-.tab-navigation {
-  display: flex;
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  margin-bottom: 25px;
-  overflow: hidden;
+.attendance-search-container .tab-navigation {
+  display: flex !important;
+  background: white !important;
+  border-radius: 12px !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
+  margin-bottom: 25px !important;
+  overflow: hidden !important;
+  border: 1px solid #e5e7eb !important;
 }
 
-.tab-btn {
+.attendance-search-container .tab-navigation .tab-btn {
   flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
   padding: 15px 20px;
-  background: transparent;
-  border: none;
-  font-weight: 600;
-  color: #64748b;
+  background: transparent !important;
+  border: none !important;
+  font-weight: 600 !important;
+  color: #6b7280 !important;
   cursor: pointer;
   transition: all 0.3s ease;
-  border-bottom: 3px solid transparent;
+  border-bottom: 3px solid transparent !important;
+  font-size: 0.95rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
-.tab-btn:hover {
-  background-color: #f1f5f9;
-  color: #475569;
+.attendance-search-container .tab-navigation .tab-btn:hover {
+  background-color: #f0fdf4 !important;
+  color: #059669 !important;
+  transform: translateY(-1px);
 }
 
-.tab-btn.active {
-  background-color: #e0f2fe;
-  color: #0891b2;
-  border-bottom-color: #0891b2;
+.attendance-search-container .tab-navigation .tab-btn.active {
+  background-color: #dcfce7 !important;
+  color: #047857 !important;
+  border-bottom-color: #10b981 !important;
+  font-weight: 700 !important;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.2) !important;
 }
 
-.tab-icon {
-  width: 20px;
-  height: 20px;
+.attendance-search-container .tab-navigation .tab-btn .tab-icon {
+  width: 20px !important;
+  height: 20px !important;
+  flex-shrink: 0 !important;
+  color: inherit !important;
 }
 
 /* Button Styles - Matching StudentList */
@@ -255,21 +264,21 @@
   box-shadow: none;
 }
 
-.btn-primary {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+.attendance-search-container .btn-primary {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+  color: white !important;
+  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3) !important;
 }
 
 .btn-primary:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4) !important;
 }
 
-.btn-success {
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-  color: white;
-  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+.attendance-search-container .btn-success {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+  color: white !important;
+  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3) !important;
 }
 
 .btn-success:hover:not(:disabled) {
@@ -278,14 +287,36 @@
 }
 
 .btn-reset {
-  background: linear-gradient(135deg, #6c757d, #495057);
-  color: white;
-  box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
+  background: linear-gradient(135deg, #6b7280, #374151) !important;
+  color: white !important;
+  box-shadow: 0 4px 15px rgba(107, 114, 128, 0.3) !important;
 }
 
 .btn-reset:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(108, 117, 125, 0.4);
+  box-shadow: 0 6px 20px rgba(107, 114, 128, 0.4) !important;
+}
+
+.attendance-search-container .btn-print {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+  color: white !important;
+  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3) !important;
+}
+
+.btn-print:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4) !important;
+}
+
+.attendance-search-container .btn-download {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+  color: white !important;
+  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3) !important;
+}
+
+.btn-download:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4) !important;
 }
 
 .btn-icon {
@@ -337,7 +368,7 @@
 }
 
 .form-section h3.section-title {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
   background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -394,8 +425,8 @@
 
 .form-input:focus {
   outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1), 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-color: #10b981 !important;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1), 0 4px 12px rgba(0, 0, 0, 0.1) !important;
   transform: translateY(-1px);
 }
 
@@ -451,15 +482,15 @@
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #3b82f6, #2563eb);
-  color: white;
-  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+  background: linear-gradient(135deg, #10b981, #059669) !important;
+  color: white !important;
+  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3) !important;
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  background: linear-gradient(135deg, #059669, #047857) !important;
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
+  box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4) !important;
 }
 
 .btn-success {
@@ -561,8 +592,8 @@
 }
 
 .results-count {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+  color: white !important;
   padding: 8px 16px;
   border-radius: 20px;
   font-size: 0.9rem;
@@ -1521,4 +1552,50 @@
   justify-content: center;
   margin: 0 auto 20px auto;
   font-size: 2.5rem;
+}
+
+/* High Specificity Overrides - To Prevent CSS Conflicts */
+.attendance-search-container {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif !important;
+  background-color: #f8f9fa !important;
+  min-height: 100vh !important;
+}
+
+.attendance-search-container * {
+  box-sizing: border-box !important;
+}
+
+/* Force tab styles with maximum specificity */
+body .attendance-search-container .tab-navigation .tab-btn {
+  background: transparent !important;
+  color: #6b7280 !important;
+  border: none !important;
+  border-bottom: 3px solid transparent !important;
+}
+
+body .attendance-search-container .tab-navigation .tab-btn:hover {
+  background-color: #f0fdf4 !important;
+  color: #059669 !important;
+}
+
+body .attendance-search-container .tab-navigation .tab-btn.active {
+  background-color: #dcfce7 !important;
+  color: #047857 !important;
+  border-bottom-color: #10b981 !important;
+}
+
+/* Force button styles with maximum specificity */
+body .attendance-search-container .btn-primary,
+body .attendance-search-container .btn-success,
+body .attendance-search-container .btn-print,
+body .attendance-search-container .btn-download {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+  color: white !important;
+  border: none !important;
+}
+
+body .attendance-search-container .btn-reset {
+  background: linear-gradient(135deg, #6b7280, #374151) !important;
+  color: white !important;
+  border: none !important;
 }

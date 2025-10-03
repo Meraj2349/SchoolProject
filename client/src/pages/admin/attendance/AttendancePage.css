@@ -3,13 +3,29 @@
   display: flex;
   min-height: 100vh;
   background-color: #f8f9fa;
+  width: 100%;
+  position: relative;
+}
+
+/* Debug styles - ensure content is visible */
+.attendance-page * {
+  box-sizing: border-box;
+}
+
+/* Ensure all major containers are visible */
+.attendance-container > * {
+  opacity: 1;
+  visibility: visible;
 }
 
 .attendance-container {
   flex: 1;
   padding: 20px;
-  margin-left: 280px; /* Match sidebar width */
-  max-width: calc(100% - 280px);
+  margin-left: 250px; /* Match sidebar width */
+  max-width: calc(100% - 250px);
+  min-height: 100vh;
+  background: #f8f9fa;
+  overflow-x: auto;
 }
 
 .page-header {
@@ -32,6 +48,10 @@
   padding: 50px;
   font-size: 1.2rem;
   color: #7f8c8d;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin: 20px 0;
 }
 
 .error-message {
@@ -41,15 +61,26 @@
   border-radius: 8px;
   margin-bottom: 20px;
   border-left: 4px solid #c33;
+  width: 100%;
+  box-sizing: border-box;
+  display: block;
+  position: relative;
+  z-index: 2;
 }
 
 /* Form Styles */
 .form-container {
-  background: white;
-  padding: 30px;
-  border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  margin-bottom: 30px;
+  background: white !important;
+  padding: 30px !important;
+  border-radius: 12px !important;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1) !important;
+  margin-bottom: 30px !important;
+  overflow: visible !important;
+  min-height: auto !important;
+  width: 100% !important;
+  position: relative !important;
+  z-index: 1 !important;
+  display: block !important;
 }
 
 .form-container h2 {
@@ -59,14 +90,20 @@
 }
 
 .attendance-form {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 20px;
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)) !important;
+  gap: 20px !important;
+  align-items: end !important;
+  width: 100% !important;
+}
+
+.form-row {
+  display: contents;
 }
 
 .form-group {
-  display: flex;
-  flex-direction: column;
+  display: flex !important;
+  flex-direction: column !important;
 }
 
 .form-group label {
@@ -78,11 +115,13 @@
 
 .form-group input,
 .form-group select {
-  padding: 12px;
-  border: 2px solid #ddd;
-  border-radius: 8px;
-  font-size: 1rem;
-  transition: border-color 0.3s ease;
+  padding: 12px !important;
+  border: 2px solid #ddd !important;
+  border-radius: 8px !important;
+  font-size: 1rem !important;
+  transition: border-color 0.3s ease !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
 }
 
 .form-group input:focus,
@@ -93,11 +132,22 @@
 }
 
 .form-actions {
-  grid-column: 1 / -1;
-  display: flex;
-  gap: 15px;
-  justify-content: flex-start;
-  margin-top: 20px;
+  grid-column: 1 / -1 !important;
+  display: flex !important;
+  gap: 15px !important;
+  justify-content: flex-start !important;
+  align-items: center !important;
+  margin-top: 30px !important;
+  padding: 20px 0 !important;
+  border-top: 2px solid #eee !important;
+  flex-wrap: wrap !important;
+  background: #f8f9fa !important;
+  margin-left: -30px !important;
+  margin-right: -30px !important;
+  margin-bottom: -30px !important;
+  padding-left: 30px !important;
+  padding-right: 30px !important;
+  border-radius: 0 0 12px 12px !important;
 }
 
 /* Filter Styles */
@@ -132,37 +182,63 @@
 
 /* Button Styles */
 .btn {
-  padding: 12px 24px;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 1rem;
-  font-weight: 600;
-  transition: all 0.3s ease;
-  text-decoration: none;
-  display: inline-block;
-  text-align: center;
+  padding: 12px 24px !important;
+  border: none !important;
+  border-radius: 8px !important;
+  cursor: pointer !important;
+  font-size: 1rem !important;
+  font-weight: 600 !important;
+  transition: all 0.3s ease !important;
+  text-decoration: none !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  min-height: 44px !important;
+  white-space: nowrap !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
 }
 
 .btn-primary {
   background: linear-gradient(135deg, #3498db, #2980b9);
   color: white;
+  border: 2px solid transparent;
+  position: relative;
+  z-index: 10;
+  min-width: 120px;
 }
 
 .btn-primary:hover {
   background: linear-gradient(135deg, #2980b9, #1f5f99);
   transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(52, 152, 219, 0.3);
+  box-shadow: 0 6px 12px rgba(52, 152, 219, 0.4);
+}
+
+.btn-primary:focus {
+  outline: none;
+  border-color: #3498db;
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
 }
 
 .btn-secondary {
   background: #95a5a6;
   color: white;
+  border: 2px solid transparent;
+  position: relative;
+  z-index: 10;
+  min-width: 100px;
 }
 
 .btn-secondary:hover {
   background: #7f8c8d;
   transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(149, 165, 166, 0.3);
+}
+
+.btn-secondary:focus {
+  outline: none;
+  border-color: #95a5a6;
+  box-shadow: 0 0 0 3px rgba(149, 165, 166, 0.2);
 }
 
 .btn-edit {
@@ -270,7 +346,8 @@
   .attendance-container {
     margin-left: 0;
     max-width: 100%;
-    padding: 10px;
+    padding: 15px;
+    min-height: calc(100vh - 60px);
   }
 
   .page-header {
@@ -285,7 +362,8 @@
   }
 
   .attendance-form {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr !important;
+    display: grid !important;
   }
 
   .filters {
@@ -294,6 +372,17 @@
 
   .form-actions {
     flex-direction: column;
+    align-items: stretch;
+    margin-left: -15px;
+    margin-right: -15px;
+    padding-left: 15px;
+    padding-right: 15px;
+  }
+
+  .form-actions .btn {
+    width: 100%;
+    margin-bottom: 10px;
+    padding: 15px;
   }
 
   .attendance-table {
@@ -362,7 +451,15 @@
 
 @media (max-width: 1024px) {
   .attendance-container {
-    margin-left: 260px; /* Match mobile sidebar width */
-    max-width: calc(100% - 260px);
+    margin-left: 250px; /* Match sidebar width */
+    max-width: calc(100% - 250px);
+  }
+}
+
+@media (max-width: 900px) {
+  .attendance-container {
+    margin-left: 0;
+    max-width: 100%;
+    padding: 15px;
   }
 }

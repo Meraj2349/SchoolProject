@@ -1,13 +1,18 @@
 import Cookies from "js-cookie";
 import { useState } from "react";
 import {
-    FaBell,
-    FaCalendarCheck,
-    FaEnvelope,
-    FaHandshake,
-    FaImage,
+  FaBell,
+  FaCalendarCheck,
+  FaEnvelope,
+  FaHandshake,
+  FaImage,
 } from "react-icons/fa";
-import { FaClipboardList, FaMessage, FaNoteSticky, FaPeopleGroup } from "react-icons/fa6";
+import {
+  FaClipboardList,
+  FaMessage,
+  FaNoteSticky,
+  FaPeopleGroup,
+} from "react-icons/fa6";
 import { FiMenu, FiX } from "react-icons/fi";
 import { RiListCheck, RiTimerLine } from "react-icons/ri";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -151,20 +156,15 @@ const Sidebar = () => {
                   label: "Exams",
                 },
                 {
-                  path: "/admin/attendance",
-                  icon: <FaClipboardList />,
-                  label: "Attendance",
-                },
-                 {
-                  path: "/admin/attendance/grid",
-                  icon: <FaClipboardList />,
-                  label: "Attendance Grid",
+                  path: "/admin/events",
+                  icon: <FaCalendarCheck />,
+                  label: "Events",
                 },
 
                 {
-                  path: "/admin/attendance/reports",
+                  path: "/admin/attendance/grid",
                   icon: <FaClipboardList />,
-                  label: "Attendance Reports",
+                  label: "Attendance Grid",
                 },
                 {
                   path: "/admin/updateEmailPassword",

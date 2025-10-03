@@ -92,72 +92,8 @@ CREATE TABLE
         FOREIGN KEY (ClassID) REFERENCES Classes (ClassID)
     );
 
--- Fee Structure Table
-CREATE TABLE
-    FeeStructure (
-        FeeStructureID INT PRIMARY KEY AUTO_INCREMENT,
-        ClassID INT,
-        FeeType ENUM (
-            'Tuition',
-            'Exam',
-            'Library',
-            'Transport',
-            'Sports',
-            'Lab',
-            'Hostel',
-            'Other'
-        ),
-        Amount DECIMAL(10, 2),
-        AcademicYear YEAR,
-        FOREIGN KEY (ClassID) REFERENCES Classes (ClassID)
-    );
 
--- Fees Payment Table
-CREATE TABLE
-    Fees (
-        FeeID INT PRIMARY KEY AUTO_INCREMENT,
-        StudentID INT,
-        FeeStructureID INT,
-        AmountDue DECIMAL(10, 2),
-        AmountPaid DECIMAL(10, 2),
-        PaymentDate DATE,
-        DueDate DATE,
-        PaymentStatus ENUM ('Paid', 'Pending', 'Overdue'),
-        PaymentMethod ENUM (
-            'Cash',
-            'Bank Transfer',
-            'Credit Card',
-            'Mobile Payment'
-        ),
-        ReceiptNumber VARCHAR(50) UNIQUE,
-        FOREIGN KEY (StudentID) REFERENCES Students (StudentID),
-        FOREIGN KEY (FeeStructureID) REFERENCES FeeStructure (FeeStructureID)
-    );
 
--- Scholarships/Discounts Table
-CREATE TABLE
-    Scholarships (
-        ScholarshipID INT PRIMARY KEY AUTO_INCREMENT,
-        StudentID INT,
-        FeeStructureID INT,
-        DiscountAmount DECIMAL(10, 2),
-        Reason VARCHAR(255),
-        FOREIGN KEY (StudentID) REFERENCES Students (StudentID),
-        FOREIGN KEY (FeeStructureID) REFERENCES FeeStructure (FeeStructureID)
-    );
-
--- Late Payment Fine Table
-CREATE TABLE
-    LatePaymentFines (
-        FineID INT PRIMARY KEY AUTO_INCREMENT,
-        StudentID INT,
-        FeeID INT,
-        FineAmount DECIMAL(10, 2),
-        FineReason VARCHAR(255),
-        FineDate DATE,
-        FOREIGN KEY (StudentID) REFERENCES Students (StudentID),
-        FOREIGN KEY (FeeID) REFERENCES Fees (FeeID)
-    );
 
 --admin
 CREATE TABLE
@@ -203,42 +139,67 @@ CREATE TABLE Images (
     FOREIGN KEY (TeacherID) REFERENCES Teachers (TeacherID) ON DELETE CASCADE
 );
 
--- Teacher Images (connects teachers to images)
-CREATE TABLE
-    TeacherImages (
-        TeacherImageID INT PRIMARY KEY AUTO_INCREMENT,
-        TeacherID INT NOT NULL,
-        ImageID INT NOT NULL,
-        ImageCategory ENUM (
-            'profile',
-            'class_photo',
-            'id_card',
-            'training',
-            'meeting',
-            'event_organization'
-        ) NOT NULL,
-        AcademicYear YEAR,
-        FOREIGN KEY (TeacherID) REFERENCES Teachers (TeacherID),
-        FOREIGN KEY (ImageID) REFERENCES Images (ImageID)
-    );
+-- -- Fee Structure Table
+-- CREATE TABLE
+--     FeeStructure (
+--         FeeStructureID INT PRIMARY KEY AUTO_INCREMENT,
+--         ClassID INT,
+--         FeeType ENUM (
+--             'Tuition',
+--             'Exam',
+--             'Library',
+--             'Transport',
+--             'Sports',
+--             'Lab',
+--             'Hostel',
+--             'Other'
+--         ),
+--         Amount DECIMAL(10, 2),
+--         AcademicYear YEAR,
+--         FOREIGN KEY (ClassID) REFERENCES Classes (ClassID)
+--     );
+-- -- Fees Payment Table
+-- CREATE TABLE
+--     Fees (
+--         FeeID INT PRIMARY KEY AUTO_INCREMENT,
+--         StudentID INT,
+--         FeeStructureID INT,
+--         AmountDue DECIMAL(10, 2),
+--         AmountPaid DECIMAL(10, 2),
+--         PaymentDate DATE,
+--         DueDate DATE,
+--         PaymentStatus ENUM ('Paid', 'Pending', 'Overdue'),
+--         PaymentMethod ENUM (
+--             'Cash',
+--             'Bank Transfer',
+--             'Credit Card',
+--             'Mobile Payment'
+--         ),
+--         ReceiptNumber VARCHAR(50) UNIQUE,
+--         FOREIGN KEY (StudentID) REFERENCES Students (StudentID),
+--         FOREIGN KEY (FeeStructureID) REFERENCES FeeStructure (FeeStructureID)
+--     );
+-- -- Scholarships/Discounts Table
+-- CREATE TABLE
+--     Scholarships (
+--         ScholarshipID INT PRIMARY KEY AUTO_INCREMENT,
+--         StudentID INT,
+--         FeeStructureID INT,
+--         DiscountAmount DECIMAL(10, 2),
+--         Reason VARCHAR(255),
+--         FOREIGN KEY (StudentID) REFERENCES Students (StudentID),
+--         FOREIGN KEY (FeeStructureID) REFERENCES FeeStructure (FeeStructureID)
+--     );
 
--- School Event Images (for general school photos)
-CREATE TABLE
-    SchoolEventImages (
-        EventImageID INT PRIMARY KEY AUTO_INCREMENT,
-        ImageID INT NOT NULL,
-        EventName VARCHAR(100) NOT NULL,
-        EventType ENUM (
-            'sports_day',
-            'annual_function',
-            'cultural_program',
-            'science_fair',
-            'independence_day',
-            'victory_day',
-            'language_day',
-            'other'
-        ) NOT NULL,
-        EventDate DATE,
-        AcademicYear YEAR,
-        FOREIGN KEY (ImageID) REFERENCES Images (ImageID)
-    );
+-- -- Late Payment Fine Table
+-- CREATE TABLE
+--     LatePaymentFines (
+--         FineID INT PRIMARY KEY AUTO_INCREMENT,
+--         StudentID INT,
+--         FeeID INT,
+--         FineAmount DECIMAL(10, 2),
+--         FineReason VARCHAR(255),
+--         FineDate DATE,
+--         FOREIGN KEY (StudentID) REFERENCES Students (StudentID),
+--         FOREIGN KEY (FeeID) REFERENCES Fees (FeeID)
+--     );

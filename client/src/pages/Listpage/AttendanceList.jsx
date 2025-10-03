@@ -1,13 +1,5 @@
 import axios from "axios";
-import {
-  BarChart,
-  Calendar,
-  RefreshCw,
-  Save,
-  Search,
-  Users,
-  X
-} from "lucide-react";
+import { BarChart, Calendar, RefreshCw, Search, Users, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import "../../assets/styles/listcss/attendancelist.css";
 import Footer from "../../components/Footer";
@@ -290,13 +282,13 @@ const AttendancePage = () => {
     }
   };
 
-  // Toggle attendance status for a student
-  const toggleAttendance = (studentId) => {
-    setAttendance((prev) => ({
-      ...prev,
-      [studentId]: prev[studentId] === "Present" ? "Absent" : "Present",
-    }));
-  };
+  // Toggle attendance functionality removed - viewing only
+  // const toggleAttendance = (studentId) => {
+  //   setAttendance((prev) => ({
+  //     ...prev,
+  //     [studentId]: prev[studentId] === "Present" ? "Absent" : "Present",
+  //   }));
+  // };
 
   // Check if attendance exists before creating
   const checkAttendanceExists = async (studentID, classID, classDate) => {
@@ -385,7 +377,7 @@ const AttendancePage = () => {
     <div className="attendance-search-container">
       <Navbar />
       <LatestUpdatesNotice />
-      
+
       <div className="search-header">
         <h1 className="search-title">Attendance Management</h1>
         <p className="search-subtitle">
@@ -394,7 +386,6 @@ const AttendancePage = () => {
       </div>
 
       <div className="search-form-container">
-
         {/* Tab Navigation */}
         <div className="tab-navigation">
           <button
@@ -426,15 +417,17 @@ const AttendancePage = () => {
             Statistics
           </button>
         </div>
-
         {/* Class Attendance Tab */}
         {activeTab === "class" && (
           <div>
             <div className="search-form-container">
               <div className="search-instruction">
-                <p>Fill in the class details below to load students and mark their attendance.</p>
+                <p>
+                  Fill in the class details below to load students and mark
+                  their attendance.
+                </p>
               </div>
-              
+
               <div className="form-grid">
                 <div className="form-group">
                   <label htmlFor="className" className="form-label">
@@ -483,7 +476,7 @@ const AttendancePage = () => {
                   />
                 </div>
               </div>
-              
+
               <div className="form-actions">
                 <button
                   onClick={fetchStudents}
@@ -535,25 +528,8 @@ const AttendancePage = () => {
               <div className="attendance-sheet">
                 <div className="sheet-header">
                   <h3 className="sheet-title">
-                    Attendance Sheet - {formData.className} {formData.section}
+                    Attendance Records - {formData.className} {formData.section}
                   </h3>
-                  <button
-                    onClick={saveAttendance}
-                    disabled={saving}
-                    className="btn btn-success"
-                  >
-                    {saving ? (
-                      <span>
-                        <RefreshCw className="btn-icon spinning" />
-                        Saving...
-                      </span>
-                    ) : (
-                      <span>
-                        <Save className="btn-icon" />
-                        Save Attendance
-                      </span>
-                    )}
-                  </button>
                 </div>
 
                 <div className="attendance-table">
@@ -561,7 +537,6 @@ const AttendancePage = () => {
                     <div className="header-cell">Roll No.</div>
                     <div className="header-cell">Student Name</div>
                     <div className="header-cell">Status</div>
-                    <div className="header-cell">Action</div>
                   </div>
 
                   {students.map((student) => (
@@ -585,21 +560,6 @@ const AttendancePage = () => {
                           )}
                         </span>
                       </div>
-                      <div className="table-cell">
-                        <button
-                          onClick={() => toggleAttendance(student.StudentID)}
-                          className={`toggle-btn ${
-                            attendance[student.StudentID] === "Present"
-                              ? "present"
-                              : "absent"
-                          }`}
-                        >
-                          Mark{" "}
-                          {attendance[student.StudentID] === "Present"
-                            ? "Absent"
-                            : "Present"}
-                        </button>
-                      </div>
                     </div>
                   ))}
                 </div>
@@ -622,10 +582,11 @@ const AttendancePage = () => {
                 </div>
               )}
           </div>
-        )}        {/* Search Records Tab */}
+        )}{" "}
+        {/* Search Records Tab */}
         {activeTab === "search" && (
           <div className="search-form-container">
-            <h3 className="section-title">Search Attendance Records</h3>
+          
             <div className="form-grid">
               <div className="form-group">
                 <label htmlFor="searchName" className="form-label">
@@ -687,12 +648,12 @@ const AttendancePage = () => {
                 />
               </div>
             </div>
-            
+
             <div className="form-actions">
               <button
                 onClick={searchAttendance}
                 disabled={searchLoading}
-                className="btn btn-primary search-btn"
+                className="btn btn-search"
               >
                 {searchLoading ? (
                   <span>
@@ -700,10 +661,7 @@ const AttendancePage = () => {
                     Searching...
                   </span>
                 ) : (
-                  <span>
-                    <Search className="btn-icon" />
-                    Search Records
-                  </span>
+                  <span>Search Records</span>
                 )}
               </button>
             </div>
@@ -795,11 +753,9 @@ const AttendancePage = () => {
               )}
           </div>
         )}
-
         {/* Date Range Tab */}
         {activeTab === "dateRange" && (
           <div className="search-form-container">
-            <h3 className="section-title">Search by Date Range</h3>
             <div className="form-grid date-range-grid">
               <div className="form-group">
                 <label htmlFor="startDate" className="form-label">
@@ -829,12 +785,12 @@ const AttendancePage = () => {
                 />
               </div>
             </div>
-            
+
             <div className="form-actions">
               <button
                 onClick={searchByDateRange}
                 disabled={dateRangeLoading}
-                className="btn btn-primary date-range-btn"
+                className="btn btn-search"
               >
                 {dateRangeLoading ? (
                   <span>
@@ -843,7 +799,6 @@ const AttendancePage = () => {
                   </span>
                 ) : (
                   <span>
-                    <Calendar className="btn-icon" />
                     Search Range
                   </span>
                 )}
@@ -937,11 +892,9 @@ const AttendancePage = () => {
               )}
           </div>
         )}
-
         {/* Statistics Tab */}
         {activeTab === "statistics" && (
           <div className="search-form-container">
-            <h3 className="section-title">Attendance Statistics</h3>
             {statistics ? (
               <div className="summary-stats">
                 <div className="stat-card">
@@ -973,7 +926,7 @@ const AttendancePage = () => {
           </div>
         )}
       </div>
-      
+
       <Footer />
     </div>
   );

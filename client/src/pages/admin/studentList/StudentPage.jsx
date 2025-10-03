@@ -135,6 +135,15 @@ const StudentPage = () => {
     setFormData({ ...formData, [name]: value });
   };
 
+  const handleFormClassChange = (e) => {
+    const className = e.target.value;
+    setFormData({ 
+      ...formData, 
+      Class: className, 
+      Section: '' // Reset section when class changes
+    });
+  };
+
   const validateForm = async () => {
     const requiredFields = [
       "FirstName",
@@ -415,6 +424,15 @@ const StudentPage = () => {
   };
 
   const getUniqueSections = (className) => {
+    return classes
+      .filter(c => c.ClassName === className)
+      .map(c => c.Section)
+      .filter(Boolean)
+      .sort();
+  };
+
+  const getFormSections = (className) => {
+    if (!className) return [];
     return classes
       .filter(c => c.ClassName === className)
       .map(c => c.Section)
@@ -915,27 +933,34 @@ const StudentPage = () => {
                     <div className="form-grid">
                       <div className="form-group">
                         <label htmlFor="Class">Class*</label>
-                        <input
+                        <select
                           id="Class"
                           name="Class"
-                          type="text"
-                          placeholder="Enter class"
                           value={formData.Class}
-                          onChange={handleInputChange}
+                          onChange={handleFormClassChange}
                           required
-                        />
+                        >
+                          <option value="">Select Class</option>
+                          {getUniqueClasses().map(className => (
+                            <option key={className} value={className}>{className}</option>
+                          ))}
+                        </select>
                       </div>
                       <div className="form-group">
                         <label htmlFor="Section">Section*</label>
-                        <input
+                        <select
                           id="Section"
                           name="Section"
-                          type="text"
-                          placeholder="Enter section"
                           value={formData.Section}
                           onChange={handleInputChange}
                           required
-                        />
+                          disabled={!formData.Class}
+                        >
+                          <option value="">Select Section</option>
+                          {formData.Class && getFormSections(formData.Class).map(section => (
+                            <option key={section} value={section}>{section}</option>
+                          ))}
+                        </select>
                       </div>
                       <div className="form-group">
                         <label htmlFor="RollNumber">Roll Number*</label>

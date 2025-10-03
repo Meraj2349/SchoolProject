@@ -5,9 +5,11 @@ import NotFound from "../components/NotFound";
 import RegisterForm from "../components/RegisterForm";
 import AboutPage from "../pages/AboutPage";
 import ChairmanMessagePage from "../pages/ChairmanMessagePage";
+import EventsPage from "../pages/EventsPage";
 import GallaryPage from "../pages/GallaryPage/GallaryPage";
 import HomePage from "../pages/HomePage";
 import AttendancePage from "../pages/Listpage/AttendanceList";
+import ResultsList from "../pages/Listpage/ResultsList";
 import StudentListPage from "../pages/Listpage/StudentList";
 import TeacherListPage from "../pages/Listpage/TeacherList";
 import AdminPage from "../pages/admin/AdminPage";
@@ -15,6 +17,8 @@ import AdminAttendancePage from "../pages/admin/attendance/AttendancePage";
 import AttendancePageGrid from "../pages/admin/attendance/AttendancePageGrid";
 import AttendanceReports from "../pages/admin/attendance/AttendanceReports";
 import ClassesPage from "../pages/admin/class/ClassesPage";
+import AdminEventsPage from "../pages/admin/events/EventsPage";
+import ExamPage from "../pages/admin/exams/ExamsPage";
 import AdminImageGallery from "../pages/admin/gallery/AdminImageGallery";
 import MessagesPage from "../pages/admin/messages/MessagesPage";
 import NoticesPage from "../pages/admin/notices/noticespage";
@@ -23,7 +27,6 @@ import StudentPage from "../pages/admin/studentList/StudentPage";
 import SubjectsPage from "../pages/admin/subject/SubjectsPage";
 import TeacherPage from "../pages/admin/teacherList/TeacherPage";
 import UpdateEmailPassword from "../pages/admin/updateEmaillPassword/UpdateEmailPassword";
-import ResultsList from "../pages/Listpage/ResultsList";
 
 const AppRoutes = () => {
   return (
@@ -35,6 +38,7 @@ const AppRoutes = () => {
       <Route path="/attendance" element={<AttendancePage />} />
       <Route path="/result" element={<ResultsList />} />
       <Route path="/about" element={<AboutPage />} />
+      <Route path="/events" element={<EventsPage />} />
       <Route path="/gallery" element={<GallaryPage />} />
       <Route path="/imageGallary" element={<GallaryPage />} />
       <Route path="*" element={<NotFound />} />
@@ -56,6 +60,8 @@ const AppRoutes = () => {
         <Route path="attendance/reports" element={<AttendanceReports />} />
         <Route path="gallery" element={<AdminImageGallery />} />
         <Route path="results" element={<StudentResultEntry />} />
+        <Route path="exams" element={<ExamPage />} />
+        <Route path="events" element={<AdminEventsPage />} />
         <Route path="*" element={<NotFound />} />
         {/* Protected routes */}
         <Route path="*" element={<NotFound />} />

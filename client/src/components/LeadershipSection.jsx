@@ -1,6 +1,7 @@
 // LeadershipSection.jsx
 import axios from "axios";
 import { useEffect, useState } from "react";
+import eventsApi from "../api/eventsApi";
 import principalImage from "../assets/images/WhatsApp Image 2024-12-07 at 20.48.41_3423f492.jpg";
 import "../assets/styles/LeaderShipSection.css";
 import ChairmanCard from "./ChairmanCard";
@@ -73,8 +74,11 @@ const newsData = [
 
 const LeadershipSection = () => {
   const [messages, setMessages] = useState([]);
+  const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [eventsLoading, setEventsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [eventsError, setEventsError] = useState(null);
 
   useEffect(() => {
     const fetchMessages = async () => {
@@ -104,6 +108,62 @@ const LeadershipSection = () => {
     };
 
     fetchMessages();
+  }, []);
+
+  // Fetch events from API
+  useEffect(() => {
+    const fetchEvents = async () => {
+      try {
+        setEventsLoading(true);
+        const response = await eventsApi.getAllEvents();
+        console.log("Events API response:", response);
+        
+        // Handle different response structures
+        let eventsData = [];
+        if (Array.isArray(response)) {
+          eventsData = response;
+        } else if (response && Array.isArray(response.data)) {
+          eventsData = response.data;
+        }
+        
+        // Helper function to format event date
+        const formatEventDate = (dateString) => {
+          if (!dateString) return "TBA";
+          const date = new Date(dateString);
+          const month = date.toLocaleDateString('en-US', { month: 'short' });
+          const day = date.getDate().toString().padStart(2, '0');
+          return `${month} ${day}`;
+        };
+
+        // Filter current and upcoming events only and limit to 4
+        const currentDate = new Date();
+        const activeEvents = eventsData
+          .filter(event => {
+            const endDate = new Date(event.EndDate);
+            return endDate >= currentDate;
+          })
+          .slice(0, 4)
+          .map(event => ({
+            date: formatEventDate(event.StartDate),
+            text: event.EventName,
+            link: `/events#event-${event.EventID}`,
+            type: event.EventType,
+            venue: event.Venue
+          }));
+        
+        setEvents(activeEvents);
+        setEventsError(null);
+      } catch (error) {
+        console.error("Error fetching events:", error);
+        setEventsError("Failed to load events");
+        // Fallback to dummy data
+        setEvents([]);
+      } finally {
+        setEventsLoading(false);
+      }
+    };
+
+    fetchEvents();
   }, []);
 
   // Get chairman message
@@ -166,7 +226,72 @@ const LeadershipSection = () => {
 
           {/* Events */}
           <div className="events-wrapper">
-            <EventNewsCard type="events" data={eventsData} />
+            {eventsLoading ? (
+              <div style={{
+                background: '#fff',
+                borderRadius: '12px',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+                padding: '20px',
+                minHeight: '320px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#6b7280'
+              }}>
+                <div style={{ textAlign: 'center' }}>
+                  <div style={{
+                    width: '40px',
+                    height: '40px',
+                    border: '3px solid #6fcf97',
+                    borderTop: '3px solid transparent',
+                    borderRadius: '50%',
+                    animation: 'spin 1s linear infinite',
+                    margin: '0 auto 10px'
+                  }}></div>
+                  Loading Events...
+                </div>
+              </div>
+            ) : eventsError ? (
+              <div style={{
+                background: '#fff',
+                borderRadius: '12px',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+                padding: '20px',
+                minHeight: '320px',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>
+                <div style={{
+                  background: '#6fcf97',
+                  color: '#fff',
+                  padding: '16px 18px',
+                  fontSize: '20px',
+                  fontWeight: '600',
+                  textAlign: 'center',
+                  textTransform: 'uppercase',
+                  letterSpacing: '1px',
+                  width: '100%',
+                  marginBottom: '20px'
+                }}>
+                  EVENTS
+                </div>
+                <div style={{ color: '#e74c3c', textAlign: 'center' }}>
+                  <div style={{ fontSize: '2rem', marginBottom: '10px' }}>⚠️</div>
+                  <div>{eventsError}</div>
+                  <div style={{ fontSize: '0.9rem', color: '#6b7280', marginTop: '5px' }}>
+                    Using fallback data
+                  </div>
+                </div>
+                <EventNewsCard type="events" data={eventsData} />
+              </div>
+            ) : (
+              <EventNewsCard 
+                type="events" 
+                data={events.length > 0 ? events : eventsData} 
+              />
+            )}
           </div>
 
           {/* News */}

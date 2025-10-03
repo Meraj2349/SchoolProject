@@ -231,7 +231,12 @@ const AttendancePageGrid = () => {
           student.ClassName === selectedClass &&
           student.Section === selectedSection
       )
-      .sort((a, b) => a.RollNumber.localeCompare(b.RollNumber));
+      .sort((a, b) => {
+        // Safe comparison for RollNumber - handle both string and number types
+        const rollA = String(a.RollNumber || '').toLowerCase();
+        const rollB = String(b.RollNumber || '').toLowerCase();
+        return rollA.localeCompare(rollB, undefined, { numeric: true });
+      });
   };
 
   // Calculate student-wise attendance statistics
@@ -587,7 +592,7 @@ const AttendancePageGrid = () => {
                     ✅{" "}
                     {
                       Object.values(attendance).filter(
-                        (status) => status === "present"
+                        (status) => status === "Present"
                       ).length
                     }{" "}
                     present today
@@ -596,7 +601,7 @@ const AttendancePageGrid = () => {
                     ❌{" "}
                     {
                       Object.values(attendance).filter(
-                        (status) => status === "absent"
+                        (status) => status === "Absent"
                       ).length
                     }{" "}
                     absent today
@@ -705,7 +710,6 @@ const AttendancePageGrid = () => {
                 onClick={() => fetchAttendanceData()}
                 disabled={!selectedClass || !selectedSection}
               >
-                <RefreshCw className="btn-icon" />
                 Refresh Data
               </button>
 
@@ -718,7 +722,7 @@ const AttendancePageGrid = () => {
                 }
                 disabled={!selectedClass || !selectedSection}
               >
-                <Users className="btn-icon" />
+                
                 {viewMode === "grid" ? "Student Summary" : "Attendance Grid"}
               </button>
 
@@ -791,7 +795,7 @@ const AttendancePageGrid = () => {
                     <span className="legend-color present"></span>
                     <span>
                       <strong>P</strong> = Present (Green) - Click to mark
-                      present
+                      Present
                     </span>
                   </div>
                   <div className="legend-item">
@@ -1090,7 +1094,7 @@ const AttendancePageGrid = () => {
                                         disabled={saving}
                                       >
                                         <span className="status-text">
-                                          {status === "present" ? "P" : "A"}
+                                          {status === "Present" ? "P" : "A"}
                                         </span>
                                         {saving && (
                                           <div className="btn-loading-spinner"></div>

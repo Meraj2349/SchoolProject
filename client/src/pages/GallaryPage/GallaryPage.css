@@ -19,7 +19,7 @@
 .gallery-title {
   font-size: 2.5rem;
   font-weight: 600;
-  color: #2c3e50;
+  color: #1f2937 !important;
   margin: 0;
   text-align: center;
 }
@@ -46,7 +46,7 @@
   font-size: 1.8rem;
   font-weight: 500;
   margin-bottom: 1.5rem;
-  color: #495057;
+  color: #374151 !important;
 }
 
 .filter-buttons {
@@ -62,29 +62,30 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.8rem 1.5rem;
-  background: white;
-  border: 2px solid #e9ecef;
+  background: white !important;
+  border: 2px solid #e5e7eb !important;
   border-radius: 50px;
   cursor: pointer;
   transition: all 0.3s ease;
   font-size: 1rem;
   font-weight: 500;
-  color: #495057;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  color: #374151 !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
 }
 
 .filter-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
-  border-color: #667eea;
+  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.3) !important;
+  border-color: #10b981 !important;
+  color: #10b981 !important;
 }
 
 .filter-btn.active {
-  background: linear-gradient(135deg, #667eea, #764ba2);
-  color: white;
-  border-color: transparent;
+  background: linear-gradient(135deg, #10b981, #059669) !important;
+  color: white !important;
+  border-color: transparent !important;
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4) !important;
 }
 
 .filter-icon {
@@ -100,17 +101,17 @@
   text-align: center;
   margin-bottom: 2rem;
   padding: 1rem;
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.9) !important;
   border-radius: 12px;
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1) !important;
 }
 
 .gallery-stats p {
   margin: 0;
   font-size: 1.1rem;
-  color: #495057;
+  color: #374151 !important;
 }
 
 /* Gallery Grid */
@@ -181,9 +182,9 @@
   bottom: 0;
   background: linear-gradient(
     135deg,
-    rgba(102, 126, 234, 0.8),
-    rgba(118, 75, 162, 0.8)
-  );
+    rgba(16, 185, 129, 0.8),
+    rgba(5, 150, 105, 0.8)
+  ) !important;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -239,28 +240,28 @@
 }
 
 .category-badge.school {
-  background: #e3f2fd;
-  color: #1976d2;
+  background: #f0fdf4 !important;
+  color: #10b981 !important;
 }
 
 .category-badge.student {
-  background: #f3e5f5;
-  color: #7b1fa2;
+  background: #f0fdf4 !important;
+  color: #059669 !important;
 }
 
 .category-badge.teacher {
-  background: #e8f5e9;
-  color: #388e3c;
+  background: #f0fdf4 !important;
+  color: #047857 !important;
 }
 
 .category-badge.event {
-  background: #fff3e0;
-  color: #f57c00;
+  background: #f8fafc !important;
+  color: #374151 !important;
 }
 
 .category-badge.notice {
-  background: #fce4ec;
-  color: #c2185b;
+  background: #f8fafc !important;
+  color: #6b7280 !important;
 }
 
 .image-description {
@@ -278,11 +279,11 @@
 .association-tag {
   margin: 0.3rem 0;
   padding: 0.4rem 0.8rem;
-  background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+  background: linear-gradient(135deg, #f8fafc, #e5e7eb) !important;
   border-radius: 15px;
   font-size: 0.85rem;
-  color: #495057;
-  border-left: 3px solid #667eea;
+  color: #374151 !important;
+  border-left: 3px solid #10b981 !important;
   display: inline-block;
   margin-right: 0.5rem;
 }
@@ -290,20 +291,20 @@
 .lightbox-associations {
   margin: 1rem 0;
   padding: 1rem;
-  background: rgba(102, 126, 234, 0.1);
+  background: rgba(16, 185, 129, 0.1) !important;
   border-radius: 12px;
-  border-left: 4px solid #667eea;
+  border-left: 4px solid #10b981 !important;
 }
 
 .association-info {
   margin: 0.5rem 0;
   font-size: 1rem;
-  color: #495057;
+  color: #374151 !important;
 }
 
 .association-label {
   font-weight: 600;
-  color: #667eea;
+  color: #10b981 !important;
 }
 
 .roll-number,
@@ -333,14 +334,14 @@
 
 .loading-spinner {
   text-align: center;
-  color: #667eea;
+  color: #10b981 !important;
 }
 
 .spinner {
   width: 50px;
   height: 50px;
-  border: 4px solid #f3f3f3;
-  border-top: 4px solid #667eea;
+  border: 4px solid #f3f3f3 !important;
+  border-top: 4px solid #10b981 !important;
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin: 0 auto 1rem;
@@ -441,63 +442,85 @@
 
 .lightbox-container {
   position: relative;
-  max-width: 90vw;
-  max-height: 90vh;
+  max-width: 85vw;
+  max-height: 85vh;
   display: flex;
   align-items: center;
   justify-content: center;
+  margin: 0 80px;
 }
 
 .lightbox-close {
   position: absolute;
-  top: -50px;
-  right: -10px;
-  background: rgba(255, 255, 255, 0.2);
-  border: none;
-  color: white;
-  font-size: 2rem;
-  width: 40px;
-  height: 40px;
+  top: 20px;
+  right: 20px;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.9),
+    rgba(247, 250, 252, 0.9)
+  ) !important;
+  border: 2px solid rgba(255, 255, 255, 0.5) !important;
+  color: #374151 !important;
+  font-size: 1.8rem;
+  width: 50px;
+  height: 50px;
   border-radius: 50%;
   cursor: pointer;
-  transition: all 0.3s ease;
-  backdrop-filter: blur(10px);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(15px);
   z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
 }
 
 .lightbox-close:hover {
-  background: rgba(255, 255, 255, 0.3);
-  transform: scale(1.1);
+  background: linear-gradient(135deg, #ef4444, #dc2626) !important;
+  color: white !important;
+  border-color: #ef4444 !important;
+  transform: rotate(90deg) scale(1.15);
+  box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4) !important;
 }
 
 .lightbox-nav {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  background: rgba(255, 255, 255, 0.2);
-  border: none;
-  color: white;
+  background: linear-gradient(
+    135deg,
+    rgba(16, 185, 129, 0.9),
+    rgba(5, 150, 105, 0.9)
+  ) !important;
+  border: 2px solid rgba(16, 185, 129, 0.5) !important;
+  color: white !important;
   font-size: 2rem;
-  width: 50px;
-  height: 50px;
+  width: 60px;
+  height: 60px;
   border-radius: 50%;
   cursor: pointer;
-  transition: all 0.3s ease;
-  backdrop-filter: blur(10px);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(15px);
   z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.4) !important;
 }
 
 .lightbox-nav:hover {
-  background: rgba(255, 255, 255, 0.3);
-  transform: translateY(-50%) scale(1.1);
+  background: linear-gradient(135deg, #059669, #047857) !important;
+  border-color: #059669 !important;
+  transform: translateY(-50%) scale(1.2);
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.6) !important;
 }
 
 .lightbox-prev {
-  left: -70px;
+  left: 30px;
 }
 
 .lightbox-next {
-  right: -70px;
+  right: 30px;
 }
 
 .lightbox-content {
@@ -588,22 +611,29 @@
   }
 
   .lightbox-close {
-    top: -40px;
-    right: 0;
+    top: 15px;
+    right: 15px;
+    width: 45px;
+    height: 45px;
+    font-size: 1.6rem;
   }
 
   .lightbox-nav {
-    width: 40px;
-    height: 40px;
-    font-size: 1.5rem;
+    width: 50px;
+    height: 50px;
+    font-size: 1.8rem;
   }
 
   .lightbox-prev {
-    left: -50px;
+    left: 20px;
   }
 
   .lightbox-next {
-    right: -50px;
+    right: 20px;
+  }
+
+  .lightbox-container {
+    margin: 0 60px;
   }
 
   .lightbox-image {
@@ -636,12 +666,29 @@
   }
 
   .lightbox-nav {
-    display: none;
+    width: 45px;
+    height: 45px;
+    font-size: 1.5rem;
+  }
+
+  .lightbox-prev {
+    left: 15px;
+  }
+
+  .lightbox-next {
+    right: 15px;
   }
 
   .lightbox-close {
-    top: -30px;
+    top: 10px;
     right: 10px;
+    width: 40px;
+    height: 40px;
+    font-size: 1.4rem;
+  }
+
+  .lightbox-container {
+    margin: 0 50px;
   }
 }
 
