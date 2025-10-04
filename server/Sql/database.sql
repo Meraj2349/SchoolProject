@@ -1,4 +1,25 @@
 -- School Management System Database
+-- Routines Table (Using ClassID from Classes table - following Classes table structure)
+CREATE TABLE
+    Routines (
+        RoutineID INT PRIMARY KEY AUTO_INCREMENT,
+        RoutineTitle VARCHAR(255) NOT NULL,
+        ClassID INT NOT NULL, -- Foreign key to Classes table
+        RoutineDate DATE NOT NULL,
+        Description TEXT,
+        FileURL VARCHAR(500), -- Cloudinary URL for PDF/Image
+        FileType ENUM ('pdf', 'image') DEFAULT 'pdf',
+        FilePublicID VARCHAR(255), -- Cloudinary public_id for deletion
+        IsActive BOOLEAN DEFAULT TRUE,
+        CreatedBy INT, -- Admin user ID (Foreign key to Users/Admin table)
+        CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UpdatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        FOREIGN KEY (ClassID) REFERENCES Classes (ClassID) ON DELETE CASCADE,
+        INDEX idx_class_id (ClassID),
+        INDEX idx_routine_date (RoutineDate),
+        INDEX idx_active (IsActive)
+    );
+
 -- Students Table
 CREATE TABLE
     Students (
@@ -35,7 +56,7 @@ CREATE TABLE
         ClassName VARCHAR(20),
         Section VARCHAR(10),
         TeacherID INT,
-        UNIQUE (className, Section),
+        UNIQUE (ClassName, Section),
         FOREIGN KEY (TeacherID) REFERENCES Teachers (TeacherID)
     );
 
@@ -92,9 +113,6 @@ CREATE TABLE
         FOREIGN KEY (ClassID) REFERENCES Classes (ClassID)
     );
 
-
-
-
 --admin
 CREATE TABLE
     Admin (
@@ -124,20 +142,21 @@ CREATE TABLE
     );
 
 -- Image Storage Table (for all images)
-CREATE TABLE Images (
-    ImageID INT PRIMARY KEY AUTO_INCREMENT,
-    ImagePath VARCHAR(255) NOT NULL,
-    PublicID VARCHAR(255) NOT NULL,
-    Description TEXT,
-    UploadDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    UploadedBy INT COMMENT 'AdminID or TeacherID who uploaded',
-    ImageType ENUM ('student', 'teacher', 'school', 'event', 'notice') NOT NULL,
-    StudentID INT NULL COMMENT 'Reference to Students table if image belongs to student',
-    TeacherID INT NULL COMMENT 'Reference to Teachers table if image belongs to teacher',
-    AssociatedID INT COMMENT 'ID of the associated entity (for other types)',
-    FOREIGN KEY (StudentID) REFERENCES Students (StudentID) ON DELETE CASCADE,
-    FOREIGN KEY (TeacherID) REFERENCES Teachers (TeacherID) ON DELETE CASCADE
-);
+CREATE TABLE
+    Images (
+        ImageID INT PRIMARY KEY AUTO_INCREMENT,
+        ImagePath VARCHAR(255) NOT NULL,
+        PublicID VARCHAR(255) NOT NULL,
+        Description TEXT,
+        UploadDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UploadedBy INT COMMENT 'AdminID or TeacherID who uploaded',
+        ImageType ENUM ('student', 'teacher', 'school', 'event', 'notice') NOT NULL,
+        StudentID INT NULL COMMENT 'Reference to Students table if image belongs to student',
+        TeacherID INT NULL COMMENT 'Reference to Teachers table if image belongs to teacher',
+        AssociatedID INT COMMENT 'ID of the associated entity (for other types)',
+        FOREIGN KEY (StudentID) REFERENCES Students (StudentID) ON DELETE CASCADE,
+        FOREIGN KEY (TeacherID) REFERENCES Teachers (TeacherID) ON DELETE CASCADE
+    );
 
 -- -- Fee Structure Table
 -- CREATE TABLE
@@ -190,7 +209,6 @@ CREATE TABLE Images (
 --         FOREIGN KEY (StudentID) REFERENCES Students (StudentID),
 --         FOREIGN KEY (FeeStructureID) REFERENCES FeeStructure (FeeStructureID)
 --     );
-
 -- -- Late Payment Fine Table
 -- CREATE TABLE
 --     LatePaymentFines (

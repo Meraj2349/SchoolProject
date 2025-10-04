@@ -16,18 +16,30 @@ const storage = multer.diskStorage({
 });
 
 const fileFilter = (req, file, cb) => {
-  const filetypes = /jpeg|jpg|png|gif/;
+  // Allow both images and PDF files for routine uploads
+  const filetypes = /jpeg|jpg|png|gif|pdf/;
   const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
-  const mimetype = filetypes.test(file.mimetype);
   
-  if (mimetype && extname) {
+  // Check both file extension and mimetype
+  const allowedMimeTypes = [
+    'image/jpeg',
+    'image/jpg', 
+    'image/png',
+    'image/gif',
+    'application/pdf'
+  ];
+  
+  const mimetypeValid = allowedMimeTypes.includes(file.mimetype);
+  
+  if (mimetypeValid && extname) {
     return cb(null, true);
   }
-  cb(new Error('Only images are allowed (jpeg, jpg, png, gif)'));
+  
+  cb(new Error('Only images (JPEG, JPG, PNG, GIF) and PDF files are allowed'));
 };
 
 export default multer({ 
   storage,
-  limits: { fileSize: 5 * 1024 * 1024 },
+  limits: { fileSize: 10 * 1024 * 1024 }, // Increased to 10MB for PDF files
   fileFilter
 });

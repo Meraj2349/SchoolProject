@@ -116,9 +116,9 @@ const Sidebar = () => {
                   label: "Event Announcements",
                 },
                 {
-                  path: "/admin/schedule",
+                  path: "/admin/routine",
                   icon: <RiTimerLine />,
-                  label: "Schedule",
+                  label: "Routine",
                 },
                 {
                   path: "/admin/commitiLIst",

@@ -12,6 +12,7 @@ import imageRoutes from "./routes/image.routes.js";
 import messageRoutes from "./routes/messages.routes.js";
 import noticeRoutes from "./routes/notices.routes.js";
 import resultRoutes from "./routes/result.routes.js";
+import routineRoutes from "./routes/routine.routes.js";
 import studentRouter from "./routes/student.route.js";
 import subjectRoutes from "./routes/subjects.routes.js";
 import teacherRoutes from "./routes/teacher.routes.js";
@@ -31,6 +32,9 @@ app.use(
 app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use(bodyParser.json());
+
+// Serve static files from public directory (for file uploads)
+app.use(express.static('public'));
 
 // Database connection check
 db.connect((err) => {
@@ -52,6 +56,7 @@ app.use("/api/events", eventRoutes);
 app.use("/api/messages", messageRoutes);
 app.use("/api/subjects", subjectRoutes);
 app.use("/api/images", imageRoutes);
+app.use("/api/routines", routineRoutes);
 app.use("/api/attendance", attendanceRoutes);
 app.use("/api/exams", examRoutes);
 app.use("/api/results", resultRoutes);

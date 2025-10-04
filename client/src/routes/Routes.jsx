@@ -10,6 +10,7 @@ import GallaryPage from "../pages/GallaryPage/GallaryPage";
 import HomePage from "../pages/HomePage";
 import AttendancePage from "../pages/Listpage/AttendanceList";
 import ResultsList from "../pages/Listpage/ResultsList";
+import RoutinList from "../pages/Listpage/RoutinList";
 import StudentListPage from "../pages/Listpage/StudentList";
 import TeacherListPage from "../pages/Listpage/TeacherList";
 import AdminPage from "../pages/admin/AdminPage";
@@ -23,6 +24,7 @@ import AdminImageGallery from "../pages/admin/gallery/AdminImageGallery";
 import MessagesPage from "../pages/admin/messages/MessagesPage";
 import NoticesPage from "../pages/admin/notices/noticespage";
 import StudentResultEntry from "../pages/admin/results/StudentResultEntry";
+import RoutinePage from "../pages/admin/routine/AdminRoutine";
 import StudentPage from "../pages/admin/studentList/StudentPage";
 import SubjectsPage from "../pages/admin/subject/SubjectsPage";
 import TeacherPage from "../pages/admin/teacherList/TeacherPage";
@@ -37,12 +39,12 @@ const AppRoutes = () => {
       <Route path="/teachers" element={<TeacherListPage />} />
       <Route path="/attendance" element={<AttendancePage />} />
       <Route path="/result" element={<ResultsList />} />
+      <Route path="/routine" element={<RoutinList />} />
       <Route path="/about" element={<AboutPage />} />
       <Route path="/events" element={<EventsPage />} />
       <Route path="/gallery" element={<GallaryPage />} />
       <Route path="/imageGallary" element={<GallaryPage />} />
       <Route path="*" element={<NotFound />} />
-
 
       {/* Admin Routes */}
       <Route path="/admin" element={<AdminPage />}>
@@ -59,6 +61,7 @@ const AppRoutes = () => {
         <Route path="attendance/grid" element={<AttendancePageGrid />} />
         <Route path="attendance/reports" element={<AttendanceReports />} />
         <Route path="gallery" element={<AdminImageGallery />} />
+        <Route path="routine" element={<RoutinePage />} />
         <Route path="results" element={<StudentResultEntry />} />
         <Route path="exams" element={<ExamPage />} />
         <Route path="events" element={<AdminEventsPage />} />
