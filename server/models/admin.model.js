@@ -5,7 +5,7 @@ import jwt from "jsonwebtoken";
 
 // Find an admin by email
 export const findAdminByEmail = async (email) => {
-  const sql = "SELECT * FROM Admins WHERE Email = ?";
+  const sql = "SELECT * FROM Admin WHERE Email = ?";
   const [rows] = await db.query(sql, [email]);
   return rows[0]; // Return the admin row
 };
@@ -15,7 +15,7 @@ export const createAdmin = async (adminData) => {
   const { Username, Email, Password } = adminData;
   const hashedPassword = await bcrypt.hash(Password, 10); // Encrypt password
   console.log(hashedPassword);
-  const sql = "INSERT INTO Admins (Username, Email, Password) VALUES (?, ?, ?)";
+  const sql = "INSERT INTO Admin (Username, Email, Password) VALUES (?, ?, ?)";
   try {
     const [result] = await db.query(sql, [Username, Email, hashedPassword]);
     return { message: "Admin created successfully", adminID: result.insertId };
@@ -52,7 +52,7 @@ export const generateAuthToken = (adminID) => {
 
 // Delete admin
 export const deleteAdmin = async (adminID) => {
-  const sql = "DELETE FROM Admins WHERE AdminID = ?";
+  const sql = "DELETE FROM Admin WHERE AdminID = ?";
   try {
     const [result] = await db.query(sql, [adminID]);
     return { message: "Admin deleted successfully", affectedRows: result.affectedRows };
@@ -63,14 +63,14 @@ export const deleteAdmin = async (adminID) => {
 
 
 export const getAdminById = async (adminId) => {
-  const sql = "SELECT * FROM Admins WHERE AdminID = ?";
+  const sql = "SELECT * FROM Admin WHERE AdminID = ?";
   const [rows] = await db.query(sql, [adminId]);
   return rows[0];
 };
 
 export const updateAdmin = async (adminId, adminData) => {
   const { Email, Password } = adminData;
-  const sql = "UPDATE Admins SET Email = ?, Password = ? WHERE AdminID = ?";
+  const sql = "UPDATE Admin SET Email = ?, Password = ? WHERE AdminID = ?";
   try {
     const [result] = await db.query(sql, [Email, Password, adminId]);
     if (result.affectedRows === 0) {
