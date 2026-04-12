@@ -67,38 +67,38 @@ export const showNotice = async (noticeId) => {
 };
 
 export const editNotice = async (noticeId, { title, description }) => {
-    const sql = `
+  const sql = `
       UPDATE Notices
       SET Title = ?, Description = ?
       WHERE NoticeID = ?
     `;
-    try {
-      const [result] = await db.query(sql, [title, description, noticeId]);
-      if (result.affectedRows === 0) {
-        return { success: false }; // No rows updated
-      }
-      return { success: true };
-    } catch (error) {
-      console.error("Error editing notice:", error);
-      throw error;
+  try {
+    const [result] = await db.query(sql, [title, description, noticeId]);
+    if (result.affectedRows === 0) {
+      return { success: false }; // No rows updated
     }
-  };
+    return { success: true };
+  } catch (error) {
+    console.error("Error editing notice:", error);
+    throw error;
+  }
+};
 
-  export const toggleNoticeVisibility = async (noticeId, show) => {
-    const sql = `
+export const toggleNoticeVisibility = async (noticeId, show) => {
+  const sql = `
       UPDATE Notices
       SET \`Show\` = ?
       WHERE NoticeID = ?
     `;
-    try {
-      console.log("Toggling visibility in database:", { noticeId, show }); // Debugging log
-      const [result] = await db.query(sql, [show, noticeId]);
-      if (result.affectedRows === 0) {
-        throw new Error("No notice found with that ID");
-      }
-      return { success: true };
-    } catch (error) {
-      console.error("Error toggling visibility in database:", error); // Log the error
-      throw error;
+  try {
+    console.log("Toggling visibility in database:", { noticeId, show }); // Debugging log
+    const [result] = await db.query(sql, [show, noticeId]);
+    if (result.affectedRows === 0) {
+      throw new Error("No notice found with that ID");
     }
-  };
+    return { success: true };
+  } catch (error) {
+    console.error("Error toggling visibility in database:", error); // Log the error
+    throw error;
+  }
+};

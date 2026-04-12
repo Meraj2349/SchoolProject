@@ -1,3 +1,4 @@
+import { t } from "../config/i18n.js";
 import {
   bulkCreateAttendance,
   checkAttendanceExists,
@@ -144,13 +145,13 @@ export const createAttendanceController = async (req, res) => {
 
     res.status(201).json({
       success: true,
-      message: "Attendance record created successfully",
+      message: t("attendance_recorded", req.language),
       data: { attendanceID },
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: "Error creating attendance record: " + error.message,
+      message: t("attendance_fetch_failed", req.language),
     });
   }
 };
@@ -196,12 +197,12 @@ export const updateAttendanceController = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: "Attendance record updated successfully",
+      message: t("attendance_updated", req.language),
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: "Error updating attendance record: " + error.message,
+      message: t("attendance_fetch_failed", req.language),
     });
   }
 };
@@ -229,12 +230,12 @@ export const deleteAttendanceController = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: "Attendance record deleted successfully",
+      message: t("attendance_deleted", req.language),
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: "Error deleting attendance record: " + error.message,
+      message: t("attendance_fetch_failed", req.language),
     });
   }
 };
@@ -342,7 +343,7 @@ export const getAttendanceSummaryByStudentController = async (req, res) => {
 // Get class attendance summary by date
 export const getClassAttendanceSummaryByClassAndDateController = async (
   req,
-  res
+  res,
 ) => {
   try {
     const { classID, date } = req.params;
@@ -364,7 +365,7 @@ export const getClassAttendanceSummaryByClassAndDateController = async (
 
     const summary = await getClassAttendanceSummaryByClassAndDate(
       parseInt(classID),
-      date
+      date,
     );
 
     res.status(200).json({
@@ -385,7 +386,7 @@ export const getClassAttendanceSummaryByClassAndDateController = async (
 // Get attendance by name, roll, class, and section
 export const getAttendanceByNameRollClassSectionController = async (
   req,
-  res
+  res,
 ) => {
   try {
     const { firstName, roll, class: className, section } = req.params;
@@ -401,7 +402,7 @@ export const getAttendanceByNameRollClassSectionController = async (
       firstName,
       roll,
       className,
-      section
+      section,
     );
 
     res.status(200).json({
@@ -481,7 +482,8 @@ export const getAttendanceByDateRangeController = async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: "Error retrieving attendance records by date range: " + error.message,
+      message:
+        "Error retrieving attendance records by date range: " + error.message,
     });
   }
 };
@@ -518,10 +520,16 @@ export const bulkCreateAttendanceController = async (req, res) => {
 
     // Validate each record
     for (const record of attendanceRecords) {
-      if (!record.studentID || !record.classID || !record.classDate || !record.status) {
+      if (
+        !record.studentID ||
+        !record.classID ||
+        !record.classDate ||
+        !record.status
+      ) {
         return res.status(400).json({
           success: false,
-          message: "Each record must have studentID, classID, classDate, and status",
+          message:
+            "Each record must have studentID, classID, classDate, and status",
         });
       }
 
@@ -577,7 +585,7 @@ export const checkAttendanceExistsController = async (req, res) => {
     const exists = await checkAttendanceExists(
       parseInt(studentID),
       parseInt(classID),
-      classDate
+      classDate,
     );
 
     res.status(200).json({
@@ -616,7 +624,11 @@ export const markAttendanceController = async (req, res) => {
   try {
     const { studentId, classDate, status } = req.body;
 
-    console.log('markAttendanceController received:', { studentId, classDate, status });
+    console.log("markAttendanceController received:", {
+      studentId,
+      classDate,
+      status,
+    });
 
     if (!studentId || !classDate || !status) {
       return res.status(400).json({
@@ -644,7 +656,7 @@ export const markAttendanceController = async (req, res) => {
     // Get student information including class details
     const { getStudentById } = await import("../models/student.model.js");
     const student = await getStudentById(parseInt(studentId));
-    
+
     if (!student) {
       return res.status(404).json({
         success: false,
@@ -654,7 +666,7 @@ export const markAttendanceController = async (req, res) => {
 
     // Use the ClassID directly from the student record
     const classID = student.ClassID;
-    
+
     if (!classID) {
       return res.status(404).json({
         success: false,
@@ -662,69 +674,80 @@ export const markAttendanceController = async (req, res) => {
       });
     }
 
-    console.log(`Processing attendance for student: ${student.FirstName} ${student.LastName}, Class: ${student.ClassName}, Section: ${student.Section}, ClassID: ${classID}`);
+    console.log(
+      `Processing attendance for student: ${student.FirstName} ${student.LastName}, Class: ${student.ClassName}, Section: ${student.Section}, ClassID: ${classID}`,
+    );
 
     // Check if attendance record already exists
-    const existingAttendance = await checkAttendanceExists(parseInt(studentId), classID, classDate);
-    
+    const existingAttendance = await checkAttendanceExists(
+      parseInt(studentId),
+      classID,
+      classDate,
+    );
+
     console.log("Existing attendance check result:", existingAttendance);
-    
+
     if (existingAttendance && existingAttendance.length > 0) {
       // Update existing record
       const attendanceId = existingAttendance[0].AttendanceID;
-      console.log(`Updating existing attendance record with ID: ${attendanceId}, new status: ${status}`);
-      
+      console.log(
+        `Updating existing attendance record with ID: ${attendanceId}, new status: ${status}`,
+      );
+
       const updateResult = await updateAttendance(attendanceId, { status });
-      
+
       if (updateResult > 0) {
-        console.log('Attendance record updated successfully');
+        console.log("Attendance record updated successfully");
         res.json({
           success: true,
           message: "Attendance record updated successfully",
-          data: { 
-            attendanceID: attendanceId, 
-            action: 'updated',
+          data: {
+            attendanceID: attendanceId,
+            action: "updated",
             studentName: `${student.FirstName} ${student.LastName}`,
             className: student.ClassName,
             section: student.Section,
             date: classDate,
-            status: status
+            status: status,
           },
         });
       } else {
-        throw new Error('Failed to update attendance record');
+        throw new Error("Failed to update attendance record");
       }
     } else {
       // Create new record with proper classID
       console.log("No existing record found, creating new attendance record");
-      
-      const attendanceData = { 
-        studentID: parseInt(studentId), 
+
+      const attendanceData = {
+        studentID: parseInt(studentId),
         classID: classID,
-        classDate, 
-        status 
+        classDate,
+        status,
       };
-      
+
       console.log("Creating attendance with data:", attendanceData);
       const attendanceID = await createAttendance(attendanceData);
 
       if (attendanceID) {
-        console.log('New attendance record created successfully with ID:', attendanceID);
+        console.log(
+          "New attendance record created successfully with ID:",
+          attendanceID,
+        );
         res.status(201).json({
           success: true,
           message: "Attendance record created successfully",
-          data: { 
-            attendanceID, 
-            action: 'created',
+          data: {
+            attendanceID,
+            action: "created",
             studentName: `${student.FirstName} ${student.LastName}`,
             className: student.ClassName,
             section: student.Section,
             date: classDate,
-            status: status
+            status: status,
           },
         });
       } else {
-        throw new Error('Failed to create attendance record');
+        throw new Error("Failed to create attendance record");
       }
     }
   } catch (error) {
@@ -752,7 +775,8 @@ export const validateDatabaseSyncController = async (req, res) => {
     const { getAllStudents } = await import("../models/student.model.js");
     const allStudents = await getAllStudents();
     const classStudents = allStudents.filter(
-      student => student.ClassName === className && student.Section === section
+      (student) =>
+        student.ClassName === className && student.Section === section,
     );
 
     if (classStudents.length === 0) {
@@ -765,11 +789,14 @@ export const validateDatabaseSyncController = async (req, res) => {
     // Get attendance records for the specified period
     const monthStart = new Date(year, month, 1);
     const monthEnd = new Date(year, month + 1, 0);
-    
-    const attendanceRecords = await getAttendanceByClassAndSection(className, section);
-    
+
+    const attendanceRecords = await getAttendanceByClassAndSection(
+      className,
+      section,
+    );
+
     // Filter records by date range
-    const monthRecords = attendanceRecords.filter(record => {
+    const monthRecords = attendanceRecords.filter((record) => {
       const recordDate = new Date(record.ClassDate);
       return recordDate >= monthStart && recordDate <= monthEnd;
     });
@@ -791,10 +818,15 @@ export const validateDatabaseSyncController = async (req, res) => {
         actualRecords,
         integrityPercentage: Math.round(integrityPercentage * 100) / 100,
         lastUpdated: new Date().toISOString(),
-        syncStatus: integrityPercentage > 95 ? 'excellent' : 
-                   integrityPercentage > 80 ? 'good' : 
-                   integrityPercentage > 60 ? 'fair' : 'needs_attention'
-      }
+        syncStatus:
+          integrityPercentage > 95
+            ? "excellent"
+            : integrityPercentage > 80
+              ? "good"
+              : integrityPercentage > 60
+                ? "fair"
+                : "needs_attention",
+      },
     });
   } catch (error) {
     console.error("Error in validateDatabaseSyncController:", error);
@@ -821,7 +853,8 @@ export const forceSyncController = async (req, res) => {
     const { getAllStudents } = await import("../models/student.model.js");
     const allStudents = await getAllStudents();
     const classStudents = allStudents.filter(
-      student => student.ClassName === className && student.Section === section
+      (student) =>
+        student.ClassName === className && student.Section === section,
     );
 
     if (classStudents.length === 0) {
@@ -832,20 +865,23 @@ export const forceSyncController = async (req, res) => {
     }
 
     // Get fresh attendance data
-    const attendanceRecords = await getAttendanceByClassAndSection(className, section);
-    
+    const attendanceRecords = await getAttendanceByClassAndSection(
+      className,
+      section,
+    );
+
     // Filter by month and year
     const monthStart = new Date(year, month, 1);
     const monthEnd = new Date(year, month + 1, 0);
-    
-    const monthRecords = attendanceRecords.filter(record => {
+
+    const monthRecords = attendanceRecords.filter((record) => {
       const recordDate = new Date(record.ClassDate);
       return recordDate >= monthStart && recordDate <= monthEnd;
     });
 
     // Transform data for frontend consumption
     const attendanceMap = {};
-    monthRecords.forEach(record => {
+    monthRecords.forEach((record) => {
       const key = `${record.StudentID}-${record.ClassDate}`;
       attendanceMap[key] = record.Status;
     });
@@ -860,8 +896,8 @@ export const forceSyncController = async (req, res) => {
         syncTimestamp: new Date().toISOString(),
         period: `${months[month]} ${year}`,
         className,
-        section
-      }
+        section,
+      },
     });
   } catch (error) {
     console.error("Error in forceSyncController:", error);
@@ -874,6 +910,16 @@ export const forceSyncController = async (req, res) => {
 
 // Months array for reference
 const months = [
-  'January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December'
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
 ];

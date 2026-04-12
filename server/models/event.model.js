@@ -2,7 +2,7 @@ import db from "../config/db.config.js";
 
 /**
  * Event Model for School Management System
- * 
+ *
  * Database Schema:
  * CREATE TABLE Events (
  *     EventID INT PRIMARY KEY AUTO_INCREMENT NOT NULL,
@@ -18,7 +18,7 @@ import db from "../config/db.config.js";
  */
 
 // Valid event types from database schema
-const VALID_EVENT_TYPES = ['Academic', 'Sports', 'Cultural', 'Other'];
+const VALID_EVENT_TYPES = ["Academic", "Sports", "Cultural", "Other"];
 
 // Get all events
 const getAllEvents = async () => {
@@ -50,7 +50,8 @@ const getEventById = async (eventId) => {
       throw new Error("Event ID is required");
     }
 
-    const [rows] = await db.query(`
+    const [rows] = await db.query(
+      `
       SELECT 
         EventID,
         EventName,
@@ -63,8 +64,10 @@ const getEventById = async (eventId) => {
         UpdatedAt
       FROM Events
       WHERE EventID = ?
-    `, [eventId]);
-    
+    `,
+      [eventId],
+    );
+
     return rows[0] || null;
   } catch (err) {
     throw new Error("Error fetching event by ID: " + err.message);
@@ -74,23 +77,21 @@ const getEventById = async (eventId) => {
 // Add new event
 const addEvent = async (eventData) => {
   try {
-    const { 
-      eventName, 
-      eventType, 
-      startDate, 
-      endDate, 
-      venue, 
-      description 
-    } = eventData;
+    const { eventName, eventType, startDate, endDate, venue, description } =
+      eventData;
 
     // Validate required fields
     if (!eventName || !eventType || !startDate || !endDate) {
-      throw new Error("Event name, type, start date, and end date are required");
+      throw new Error(
+        "Event name, type, start date, and end date are required",
+      );
     }
 
     // Validate event type
     if (!VALID_EVENT_TYPES.includes(eventType)) {
-      throw new Error(`Invalid event type. Must be one of: ${VALID_EVENT_TYPES.join(', ')}`);
+      throw new Error(
+        `Invalid event type. Must be one of: ${VALID_EVENT_TYPES.join(", ")}`,
+      );
     }
 
     // Validate event name length
@@ -101,7 +102,7 @@ const addEvent = async (eventData) => {
     // Validate dates
     const startDateObj = new Date(startDate);
     const endDateObj = new Date(endDate);
-    
+
     if (isNaN(startDateObj.getTime()) || isNaN(endDateObj.getTime())) {
       throw new Error("Invalid date format. Use YYYY-MM-DD");
     }
@@ -116,10 +117,20 @@ const addEvent = async (eventData) => {
     }
 
     // Insert the event
-    const [result] = await db.query(`
+    const [result] = await db.query(
+      `
       INSERT INTO Events (EventName, EventType, StartDate, EndDate, Venue, Description)
       VALUES (?, ?, ?, ?, ?, ?)
-    `, [eventName.trim(), eventType, startDate, endDate, venue?.trim() || null, description?.trim() || null]);
+    `,
+      [
+        eventName.trim(),
+        eventType,
+        startDate,
+        endDate,
+        venue?.trim() || null,
+        description?.trim() || null,
+      ],
+    );
 
     return {
       success: true,
@@ -132,8 +143,8 @@ const addEvent = async (eventData) => {
         StartDate: startDate,
         EndDate: endDate,
         Venue: venue?.trim() || null,
-        Description: description?.trim() || null
-      }
+        Description: description?.trim() || null,
+      },
     };
   } catch (err) {
     throw new Error("Error adding event: " + err.message);
@@ -148,15 +159,19 @@ const updateEvent = async (eventId, eventData) => {
     }
 
     // Check if event exists
-    const [existingEvent] = await db.query(`
+    const [existingEvent] = await db.query(
+      `
       SELECT * FROM Events WHERE EventID = ?
-    `, [eventId]);
+    `,
+      [eventId],
+    );
 
     if (existingEvent.length === 0) {
       throw new Error("Event not found");
     }
 
-    const { eventName, eventType, startDate, endDate, venue, description } = eventData;
+    const { eventName, eventType, startDate, endDate, venue, description } =
+      eventData;
     const updates = [];
     const params = [];
 
@@ -174,7 +189,9 @@ const updateEvent = async (eventId, eventData) => {
 
     if (eventType !== undefined) {
       if (!VALID_EVENT_TYPES.includes(eventType)) {
-        throw new Error(`Invalid event type. Must be one of: ${VALID_EVENT_TYPES.join(', ')}`);
+        throw new Error(
+          `Invalid event type. Must be one of: ${VALID_EVENT_TYPES.join(", ")}`,
+        );
       }
       updates.push("EventType = ?");
       params.push(eventType);
@@ -224,11 +241,14 @@ const updateEvent = async (eventId, eventData) => {
 
     // Perform update
     params.push(eventId);
-    const [result] = await db.query(`
+    const [result] = await db.query(
+      `
       UPDATE Events 
-      SET ${updates.join(', ')}
+      SET ${updates.join(", ")}
       WHERE EventID = ?
-    `, params);
+    `,
+      params,
+    );
 
     if (result.affectedRows === 0) {
       throw new Error("No rows were updated");
@@ -237,7 +257,7 @@ const updateEvent = async (eventId, eventData) => {
     return {
       success: true,
       message: "Event updated successfully",
-      affectedRows: result.affectedRows
+      affectedRows: result.affectedRows,
     };
   } catch (err) {
     throw new Error("Error updating event: " + err.message);
@@ -258,9 +278,12 @@ const deleteEvent = async (eventId) => {
     }
 
     // Delete the event
-    const [result] = await db.query(`
+    const [result] = await db.query(
+      `
       DELETE FROM Events WHERE EventID = ?
-    `, [eventId]);
+    `,
+      [eventId],
+    );
 
     if (result.affectedRows === 0) {
       throw new Error("No event was deleted");
@@ -276,8 +299,8 @@ const deleteEvent = async (eventId) => {
         StartDate: eventInfo.StartDate,
         EndDate: eventInfo.EndDate,
         Venue: eventInfo.Venue,
-        Description: eventInfo.Description
-      }
+        Description: eventInfo.Description,
+      },
     };
   } catch (err) {
     throw new Error("Error deleting event: " + err.message);
@@ -287,7 +310,8 @@ const deleteEvent = async (eventId) => {
 // Get events by date range
 const getEventsByDateRange = async (startDate, endDate) => {
   try {
-    const [rows] = await db.query(`
+    const [rows] = await db.query(
+      `
       SELECT 
         EventID,
         EventName,
@@ -301,8 +325,10 @@ const getEventsByDateRange = async (startDate, endDate) => {
       FROM Events
       WHERE StartDate >= ? AND EndDate <= ?
       ORDER BY StartDate ASC
-    `, [startDate, endDate]);
-    
+    `,
+      [startDate, endDate],
+    );
+
     return rows;
   } catch (err) {
     throw new Error("Error fetching events by date range: " + err.message);
@@ -313,10 +339,13 @@ const getEventsByDateRange = async (startDate, endDate) => {
 const getEventsByType = async (eventType) => {
   try {
     if (!VALID_EVENT_TYPES.includes(eventType)) {
-      throw new Error(`Invalid event type. Must be one of: ${VALID_EVENT_TYPES.join(', ')}`);
+      throw new Error(
+        `Invalid event type. Must be one of: ${VALID_EVENT_TYPES.join(", ")}`,
+      );
     }
 
-    const [rows] = await db.query(`
+    const [rows] = await db.query(
+      `
       SELECT 
         EventID,
         EventName,
@@ -330,8 +359,10 @@ const getEventsByType = async (eventType) => {
       FROM Events
       WHERE EventType = ?
       ORDER BY StartDate ASC
-    `, [eventType]);
-    
+    `,
+      [eventType],
+    );
+
     return rows;
   } catch (err) {
     throw new Error("Error fetching events by type: " + err.message);
@@ -339,7 +370,12 @@ const getEventsByType = async (eventType) => {
 };
 
 export {
-    VALID_EVENT_TYPES, addEvent, deleteEvent, getAllEvents,
-    getEventById, getEventsByDateRange,
-    getEventsByType, updateEvent
+  VALID_EVENT_TYPES,
+  addEvent,
+  deleteEvent,
+  getAllEvents,
+  getEventById,
+  getEventsByDateRange,
+  getEventsByType,
+  updateEvent,
 };

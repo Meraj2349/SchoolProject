@@ -2,7 +2,7 @@ import db from "../config/db.config.js";
 
 /**
  * Result Model for School Management System
- * 
+ *
  * Database Schema (Matches your database.sql):
  * CREATE TABLE Results (
  *     ResultID INT PRIMARY KEY AUTO_INCREMENT,
@@ -50,7 +50,8 @@ const getAllResults = async () => {
 // Get result by ID with complete information
 const getResultById = async (resultId) => {
   try {
-    const [rows] = await db.query(`
+    const [rows] = await db.query(
+      `
       SELECT 
         r.MarksObtained,
         CONCAT(s.FirstName, ' ', s.LastName) as StudentName,
@@ -69,7 +70,9 @@ const getResultById = async (resultId) => {
       LEFT JOIN Subjects sub ON r.SubjectID = sub.SubjectID
       LEFT JOIN Classes c ON r.ClassID = c.ClassID
       WHERE r.ResultID = ?
-    `, [resultId]);
+    `,
+      [resultId],
+    );
     return rows[0];
   } catch (err) {
     throw new Error("Error fetching result by ID: " + err.message);
@@ -79,7 +82,8 @@ const getResultById = async (resultId) => {
 // Get results by student ID with complete information
 const getResultsByStudent = async (studentId) => {
   try {
-    const [rows] = await db.query(`
+    const [rows] = await db.query(
+      `
       SELECT 
         r.MarksObtained,
         CONCAT(s.FirstName, ' ', s.LastName) as StudentName,
@@ -99,7 +103,9 @@ const getResultsByStudent = async (studentId) => {
       LEFT JOIN Classes c ON r.ClassID = c.ClassID
       WHERE r.StudentID = ?
       ORDER BY e.ExamDate DESC
-    `, [studentId]);
+    `,
+      [studentId],
+    );
     return rows;
   } catch (err) {
     throw new Error("Error fetching results by student: " + err.message);
@@ -109,7 +115,8 @@ const getResultsByStudent = async (studentId) => {
 // Get results by exam ID with complete information
 const getResultsByExam = async (examId) => {
   try {
-    const [rows] = await db.query(`
+    const [rows] = await db.query(
+      `
       SELECT 
         r.MarksObtained,
         CONCAT(s.FirstName, ' ', s.LastName) as StudentName,
@@ -129,7 +136,9 @@ const getResultsByExam = async (examId) => {
       LEFT JOIN Classes c ON r.ClassID = c.ClassID
       WHERE r.ExamID = ?
       ORDER BY s.RollNumber, sub.SubjectName
-    `, [examId]);
+    `,
+      [examId],
+    );
     return rows;
   } catch (err) {
     throw new Error("Error fetching results by exam: " + err.message);
@@ -139,7 +148,8 @@ const getResultsByExam = async (examId) => {
 // Get results by class with complete information
 const getResultsByClass = async (classId) => {
   try {
-    const [rows] = await db.query(`
+    const [rows] = await db.query(
+      `
       SELECT 
         r.MarksObtained,
         CONCAT(s.FirstName, ' ', s.LastName) as StudentName,
@@ -159,7 +169,9 @@ const getResultsByClass = async (classId) => {
       LEFT JOIN Classes c ON r.ClassID = c.ClassID
       WHERE r.ClassID = ?
       ORDER BY e.ExamDate DESC, s.RollNumber
-    `, [classId]);
+    `,
+      [classId],
+    );
     return rows;
   } catch (err) {
     throw new Error("Error fetching results by class: " + err.message);
@@ -169,7 +181,8 @@ const getResultsByClass = async (classId) => {
 // Get results by subject with complete information
 const getResultsBySubject = async (subjectId) => {
   try {
-    const [rows] = await db.query(`
+    const [rows] = await db.query(
+      `
       SELECT 
         r.MarksObtained,
         CONCAT(s.FirstName, ' ', s.LastName) as StudentName,
@@ -189,7 +202,9 @@ const getResultsBySubject = async (subjectId) => {
       LEFT JOIN Classes c ON r.ClassID = c.ClassID
       WHERE r.SubjectID = ?
       ORDER BY e.ExamDate DESC, s.RollNumber
-    `, [subjectId]);
+    `,
+      [subjectId],
+    );
     return rows;
   } catch (err) {
     throw new Error("Error fetching results by subject: " + err.message);
@@ -199,13 +214,28 @@ const getResultsBySubject = async (subjectId) => {
 // Add new result with validation
 const addResult = async (resultData) => {
   try {
-    console.log('🔍 Model addResult called with:', resultData);
+    console.log("🔍 Model addResult called with:", resultData);
     const { StudentID, ExamID, SubjectID, ClassID, MarksObtained } = resultData;
-    console.log('🔍 Extracted values:', { StudentID, ExamID, SubjectID, ClassID, MarksObtained });
-    
+    console.log("🔍 Extracted values:", {
+      StudentID,
+      ExamID,
+      SubjectID,
+      ClassID,
+      MarksObtained,
+    });
+
     // Validate required fields
-    if (!StudentID || !ExamID || !SubjectID || !ClassID || MarksObtained === undefined || MarksObtained === null) {
-      throw new Error("All fields are required: StudentID, ExamID, SubjectID, ClassID, MarksObtained");
+    if (
+      !StudentID ||
+      !ExamID ||
+      !SubjectID ||
+      !ClassID ||
+      MarksObtained === undefined ||
+      MarksObtained === null
+    ) {
+      throw new Error(
+        "All fields are required: StudentID, ExamID, SubjectID, ClassID, MarksObtained",
+      );
     }
 
     // Validate marks
@@ -218,40 +248,56 @@ const addResult = async (resultData) => {
     }
 
     // Check if student exists and belongs to the specified class
-    const [studentCheck] = await db.query(`
+    const [studentCheck] = await db.query(
+      `
       SELECT s.StudentID, s.FirstName, s.LastName, s.RollNumber, c.ClassName, c.Section
       FROM Students s
       LEFT JOIN Classes c ON s.ClassID = c.ClassID
       WHERE s.StudentID = ? AND s.ClassID = ?
-    `, [StudentID, ClassID]);
+    `,
+      [StudentID, ClassID],
+    );
 
     if (studentCheck.length === 0) {
-      console.log('❌ Student not found for StudentID:', StudentID, 'ClassID:', ClassID);
-      throw new Error("Student not found or does not belong to the specified class");
+      console.log(
+        "❌ Student not found for StudentID:",
+        StudentID,
+        "ClassID:",
+        ClassID,
+      );
+      throw new Error(
+        "Student not found or does not belong to the specified class",
+      );
     }
-    console.log('✅ Student found:', studentCheck[0]);
+    console.log("✅ Student found:", studentCheck[0]);
 
     // Check if exam exists (remove class restriction for now)
-    const [examCheck] = await db.query(`
+    const [examCheck] = await db.query(
+      `
       SELECT ExamID, ExamName, ExamType, ClassID FROM Exams WHERE ExamID = ?
-    `, [ExamID]);
+    `,
+      [ExamID],
+    );
 
     if (examCheck.length === 0) {
-      console.log('❌ Exam not found for ExamID:', ExamID);
+      console.log("❌ Exam not found for ExamID:", ExamID);
       throw new Error("Exam not found");
     }
-    console.log('✅ Exam found:', examCheck[0]);
+    console.log("✅ Exam found:", examCheck[0]);
 
-    // Check if subject exists (remove class restriction for now)  
-    const [subjectCheck] = await db.query(`
+    // Check if subject exists (remove class restriction for now)
+    const [subjectCheck] = await db.query(
+      `
       SELECT SubjectID, SubjectName, ClassID FROM Subjects WHERE SubjectID = ?
-    `, [SubjectID]);
+    `,
+      [SubjectID],
+    );
 
     if (subjectCheck.length === 0) {
-      console.log('❌ Subject not found for SubjectID:', SubjectID);
+      console.log("❌ Subject not found for SubjectID:", SubjectID);
       throw new Error("Subject not found");
     }
-    console.log('✅ Subject found:', subjectCheck[0]);
+    console.log("✅ Subject found:", subjectCheck[0]);
 
     // Check if result already exists
     const exists = await checkResultExists(StudentID, ExamID, SubjectID);
@@ -259,17 +305,22 @@ const addResult = async (resultData) => {
       const student = studentCheck[0];
       const exam = examCheck[0];
       const subject = subjectCheck[0];
-      throw new Error(`Result already exists for ${student.FirstName} ${student.LastName} (Roll: ${student.RollNumber}) in ${subject.SubjectName} for ${exam.ExamName} exam`);
+      throw new Error(
+        `Result already exists for ${student.FirstName} ${student.LastName} (Roll: ${student.RollNumber}) in ${subject.SubjectName} for ${exam.ExamName} exam`,
+      );
     }
 
     // Insert the result
-    console.log('🔄 Executing INSERT query...');
-    const [result] = await db.query(`
+    console.log("🔄 Executing INSERT query...");
+    const [result] = await db.query(
+      `
       INSERT INTO Results (StudentID, ExamID, SubjectID, ClassID, MarksObtained)
       VALUES (?, ?, ?, ?, ?)
-    `, [StudentID, ExamID, SubjectID, ClassID, MarksObtained]);
+    `,
+      [StudentID, ExamID, SubjectID, ClassID, MarksObtained],
+    );
 
-    console.log('📊 INSERT result:', result);
+    console.log("📊 INSERT result:", result);
 
     return {
       affectedRows: result.affectedRows,
@@ -284,8 +335,8 @@ const addResult = async (resultData) => {
         MarksObtained,
         studentInfo: studentCheck[0],
         examInfo: examCheck[0],
-        subjectInfo: subjectCheck[0]
-      }
+        subjectInfo: subjectCheck[0],
+      },
     };
   } catch (err) {
     throw new Error("Error adding result: " + err.message);
@@ -295,14 +346,14 @@ const addResult = async (resultData) => {
 // Add result by student details (name, roll, class, section)
 const addResultByStudentDetails = async (resultData) => {
   try {
-    const { 
-      studentName, 
-      rollNumber, 
-      className, 
-      section, 
-      examName, 
-      subjectName, 
-      marksObtained 
+    const {
+      studentName,
+      rollNumber,
+      className,
+      section,
+      examName,
+      subjectName,
+      marksObtained,
     } = resultData;
 
     // Validate required fields
@@ -343,53 +394,72 @@ const addResultByStudentDetails = async (resultData) => {
     const [studentRows] = await db.query(studentQuery, studentParams);
 
     if (studentRows.length === 0) {
-      throw new Error("Student not found with the provided details. Please check student name, roll number, class, and section.");
+      throw new Error(
+        "Student not found with the provided details. Please check student name, roll number, class, and section.",
+      );
     }
 
     if (studentRows.length > 1) {
-      throw new Error("Multiple students found with the provided details. Please provide more specific information.");
+      throw new Error(
+        "Multiple students found with the provided details. Please provide more specific information.",
+      );
     }
 
     const student = studentRows[0];
     const studentId = student.StudentID;
 
     // Get exam ID by exam name and class
-    const [examRows] = await db.query(`
+    const [examRows] = await db.query(
+      `
       SELECT e.ExamID, e.ExamName, e.ExamType, c.ClassName, c.Section
       FROM Exams e
       LEFT JOIN Classes c ON e.ClassID = c.ClassID
       WHERE e.ExamName = ? AND c.ClassName = ? AND c.Section = ?
-    `, [examName, className, section]);
+    `,
+      [examName, className, section],
+    );
 
     if (examRows.length === 0) {
-      throw new Error(`Exam '${examName}' not found for class '${className}' section '${section}'. Please check exam name and class details.`);
+      throw new Error(
+        `Exam '${examName}' not found for class '${className}' section '${section}'. Please check exam name and class details.`,
+      );
     }
 
     const exam = examRows[0];
     const examId = exam.ExamID;
 
     // Get subject ID by subject name and class
-    const [subjectRows] = await db.query(`
+    const [subjectRows] = await db.query(
+      `
       SELECT sub.SubjectID, sub.SubjectName, c.ClassName, c.Section
       FROM Subjects sub
       LEFT JOIN Classes c ON sub.ClassID = c.ClassID
       WHERE sub.SubjectName = ? AND c.ClassName = ? AND c.Section = ?
-    `, [subjectName, className, section]);
+    `,
+      [subjectName, className, section],
+    );
 
     if (subjectRows.length === 0) {
-      throw new Error(`Subject '${subjectName}' not found for class '${className}' section '${section}'. Please check subject name and class details.`);
+      throw new Error(
+        `Subject '${subjectName}' not found for class '${className}' section '${section}'. Please check subject name and class details.`,
+      );
     }
 
     const subject = subjectRows[0];
     const subjectId = subject.SubjectID;
 
     // Get class ID
-    const [classRows] = await db.query(`
+    const [classRows] = await db.query(
+      `
       SELECT ClassID FROM Classes WHERE ClassName = ? AND Section = ?
-    `, [className, section]);
+    `,
+      [className, section],
+    );
 
     if (classRows.length === 0) {
-      throw new Error(`Class '${className}' section '${section}' not found. Please check class and section names.`);
+      throw new Error(
+        `Class '${className}' section '${section}' not found. Please check class and section names.`,
+      );
     }
 
     const classId = classRows[0].ClassID;
@@ -397,7 +467,9 @@ const addResultByStudentDetails = async (resultData) => {
     // Check if result already exists
     const exists = await checkResultExists(studentId, examId, subjectId);
     if (exists) {
-      throw new Error(`Result already exists for student '${student.FirstName} ${student.LastName}' (Roll: ${student.RollNumber}) in '${subjectName}' for '${examName}' exam.`);
+      throw new Error(
+        `Result already exists for student '${student.FirstName} ${student.LastName}' (Roll: ${student.RollNumber}) in '${subjectName}' for '${examName}' exam.`,
+      );
     }
 
     // Validate marks (assuming 100 as max marks, adjust as needed)
@@ -406,10 +478,13 @@ const addResultByStudentDetails = async (resultData) => {
     }
 
     // Insert the result
-    const [result] = await db.query(`
+    const [result] = await db.query(
+      `
       INSERT INTO Results (StudentID, ExamID, SubjectID, ClassID, MarksObtained)
       VALUES (?, ?, ?, ?, ?)
-    `, [studentId, examId, subjectId, classId, marksObtained]);
+    `,
+      [studentId, examId, subjectId, classId, marksObtained],
+    );
 
     return {
       success: true,
@@ -422,7 +497,7 @@ const addResultByStudentDetails = async (resultData) => {
       examType: exam.ExamType,
       subjectName: subjectName,
       marksObtained: marksObtained,
-      message: `Result added successfully for ${student.FirstName} ${student.LastName} (Roll: ${student.RollNumber}) in ${subjectName}`
+      message: `Result added successfully for ${student.FirstName} ${student.LastName} (Roll: ${student.RollNumber}) in ${subjectName}`,
     };
   } catch (err) {
     throw new Error("Error adding result by student details: " + err.message);
@@ -445,34 +520,56 @@ const addMultipleResults = async (resultsData) => {
       const { StudentID, ExamID, SubjectID, ClassID, MarksObtained } = result;
 
       // Check required fields
-      if (!StudentID || !ExamID || !SubjectID || !ClassID || MarksObtained === undefined || MarksObtained === null) {
+      if (
+        !StudentID ||
+        !ExamID ||
+        !SubjectID ||
+        !ClassID ||
+        MarksObtained === undefined ||
+        MarksObtained === null
+      ) {
         errors.push(`Row ${i + 1}: Missing required fields`);
         continue;
       }
 
       // Validate marks
       if (MarksObtained < 0 || MarksObtained > 100) {
-        errors.push(`Row ${i + 1}: Invalid marks (${MarksObtained}). Must be between 0 and 100`);
+        errors.push(
+          `Row ${i + 1}: Invalid marks (${MarksObtained}). Must be between 0 and 100`,
+        );
         continue;
       }
 
       // Check for duplicates in the same batch
-      const duplicate = validatedResults.find(r => 
-        r.StudentID === StudentID && r.ExamID === ExamID && r.SubjectID === SubjectID
+      const duplicate = validatedResults.find(
+        (r) =>
+          r.StudentID === StudentID &&
+          r.ExamID === ExamID &&
+          r.SubjectID === SubjectID,
       );
       if (duplicate) {
-        errors.push(`Row ${i + 1}: Duplicate result in batch for StudentID ${StudentID}, ExamID ${ExamID}, SubjectID ${SubjectID}`);
+        errors.push(
+          `Row ${i + 1}: Duplicate result in batch for StudentID ${StudentID}, ExamID ${ExamID}, SubjectID ${SubjectID}`,
+        );
         continue;
       }
 
       // Check if result already exists in database
       const exists = await checkResultExists(StudentID, ExamID, SubjectID);
       if (exists) {
-        errors.push(`Row ${i + 1}: Result already exists for StudentID ${StudentID}, ExamID ${ExamID}, SubjectID ${SubjectID}`);
+        errors.push(
+          `Row ${i + 1}: Result already exists for StudentID ${StudentID}, ExamID ${ExamID}, SubjectID ${SubjectID}`,
+        );
         continue;
       }
 
-      validatedResults.push([StudentID, ExamID, SubjectID, ClassID, MarksObtained]);
+      validatedResults.push([
+        StudentID,
+        ExamID,
+        SubjectID,
+        ClassID,
+        MarksObtained,
+      ]);
     }
 
     if (errors.length > 0) {
@@ -484,16 +581,19 @@ const addMultipleResults = async (resultsData) => {
     }
 
     // Insert all valid results
-    const [result] = await db.query(`
+    const [result] = await db.query(
+      `
       INSERT INTO Results (StudentID, ExamID, SubjectID, ClassID, MarksObtained)
       VALUES ?
-    `, [validatedResults]);
+    `,
+      [validatedResults],
+    );
 
     return {
       success: true,
       insertedCount: validatedResults.length,
       firstInsertId: result.insertId,
-      message: `Successfully inserted ${validatedResults.length} results`
+      message: `Successfully inserted ${validatedResults.length} results`,
     };
   } catch (err) {
     throw new Error("Error adding multiple results: " + err.message);
@@ -508,9 +608,12 @@ const updateResult = async (resultId, resultData) => {
     }
 
     // Check if result exists
-    const [existingResult] = await db.query(`
+    const [existingResult] = await db.query(
+      `
       SELECT * FROM Results WHERE ResultID = ?
-    `, [resultId]);
+    `,
+      [resultId],
+    );
 
     if (existingResult.length === 0) {
       throw new Error("Result not found");
@@ -523,56 +626,74 @@ const updateResult = async (resultId, resultData) => {
     // Build dynamic update query
     if (StudentID !== undefined) {
       // Validate student exists and belongs to class
-      const [studentCheck] = await db.query(`
+      const [studentCheck] = await db.query(
+        `
         SELECT StudentID FROM Students WHERE StudentID = ? AND ClassID = ?
-      `, [StudentID, ClassID || existingResult[0].ClassID]);
-      
+      `,
+        [StudentID, ClassID || existingResult[0].ClassID],
+      );
+
       if (studentCheck.length === 0) {
-        throw new Error("Student not found or does not belong to the specified class");
+        throw new Error(
+          "Student not found or does not belong to the specified class",
+        );
       }
-      
+
       updates.push("StudentID = ?");
       params.push(StudentID);
     }
 
     if (ExamID !== undefined) {
       // Validate exam exists and belongs to class
-      const [examCheck] = await db.query(`
+      const [examCheck] = await db.query(
+        `
         SELECT ExamID FROM Exams WHERE ExamID = ? AND ClassID = ?
-      `, [ExamID, ClassID || existingResult[0].ClassID]);
-      
+      `,
+        [ExamID, ClassID || existingResult[0].ClassID],
+      );
+
       if (examCheck.length === 0) {
-        throw new Error("Exam not found or does not belong to the specified class");
+        throw new Error(
+          "Exam not found or does not belong to the specified class",
+        );
       }
-      
+
       updates.push("ExamID = ?");
       params.push(ExamID);
     }
 
     if (SubjectID !== undefined) {
       // Validate subject exists and belongs to class
-      const [subjectCheck] = await db.query(`
+      const [subjectCheck] = await db.query(
+        `
         SELECT SubjectID FROM Subjects WHERE SubjectID = ? AND ClassID = ?
-      `, [SubjectID, ClassID || existingResult[0].ClassID]);
-      
+      `,
+        [SubjectID, ClassID || existingResult[0].ClassID],
+      );
+
       if (subjectCheck.length === 0) {
-        throw new Error("Subject not found or does not belong to the specified class");
+        throw new Error(
+          "Subject not found or does not belong to the specified class",
+        );
       }
-      
+
       updates.push("SubjectID = ?");
       params.push(SubjectID);
     }
 
     if (ClassID !== undefined) {
       // Validate class exists
-      const [classCheck] = await db.query(`
+      const [classCheck] = await db.query(
+        `
         SELECT ClassID FROM Classes WHERE ClassID = ?
-      `, [ClassID]);
-      
+      `,
+        [ClassID],
+      );
+
       if (classCheck.length === 0) {
         throw new Error("Class not found");
       }
-      
+
       updates.push("ClassID = ?");
       params.push(ClassID);
     }
@@ -582,7 +703,7 @@ const updateResult = async (resultId, resultData) => {
       if (MarksObtained < 0 || MarksObtained > 100) {
         throw new Error("Marks obtained must be between 0 and 100");
       }
-      
+
       updates.push("MarksObtained = ?");
       params.push(MarksObtained);
     }
@@ -592,28 +713,40 @@ const updateResult = async (resultId, resultData) => {
     }
 
     // Check for duplicate result if StudentID, ExamID, or SubjectID is being updated
-    if (StudentID !== undefined || ExamID !== undefined || SubjectID !== undefined) {
+    if (
+      StudentID !== undefined ||
+      ExamID !== undefined ||
+      SubjectID !== undefined
+    ) {
       const newStudentID = StudentID || existingResult[0].StudentID;
       const newExamID = ExamID || existingResult[0].ExamID;
       const newSubjectID = SubjectID || existingResult[0].SubjectID;
 
-      const [duplicateCheck] = await db.query(`
+      const [duplicateCheck] = await db.query(
+        `
         SELECT ResultID FROM Results 
         WHERE StudentID = ? AND ExamID = ? AND SubjectID = ? AND ResultID != ?
-      `, [newStudentID, newExamID, newSubjectID, resultId]);
+      `,
+        [newStudentID, newExamID, newSubjectID, resultId],
+      );
 
       if (duplicateCheck.length > 0) {
-        throw new Error("Another result already exists for this student, exam, and subject combination");
+        throw new Error(
+          "Another result already exists for this student, exam, and subject combination",
+        );
       }
     }
 
     // Perform update
     params.push(resultId);
-    const [result] = await db.query(`
+    const [result] = await db.query(
+      `
       UPDATE Results 
-      SET ${updates.join(', ')}
+      SET ${updates.join(", ")}
       WHERE ResultID = ?
-    `, params);
+    `,
+      params,
+    );
 
     if (result.affectedRows === 0) {
       throw new Error("No rows were updated");
@@ -622,7 +755,7 @@ const updateResult = async (resultId, resultData) => {
     return {
       success: true,
       message: "Result updated successfully",
-      affectedRows: result.affectedRows
+      affectedRows: result.affectedRows,
     };
   } catch (err) {
     throw new Error("Error updating result: " + err.message);
@@ -632,9 +765,12 @@ const updateResult = async (resultId, resultData) => {
 // Delete result
 const deleteResult = async (resultId) => {
   try {
-    const [result] = await db.query(`
+    const [result] = await db.query(
+      `
       DELETE FROM Results WHERE ResultID = ?
-    `, [resultId]);
+    `,
+      [resultId],
+    );
     return result;
   } catch (err) {
     throw new Error("Error deleting result: " + err.message);
@@ -644,9 +780,12 @@ const deleteResult = async (resultId) => {
 // Delete results by exam
 const deleteResultsByExam = async (examId) => {
   try {
-    const [result] = await db.query(`
+    const [result] = await db.query(
+      `
       DELETE FROM Results WHERE ExamID = ?
-    `, [examId]);
+    `,
+      [examId],
+    );
     return result;
   } catch (err) {
     throw new Error("Error deleting results by exam: " + err.message);
@@ -668,11 +807,14 @@ const getResultCount = async () => {
 // Check if result exists
 const checkResultExists = async (studentId, examId, subjectId) => {
   try {
-    const [rows] = await db.query(`
+    const [rows] = await db.query(
+      `
       SELECT COUNT(*) as count 
       FROM Results 
       WHERE StudentID = ? AND ExamID = ? AND SubjectID = ?
-    `, [studentId, examId, subjectId]);
+    `,
+      [studentId, examId, subjectId],
+    );
     return rows[0].count > 0;
   } catch (err) {
     throw new Error("Error checking result existence: " + err.message);
@@ -682,7 +824,8 @@ const checkResultExists = async (studentId, examId, subjectId) => {
 // Find a result row by composite keys (StudentID + ExamID + SubjectID)
 const findResultByComposite = async (studentId, examId, subjectId) => {
   try {
-    const [rows] = await db.query(`
+    const [rows] = await db.query(
+      `
       SELECT 
         r.ResultID,
         r.StudentID,
@@ -693,7 +836,9 @@ const findResultByComposite = async (studentId, examId, subjectId) => {
       FROM Results r
       WHERE r.StudentID = ? AND r.ExamID = ? AND r.SubjectID = ?
       LIMIT 1
-    `, [studentId, examId, subjectId]);
+    `,
+      [studentId, examId, subjectId],
+    );
     return rows[0] || null;
   } catch (err) {
     throw new Error("Error finding result by composite keys: " + err.message);
@@ -703,7 +848,8 @@ const findResultByComposite = async (studentId, examId, subjectId) => {
 // Get student result summary (all subjects for a specific exam) with complete information
 const getStudentResultSummary = async (studentId, examId) => {
   try {
-    const [rows] = await db.query(`
+    const [rows] = await db.query(
+      `
       SELECT 
         r.MarksObtained,
         sub.SubjectName,
@@ -722,7 +868,9 @@ const getStudentResultSummary = async (studentId, examId) => {
       LEFT JOIN Classes c ON r.ClassID = c.ClassID
       WHERE r.StudentID = ? AND r.ExamID = ?
       ORDER BY sub.SubjectName
-    `, [studentId, examId]);
+    `,
+      [studentId, examId],
+    );
     return rows;
   } catch (err) {
     throw new Error("Error fetching student result summary: " + err.message);
@@ -847,7 +995,7 @@ const searchResults = async (filters) => {
     if (filters.limit) {
       query += ` LIMIT ?`;
       params.push(parseInt(filters.limit));
-      
+
       if (filters.offset) {
         query += ` OFFSET ?`;
         params.push(parseInt(filters.offset));
@@ -876,10 +1024,10 @@ const advancedSearchResults = async (searchCriteria) => {
       examType,
       startDate,
       endDate,
-      sortBy = 'examDate',
-      sortOrder = 'DESC',
+      sortBy = "examDate",
+      sortOrder = "DESC",
       limit = 50,
-      offset = 0
+      offset = 0,
     } = searchCriteria;
 
     let query = `
@@ -914,13 +1062,15 @@ const advancedSearchResults = async (searchCriteria) => {
       LEFT JOIN Classes c ON r.ClassID = c.ClassID
       WHERE 1=1
     `;
-    
+
     const params = [];
     const conditions = [];
 
     // Build search conditions
     if (studentName) {
-      conditions.push(`(s.FirstName LIKE ? OR s.LastName LIKE ? OR CONCAT(s.FirstName, ' ', s.LastName) LIKE ?)`);
+      conditions.push(
+        `(s.FirstName LIKE ? OR s.LastName LIKE ? OR CONCAT(s.FirstName, ' ', s.LastName) LIKE ?)`,
+      );
       const namePattern = `%${studentName}%`;
       params.push(namePattern, namePattern, namePattern);
     }
@@ -977,22 +1127,22 @@ const advancedSearchResults = async (searchCriteria) => {
 
     // Add conditions to query
     if (conditions.length > 0) {
-      query += ` AND ${conditions.join(' AND ')}`;
+      query += ` AND ${conditions.join(" AND ")}`;
     }
 
     // Add sorting
     const sortColumns = {
-      'examDate': 'e.ExamDate',
-      'studentName': 'CONCAT(s.FirstName, " ", s.LastName)',
-      'rollNumber': 's.RollNumber',
-      'className': 'c.ClassName',
-      'marks': 'r.MarksObtained',
-      'subjectName': 'sub.SubjectName'
+      examDate: "e.ExamDate",
+      studentName: 'CONCAT(s.FirstName, " ", s.LastName)',
+      rollNumber: "s.RollNumber",
+      className: "c.ClassName",
+      marks: "r.MarksObtained",
+      subjectName: "sub.SubjectName",
     };
 
-    const sortColumn = sortColumns[sortBy] || 'e.ExamDate';
-    const order = sortOrder.toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
-    
+    const sortColumn = sortColumns[sortBy] || "e.ExamDate";
+    const order = sortOrder.toUpperCase() === "ASC" ? "ASC" : "DESC";
+
     query += ` ORDER BY ${sortColumn} ${order}, s.RollNumber ASC`;
 
     // Add pagination
@@ -1000,7 +1150,7 @@ const advancedSearchResults = async (searchCriteria) => {
     params.push(limit, offset);
 
     const [rows] = await db.query(query, params);
-    
+
     // Get total count for pagination
     let countQuery = `
       SELECT COUNT(*) as total
@@ -1011,20 +1161,20 @@ const advancedSearchResults = async (searchCriteria) => {
       LEFT JOIN Classes c ON r.ClassID = c.ClassID
       WHERE 1=1
     `;
-    
+
     if (conditions.length > 0) {
-      countQuery += ` AND ${conditions.join(' AND ')}`;
+      countQuery += ` AND ${conditions.join(" AND ")}`;
     }
-    
+
     const countParams = params.slice(0, -2); // Remove limit and offset
     const [countRows] = await db.query(countQuery, countParams);
-    
+
     return {
       results: rows,
       total: countRows[0].total,
       limit,
       offset,
-      hasMore: (offset + limit) < countRows[0].total
+      hasMore: offset + limit < countRows[0].total,
     };
   } catch (err) {
     throw new Error("Error in advanced search: " + err.message);
@@ -1036,8 +1186,11 @@ export {
   addResult,
   addResultByStudentDetails,
   advancedSearchResults,
-  checkResultExists, deleteResult,
-  deleteResultsByExam, findResultByComposite, getAllResults,
+  checkResultExists,
+  deleteResult,
+  deleteResultsByExam,
+  findResultByComposite,
+  getAllResults,
   getResultById,
   getResultCount,
   getResultsByClass,
@@ -1046,6 +1199,5 @@ export {
   getResultsBySubject,
   getStudentResultSummary,
   searchResults,
-  updateResult
+  updateResult,
 };
-

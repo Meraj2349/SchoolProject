@@ -1,5 +1,9 @@
 import fs from "fs";
-import { deleteFromCloudinary, uploadToCloudinary } from "../config/cloudinary.config.js";
+import {
+  deleteFromCloudinary,
+  uploadToCloudinary,
+} from "../config/cloudinary.config.js";
+import { t } from "../config/i18n.js";
 import * as RoutineModel from "../models/routine.model.js";
 
 // Create new routine with file upload (Classes table structure follow করে)
@@ -12,17 +16,18 @@ export const createRoutine = async (req, res) => {
     const { RoutineTitle, ClassID, RoutineDate, Description } = req.body;
 
     // Validate required fields (Classes table structure অনুযায়ী)
+    const lang = req.language;
     if (!RoutineTitle || !ClassID || !RoutineDate) {
-      return res.status(400).json({ 
-        message: "Missing required fields: RoutineTitle, ClassID, RoutineDate" 
-      });
+      return res
+        .status(400)
+        .json({ message: t("routine_file_required", lang) });
     }
 
     // Validate class exists (Classes table থেকে ClassName এবং Section পাওয়ার জন্য)
     const classInfo = await RoutineModel.validateClassId(ClassID);
     if (!classInfo) {
-      return res.status(400).json({ 
-        message: `Invalid ClassID: ${ClassID}. Class does not exist.` 
+      return res.status(400).json({
+        message: `Invalid ClassID: ${ClassID}. Class does not exist.`,
       });
     }
 
@@ -31,7 +36,7 @@ export const createRoutine = async (req, res) => {
       ClassID: parseInt(ClassID),
       RoutineDate,
       Description: Description || null,
-      CreatedBy: req.adminId || null // From auth middleware
+      CreatedBy: req.adminId || null, // From auth middleware
     };
 
     // Handle file upload if present (with Cloudinary fallback)
@@ -39,77 +44,83 @@ export const createRoutine = async (req, res) => {
       try {
         // Try to upload to Cloudinary with timeout
         console.log("Attempting Cloudinary upload...");
-        const uploadPromise = uploadToCloudinary(req.file.path, "school/routines");
-        const timeoutPromise = new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Cloudinary timeout')), 15000)
+        const uploadPromise = uploadToCloudinary(
+          req.file.path,
+          "school/routines",
         );
-        
+        const timeoutPromise = new Promise((_, reject) =>
+          setTimeout(() => reject(new Error("Cloudinary timeout")), 15000),
+        );
+
         const result = await Promise.race([uploadPromise, timeoutPromise]);
 
         routineData.FileURL = result.secure_url;
         routineData.FilePublicID = result.public_id;
-        
+
         // Determine file type based on format
-        const fileFormat = result.format?.toLowerCase() || 'pdf';
-        if (['pdf'].includes(fileFormat)) {
-          routineData.FileType = 'pdf';
-        } else if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(fileFormat)) {
-          routineData.FileType = 'image';
+        const fileFormat = result.format?.toLowerCase() || "pdf";
+        if (["pdf"].includes(fileFormat)) {
+          routineData.FileType = "pdf";
+        } else if (["jpg", "jpeg", "png", "gif", "webp"].includes(fileFormat)) {
+          routineData.FileType = "image";
         } else {
-          routineData.FileType = 'pdf'; // Default
+          routineData.FileType = "pdf"; // Default
         }
 
         // Clean up local file after successful upload
         fs.unlinkSync(req.file.path);
-        
-        console.log("File uploaded to Cloudinary successfully:", result.secure_url);
+
+        console.log(
+          "File uploaded to Cloudinary successfully:",
+          result.secure_url,
+        );
       } catch (uploadError) {
         console.error("Cloudinary upload error:", uploadError);
-        
+
         // Fallback: Save file locally and continue without Cloudinary
         console.log("Using local file storage as fallback...");
-        
+
         try {
           // Move file to permanent location with a clean filename
-          const fileExtension = req.file.originalname.split('.').pop();
+          const fileExtension = req.file.originalname.split(".").pop();
           const newFilename = `routine_${Date.now()}.${fileExtension}`;
           const newPath = `/uploads/${newFilename}`;
           const fullPath = `${process.cwd()}/public${newPath}`;
-          
+
           // Ensure uploads directory exists
           const uploadsDir = `${process.cwd()}/public/uploads`;
           if (!fs.existsSync(uploadsDir)) {
             fs.mkdirSync(uploadsDir, { recursive: true });
           }
-          
+
           // Move file to permanent location
           fs.renameSync(req.file.path, fullPath);
-          
+
           // Use local file path
           routineData.FileURL = `http://localhost:3000${newPath}`;
           routineData.FilePublicID = null; // No Cloudinary ID
-          
+
           // Determine file type from extension
           const fileExt = fileExtension?.toLowerCase();
-          if (['pdf'].includes(fileExt)) {
-            routineData.FileType = 'pdf';
-          } else if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(fileExt)) {
-            routineData.FileType = 'image';
+          if (["pdf"].includes(fileExt)) {
+            routineData.FileType = "pdf";
+          } else if (["jpg", "jpeg", "png", "gif", "webp"].includes(fileExt)) {
+            routineData.FileType = "image";
           } else {
-            routineData.FileType = 'pdf'; // Default
+            routineData.FileType = "pdf"; // Default
           }
-          
+
           console.log("File saved locally:", routineData.FileURL);
-          
         } catch (localError) {
           console.error("Local file save error:", localError);
           // Clean up original file
           if (fs.existsSync(req.file.path)) {
             fs.unlinkSync(req.file.path);
           }
-          return res.status(500).json({ 
-            message: "File upload failed - both Cloudinary and local storage failed", 
-            error: `Cloudinary: ${uploadError.message}, Local: ${localError.message}`
+          return res.status(500).json({
+            message:
+              "File upload failed - both Cloudinary and local storage failed",
+            error: `Cloudinary: ${uploadError.message}, Local: ${localError.message}`,
           });
         }
       }
@@ -117,43 +128,38 @@ export const createRoutine = async (req, res) => {
 
     const routine = await RoutineModel.createRoutine(routineData);
     res.status(201).json({
-      message: "Routine created successfully",
+      message: t("routine_created", req.language),
       routine,
       classInfo: {
         ClassID: classInfo.ClassID,
         ClassName: classInfo.ClassName,
-        Section: classInfo.Section
-      }
+        Section: classInfo.Section,
+      },
     });
-
   } catch (error) {
     console.error("Create routine error:", error);
     // Clean up local file on error
     if (req.file && fs.existsSync(req.file.path)) {
       fs.unlinkSync(req.file.path);
     }
-    res.status(500).json({ 
-      message: "Error creating routine", 
-      error: error.message 
+    res.status(500).json({
+      message: "Error creating routine",
+      error: error.message,
     });
   }
 };
 
 // Get all routines with class names and sections
 export const getAllRoutines = async (req, res) => {
+  const lang = req.language;
   try {
     const routines = await RoutineModel.getAllRoutines();
-    res.status(200).json({
-      message: "Routines retrieved successfully",
-      count: routines.length,
-      routines
-    });
+    res.status(200).json({ count: routines.length, routines });
   } catch (error) {
     console.error("Get all routines error:", error);
-    res.status(500).json({ 
-      message: "Error retrieving routines", 
-      error: error.message 
-    });
+    res
+      .status(500)
+      .json({ message: t("routine_fetch_failed", lang), error: error.message });
   }
 };
 
@@ -161,26 +167,24 @@ export const getAllRoutines = async (req, res) => {
 export const getRoutineById = async (req, res) => {
   try {
     const { id } = req.params;
-    
+
+    const lang = req.language;
     if (!id || isNaN(id)) {
-      return res.status(400).json({ message: "Valid routine ID is required" });
+      return res.status(400).json({ message: t("routine_id_required", lang) });
     }
 
     const routine = await RoutineModel.getRoutineById(id);
-    
+
     if (!routine) {
-      return res.status(404).json({ message: "Routine not found" });
+      return res.status(404).json({ message: t("routine_not_found", lang) });
     }
 
-    res.status(200).json({
-      message: "Routine retrieved successfully",
-      routine
-    });
+    res.status(200).json({ routine });
   } catch (error) {
     console.error("Get routine by ID error:", error);
-    res.status(500).json({ 
-      message: "Error retrieving routine", 
-      error: error.message 
+    res.status(500).json({
+      message: "Error retrieving routine",
+      error: error.message,
     });
   }
 };
@@ -189,20 +193,23 @@ export const getRoutineById = async (req, res) => {
 export const getRoutinesByClassSection = async (req, res) => {
   try {
     const { className, section } = req.query;
-    
-    const routines = await RoutineModel.getRoutinesByClassSection(className, section);
-    
+
+    const routines = await RoutineModel.getRoutinesByClassSection(
+      className,
+      section,
+    );
+
     res.status(200).json({
       message: "Routines retrieved successfully",
       count: routines.length,
-      filters: { className: className || 'all', section: section || 'all' },
-      routines
+      filters: { className: className || "all", section: section || "all" },
+      routines,
     });
   } catch (error) {
     console.error("Get routines by class/section error:", error);
-    res.status(500).json({ 
-      message: "Error retrieving routines", 
-      error: error.message 
+    res.status(500).json({
+      message: "Error retrieving routines",
+      error: error.message,
     });
   }
 };
@@ -211,24 +218,24 @@ export const getRoutinesByClassSection = async (req, res) => {
 export const getRoutinesByClassId = async (req, res) => {
   try {
     const { classId } = req.params;
-    
+
     if (!classId || isNaN(classId)) {
       return res.status(400).json({ message: "Valid ClassID is required" });
     }
 
     const routines = await RoutineModel.getRoutinesByClassId(classId);
-    
+
     res.status(200).json({
       message: "Routines retrieved successfully",
       count: routines.length,
       ClassID: parseInt(classId),
-      routines
+      routines,
     });
   } catch (error) {
     console.error("Get routines by ClassID error:", error);
-    res.status(500).json({ 
-      message: "Error retrieving routines", 
-      error: error.message 
+    res.status(500).json({
+      message: "Error retrieving routines",
+      error: error.message,
     });
   }
 };
@@ -237,7 +244,7 @@ export const getRoutinesByClassId = async (req, res) => {
 export const updateRoutine = async (req, res) => {
   try {
     const { id } = req.params;
-    
+
     if (!id || isNaN(id)) {
       return res.status(400).json({ message: "Valid routine ID is required" });
     }
@@ -254,8 +261,8 @@ export const updateRoutine = async (req, res) => {
     if (updateData.ClassID) {
       const classInfo = await RoutineModel.validateClassId(updateData.ClassID);
       if (!classInfo) {
-        return res.status(400).json({ 
-          message: `Invalid ClassID: ${updateData.ClassID}. Class does not exist.` 
+        return res.status(400).json({
+          message: `Invalid ClassID: ${updateData.ClassID}. Class does not exist.`,
         });
       }
       updateData.ClassID = parseInt(updateData.ClassID);
@@ -275,49 +282,50 @@ export const updateRoutine = async (req, res) => {
         }
 
         // Upload new file using your existing function
-        const result = await uploadToCloudinary(req.file.path, "school/routines");
+        const result = await uploadToCloudinary(
+          req.file.path,
+          "school/routines",
+        );
 
         updateData.FileURL = result.secure_url;
         updateData.FilePublicID = result.public_id;
-        
+
         // Determine file type
-        const fileFormat = result.format?.toLowerCase() || 'pdf';
-        if (['pdf'].includes(fileFormat)) {
-          updateData.FileType = 'pdf';
-        } else if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(fileFormat)) {
-          updateData.FileType = 'image';
+        const fileFormat = result.format?.toLowerCase() || "pdf";
+        if (["pdf"].includes(fileFormat)) {
+          updateData.FileType = "pdf";
+        } else if (["jpg", "jpeg", "png", "gif", "webp"].includes(fileFormat)) {
+          updateData.FileType = "image";
         }
 
         // Clean up local file
         fs.unlinkSync(req.file.path);
-        
       } catch (uploadError) {
         console.error("File upload error:", uploadError);
         if (fs.existsSync(req.file.path)) {
           fs.unlinkSync(req.file.path);
         }
-        return res.status(500).json({ 
-          message: "File upload failed", 
-          error: uploadError.message 
+        return res.status(500).json({
+          message: "File upload failed",
+          error: uploadError.message,
         });
       }
     }
 
     const updatedRoutine = await RoutineModel.updateRoutine(id, updateData);
-    
-    res.status(200).json({
-      message: "Routine updated successfully",
-      routine: updatedRoutine
-    });
 
+    res.status(200).json({
+      message: t("routine_updated", req.language),
+      routine: updatedRoutine,
+    });
   } catch (error) {
     console.error("Update routine error:", error);
     if (req.file && fs.existsSync(req.file.path)) {
       fs.unlinkSync(req.file.path);
     }
-    res.status(500).json({ 
-      message: "Error updating routine", 
-      error: error.message 
+    res.status(500).json({
+      message: "Error updating routine",
+      error: error.message,
     });
   }
 };
@@ -326,7 +334,7 @@ export const updateRoutine = async (req, res) => {
 export const deleteRoutine = async (req, res) => {
   try {
     const { id } = req.params;
-    
+
     if (!id || isNaN(id)) {
       return res.status(400).json({ message: "Valid routine ID is required" });
     }
@@ -348,27 +356,28 @@ export const deleteRoutine = async (req, res) => {
     }
 
     const deleted = await RoutineModel.deleteRoutine(id);
-    
+
     if (!deleted) {
-      return res.status(404).json({ message: "Routine not found or already deleted" });
+      return res
+        .status(404)
+        .json({ message: "Routine not found or already deleted" });
     }
 
-    res.status(200).json({ 
-      message: "Routine deleted successfully",
+    res.status(200).json({
+      message: t("routine_deleted", req.language),
       deletedRoutine: {
         RoutineID: routine.RoutineID,
         RoutineTitle: routine.RoutineTitle,
         ClassName: routine.ClassName,
         Section: routine.Section,
-        ClassSectionName: routine.ClassSectionName
-      }
+        ClassSectionName: routine.ClassSectionName,
+      },
     });
-
   } catch (error) {
     console.error("Delete routine error:", error);
-    res.status(500).json({ 
-      message: "Error deleting routine", 
-      error: error.message 
+    res.status(500).json({
+      message: "Error deleting routine",
+      error: error.message,
     });
   }
 };
@@ -377,24 +386,26 @@ export const deleteRoutine = async (req, res) => {
 export const searchRoutines = async (req, res) => {
   try {
     const { q } = req.query;
-    
+
     if (!q || q.trim().length < 2) {
-      return res.status(400).json({ message: "Search term must be at least 2 characters" });
+      return res
+        .status(400)
+        .json({ message: "Search term must be at least 2 characters" });
     }
 
     const routines = await RoutineModel.searchRoutines(q.trim());
-    
+
     res.status(200).json({
       message: "Search completed successfully",
       searchTerm: q,
       count: routines.length,
-      routines
+      routines,
     });
   } catch (error) {
     console.error("Search routines error:", error);
-    res.status(500).json({ 
-      message: "Error searching routines", 
-      error: error.message 
+    res.status(500).json({
+      message: "Error searching routines",
+      error: error.message,
     });
   }
 };
@@ -403,17 +414,17 @@ export const searchRoutines = async (req, res) => {
 export const getAllClasses = async (req, res) => {
   try {
     const classes = await RoutineModel.getAllClasses();
-    
+
     res.status(200).json({
       message: "Classes retrieved successfully",
       count: classes.length,
-      classes
+      classes,
     });
   } catch (error) {
     console.error("Get all classes error:", error);
-    res.status(500).json({ 
-      message: "Error retrieving classes", 
-      error: error.message 
+    res.status(500).json({
+      message: "Error retrieving classes",
+      error: error.message,
     });
   }
 };
@@ -423,19 +434,19 @@ export const getFilterOptions = async (req, res) => {
   try {
     const classes = await RoutineModel.getDistinctClasses();
     const sections = await RoutineModel.getDistinctSections();
-    
+
     res.status(200).json({
       message: "Filter options retrieved successfully",
       options: {
         classes,
-        sections
-      }
+        sections,
+      },
     });
   } catch (error) {
     console.error("Get filter options error:", error);
-    res.status(500).json({ 
-      message: "Error retrieving filter options", 
-      error: error.message 
+    res.status(500).json({
+      message: "Error retrieving filter options",
+      error: error.message,
     });
   }
 };
@@ -444,24 +455,24 @@ export const getFilterOptions = async (req, res) => {
 export const getSectionsByClassName = async (req, res) => {
   try {
     const { className } = req.params;
-    
+
     if (!className) {
       return res.status(400).json({ message: "ClassName is required" });
     }
 
     const sections = await RoutineModel.getSectionsByClassName(className);
-    
+
     res.status(200).json({
       message: "Sections retrieved successfully",
       ClassName: className,
       count: sections.length,
-      sections
+      sections,
     });
   } catch (error) {
     console.error("Get sections by ClassName error:", error);
-    res.status(500).json({ 
-      message: "Error retrieving sections", 
-      error: error.message 
+    res.status(500).json({
+      message: "Error retrieving sections",
+      error: error.message,
     });
   }
 };

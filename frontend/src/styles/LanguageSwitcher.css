@@ -1,0 +1,52 @@
+/* LanguageSwitcher component styles */
+.language-switcher {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 20px;
+  padding: 2px 8px;
+  font-size: 0.8rem;
+}
+
+.lang-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: inherit;
+  font-size: 0.8rem;
+  padding: 2px 4px;
+  border-radius: 12px;
+  transition: background 0.2s, color 0.2s;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.lang-btn.active {
+  background: rgba(255, 255, 255, 0.85);
+  color: #2d5a27;
+  font-weight: 700;
+}
+
+.lang-btn:hover:not(.active) {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.lang-divider {
+  opacity: 0.5;
+  user-select: none;
+}
+
+/* Dark sidebar variant */
+.sidebar .language-switcher,
+.language-switcher-dark {
+  background: rgba(0, 0, 0, 0.2);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.sidebar .lang-btn.active,
+.language-switcher-dark .lang-btn.active {
+  background: rgba(255, 255, 255, 0.9);
+  color: #1a1a2e;
+}

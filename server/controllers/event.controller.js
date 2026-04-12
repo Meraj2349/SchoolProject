@@ -1,79 +1,76 @@
+import { t } from "../config/i18n.js";
 import {
-    addEvent,
-    deleteEvent,
-    getAllEvents,
-    getEventById,
-    getEventsByDateRange,
-    getEventsByType,
-    updateEvent
+  addEvent,
+  deleteEvent,
+  getAllEvents,
+  getEventById,
+  getEventsByDateRange,
+  getEventsByType,
+  updateEvent,
 } from "../models/event.model.js";
 
 // Get all events
 export const getAllEventsController = async (req, res) => {
+  const lang = req.language;
   try {
     const events = await getAllEvents();
-    res.status(200).json({
-      success: true,
-      message: "Events fetched successfully",
-      data: events
-    });
+    res.status(200).json({ success: true, data: events });
   } catch (error) {
     console.error("Error in getAllEventsController:", error);
-    res.status(500).json({
-      success: false,
-      message: "Internal server error",
-      error: error.message
-    });
+    res
+      .status(500)
+      .json({
+        success: false,
+        message: t("event_fetch_failed", lang),
+        error: error.message,
+      });
   }
 };
 
 // Get event by ID
 export const getEventByIdController = async (req, res) => {
+  const lang = req.language;
   try {
     const { id } = req.params;
-    
+
     if (!id) {
-      return res.status(400).json({
-        success: false,
-        message: "Event ID is required"
-      });
+      return res
+        .status(400)
+        .json({ success: false, message: t("event_title_required", lang) });
     }
 
     const event = await getEventById(id);
-    
+
     if (!event) {
-      return res.status(404).json({
-        success: false,
-        message: "Event not found"
-      });
+      return res
+        .status(404)
+        .json({ success: false, message: t("event_not_found", lang) });
     }
 
-    res.status(200).json({
-      success: true,
-      message: "Event fetched successfully",
-      data: event
-    });
+    res.status(200).json({ success: true, data: event });
   } catch (error) {
     console.error("Error in getEventByIdController:", error);
-    res.status(500).json({
-      success: false,
-      message: "Internal server error",
-      error: error.message
-    });
+    res
+      .status(500)
+      .json({
+        success: false,
+        message: t("internal_server_error", lang),
+        error: error.message,
+      });
   }
 };
 
 // Add new event
 export const addEventController = async (req, res) => {
+  const lang = req.language;
   try {
-    const { eventName, eventType, startDate, endDate, venue, description } = req.body;
+    const { eventName, eventType, startDate, endDate, venue, description } =
+      req.body;
 
-    // Basic validation
     if (!eventName || !eventType || !startDate || !endDate) {
-      return res.status(400).json({
-        success: false,
-        message: "Event name, type, start date, and end date are required"
-      });
+      return res
+        .status(400)
+        .json({ success: false, message: t("event_required_fields", lang) });
     }
 
     const eventData = {
@@ -82,58 +79,65 @@ export const addEventController = async (req, res) => {
       startDate,
       endDate,
       venue,
-      description
+      description,
     };
-
     const result = await addEvent(eventData);
-    
-    res.status(201).json({
-      success: true,
-      message: result.message,
-      data: result.data
-    });
+
+    res
+      .status(201)
+      .json({
+        success: true,
+        message: t("event_created", lang),
+        data: result.data,
+      });
   } catch (error) {
     console.error("Error in addEventController:", error);
-    
-    // Handle validation errors
-    if (error.message.includes("Invalid") || 
-        error.message.includes("required") || 
-        error.message.includes("exceed") ||
-        error.message.includes("cannot be")) {
-      return res.status(400).json({
-        success: false,
-        message: error.message
-      });
+
+    if (
+      error.message.includes("Invalid") ||
+      error.message.includes("required") ||
+      error.message.includes("exceed") ||
+      error.message.includes("cannot be")
+    ) {
+      return res.status(400).json({ success: false, message: error.message });
     }
 
-    res.status(500).json({
-      success: false,
-      message: "Internal server error",
-      error: error.message
-    });
+    res
+      .status(500)
+      .json({
+        success: false,
+        message: t("internal_server_error", lang),
+        error: error.message,
+      });
   }
 };
 
 // Update event
 export const updateEventController = async (req, res) => {
+  const lang = req.language;
   try {
     const { id } = req.params;
-    
+
     if (!id) {
-      return res.status(400).json({
-        success: false,
-        message: "Event ID is required"
-      });
+      return res
+        .status(400)
+        .json({ success: false, message: t("event_title_required", lang) });
     }
 
-    const { eventName, eventType, startDate, endDate, venue, description } = req.body;
+    const { eventName, eventType, startDate, endDate, venue, description } =
+      req.body;
 
-    // Check if at least one field is provided
-    if (!eventName && !eventType && !startDate && !endDate && !venue && !description) {
-      return res.status(400).json({
-        success: false,
-        message: "At least one field is required for update"
-      });
+    if (
+      !eventName &&
+      !eventType &&
+      !startDate &&
+      !endDate &&
+      !venue &&
+      !description
+    ) {
+      return res
+        .status(400)
+        .json({ success: false, message: t("event_required_fields", lang) });
     }
 
     const eventData = {};
@@ -144,142 +148,132 @@ export const updateEventController = async (req, res) => {
     if (venue !== undefined) eventData.venue = venue;
     if (description !== undefined) eventData.description = description;
 
-    const result = await updateEvent(id, eventData);
-    
-    res.status(200).json({
-      success: true,
-      message: result.message
-    });
+    await updateEvent(id, eventData);
+
+    res.status(200).json({ success: true, message: t("event_updated", lang) });
   } catch (error) {
     console.error("Error in updateEventController:", error);
-    
-    // Handle not found and validation errors
+
     if (error.message.includes("not found")) {
-      return res.status(404).json({
-        success: false,
-        message: error.message
-      });
-    }
-    
-    if (error.message.includes("Invalid") || 
-        error.message.includes("required") || 
-        error.message.includes("exceed") ||
-        error.message.includes("cannot be")) {
-      return res.status(400).json({
-        success: false,
-        message: error.message
-      });
+      return res
+        .status(404)
+        .json({ success: false, message: t("event_not_found", lang) });
     }
 
-    res.status(500).json({
-      success: false,
-      message: "Internal server error",
-      error: error.message
-    });
+    if (
+      error.message.includes("Invalid") ||
+      error.message.includes("required") ||
+      error.message.includes("exceed") ||
+      error.message.includes("cannot be")
+    ) {
+      return res.status(400).json({ success: false, message: error.message });
+    }
+
+    res
+      .status(500)
+      .json({
+        success: false,
+        message: t("internal_server_error", lang),
+        error: error.message,
+      });
   }
 };
 
 // Delete event
 export const deleteEventController = async (req, res) => {
+  const lang = req.language;
   try {
     const { id } = req.params;
-    
+
     if (!id) {
-      return res.status(400).json({
-        success: false,
-        message: "Event ID is required"
-      });
+      return res
+        .status(400)
+        .json({ success: false, message: t("event_title_required", lang) });
     }
 
     const result = await deleteEvent(id);
-    
-    res.status(200).json({
-      success: true,
-      message: result.message,
-      data: result.deletedEvent
-    });
+
+    res
+      .status(200)
+      .json({
+        success: true,
+        message: t("event_deleted", lang),
+        data: result.deletedEvent,
+      });
   } catch (error) {
     console.error("Error in deleteEventController:", error);
-    
-    // Handle not found error
+
     if (error.message.includes("not found")) {
-      return res.status(404).json({
-        success: false,
-        message: error.message
-      });
+      return res
+        .status(404)
+        .json({ success: false, message: t("event_not_found", lang) });
     }
 
-    res.status(500).json({
-      success: false,
-      message: "Internal server error",
-      error: error.message
-    });
+    res
+      .status(500)
+      .json({
+        success: false,
+        message: t("internal_server_error", lang),
+        error: error.message,
+      });
   }
 };
 
 // Get events by date range
 export const getEventsByDateRangeController = async (req, res) => {
+  const lang = req.language;
   try {
     const { startDate, endDate } = req.query;
-    
+
     if (!startDate || !endDate) {
-      return res.status(400).json({
-        success: false,
-        message: "Start date and end date are required"
-      });
+      return res
+        .status(400)
+        .json({ success: false, message: t("event_dates_required", lang) });
     }
 
     const events = await getEventsByDateRange(startDate, endDate);
-    
-    res.status(200).json({
-      success: true,
-      message: "Events fetched successfully",
-      data: events
-    });
+
+    res.status(200).json({ success: true, data: events });
   } catch (error) {
     console.error("Error in getEventsByDateRangeController:", error);
-    res.status(500).json({
-      success: false,
-      message: "Internal server error",
-      error: error.message
-    });
+    res
+      .status(500)
+      .json({
+        success: false,
+        message: t("internal_server_error", lang),
+        error: error.message,
+      });
   }
 };
 
 // Get events by type
 export const getEventsByTypeController = async (req, res) => {
+  const lang = req.language;
   try {
     const { type } = req.params;
-    
+
     if (!type) {
-      return res.status(400).json({
-        success: false,
-        message: "Event type is required"
-      });
+      return res
+        .status(400)
+        .json({ success: false, message: t("event_title_required", lang) });
     }
 
     const events = await getEventsByType(type);
-    
-    res.status(200).json({
-      success: true,
-      message: "Events fetched successfully",
-      data: events
-    });
+
+    res.status(200).json({ success: true, data: events });
   } catch (error) {
     console.error("Error in getEventsByTypeController:", error);
-    
-    // Handle validation errors
+
     if (error.message.includes("Invalid")) {
-      return res.status(400).json({
-        success: false,
-        message: error.message
-      });
+      return res.status(400).json({ success: false, message: error.message });
     }
 
-    res.status(500).json({
-      success: false,
-      message: "Internal server error",
-      error: error.message
-    });
+    res
+      .status(500)
+      .json({
+        success: false,
+        message: t("internal_server_error", lang),
+        error: error.message,
+      });
   }
 };

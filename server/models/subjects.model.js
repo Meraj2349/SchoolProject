@@ -6,7 +6,7 @@ const findOrCreateClass = async (className) => {
     // First, try to find any class with this className
     const [existingClass] = await db.query(
       "SELECT ClassID FROM Classes WHERE ClassName = ? LIMIT 1",
-      [className]
+      [className],
     );
 
     if (existingClass.length > 0) {
@@ -16,7 +16,7 @@ const findOrCreateClass = async (className) => {
     // If not found, create a new class with default section 'A'
     const [result] = await db.query(
       "INSERT INTO Classes (ClassName, Section) VALUES (?, 'A')",
-      [className]
+      [className],
     );
     return result.insertId;
   } catch (error) {
@@ -29,13 +29,17 @@ export const addSubject = async ({ subjectName, className }) => {
   try {
     // Get or create ClassID
     const classId = await findOrCreateClass(className);
-    
+
     const sql = `
       INSERT INTO Subjects (SubjectName, ClassID)
       VALUES (?, ?)
     `;
-    
-    console.log("Inserting into database:", { subjectName, className, classId }); // Debugging log
+
+    console.log("Inserting into database:", {
+      subjectName,
+      className,
+      classId,
+    }); // Debugging log
     const [result] = await db.query(sql, [subjectName, classId]);
     return { SubjectID: result.insertId };
   } catch (error) {
@@ -84,14 +88,19 @@ export const editSubject = async (subjectId, { subjectName, className }) => {
   try {
     // Get or create ClassID
     const classId = await findOrCreateClass(className);
-    
+
     const sql = `
       UPDATE Subjects
       SET SubjectName = ?, ClassID = ?
       WHERE SubjectID = ?
     `;
-    
-    console.log("Updating subject in database:", { subjectId, subjectName, className, classId }); // Debugging log
+
+    console.log("Updating subject in database:", {
+      subjectId,
+      subjectName,
+      className,
+      classId,
+    }); // Debugging log
     const [result] = await db.query(sql, [subjectName, classId, subjectId]);
     if (result.affectedRows === 0) {
       throw new Error("No subject found with that ID");
@@ -106,7 +115,9 @@ export const editSubject = async (subjectId, { subjectName, className }) => {
 // Get all classes (unique class names)
 export const getAllClasses = async () => {
   try {
-    const [rows] = await db.query("SELECT DISTINCT ClassName FROM Classes ORDER BY ClassName");
+    const [rows] = await db.query(
+      "SELECT DISTINCT ClassName FROM Classes ORDER BY ClassName",
+    );
     return rows;
   } catch (err) {
     throw new Error("Error fetching classes: " + err.message);

@@ -16,7 +16,11 @@ router.get("/:id", ImageController.getImage);
 
 // Update
 router.put("/:id", ImageController.updateImage); // Update metadata only
-router.put("/:id/image", upload.single("image"), ImageController.replaceImageFile); // Replace image file
+router.put(
+  "/:id/image",
+  upload.single("image"),
+  ImageController.replaceImageFile,
+); // Replace image file
 
 // Delete
 router.delete("/:id", ImageController.deleteImage);

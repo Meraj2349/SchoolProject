@@ -56,7 +56,12 @@ export const editClass = async (classId, { className, section, teacherId }) => {
     WHERE ClassID = ?
   `;
   try {
-    const [result] = await db.query(sql, [className, section, teacherId, classId]);
+    const [result] = await db.query(sql, [
+      className,
+      section,
+      teacherId,
+      classId,
+    ]);
     if (result.affectedRows === 0) {
       throw new Error("No class found with that ID");
     }
@@ -67,7 +72,7 @@ export const editClass = async (classId, { className, section, teacherId }) => {
   }
 };
 
-//add claasswise student count 
+//add claasswise student count
 
 export const getClasswiseStudentCount = async () => {
   const sql = `
@@ -83,7 +88,7 @@ export const getClasswiseStudentCount = async () => {
     console.error("Error fetching classwise student count:", error);
     throw error;
   }
-}
+};
 
 // Get total students in a class by class name
 export const getTotalStudentsInClassByName = async (className) => {
@@ -100,4 +105,4 @@ export const getTotalStudentsInClassByName = async (className) => {
     console.error("Error fetching total students in class:", error);
     throw error;
   }
-};  
+};

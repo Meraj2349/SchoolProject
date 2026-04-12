@@ -48,19 +48,19 @@ export const generateAuthToken = (adminID) => {
   return token; // Return the JWT token
 };
 
-
-
 // Delete admin
 export const deleteAdmin = async (adminID) => {
   const sql = "DELETE FROM Admin WHERE AdminID = ?";
   try {
     const [result] = await db.query(sql, [adminID]);
-    return { message: "Admin deleted successfully", affectedRows: result.affectedRows };
+    return {
+      message: "Admin deleted successfully",
+      affectedRows: result.affectedRows,
+    };
   } catch (err) {
     throw new Error("Error deleting admin: " + err.message);
   }
 };
-
 
 export const getAdminById = async (adminId) => {
   const sql = "SELECT * FROM Admin WHERE AdminID = ?";

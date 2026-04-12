@@ -3,8 +3,13 @@ import cors from "cors";
 import dotenv from "dotenv";
 import express from "express";
 import db from "./config/db.config.js";
+import { languageMiddleware } from "./middlewares/language.middleware.js";
 import adminRouter from "./routes/admin.routes.js";
 import attendanceRoutes from "./routes/attendance.route.js";
+import applicationRoutes from "./routes/application.routes.js";
+import newsRoutes from "./routes/news.routes.js";
+import noticeAnnouncementRoutes from "./routes/notice-announcement.routes.js";
+import branchRoutes from "./routes/branch.routes.js";
 import classRoutes from "./routes/classes.routes.js";
 import eventRoutes from "./routes/event.routes.js";
 import examRoutes from "./routes/exam.routes.js";
@@ -27,14 +32,17 @@ app.use(
   cors({
     origin: process.env.FRONTEND_URL || "http://localhost:5173",
     credentials: true,
-  })
+  }),
 );
 app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use(bodyParser.json());
 
+// Language detection – attaches req.language ("en" | "bn"), default "bn"
+app.use(languageMiddleware);
+
 // Serve static files from public directory (for file uploads)
-app.use(express.static('public'));
+app.use(express.static("public"));
 
 // Database connection check
 db.connect((err) => {
@@ -60,6 +68,10 @@ app.use("/api/routines", routineRoutes);
 app.use("/api/attendance", attendanceRoutes);
 app.use("/api/exams", examRoutes);
 app.use("/api/results", resultRoutes);
+app.use("/api/branches", branchRoutes);
+app.use("/api/applications", applicationRoutes);
+app.use("/api/news", newsRoutes);
+app.use("/api/notice-announcements", noticeAnnouncementRoutes);
 
 // Handle root URL (Welcome message)
 app.get("/", (req, res) => {

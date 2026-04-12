@@ -6,7 +6,7 @@ import {
   updateAdminController,
   updateEmailPassword,
   deleteAdminController,
-} from '../controllers/admin.controller.js';
+} from "../controllers/admin.controller.js";
 
 import authMiddleware from "../middlewares/auth.middleware.js";
 
@@ -22,8 +22,7 @@ router.post("/logout", handleLogout);
 router.put("/update/:id", authMiddleware, updateAdminController);
 //delete admin
 router.delete("/delete/:id", authMiddleware, deleteAdminController);
-//updateEmallpassword 
+//updateEmallpassword
 router.put("/updateEmailPassword", authMiddleware, updateEmailPassword);
-
 
 export default router;
