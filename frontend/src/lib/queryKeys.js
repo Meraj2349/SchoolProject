@@ -48,6 +48,9 @@ export const queryKeys = {
   branches: {
     all: ["branches"],
   },
+  news: {
+    all: ["news"],
+  },
   images: {
     all: ["images"],
     byType: (type) => ["images", "type", type],

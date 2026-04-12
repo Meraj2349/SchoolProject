@@ -2,36 +2,21 @@
 
 import { useMessages } from "@/hooks/useMessages";
 import { useEvents } from "@/hooks/useEvents";
+import { useNews } from "@/hooks/useNews";
 import ChairmanCard from "@/components/shared/ChairmanCard";
 import EventNewsCard from "@/components/shared/EventNewsCard";
 import QuickLinks from "@/components/shared/QuickLinks";
-import { useTranslations } from "@/store/languageStore";
+import { useLanguageStore, useTranslations } from "@/store/languageStore";
 import "@/styles/LeaderShipSection.css";
-
-const NEWS_DATA = [
-  {
-    date: "11 Oct, 2023",
-    text: "Nobin Boron Program held in Sylhet Cantonment Public School",
-    link: "/events",
-  },
-  {
-    date: "26 Jul, 2025",
-    text: "Class XI Admission Notice-2025",
-    link: "/events",
-  },
-  {
-    date: "19 Sep, 2024",
-    text: "Candidates list for Written Exam 21 September 2024",
-    link: "/events",
-  },
-  { date: "14 Aug, 2024", text: "Education Insurance", link: "/events" },
-];
 
 export default function LeadershipSection() {
   const { data: messages = [], isLoading: msgLoading } = useMessages();
   const { data: events = [], isLoading: eventsLoading } = useEvents();
+  const { data: newsItems = [], isLoading: newsLoading, isError: newsError } = useNews();
+  const language = useLanguageStore((s) => s.language);
   const tChairman = useTranslations("chairman");
   const tHome = useTranslations("home");
+  const tEventNews = useTranslations("eventNews");
 
   const visibleMessages = messages.filter(
     (m) => m.Show === 1 || m.Show === true,
@@ -57,6 +42,12 @@ export default function LeadershipSection() {
       link: `/events`,
       venue: e.Venue,
     }));
+
+  const activeNews = newsItems.slice(0, 4).map((item) => ({
+    date: formatDate(item.date),
+    text: language === "en" ? item.title_en : item.title_bn,
+    link: item.link || "/events",
+  }));
 
   if (msgLoading) {
     return (
@@ -90,7 +81,13 @@ export default function LeadershipSection() {
             />
           </div>
           <div className="news-wrapper">
-            <EventNewsCard type="news" data={NEWS_DATA} />
+            {newsLoading ? (
+              <div className="loading-message">{tEventNews("newsLoading")}</div>
+            ) : newsError ? (
+              <div className="loading-message">{tEventNews("newsError")}</div>
+            ) : (
+              <EventNewsCard type="news" data={activeNews} />
+            )}
           </div>
         </div>
       </div>

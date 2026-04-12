@@ -70,7 +70,9 @@
     "events": "EVENTS",
     "news": "NEWS",
     "viewAllEvents": "View All Events →",
-    "viewAllNews": "View All News →"
+    "viewAllNews": "View All News →",
+    "newsLoading": "Loading news…",
+    "newsError": "Failed to load news"
   },
 
   "chairmanCard": {

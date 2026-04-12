@@ -526,6 +526,44 @@ const i18n = {
     bn: "আপডেটের জন্য কোনো তথ্য প্রদান করা হয়নি।",
   },
 
+  // ── News ──────────────────────────────────────────────────────────────────
+  news_created: {
+    en: "News item created successfully.",
+    bn: "সংবাদ সফলভাবে তৈরি হয়েছে।",
+  },
+  news_updated: {
+    en: "News item updated successfully.",
+    bn: "সংবাদ সফলভাবে আপডেট হয়েছে।",
+  },
+  news_deleted: {
+    en: "News item deleted successfully.",
+    bn: "সংবাদ সফলভাবে মুছে ফেলা হয়েছে।",
+  },
+  news_not_found: {
+    en: "News item not found.",
+    bn: "সংবাদ পাওয়া যায়নি।",
+  },
+  news_fetch_failed: {
+    en: "Failed to fetch news.",
+    bn: "সংবাদ আনতে ব্যর্থ হয়েছে।",
+  },
+  news_required_fields: {
+    en: "title_bn, title_en, and date are required.",
+    bn: "title_bn, title_en এবং date আবশ্যক।",
+  },
+  news_create_failed: {
+    en: "Failed to create news item.",
+    bn: "সংবাদ তৈরি করতে ব্যর্থ হয়েছে।",
+  },
+  news_update_failed: {
+    en: "Failed to update news item.",
+    bn: "সংবাদ আপডেট করতে ব্যর্থ হয়েছে।",
+  },
+  news_delete_failed: {
+    en: "Failed to delete news item.",
+    bn: "সংবাদ মুছতে ব্যর্থ হয়েছে।",
+  },
+
   // ── Applications ──────────────────────────────────────────────────────────
   application_submitted: {
     en: "Application submitted successfully.",

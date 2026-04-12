@@ -70,7 +70,9 @@
     "events": "ইভেন্ট",
     "news": "সংবাদ",
     "viewAllEvents": "সকল ইভেন্ট দেখুন →",
-    "viewAllNews": "সকল সংবাদ দেখুন →"
+    "viewAllNews": "সকল সংবাদ দেখুন →",
+    "newsLoading": "সংবাদ লোড হচ্ছে…",
+    "newsError": "সংবাদ লোড করতে ব্যর্থ হয়েছে"
   },
 
   "chairmanCard": {
