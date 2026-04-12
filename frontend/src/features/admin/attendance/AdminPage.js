@@ -3,9 +3,12 @@
 import { useState } from "react";
 import { attendanceService } from "@/services/attendance.service";
 import { studentsService } from "@/services/students.service";
+import { useTranslations } from "@/store/languageStore";
 import "@/styles/AttendancePage.css";
 
 export default function AdminPage() {
+  const t = useTranslations("admin.attendance");
+
   const [filter, setFilter] = useState({
     className: "",
     section: "",
@@ -24,7 +27,7 @@ export default function AdminPage() {
 
   const loadStudents = async () => {
     if (!filter.className || !filter.section) {
-      flash("Class and section required", true);
+      flash(t("classAndSectionRequired"), true);
       return;
     }
     setLoading(true);
@@ -41,7 +44,7 @@ export default function AdminPage() {
       });
       setAttendance(init);
     } catch (err) {
-      flash(err.message || "Failed to load students", true);
+      flash(err.message || t("loadFailed"), true);
     } finally {
       setLoading(false);
     }
@@ -49,7 +52,7 @@ export default function AdminPage() {
 
   const handleSave = async () => {
     if (students.length === 0) {
-      flash("No students loaded", true);
+      flash(t("noStudentsLoaded"), true);
       return;
     }
     setSaving(true);
@@ -62,17 +65,23 @@ export default function AdminPage() {
         Section: filter.section,
       }));
       await attendanceService.bulkCreate(records);
-      flash("Attendance saved!");
+      flash(t("attendanceSaved"));
     } catch (err) {
-      flash(err.message || "Save failed", true);
+      flash(err.message || t("saveFailed"), true);
     } finally {
       setSaving(false);
     }
   };
 
+  const FIELDS = [
+    ["className", t("className"), "text"],
+    ["section", t("section"), "text"],
+    ["date", t("date"), "date"],
+  ];
+
   return (
     <div className="admin-attendance-page">
-      <h1>Attendance Management</h1>
+      <h1>{t("markTitle")}</h1>
       {status.error && <div className="error-message">{status.error}</div>}
       {status.success && (
         <div className="success-message">{status.success}</div>
@@ -94,11 +103,7 @@ export default function AdminPage() {
             flexWrap: "wrap",
           }}
         >
-          {[
-            ["className", "Class Name", "text"],
-            ["section", "Section", "text"],
-            ["date", "Date", "date"],
-          ].map(([n, l, t]) => (
+          {FIELDS.map(([n, l, type]) => (
             <div key={n}>
               <label
                 style={{ fontSize: 14, fontWeight: 500, display: "block" }}
@@ -106,7 +111,7 @@ export default function AdminPage() {
                 {l}
               </label>
               <input
-                type={t}
+                type={type}
                 value={filter[n]}
                 onChange={(e) =>
                   setFilter((p) => ({ ...p, [n]: e.target.value }))
@@ -122,7 +127,7 @@ export default function AdminPage() {
             className="btn-primary"
             disabled={loading}
           >
-            {loading ? "Loading…" : "Load Students"}
+            {loading ? t("loading") : t("loadStudents")}
           </button>
         </div>
       </div>
@@ -144,7 +149,7 @@ export default function AdminPage() {
             }}
           >
             <h2>
-              {students.length} Students – {filter.className} {filter.section} –{" "}
+              {students.length} {t("student")} – {filter.className} {filter.section} –{" "}
               {filter.date}
             </h2>
             <button
@@ -152,17 +157,17 @@ export default function AdminPage() {
               className="btn-primary"
               disabled={saving}
             >
-              {saving ? "Saving…" : "Save Attendance"}
+              {saving ? t("saving") : t("saveAttendance")}
             </button>
           </div>
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead style={{ background: "#f9fafb" }}>
               <tr>
-                <th className="table-header">Roll</th>
-                <th className="table-header">Name</th>
-                <th className="table-header">Present</th>
-                <th className="table-header">Absent</th>
-                <th className="table-header">Late</th>
+                <th className="table-header">{t("roll")}</th>
+                <th className="table-header">{t("name")}</th>
+                <th className="table-header">{t("present")}</th>
+                <th className="table-header">{t("absent")}</th>
+                <th className="table-header">{t("late")}</th>
               </tr>
             </thead>
             <tbody>

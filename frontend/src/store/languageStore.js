@@ -17,9 +17,9 @@ const TRANSLATIONS = { en, bn };
 
 /**
  * Resolve a dot-separated key against an object.
- * e.g. get("nav.home", { nav: { home: "HOME" } }) → "HOME"
+ * e.g. resolveKey("nav.home", { nav: { home: "HOME" } }) → "HOME"
  */
-function get(key, obj) {
+function resolveKey(key, obj) {
   return (
     key.split(".").reduce((acc, part) => {
       if (acc == null) return key; // fallback to key
@@ -30,7 +30,7 @@ function get(key, obj) {
 
 export const useLanguageStore = create(
   persist(
-    (set, getState) => ({
+    (set, get) => ({
       language: "bn",
 
       setLanguage: (lang) => {
@@ -39,15 +39,15 @@ export const useLanguageStore = create(
       },
 
       toggleLanguage: () => {
-        const current = getState().language;
+        const current = get().language;
         set({ language: current === "bn" ? "en" : "bn" });
       },
 
       /** Translate a dot-notation key for the currently selected language */
       t: (key) => {
-        const lang = getState().language;
+        const lang = get().language;
         const dict = TRANSLATIONS[lang] ?? TRANSLATIONS.bn;
-        return get(key, dict);
+        return resolveKey(key, dict);
       },
     }),
     {
@@ -74,6 +74,6 @@ export function useTranslations(namespace) {
 
   return (key) => {
     const fullKey = namespace ? `${namespace}.${key}` : key;
-    return get(fullKey, dict);
+    return resolveKey(fullKey, dict);
   };
 }

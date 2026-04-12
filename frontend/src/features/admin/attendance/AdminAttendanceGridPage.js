@@ -3,11 +3,13 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { attendanceService } from "@/services/attendance.service";
-import { studentsService } from "@/services/students.service";
 import { queryKeys } from "@/lib/queryKeys";
+import { useTranslations } from "@/store/languageStore";
 import "@/styles/AttendancePageGrid.css";
 
 export default function AdminAttendanceGridPage() {
+  const t = useTranslations("admin.attendance");
+
   const [filter, setFilter] = useState({ className: "", section: "" });
   const [submitted, setSubmitted] = useState(null);
 
@@ -28,7 +30,7 @@ export default function AdminAttendanceGridPage() {
 
   return (
     <div className="attendance-grid-page">
-      <h1>Attendance Grid</h1>
+      <h1>{t("title")}</h1>
       <div
         style={{
           background: "#fff",
@@ -41,7 +43,7 @@ export default function AdminAttendanceGridPage() {
         <div style={{ display: "flex", gap: 16, alignItems: "flex-end" }}>
           <div>
             <label style={{ fontSize: 14, fontWeight: 500, display: "block" }}>
-              Class
+              {t("class")}
             </label>
             <input
               type="text"
@@ -51,12 +53,12 @@ export default function AdminAttendanceGridPage() {
               }
               className="form-input"
               style={{ marginTop: 4 }}
-              placeholder="e.g. Class 5"
+              placeholder={t("className")}
             />
           </div>
           <div>
             <label style={{ fontSize: 14, fontWeight: 500, display: "block" }}>
-              Section
+              {t("section")}
             </label>
             <input
               type="text"
@@ -66,18 +68,18 @@ export default function AdminAttendanceGridPage() {
               }
               className="form-input"
               style={{ marginTop: 4 }}
-              placeholder="e.g. A"
+              placeholder={t("section")}
             />
           </div>
           <button
             onClick={() => setSubmitted({ ...filter })}
             className="btn-primary"
           >
-            Load
+            {t("search")}
           </button>
         </div>
       </div>
-      {isLoading && <p>Loading…</p>}
+      {isLoading && <p>{t("loading")}</p>}
       {filtered.length > 0 ? (
         <div style={{ overflowX: "auto" }}>
           <table
@@ -89,9 +91,9 @@ export default function AdminAttendanceGridPage() {
           >
             <thead style={{ background: "#f9fafb" }}>
               <tr>
-                <th className="table-header">Student</th>
-                <th className="table-header">Date</th>
-                <th className="table-header">Status</th>
+                <th className="table-header">{t("student")}</th>
+                <th className="table-header">{t("date")}</th>
+                <th className="table-header">{t("status")}</th>
               </tr>
             </thead>
             <tbody>
@@ -115,7 +117,7 @@ export default function AdminAttendanceGridPage() {
         </div>
       ) : (
         submitted &&
-        !isLoading && <p className="no-data">No attendance records found.</p>
+        !isLoading && <p className="no-data">{t("noRecords")}</p>
       )}
     </div>
   );

@@ -564,6 +564,19 @@
       "updating": "Updating…",
       "successMessage": "Credentials updated successfully!",
       "errorMessage": "Update failed"
+    },
+    "register": {
+      "title": "Admin Register",
+      "email": "Email",
+      "password": "Password",
+      "confirmPassword": "Confirm Password",
+      "registerBtn": "Register",
+      "registering": "Registering…",
+      "haveAccount": "Already have an account?",
+      "signIn": "Sign in",
+      "passwordMismatch": "Passwords do not match",
+      "registrationSuccess": "Registration successful! Please log in.",
+      "registrationFailed": "Registration failed"
     }
   },
 

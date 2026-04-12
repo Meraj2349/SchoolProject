@@ -5,12 +5,16 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { subjectsService } from "@/services/subjects.service";
 import { classesService } from "@/services/classes.service";
 import { queryKeys } from "@/lib/queryKeys";
+import { useTranslations } from "@/store/languageStore";
 import "@/styles/SubjectsPage.css";
 
 const EMPTY = { SubjectName: "", ClassID: "" };
 
 export default function AdminPage() {
   const qc = useQueryClient();
+  const t = useTranslations("admin.subjects");
+  const tCommon = useTranslations("common");
+
   const { data: subjects = [], isLoading } = useQuery({
     queryKey: queryKeys.subjects.all,
     queryFn: subjectsService.getAll,
@@ -26,7 +30,7 @@ export default function AdminPage() {
     mutationFn: subjectsService.create,
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: queryKeys.subjects.all });
-      flash("Added!");
+      flash(t("subjectAdded"));
       reset();
     },
   });
@@ -34,7 +38,7 @@ export default function AdminPage() {
     mutationFn: ({ id, data }) => subjectsService.update(id, data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: queryKeys.subjects.all });
-      flash("Updated!");
+      flash(t("subjectUpdated"));
       reset();
     },
   });
@@ -42,7 +46,7 @@ export default function AdminPage() {
     mutationFn: subjectsService.remove,
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: queryKeys.subjects.all });
-      flash("Deleted.");
+      flash(t("deleted"));
     },
   });
 
@@ -69,13 +73,13 @@ export default function AdminPage() {
       if (editId) await update.mutateAsync({ id: editId, data: form });
       else await create.mutateAsync(form);
     } catch (err) {
-      flash(err.message || "Failed", true);
+      flash(err.message || t("operationFailed"), true);
     }
   };
 
   return (
     <div className="subjects-page">
-      <h1>Subject Management</h1>
+      <h1>{t("title")}</h1>
       {status.error && <div className="error-message">{status.error}</div>}
       {status.success && (
         <div className="success-message">{status.success}</div>
@@ -90,13 +94,13 @@ export default function AdminPage() {
           marginBottom: 24,
         }}
       >
-        <h2>{editId ? "Edit" : "Add"} Subject</h2>
+        <h2>{editId ? t("editSubject") : t("addSubject")}</h2>
         <div
           style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}
         >
           <div>
             <label style={{ fontSize: 14, fontWeight: 500 }}>
-              Subject Name
+              {t("subjectName")}
             </label>
             <input
               type="text"
@@ -109,7 +113,7 @@ export default function AdminPage() {
             />
           </div>
           <div>
-            <label style={{ fontSize: 14, fontWeight: 500 }}>Class</label>
+            <label style={{ fontSize: 14, fontWeight: 500 }}>{t("className")}</label>
             <select
               name="ClassID"
               value={form.ClassID}
@@ -117,7 +121,7 @@ export default function AdminPage() {
               className="form-input"
               style={{ marginTop: 4, width: "100%" }}
             >
-              <option value="">Select class</option>
+              <option value="">{t("selectClass")}</option>
               {classes.map((c) => (
                 <option key={c.ClassID || c.id} value={c.ClassID || c.id}>
                   {c.className || c.ClassName} – {c.section || c.Section}
@@ -128,18 +132,18 @@ export default function AdminPage() {
         </div>
         <div style={{ display: "flex", gap: 8, marginTop: 16 }}>
           <button type="submit" className="btn-primary">
-            {editId ? "Update" : "Add"}
+            {editId ? t("updateSubject") : t("addSubject")}
           </button>
           {editId && (
             <button type="button" onClick={reset} className="btn-secondary">
-              Cancel
+              {t("cancel")}
             </button>
           )}
         </div>
       </form>
-      <h2>All Subjects</h2>
+      <h2>{t("allSubjects")}</h2>
       {isLoading ? (
-        <p>Loading…</p>
+        <p>{t("loading")}</p>
       ) : (
         <table
           style={{
@@ -150,11 +154,9 @@ export default function AdminPage() {
         >
           <thead style={{ background: "#f9fafb" }}>
             <tr>
-              {["Subject", "Class", "Actions"].map((h) => (
-                <th key={h} className="table-header">
-                  {h}
-                </th>
-              ))}
+              <th className="table-header">{t("name")}</th>
+              <th className="table-header">{t("className")}</th>
+              <th className="table-header">{t("actions")}</th>
             </tr>
           </thead>
           <tbody>
@@ -179,11 +181,11 @@ export default function AdminPage() {
                       marginRight: 8,
                     }}
                   >
-                    Edit
+                    {tCommon("edit")}
                   </button>
                   <button
                     onClick={() => {
-                      if (window.confirm("Delete?")) remove.mutate(s.SubjectID);
+                      if (window.confirm(t("deleteConfirm"))) remove.mutate(s.SubjectID);
                     }}
                     style={{
                       color: "#dc2626",
@@ -192,7 +194,7 @@ export default function AdminPage() {
                       cursor: "pointer",
                     }}
                   >
-                    Delete
+                    {tCommon("delete")}
                   </button>
                 </td>
               </tr>

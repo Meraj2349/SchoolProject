@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { authService } from "@/services/auth.service";
+import { useTranslations } from "@/store/languageStore";
 import "@/styles/login.css";
 
 export default function RegisterPage() {
@@ -15,6 +16,7 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const router = useRouter();
+  const t = useTranslations("admin.register");
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -24,7 +26,7 @@ export default function RegisterPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (form.Password !== form.confirmPassword) {
-      setError("Passwords do not match");
+      setError(t("passwordMismatch"));
       return;
     }
     setLoading(true);
@@ -34,11 +36,11 @@ export default function RegisterPage() {
         Email: form.Email,
         Password: form.Password,
       });
-      alert("Registration successful! Please log in.");
+      alert(t("registrationSuccess"));
       router.replace("/admin/login");
     } catch (err) {
       setError(
-        err.response?.data?.message || err.message || "Registration failed",
+        err.response?.data?.message || err.message || t("registrationFailed"),
       );
     } finally {
       setLoading(false);
@@ -48,7 +50,7 @@ export default function RegisterPage() {
   return (
     <div className="form-container">
       <div className="form-box">
-        <h2>Admin Register</h2>
+        <h2>{t("title")}</h2>
         {error && (
           <div
             style={{
@@ -65,7 +67,7 @@ export default function RegisterPage() {
         )}
         <form onSubmit={handleSubmit}>
           <div className="input-group">
-            <label>Email</label>
+            <label>{t("email")}</label>
             <input
               type="email"
               name="Email"
@@ -75,7 +77,7 @@ export default function RegisterPage() {
             />
           </div>
           <div className="input-group">
-            <label>Password</label>
+            <label>{t("password")}</label>
             <input
               type="password"
               name="Password"
@@ -85,7 +87,7 @@ export default function RegisterPage() {
             />
           </div>
           <div className="input-group">
-            <label>Confirm Password</label>
+            <label>{t("confirmPassword")}</label>
             <input
               type="password"
               name="confirmPassword"
@@ -95,12 +97,12 @@ export default function RegisterPage() {
             />
           </div>
           <button type="submit" className="submit-btn" disabled={loading}>
-            {loading ? "Registering…" : "Register"}
+            {loading ? t("registering") : t("registerBtn")}
           </button>
         </form>
         <div className="signup-link">
           <p>
-            Already have an account? <Link href="/admin/login">Sign in</Link>
+            {t("haveAccount")} <Link href="/admin/login">{t("signIn")}</Link>
           </p>
         </div>
       </div>

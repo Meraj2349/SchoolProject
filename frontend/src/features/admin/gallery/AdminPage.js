@@ -2,6 +2,7 @@
 
 import { useState, useRef } from "react";
 import { useImages, useUploadImage, useDeleteImage } from "@/hooks/useImages";
+import { useTranslations } from "@/store/languageStore";
 import "@/styles/AdminImageGallery.css";
 
 const TYPES = ["general", "school", "student", "teacher", "event", "notice"];
@@ -11,6 +12,8 @@ export default function AdminPage() {
   const upload = useUploadImage();
   const remove = useDeleteImage();
   const fileRef = useRef();
+  const t = useTranslations("admin.gallery");
+  const tCommon = useTranslations("common");
 
   const [form, setForm] = useState({
     description: "",
@@ -31,7 +34,7 @@ export default function AdminPage() {
     e.preventDefault();
     const file = fileRef.current?.files?.[0];
     if (!file) {
-      flash("Please select a file", true);
+      flash(t("selectFile"), true);
       return;
     }
     const fd = new FormData();
@@ -42,7 +45,7 @@ export default function AdminPage() {
     if (form.teacherId) fd.append("teacherId", form.teacherId);
     try {
       await upload.mutateAsync(fd);
-      flash("Image uploaded!");
+      flash(t("uploaded"));
       if (fileRef.current) fileRef.current.value = "";
       setForm({
         description: "",
@@ -51,23 +54,23 @@ export default function AdminPage() {
         teacherId: "",
       });
     } catch (err) {
-      flash(err.message || "Upload failed", true);
+      flash(err.message || t("uploadFailed"), true);
     }
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm("Delete this image?")) return;
+    if (!window.confirm(t("deleteConfirm"))) return;
     try {
       await remove.mutateAsync(id);
-      flash("Deleted.");
+      flash(t("deleted"));
     } catch (err) {
-      flash(err.message || "Delete failed", true);
+      flash(err.message || t("deleteFailed"), true);
     }
   };
 
   return (
     <div className="admin-gallery-page">
-      <h1>Image Gallery</h1>
+      <h1>{t("title")}</h1>
       {status.error && <div className="error-message">{status.error}</div>}
       {status.success && (
         <div className="success-message">{status.success}</div>
@@ -84,12 +87,12 @@ export default function AdminPage() {
           marginBottom: 24,
         }}
       >
-        <h2>Upload Image</h2>
+        <h2>{t("upload")}</h2>
         <div
           style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}
         >
           <div>
-            <label>File</label>
+            <label>{t("file")}</label>
             <input
               type="file"
               ref={fileRef}
@@ -99,7 +102,7 @@ export default function AdminPage() {
             />
           </div>
           <div>
-            <label>Type</label>
+            <label>{t("imageType")}</label>
             <select
               value={form.imageType}
               onChange={(e) =>
@@ -108,15 +111,15 @@ export default function AdminPage() {
               className="form-input"
               style={{ marginTop: 4, width: "100%" }}
             >
-              {TYPES.map((t) => (
-                <option key={t} value={t}>
-                  {t}
+              {TYPES.map((type) => (
+                <option key={type} value={type}>
+                  {type}
                 </option>
               ))}
             </select>
           </div>
           <div>
-            <label>Description</label>
+            <label>{t("description")}</label>
             <input
               type="text"
               value={form.description}
@@ -125,11 +128,11 @@ export default function AdminPage() {
               }
               className="form-input"
               style={{ marginTop: 4, width: "100%" }}
-              placeholder="Optional description"
+              placeholder={t("descriptionPlaceholder")}
             />
           </div>
           <div>
-            <label>Student ID (optional)</label>
+            <label>{t("studentId")}</label>
             <input
               type="text"
               value={form.studentId}
@@ -147,14 +150,16 @@ export default function AdminPage() {
           style={{ marginTop: 16 }}
           disabled={upload.isPending}
         >
-          {upload.isPending ? "Uploading…" : "Upload Image"}
+          {upload.isPending ? t("uploading") : t("upload")}
         </button>
       </form>
 
       <div>
-        <h2>All Images ({images.length})</h2>
+        <h2>{t("allImages")} ({images.length})</h2>
         {isLoading ? (
-          <p>Loading…</p>
+          <p>{t("loading")}</p>
+        ) : images.length === 0 ? (
+          <p>{t("noImages")}</p>
         ) : (
           <div
             style={{
@@ -208,7 +213,7 @@ export default function AdminPage() {
                       fontSize: 13,
                     }}
                   >
-                    Delete
+                    {tCommon("delete")}
                   </button>
                 </div>
               </div>
