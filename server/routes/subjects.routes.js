@@ -1,10 +1,10 @@
 import express from "express";
 import {
-    addSubjectController,
-    deleteSubjectController,
-    editSubjectController,
-    getAllClassesController,
-    getSubjectsController,
+  addSubjectController,
+  deleteSubjectController,
+  editSubjectController,
+  getAllClassesController,
+  getSubjectsController,
 } from "../controllers/subjects.controller.js";
 
 const router = express.Router();

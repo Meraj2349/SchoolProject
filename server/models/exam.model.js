@@ -2,7 +2,7 @@ import db from "../config/db.config.js";
 
 /**
  * Simple Exam Model for School Management System
- * 
+ *
  * Database Schema:
  * CREATE TABLE Exams (
  *     ExamID INT PRIMARY KEY AUTO_INCREMENT NOT NULL,
@@ -15,7 +15,13 @@ import db from "../config/db.config.js";
  */
 
 // Valid exam types from database schema
-const VALID_EXAM_TYPES = ['Monthly', 'Quarterly', 'Half-Yearly', 'Annual', 'Final'];
+const VALID_EXAM_TYPES = [
+  "Monthly",
+  "Quarterly",
+  "Half-Yearly",
+  "Annual",
+  "Final",
+];
 
 // Get all exams
 const getAllExams = async () => {
@@ -46,7 +52,8 @@ const getExamById = async (examId) => {
       throw new Error("Exam ID is required");
     }
 
-    const [rows] = await db.query(`
+    const [rows] = await db.query(
+      `
       SELECT 
         e.ExamID,
         e.ExamType,
@@ -58,8 +65,10 @@ const getExamById = async (examId) => {
       FROM Exams e
       LEFT JOIN Classes c ON e.ClassID = c.ClassID
       WHERE e.ExamID = ?
-    `, [examId]);
-    
+    `,
+      [examId],
+    );
+
     return rows[0] || null;
   } catch (err) {
     throw new Error("Error fetching exam by ID: " + err.message);
@@ -69,7 +78,8 @@ const getExamById = async (examId) => {
 // Get exams by class
 const getExamsByClass = async (classId) => {
   try {
-    const [rows] = await db.query(`
+    const [rows] = await db.query(
+      `
       SELECT 
         e.ExamID,
         e.ExamType,
@@ -82,7 +92,9 @@ const getExamsByClass = async (classId) => {
       LEFT JOIN Classes c ON e.ClassID = c.ClassID
       WHERE e.ClassID = ?
       ORDER BY e.ExamDate DESC
-    `, [classId]);
+    `,
+      [classId],
+    );
     return rows;
   } catch (err) {
     throw new Error("Error fetching exams by class: " + err.message);
@@ -92,30 +104,31 @@ const getExamsByClass = async (classId) => {
 // Add exam by class name and section
 const addExamByClassDetails = async (examData) => {
   try {
-    const { 
-      examType, 
-      examName, 
-      className, 
-      sectionName, 
-      examDate
-    } = examData;
+    const { examType, examName, className, sectionName, examDate } = examData;
 
     // Validate required fields
     if (!examType || !examName || !className || !sectionName || !examDate) {
-      throw new Error("All fields are required: examType, examName, className, sectionName, examDate");
+      throw new Error(
+        "All fields are required: examType, examName, className, sectionName, examDate",
+      );
     }
 
     // Validate exam type
     if (!VALID_EXAM_TYPES.includes(examType)) {
-      throw new Error(`Invalid examType. Must be one of: ${VALID_EXAM_TYPES.join(', ')}`);
+      throw new Error(
+        `Invalid examType. Must be one of: ${VALID_EXAM_TYPES.join(", ")}`,
+      );
     }
 
     // Get class ID by class name and section
-    const [classRows] = await db.query(`
+    const [classRows] = await db.query(
+      `
       SELECT ClassID, ClassName, Section
       FROM Classes 
       WHERE ClassName = ? AND Section = ?
-    `, [className, sectionName]);
+    `,
+      [className, sectionName],
+    );
 
     if (classRows.length === 0) {
       throw new Error(`Class '${className} - ${sectionName}' not found`);
@@ -127,7 +140,7 @@ const addExamByClassDetails = async (examData) => {
     const examDateObj = new Date(examDate);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    
+
     if (isNaN(examDateObj.getTime())) {
       throw new Error("Invalid examDate format. Use YYYY-MM-DD");
     }
@@ -137,10 +150,13 @@ const addExamByClassDetails = async (examData) => {
     }
 
     // Insert the exam
-    const [result] = await db.query(`
+    const [result] = await db.query(
+      `
       INSERT INTO Exams (ExamType, ExamName, ClassID, ExamDate)
       VALUES (?, ?, ?, ?)
-    `, [examType, examName, classInfo.ClassID, examDate]);
+    `,
+      [examType, examName, classInfo.ClassID, examDate],
+    );
 
     return {
       success: true,
@@ -153,8 +169,8 @@ const addExamByClassDetails = async (examData) => {
         ClassID: classInfo.ClassID,
         ClassName: className,
         Section: sectionName,
-        ExamDate: examDate
-      }
+        ExamDate: examDate,
+      },
     };
   } catch (err) {
     throw new Error("Error adding exam by class details: " + err.message);
@@ -162,24 +178,37 @@ const addExamByClassDetails = async (examData) => {
 };
 
 // Create exam by class name and section (alternative function name)
-const createExamByClassNameAndSection = async (examType, examName, className, sectionName, examDate) => {
+const createExamByClassNameAndSection = async (
+  examType,
+  examName,
+  className,
+  sectionName,
+  examDate,
+) => {
   try {
     // Validate required fields
     if (!examType || !examName || !className || !sectionName || !examDate) {
-      throw new Error("All fields are required: examType, examName, className, sectionName, examDate");
+      throw new Error(
+        "All fields are required: examType, examName, className, sectionName, examDate",
+      );
     }
 
     // Validate exam type
     if (!VALID_EXAM_TYPES.includes(examType)) {
-      throw new Error(`Invalid examType. Must be one of: ${VALID_EXAM_TYPES.join(', ')}`);
+      throw new Error(
+        `Invalid examType. Must be one of: ${VALID_EXAM_TYPES.join(", ")}`,
+      );
     }
 
     // Get class ID by class name and section
-    const [classRows] = await db.query(`
+    const [classRows] = await db.query(
+      `
       SELECT ClassID, ClassName, Section
       FROM Classes 
       WHERE ClassName = ? AND Section = ?
-    `, [className, sectionName]);
+    `,
+      [className, sectionName],
+    );
 
     if (classRows.length === 0) {
       throw new Error(`Class '${className} - ${sectionName}' not found`);
@@ -191,7 +220,7 @@ const createExamByClassNameAndSection = async (examType, examName, className, se
     const examDateObj = new Date(examDate);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    
+
     if (isNaN(examDateObj.getTime())) {
       throw new Error("Invalid examDate format. Use YYYY-MM-DD");
     }
@@ -201,10 +230,13 @@ const createExamByClassNameAndSection = async (examType, examName, className, se
     }
 
     // Insert the exam
-    const [result] = await db.query(`
+    const [result] = await db.query(
+      `
       INSERT INTO Exams (ExamType, ExamName, ClassID, ExamDate)
       VALUES (?, ?, ?, ?)
-    `, [examType, examName, classInfo.ClassID, examDate]);
+    `,
+      [examType, examName, classInfo.ClassID, examDate],
+    );
 
     return {
       success: true,
@@ -217,11 +249,13 @@ const createExamByClassNameAndSection = async (examType, examName, className, se
         ClassID: classInfo.ClassID,
         ClassName: className,
         Section: sectionName,
-        ExamDate: examDate
-      }
+        ExamDate: examDate,
+      },
     };
   } catch (err) {
-    throw new Error("Error creating exam by class name and section: " + err.message);
+    throw new Error(
+      "Error creating exam by class name and section: " + err.message,
+    );
   }
 };
 
@@ -233,9 +267,12 @@ const updateExam = async (examId, examData) => {
     }
 
     // Check if exam exists
-    const [existingExam] = await db.query(`
+    const [existingExam] = await db.query(
+      `
       SELECT * FROM Exams WHERE ExamID = ?
-    `, [examId]);
+    `,
+      [examId],
+    );
 
     if (existingExam.length === 0) {
       throw new Error("Exam not found");
@@ -248,7 +285,9 @@ const updateExam = async (examId, examData) => {
     // Build dynamic update query
     if (ExamType !== undefined) {
       if (!VALID_EXAM_TYPES.includes(ExamType)) {
-        throw new Error(`Invalid ExamType. Must be one of: ${VALID_EXAM_TYPES.join(', ')}`);
+        throw new Error(
+          `Invalid ExamType. Must be one of: ${VALID_EXAM_TYPES.join(", ")}`,
+        );
       }
       updates.push("ExamType = ?");
       params.push(ExamType);
@@ -267,9 +306,12 @@ const updateExam = async (examId, examData) => {
 
     if (ClassID !== undefined) {
       // Validate class exists
-      const [classCheck] = await db.query(`
+      const [classCheck] = await db.query(
+        `
         SELECT ClassID FROM Classes WHERE ClassID = ?
-      `, [ClassID]);
+      `,
+        [ClassID],
+      );
 
       if (classCheck.length === 0) {
         throw new Error("Class not found");
@@ -283,7 +325,7 @@ const updateExam = async (examId, examData) => {
       const examDate = new Date(ExamDate);
       const today = new Date();
       today.setHours(0, 0, 0, 0);
-      
+
       if (isNaN(examDate.getTime())) {
         throw new Error("Invalid ExamDate format. Use YYYY-MM-DD");
       }
@@ -302,11 +344,14 @@ const updateExam = async (examId, examData) => {
 
     // Perform update
     params.push(examId);
-    const [result] = await db.query(`
+    const [result] = await db.query(
+      `
       UPDATE Exams 
-      SET ${updates.join(', ')}
+      SET ${updates.join(", ")}
       WHERE ExamID = ?
-    `, params);
+    `,
+      params,
+    );
 
     if (result.affectedRows === 0) {
       throw new Error("No rows were updated");
@@ -315,7 +360,7 @@ const updateExam = async (examId, examData) => {
     return {
       success: true,
       message: "Exam updated successfully",
-      affectedRows: result.affectedRows
+      affectedRows: result.affectedRows,
     };
   } catch (err) {
     throw new Error("Error updating exam: " + err.message);
@@ -336,9 +381,12 @@ const deleteExam = async (examId) => {
     }
 
     // Delete the exam
-    const [result] = await db.query(`
+    const [result] = await db.query(
+      `
       DELETE FROM Exams WHERE ExamID = ?
-    `, [examId]);
+    `,
+      [examId],
+    );
 
     if (result.affectedRows === 0) {
       throw new Error("No exam was deleted");
@@ -353,8 +401,8 @@ const deleteExam = async (examId) => {
         ExamType: examInfo.ExamType,
         ClassName: examInfo.ClassName,
         Section: examInfo.Section,
-        ExamDate: examInfo.ExamDate
-      }
+        ExamDate: examInfo.ExamDate,
+      },
     };
   } catch (err) {
     throw new Error("Error deleting exam: " + err.message);
@@ -369,6 +417,5 @@ export {
   getExamById,
   getExamsByClass,
   updateExam,
-  VALID_EXAM_TYPES
+  VALID_EXAM_TYPES,
 };
-

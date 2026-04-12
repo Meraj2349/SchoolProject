@@ -1,0 +1,83 @@
+"use client";
+
+import Navbar from "@/components/layout/Navbar";
+import Footer from "@/components/layout/Footer";
+import LatestUpdatesNotice from "@/components/shared/LatestUpdatesNotice";
+import { useMessages } from "@/hooks/useMessages";
+import { useTranslations } from "@/store/languageStore";
+import "@/styles/ChairmanMessagePage.css";
+
+export default function ChairmanMessagePage() {
+  const { data: messages = [], isLoading } = useMessages();
+  const t = useTranslations("chairman");
+
+  const visible = messages
+    .filter((m) => m.Show === 1 || m.Show === true)
+    .sort((a, b) => a.MessageID - b.MessageID);
+
+  const message =
+    visible.length > 0 ? visible[0].Messages : t("defaultMessage");
+
+  if (isLoading) {
+    return (
+      <div className="chairman-message-page">
+        <Navbar />
+        <LatestUpdatesNotice />
+        <div className="loading-container">
+          <div className="loading-spinner" />
+          <p>{t("loading")}</p>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  return (
+    <div className="chairman-message-page">
+      <Navbar />
+      <LatestUpdatesNotice />
+      <main className="chairman-message-main">
+        <div className="container">
+          <div className="page-header">
+            <h1>{t("pageTitle")}</h1>
+            <div className="header-line" />
+          </div>
+          <div className="chairman-profile">
+            <div className="profile-image-container">
+              <img
+                src="/images/WhatsApp Image 2024-12-07 at 20.48.41_3423f492.jpg"
+                alt={`${t("name")} – ${t("title")}`}
+                className="profile-image"
+              />
+            </div>
+            <div className="profile-info">
+              <h2>{t("name")}</h2>
+              <p className="title">{t("title")}</p>
+              <p className="institution">{t("institution")}</p>
+            </div>
+          </div>
+          <div className="message-content">
+            <div className="message-text">
+              <p>{message}</p>
+            </div>
+            <div className="message-signature">
+              <p className="signature-regards">{t("bestRegards")}</p>
+              <p className="signature-name">{t("name")}</p>
+              <p className="signature-title">{t("title")}</p>
+              <p className="signature-institution">{t("institution")}</p>
+            </div>
+          </div>
+          <div className="back-button-container">
+            <button
+              onClick={() => window.history.back()}
+              className="back-button"
+            >
+              {t("backToHome")}
+            </button>
+          </div>
+        </div>
+      </main>
+      <Footer />
+    </div>
+  );
+}

@@ -1,12 +1,12 @@
 import express from "express";
 import {
-    addEventController,
-    deleteEventController,
-    getAllEventsController,
-    getEventByIdController,
-    getEventsByDateRangeController,
-    getEventsByTypeController,
-    updateEventController
+  addEventController,
+  deleteEventController,
+  getAllEventsController,
+  getEventByIdController,
+  getEventsByDateRangeController,
+  getEventsByTypeController,
+  updateEventController,
 } from "../controllers/event.controller.js";
 
 const router = express.Router();

@@ -12,10 +12,10 @@ export const createRoutine = async (routineData) => {
       routineData.RoutineDate,
       routineData.Description || null,
       routineData.FileURL || null,
-      routineData.FileType || 'pdf',
+      routineData.FileType || "pdf",
       routineData.FilePublicID || null,
-      routineData.CreatedBy || null
-    ]
+      routineData.CreatedBy || null,
+    ],
   );
   return getRoutineById(result.insertId);
 };
@@ -28,7 +28,7 @@ export const getRoutineById = async (id) => {
      FROM Routines r 
      LEFT JOIN Classes c ON r.ClassID = c.ClassID 
      WHERE r.RoutineID = ? AND r.IsActive = TRUE`,
-    [id]
+    [id],
   );
   return rows[0];
 };
@@ -41,7 +41,7 @@ export const getAllRoutines = async () => {
      FROM Routines r 
      LEFT JOIN Classes c ON r.ClassID = c.ClassID 
      WHERE r.IsActive = TRUE 
-     ORDER BY r.RoutineDate DESC, r.CreatedAt DESC`
+     ORDER BY r.RoutineDate DESC, r.CreatedAt DESC`,
   );
   return rows;
 };
@@ -55,7 +55,7 @@ export const getRoutinesByClassId = async (classId) => {
      LEFT JOIN Classes c ON r.ClassID = c.ClassID 
      WHERE r.ClassID = ? AND r.IsActive = TRUE 
      ORDER BY r.RoutineDate DESC, r.CreatedAt DESC`,
-    [classId]
+    [classId],
   );
   return rows;
 };
@@ -68,19 +68,19 @@ export const getRoutinesByClassSection = async (className, section) => {
                LEFT JOIN Classes c ON r.ClassID = c.ClassID 
                WHERE r.IsActive = TRUE`;
   let params = [];
-  
-  if (className && className !== 'all') {
-    query += ' AND c.ClassName = ?';
+
+  if (className && className !== "all") {
+    query += " AND c.ClassName = ?";
     params.push(className);
   }
-  
-  if (section && section !== 'all') {
-    query += ' AND c.Section = ?';
+
+  if (section && section !== "all") {
+    query += " AND c.Section = ?";
     params.push(section);
   }
-  
-  query += ' ORDER BY r.RoutineDate DESC, r.CreatedAt DESC';
-  
+
+  query += " ORDER BY r.RoutineDate DESC, r.CreatedAt DESC";
+
   const [rows] = await db.execute(query, params);
   return rows;
 };
@@ -89,56 +89,56 @@ export const getRoutinesByClassSection = async (className, section) => {
 export const updateRoutine = async (id, updateData) => {
   const fields = [];
   const values = [];
-  
+
   // Build dynamic update query (following Classes table naming convention)
   if (updateData.RoutineTitle) {
-    fields.push('RoutineTitle = ?');
+    fields.push("RoutineTitle = ?");
     values.push(updateData.RoutineTitle);
   }
   if (updateData.ClassID) {
-    fields.push('ClassID = ?');
+    fields.push("ClassID = ?");
     values.push(updateData.ClassID);
   }
   if (updateData.RoutineDate) {
-    fields.push('RoutineDate = ?');
+    fields.push("RoutineDate = ?");
     values.push(updateData.RoutineDate);
   }
   if (updateData.Description !== undefined) {
-    fields.push('Description = ?');
+    fields.push("Description = ?");
     values.push(updateData.Description);
   }
   if (updateData.FileURL !== undefined) {
-    fields.push('FileURL = ?');
+    fields.push("FileURL = ?");
     values.push(updateData.FileURL);
   }
   if (updateData.FileType) {
-    fields.push('FileType = ?');
+    fields.push("FileType = ?");
     values.push(updateData.FileType);
   }
   if (updateData.FilePublicID !== undefined) {
-    fields.push('FilePublicID = ?');
+    fields.push("FilePublicID = ?");
     values.push(updateData.FilePublicID);
   }
-  
+
   if (fields.length === 0) {
-    throw new Error('No valid fields to update');
+    throw new Error("No valid fields to update");
   }
-  
+
   values.push(id);
-  
+
   await db.execute(
-    `UPDATE Routines SET ${fields.join(', ')}, UpdatedAt = CURRENT_TIMESTAMP WHERE RoutineID = ?`,
-    values
+    `UPDATE Routines SET ${fields.join(", ")}, UpdatedAt = CURRENT_TIMESTAMP WHERE RoutineID = ?`,
+    values,
   );
-  
+
   return getRoutineById(id);
 };
 
 // Delete routine (soft delete)
 export const deleteRoutine = async (id) => {
   const [result] = await db.execute(
-    'UPDATE Routines SET IsActive = FALSE WHERE RoutineID = ?',
-    [id]
+    "UPDATE Routines SET IsActive = FALSE WHERE RoutineID = ?",
+    [id],
   );
   return result.affectedRows > 0;
 };
@@ -153,7 +153,12 @@ export const searchRoutines = async (searchTerm) => {
      WHERE (r.RoutineTitle LIKE ? OR c.ClassName LIKE ? OR c.Section LIKE ? OR r.Description LIKE ?) 
      AND r.IsActive = TRUE 
      ORDER BY r.RoutineDate DESC`,
-    [`%${searchTerm}%`, `%${searchTerm}%`, `%${searchTerm}%`, `%${searchTerm}%`]
+    [
+      `%${searchTerm}%`,
+      `%${searchTerm}%`,
+      `%${searchTerm}%`,
+      `%${searchTerm}%`,
+    ],
   );
   return rows;
 };
@@ -167,7 +172,7 @@ export const getAllClasses = async () => {
      CONCAT(ClassName, ' - Section ', Section) as ClassSectionName,
      TeacherID
      FROM Classes 
-     ORDER BY ClassName, Section`
+     ORDER BY ClassName, Section`,
   );
   return rows;
 };
@@ -175,24 +180,24 @@ export const getAllClasses = async () => {
 // Get distinct class names for filter dropdown
 export const getDistinctClasses = async () => {
   const [rows] = await db.execute(
-    'SELECT DISTINCT c.ClassName FROM Classes c ORDER BY c.ClassName'
+    "SELECT DISTINCT c.ClassName FROM Classes c ORDER BY c.ClassName",
   );
-  return rows.map(row => row.ClassName);
+  return rows.map((row) => row.ClassName);
 };
 
-// Get distinct sections for filter dropdown  
+// Get distinct sections for filter dropdown
 export const getDistinctSections = async () => {
   const [rows] = await db.execute(
-    'SELECT DISTINCT c.Section FROM Classes c ORDER BY c.Section'
+    "SELECT DISTINCT c.Section FROM Classes c ORDER BY c.Section",
   );
-  return rows.map(row => row.Section);
+  return rows.map((row) => row.Section);
 };
 
 // Get sections by class name (dynamic section loading)
 export const getSectionsByClassName = async (className) => {
   const [rows] = await db.execute(
-    'SELECT ClassID, Section FROM Classes WHERE ClassName = ? ORDER BY Section',
-    [className]
+    "SELECT ClassID, Section FROM Classes WHERE ClassName = ? ORDER BY Section",
+    [className],
   );
   return rows;
 };
@@ -200,8 +205,8 @@ export const getSectionsByClassName = async (className) => {
 // Validate if class exists (before creating/updating routine)
 export const validateClassId = async (classId) => {
   const [rows] = await db.execute(
-    'SELECT ClassID, ClassName, Section FROM Classes WHERE ClassID = ?',
-    [classId]
+    "SELECT ClassID, ClassName, Section FROM Classes WHERE ClassID = ?",
+    [classId],
   );
   return rows[0];
 };

@@ -1,3 +1,4 @@
+import { t } from "../config/i18n.js";
 import {
   addMultipleResults,
   addResult,
@@ -16,13 +17,21 @@ import {
   getResultsBySubject,
   getStudentResultSummary,
   searchResults,
-  updateResult
+  updateResult,
 } from "../models/result.model.js";
 
 // Utility function for validation
 const validateResultData = (data) => {
-  const requiredFields = ["StudentID", "ExamID", "SubjectID", "ClassID", "MarksObtained"];
-  const missingFields = requiredFields.filter((field) => !data[field] && data[field] !== 0);
+  const requiredFields = [
+    "StudentID",
+    "ExamID",
+    "SubjectID",
+    "ClassID",
+    "MarksObtained",
+  ];
+  const missingFields = requiredFields.filter(
+    (field) => !data[field] && data[field] !== 0,
+  );
 
   if (missingFields.length > 0) {
     return `Missing required fields: ${missingFields.join(", ")}`;
@@ -46,19 +55,18 @@ const validateResultData = (data) => {
 
 // Get all results
 const getAllResultsController = async (req, res) => {
+  const lang = req.language;
   try {
     const results = await getAllResults();
-    res.status(200).json({
-      success: true,
-      message: "Results retrieved successfully",
-      data: results,
-    });
+    res.status(200).json({ success: true, data: results });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Error retrieving results",
-      error: error.message,
-    });
+    res
+      .status(500)
+      .json({
+        success: false,
+        message: t("result_fetch_failed", lang),
+        error: error.message,
+      });
   }
 };
 
@@ -66,7 +74,7 @@ const getAllResultsController = async (req, res) => {
 const getResultByIdController = async (req, res) => {
   try {
     const { id } = req.params;
-    
+
     if (!id || isNaN(id)) {
       return res.status(400).json({
         success: false,
@@ -75,7 +83,7 @@ const getResultByIdController = async (req, res) => {
     }
 
     const result = await getResultById(id);
-    
+
     if (!result) {
       return res.status(404).json({
         success: false,
@@ -101,7 +109,7 @@ const getResultByIdController = async (req, res) => {
 const getResultsByStudentController = async (req, res) => {
   try {
     const { studentId } = req.params;
-    
+
     if (!studentId || isNaN(studentId)) {
       return res.status(400).json({
         success: false,
@@ -128,7 +136,7 @@ const getResultsByStudentController = async (req, res) => {
 const getResultsByExamController = async (req, res) => {
   try {
     const { examId } = req.params;
-    
+
     if (!examId || isNaN(examId)) {
       return res.status(400).json({
         success: false,
@@ -155,7 +163,7 @@ const getResultsByExamController = async (req, res) => {
 const getResultsByClassController = async (req, res) => {
   try {
     const { classId } = req.params;
-    
+
     if (!classId || isNaN(classId)) {
       return res.status(400).json({
         success: false,
@@ -182,7 +190,7 @@ const getResultsByClassController = async (req, res) => {
 const getResultsBySubjectController = async (req, res) => {
   try {
     const { subjectId } = req.params;
-    
+
     if (!subjectId || isNaN(subjectId)) {
       return res.status(400).json({
         success: false,
@@ -209,24 +217,24 @@ const getResultsBySubjectController = async (req, res) => {
 const addResultController = async (req, res) => {
   try {
     const resultData = req.body;
-    console.log('🔍 Received result data:', resultData);
+    console.log("🔍 Received result data:", resultData);
 
     // Validate input data
     const validationError = validateResultData(resultData);
     if (validationError) {
-      console.log('❌ Validation error:', validationError);
+      console.log("❌ Validation error:", validationError);
       return res.status(400).json({
         success: false,
         message: validationError,
       });
     }
-    console.log('✅ Validation passed');
+    console.log("✅ Validation passed");
 
     // Check if result already exists
     const resultExists = await checkResultExists(
       resultData.StudentID,
       resultData.ExamID,
-      resultData.SubjectID
+      resultData.SubjectID,
     );
 
     if (resultExists) {
@@ -237,17 +245,17 @@ const addResultController = async (req, res) => {
     }
 
     const result = await addResult(resultData);
-    console.log('🔍 Database result:', result);
-    
+    console.log("🔍 Database result:", result);
+
     if (result && result.affectedRows > 0) {
-      console.log('✅ Result added successfully, ID:', result.insertId);
+      console.log("✅ Result added successfully, ID:", result.insertId);
       res.status(201).json({
         success: true,
         message: "Result added successfully",
         data: { resultId: result.insertId },
       });
     } else {
-      console.log('❌ Database operation failed, result:', result);
+      console.log("❌ Database operation failed, result:", result);
       res.status(400).json({
         success: false,
         message: "Failed to add result - No rows affected",
@@ -286,7 +294,7 @@ const addMultipleResultsController = async (req, res) => {
     }
 
     const result = await addMultipleResults(results);
-    
+
     if (result.affectedRows > 0) {
       res.status(201).json({
         success: true,
@@ -340,7 +348,7 @@ const updateResultController = async (req, res) => {
     }
 
     const result = await updateResult(id, resultData);
-    
+
     if (result.affectedRows > 0) {
       res.status(200).json({
         success: true,
@@ -383,7 +391,7 @@ const deleteResultController = async (req, res) => {
     }
 
     const result = await deleteResult(id);
-    
+
     if (result.affectedRows > 0) {
       res.status(200).json({
         success: true,
@@ -417,7 +425,7 @@ const deleteResultsByExamController = async (req, res) => {
     }
 
     const result = await deleteResultsByExam(examId);
-    
+
     res.status(200).json({
       success: true,
       message: `${result.affectedRows} results deleted successfully`,
@@ -454,7 +462,7 @@ const getResultCountController = async (req, res) => {
 const getStudentResultSummaryController = async (req, res) => {
   try {
     const { studentId, examId } = req.params;
-    
+
     if (!studentId || isNaN(studentId)) {
       return res.status(400).json({
         success: false,
@@ -488,7 +496,7 @@ const getStudentResultSummaryController = async (req, res) => {
 const searchResultsController = async (req, res) => {
   try {
     const filters = req.query;
-    
+
     const results = await searchResults(filters);
     res.status(200).json({
       success: true,
@@ -557,7 +565,7 @@ const getResultsWithTeacherInfoController = async (req, res) => {
 const getClassResultsSummaryController = async (req, res) => {
   try {
     const { classId, examId } = req.params;
-    
+
     if (!classId || isNaN(classId)) {
       return res.status(400).json({
         success: false,
@@ -591,7 +599,7 @@ const getClassResultsSummaryController = async (req, res) => {
 const getSubjectWiseResultsController = async (req, res) => {
   try {
     const { subjectId } = req.params;
-    
+
     if (!subjectId || isNaN(subjectId)) {
       return res.status(400).json({
         success: false,
@@ -617,14 +625,14 @@ const getSubjectWiseResultsController = async (req, res) => {
 // Add result by student details (names instead of IDs)
 const addResultByStudentDetailsController = async (req, res) => {
   try {
-    const { 
-      studentName, 
-      rollNumber, 
-      className, 
-      sectionName, 
-      examName, 
-      subjectName, 
-      marksObtained 
+    const {
+      studentName,
+      rollNumber,
+      className,
+      sectionName,
+      examName,
+      subjectName,
+      marksObtained,
     } = req.body;
 
     // Validate required fields
@@ -635,10 +643,17 @@ const addResultByStudentDetailsController = async (req, res) => {
       });
     }
 
-    if (!className || !sectionName || !examName || !subjectName || marksObtained === undefined) {
+    if (
+      !className ||
+      !sectionName ||
+      !examName ||
+      !subjectName ||
+      marksObtained === undefined
+    ) {
       return res.status(400).json({
         success: false,
-        message: "className, sectionName, examName, subjectName, and marksObtained are required",
+        message:
+          "className, sectionName, examName, subjectName, and marksObtained are required",
       });
     }
 
@@ -649,7 +664,7 @@ const addResultByStudentDetailsController = async (req, res) => {
       sectionName,
       examName,
       subjectName,
-      marksObtained
+      marksObtained,
     });
 
     res.status(201).json({
@@ -681,10 +696,10 @@ const advancedSearchResultsController = async (req, res) => {
       examType,
       startDate,
       endDate,
-      sortBy = 'examDate',
-      sortOrder = 'DESC',
+      sortBy = "examDate",
+      sortOrder = "DESC",
       limit = 50,
-      offset = 0
+      offset = 0,
     } = req.query;
 
     const searchCriteria = {
@@ -702,7 +717,7 @@ const advancedSearchResultsController = async (req, res) => {
       sortBy,
       sortOrder,
       limit: parseInt(limit),
-      offset: parseInt(offset)
+      offset: parseInt(offset),
     };
 
     const results = await advancedSearchResults(searchCriteria);
@@ -715,8 +730,8 @@ const advancedSearchResultsController = async (req, res) => {
         total: results.total,
         limit: results.limit,
         offset: results.offset,
-        hasMore: results.hasMore
-      }
+        hasMore: results.hasMore,
+      },
     });
   } catch (error) {
     res.status(500).json({
@@ -728,7 +743,10 @@ const advancedSearchResultsController = async (req, res) => {
 };
 
 export {
-  addMultipleResultsController, addResultByStudentDetailsController, addResultController, advancedSearchResultsController,
+  addMultipleResultsController,
+  addResultByStudentDetailsController,
+  addResultController,
+  advancedSearchResultsController,
   checkResultExistsController,
   deleteResultController,
   deleteResultsByExamController,
@@ -741,6 +759,5 @@ export {
   getResultsBySubjectController,
   getStudentResultSummaryController,
   searchResultsController,
-  updateResultController
+  updateResultController,
 };
-

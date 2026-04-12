@@ -1,12 +1,12 @@
 import express from "express";
 import {
-    addExamByClassDetailsController,
-    createExamByClassNameAndSectionController,
-    deleteExamController,
-    getAllExamsController,
-    getExamByIdController,
-    getExamsByClassController,
-    updateExamController
+  addExamByClassDetailsController,
+  createExamByClassNameAndSectionController,
+  deleteExamController,
+  getAllExamsController,
+  getExamByIdController,
+  getExamsByClassController,
+  updateExamController,
 } from "../controllers/exam.controller.js";
 
 const router = express.Router();

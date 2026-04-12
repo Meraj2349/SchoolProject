@@ -22,6 +22,9 @@ router.get("/", getClassesController);
 router.put("/edit/:id", editClassController);
 
 // Get total students in a class by class name
-router.get("/totalstudents/:className", getTotalStudentsInClassByNameController);
+router.get(
+  "/totalstudents/:className",
+  getTotalStudentsInClassByNameController,
+);
 
 export default router;

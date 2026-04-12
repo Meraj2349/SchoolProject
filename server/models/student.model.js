@@ -1,16 +1,16 @@
 import db from "../config/db.config.js";
 // // CREATE TABLE Students (
-//     StudentID INT PRIMARY KEY AUTO_INCREMENT, 
-//     FirstName VARCHAR(50) NOT NULL,           
-//     LastName VARCHAR(50) NOT NULL,            
-//     RollNumber VARCHAR(20) NOT NULL,          
-//     DateOfBirth DATE NOT NULL,               
+//     StudentID INT PRIMARY KEY AUTO_INCREMENT,
+//     FirstName VARCHAR(50) NOT NULL,
+//     LastName VARCHAR(50) NOT NULL,
+//     RollNumber VARCHAR(20) NOT NULL,
+//     DateOfBirth DATE NOT NULL,
 //     Gender ENUM('Male', 'Female') NOT NULL,
-//     ClassID INT NOT NULL,                     
-//     AdmissionDate DATE NOT NULL,              
-//     Address TEXT,                           
-//     ParentContact VARCHAR(15),                
-//     FOREIGN KEY (ClassID) REFERENCES Classes(ClassID) 
+//     ClassID INT NOT NULL,
+//     AdmissionDate DATE NOT NULL,
+//     Address TEXT,
+//     ParentContact VARCHAR(15),
+//     FOREIGN KEY (ClassID) REFERENCES Classes(ClassID)
 // );
 // CREATE TABLE
 //     Classes (
@@ -54,19 +54,19 @@ const findOrCreateClass = async (className, section) => {
     // First, try to find existing class
     const [existingClass] = await db.query(
       "SELECT ClassID FROM Classes WHERE ClassName = ? AND Section = ?",
-      [className, section]
+      [className, section],
     );
-    
+
     if (existingClass.length > 0) {
       return existingClass[0].ClassID;
     }
-    
+
     // If not found, create new class
     const [result] = await db.query(
       "INSERT INTO Classes (ClassName, Section) VALUES (?, ?)",
-      [className, section]
+      [className, section],
     );
-    
+
     return result.insertId;
   } catch (err) {
     throw new Error("Error finding or creating class: " + err.message);
@@ -84,16 +84,16 @@ const addStudent = async (studentData) => {
     Section,
     AdmissionDate,
     Address,
-    ParentContact
+    ParentContact,
   } = studentData;
 
   try {
     // Get or create ClassID
     const classId = await findOrCreateClass(Class, Section);
-    
+
     const sql =
       "INSERT INTO Students (FirstName, LastName, DateOfBirth, Gender, ClassID, AdmissionDate, Address, ParentContact, RollNumber) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-    
+
     const [result] = await db.query(sql, [
       FirstName,
       LastName,
@@ -105,7 +105,7 @@ const addStudent = async (studentData) => {
       ParentContact,
       RollNumber,
     ]);
-    
+
     return {
       message: "Student added successfully",
       studentID: result.insertId,
@@ -144,11 +144,11 @@ const updateStudent = async (studentID, studentData) => {
     ParentContact,
     RollNumber,
   } = studentData;
-  
+
   try {
     // Get or create ClassID
     const classId = await findOrCreateClass(Class, Section);
-    
+
     const sql = `UPDATE Students SET 
       FirstName = ?, 
       LastName = ?, 
@@ -179,8 +179,6 @@ const updateStudent = async (studentID, studentData) => {
     throw new Error("Error updating student: " + error.message);
   }
 };
-
-
 
 const getStudentCount = async () => {
   const sql = "SELECT COUNT(*) AS totalStudents FROM Students";
@@ -253,21 +251,27 @@ const getStudentsByClass = async (classID) => {
     throw new Error("Error fetching students by class: " + error.message);
   }
 };
-const checkRollNumberExists = async (rollNumber, className, section, excludeStudentID = null) => {
+const checkRollNumberExists = async (
+  rollNumber,
+  className,
+  section,
+  excludeStudentID = null,
+) => {
   try {
     // First get the ClassID for the given class and section
     const [classResult] = await db.query(
       "SELECT ClassID FROM Classes WHERE ClassName = ? AND Section = ?",
-      [className, section]
+      [className, section],
     );
-    
+
     if (classResult.length === 0) {
       return false; // Class doesn't exist, so roll number is available
     }
-    
+
     const classID = classResult[0].ClassID;
-    
-    let sql = "SELECT StudentID FROM Students WHERE RollNumber = ? AND ClassID = ?";
+
+    let sql =
+      "SELECT StudentID FROM Students WHERE RollNumber = ? AND ClassID = ?";
     const params = [rollNumber, classID];
 
     if (excludeStudentID) {
@@ -293,7 +297,9 @@ const getStudentsByClassAndSection = async (className, section) => {
     const [rows] = await db.query(sql, [className, section]);
     return rows;
   } catch (error) {
-    throw new Error("Error fetching students by class and section: " + error.message);
+    throw new Error(
+      "Error fetching students by class and section: " + error.message,
+    );
   }
 };
 const searchStudents = async (filters) => {
@@ -353,7 +359,9 @@ const searchStudents = async (filters) => {
 // Add function to get all classes
 const getAllClasses = async () => {
   try {
-    const [rows] = await db.query("SELECT * FROM Classes ORDER BY ClassName, Section");
+    const [rows] = await db.query(
+      "SELECT * FROM Classes ORDER BY ClassName, Section",
+    );
     return rows;
   } catch (err) {
     throw new Error("Error fetching classes: " + err.message);
@@ -361,5 +369,16 @@ const getAllClasses = async () => {
 };
 
 export {
-    addStudent, checkRollNumberExists, deleteStudent, findOrCreateClass, getAllClasses, getAllStudents, getStudentById, getStudentCount, getStudentsByClass, getStudentsByClassAndSection, searchStudents, updateStudent
+  addStudent,
+  checkRollNumberExists,
+  deleteStudent,
+  findOrCreateClass,
+  getAllClasses,
+  getAllStudents,
+  getStudentById,
+  getStudentCount,
+  getStudentsByClass,
+  getStudentsByClassAndSection,
+  searchStudents,
+  updateStudent,
 };

@@ -19,7 +19,7 @@ export const getAttendanceByID = async (id) => {
       JOIN Students s ON a.StudentID = s.StudentID
       JOIN Classes c ON a.ClassID = c.ClassID
       WHERE a.AttendanceID = ?`,
-      [id]
+      [id],
     );
     return rows[0] || null; // Return the first row or null if not found
   } catch (error) {
@@ -47,12 +47,12 @@ export const getAttendanceByStudentId = async (studentID) => {
       JOIN Classes c ON a.ClassID = c.ClassID 
       WHERE s.StudentID = ?
       ORDER BY a.ClassDate DESC`,
-      [studentID]
+      [studentID],
     );
     return rows; // Return all matching rows
   } catch (error) {
     throw new Error(
-      "Error fetching attendance by Student ID: " + error.message
+      "Error fetching attendance by Student ID: " + error.message,
     );
   }
 };
@@ -86,12 +86,12 @@ export const getAllAttendance = async () => {
 // Create a new attendance record
 export const createAttendance = async (attendanceData) => {
   const { studentID, classID, classDate, status } = attendanceData;
-  
+
   try {
     const [result] = await db.query(
       `INSERT INTO Attendance (StudentID, ClassID, ClassDate, Status) 
        VALUES (?, ?, ?, ?)`,
-      [studentID, classID, classDate, status]
+      [studentID, classID, classDate, status],
     );
     return result.insertId; // Return the ID of the newly created record
   } catch (error) {
@@ -102,13 +102,13 @@ export const createAttendance = async (attendanceData) => {
 // Update an attendance record
 export const updateAttendance = async (id, attendanceData) => {
   const { status } = attendanceData;
-  
+
   try {
     const [result] = await db.query(
       `UPDATE Attendance
        SET Status = ?
        WHERE AttendanceID = ?`,
-      [status, id]
+      [status, id],
     );
     return result.affectedRows; // Return the number of affected rows
   } catch (error) {
@@ -121,7 +121,7 @@ export const deleteAttendance = async (id) => {
   try {
     const [result] = await db.query(
       `DELETE FROM Attendance WHERE AttendanceID = ?`,
-      [id]
+      [id],
     );
     return result.affectedRows; // Return number of deleted rows
   } catch (error) {
@@ -149,7 +149,7 @@ export const getAttendanceByClassID = async (classID) => {
       JOIN Students s ON a.StudentID = s.StudentID 
       WHERE a.ClassID = ?
       ORDER BY a.ClassDate DESC, s.FirstName ASC`,
-      [classID]
+      [classID],
     );
     return rows;
   } catch (error) {
@@ -177,7 +177,7 @@ export const getAttendanceByDate = async (date) => {
       JOIN Students s ON a.StudentID = s.StudentID 
       WHERE a.ClassDate = ?
       ORDER BY c.ClassName ASC, c.Section ASC, s.FirstName ASC`,
-      [date]
+      [date],
     );
     return rows;
   } catch (error) {
@@ -205,18 +205,21 @@ export const getAttendanceSummaryByStudent = async (studentID) => {
       JOIN Classes c ON a.ClassID = c.ClassID
       WHERE a.StudentID = ?
       GROUP BY s.StudentID, s.FirstName, s.LastName, s.RollNumber, c.ClassName, c.Section`,
-      [studentID]
+      [studentID],
     );
     return result[0] || null; // Return the summary object for the student
   } catch (error) {
     throw new Error(
-      "Error getting attendance summary by student: " + error.message
+      "Error getting attendance summary by student: " + error.message,
     );
   }
 };
 
 // Get class attendance summary by class and date
-export const getClassAttendanceSummaryByClassAndDate = async (classId, date) => {
+export const getClassAttendanceSummaryByClassAndDate = async (
+  classId,
+  date,
+) => {
   try {
     const [rows] = await db.query(
       `SELECT 
@@ -225,7 +228,7 @@ export const getClassAttendanceSummaryByClassAndDate = async (classId, date) => 
        FROM Attendance a
        WHERE a.ClassID = ? AND a.ClassDate = ?
        GROUP BY a.Status`,
-      [classId, date]
+      [classId, date],
     );
     return rows;
   } catch (error) {
@@ -253,12 +256,12 @@ export const getAttendanceByClassAndSection = async (className, section) => {
       JOIN Students s ON a.StudentID = s.StudentID 
       WHERE c.ClassName = ? AND c.Section = ?
       ORDER BY a.ClassDate DESC, s.FirstName ASC`,
-      [className, section]
+      [className, section],
     );
     return rows;
   } catch (error) {
     throw new Error(
-      "Error getting attendance by class and section: " + error.message
+      "Error getting attendance by class and section: " + error.message,
     );
   }
 };
@@ -268,7 +271,7 @@ export const getAttendanceByNameRollClassSection = async (
   firstName,
   roll,
   className,
-  section
+  section,
 ) => {
   try {
     const [rows] = await db.query(
@@ -288,12 +291,13 @@ export const getAttendanceByNameRollClassSection = async (
       JOIN Students s ON a.StudentID = s.StudentID 
       WHERE s.FirstName LIKE ? AND s.RollNumber LIKE ? AND c.ClassName = ? AND c.Section = ?
       ORDER BY a.ClassDate DESC`,
-      [`%${firstName}%`, `%${roll}%`, className, section]
+      [`%${firstName}%`, `%${roll}%`, className, section],
     );
     return rows;
   } catch (error) {
     throw new Error(
-      "Error getting attendance by name, roll, class and section: " + error.message
+      "Error getting attendance by name, roll, class and section: " +
+        error.message,
     );
   }
 };
@@ -318,7 +322,7 @@ export const getAttendanceByDateRange = async (startDate, endDate) => {
       JOIN Students s ON a.StudentID = s.StudentID 
       WHERE a.ClassDate BETWEEN ? AND ?
       ORDER BY a.ClassDate DESC, c.ClassName ASC, c.Section ASC, s.FirstName ASC`,
-      [startDate, endDate]
+      [startDate, endDate],
     );
     return rows;
   } catch (error) {
@@ -329,9 +333,7 @@ export const getAttendanceByDateRange = async (startDate, endDate) => {
 // Get attendance count
 export const getAttendanceCount = async () => {
   try {
-    const [result] = await db.query(
-      `SELECT COUNT(*) as count FROM Attendance`
-    );
+    const [result] = await db.query(`SELECT COUNT(*) as count FROM Attendance`);
     return result[0].count;
   } catch (error) {
     throw new Error("Error getting attendance count: " + error.message);
@@ -341,16 +343,16 @@ export const getAttendanceCount = async () => {
 // Bulk create attendance records
 export const bulkCreateAttendance = async (attendanceRecords) => {
   try {
-    const values = attendanceRecords.map(record => [
+    const values = attendanceRecords.map((record) => [
       record.studentID,
       record.classID,
       record.classDate,
-      record.status
+      record.status,
     ]);
 
     const [result] = await db.query(
       `INSERT INTO Attendance (StudentID, ClassID, ClassDate, Status) VALUES ?`,
-      [values]
+      [values],
     );
     return result.affectedRows;
   } catch (error) {
@@ -364,7 +366,7 @@ export const checkAttendanceExists = async (studentID, classID, classDate) => {
     const [rows] = await db.query(
       `SELECT AttendanceID, Status FROM Attendance 
        WHERE StudentID = ? AND ClassID = ? AND ClassDate = ?`,
-      [studentID, classID, classDate]
+      [studentID, classID, classDate],
     );
     return rows; // Return the actual rows, not just a boolean
   } catch (error) {
@@ -381,7 +383,7 @@ export const getAttendanceStatistics = async () => {
         SUM(CASE WHEN Status = 'Present' THEN 1 ELSE 0 END) as TotalPresent,
         SUM(CASE WHEN Status = 'Absent' THEN 1 ELSE 0 END) as TotalAbsent,
         ROUND((SUM(CASE WHEN Status = 'Present' THEN 1 ELSE 0 END) / COUNT(*)) * 100, 2) as OverallAttendancePercentage
-      FROM Attendance`
+      FROM Attendance`,
     );
     return rows[0];
   } catch (error) {

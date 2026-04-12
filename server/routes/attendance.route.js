@@ -36,20 +36,35 @@ router.get("/exists", checkAttendanceExistsController);
 
 // Summary Routes
 // Route to get attendance summary by student ID
-router.get("/summary/student/:studentID", getAttendanceSummaryByStudentController);
+router.get(
+  "/summary/student/:studentID",
+  getAttendanceSummaryByStudentController,
+);
 
 // Route to get class attendance summary by class ID and date
-router.get("/summary/class/:classID/date/:date", getClassAttendanceSummaryByClassAndDateController);
+router.get(
+  "/summary/class/:classID/date/:date",
+  getClassAttendanceSummaryByClassAndDateController,
+);
 
 // Search and Filter Routes
 // Route to get attendance by name, roll number, class, and section
-router.get("/search/name/:firstName/roll/:roll/class/:class/section/:section", getAttendanceByNameRollClassSectionController);
+router.get(
+  "/search/name/:firstName/roll/:roll/class/:class/section/:section",
+  getAttendanceByNameRollClassSectionController,
+);
 
 // Route to get attendance by class name and section
-router.get("/search/class/:className/section/:section", getAttendanceByClassAndSectionController);
+router.get(
+  "/search/class/:className/section/:section",
+  getAttendanceByClassAndSectionController,
+);
 
 // Route to get attendance by date range
-router.get("/search/daterange/:startDate/:endDate", getAttendanceByDateRangeController);
+router.get(
+  "/search/daterange/:startDate/:endDate",
+  getAttendanceByDateRangeController,
+);
 
 // Route to get attendance by student ID
 router.get("/student/:studentID", getAttendanceByStudentIdController);

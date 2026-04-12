@@ -3,6 +3,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import express from "express";
 import db from "./config/db.config.js";
+import { languageMiddleware } from "./middlewares/language.middleware.js";
 import adminRouter from "./routes/admin.routes.js";
 import attendanceRoutes from "./routes/attendance.route.js";
 import classRoutes from "./routes/classes.routes.js";
@@ -27,14 +28,17 @@ app.use(
   cors({
     origin: process.env.FRONTEND_URL || "http://localhost:5173",
     credentials: true,
-  })
+  }),
 );
 app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use(bodyParser.json());
 
+// Language detection – attaches req.language ("en" | "bn"), default "bn"
+app.use(languageMiddleware);
+
 // Serve static files from public directory (for file uploads)
-app.use(express.static('public'));
+app.use(express.static("public"));
 
 // Database connection check
 db.connect((err) => {

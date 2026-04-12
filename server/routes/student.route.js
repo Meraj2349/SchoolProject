@@ -10,7 +10,7 @@ import {
   getStudentsByClassAndSectionController,
   getStudentsByClassController,
   searchStudentsController,
-  updateStudentController
+  updateStudentController,
 } from "../controllers/student.controller.js";
 
 const router = express.Router();
@@ -46,6 +46,9 @@ router.put("/:id", updateStudentController);
 router.delete("/:id", deleteStudentController);
 
 // Route to get students by class and section
-router.get("/class/:className/section/:sectionName", getStudentsByClassAndSectionController);
+router.get(
+  "/class/:className/section/:sectionName",
+  getStudentsByClassAndSectionController,
+);
 
 export default router;

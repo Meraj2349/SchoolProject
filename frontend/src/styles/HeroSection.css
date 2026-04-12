@@ -1,0 +1,15 @@
+.hero-section {
+  width: 100vw;
+  min-height: 60vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-size: cover;
+  background-position: center;
+}
+
+.hero-content {
+  color: #fff;
+  text-align: center;
+  padding: 2rem 1rem;
+}

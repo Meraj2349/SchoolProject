@@ -1,40 +1,33 @@
 import fs from "fs";
+import { t } from "../config/i18n.js";
 import * as ImageService from "../services/image.service.js";
 
 export const uploadImage = async (req, res) => {
+  const lang = req.language;
   try {
-    console.log("Upload request received");
-    console.log("File:", req.file);
-    console.log("Body:", req.body);
-    
     if (!req.file) {
-      return res.status(400).json({ message: "No file uploaded" });
+      return res.status(400).json({ message: t("no_file_uploaded", lang) });
     }
 
-    const { description, imageType, studentId, teacherId, associatedId } = req.body;
+    const { description, imageType, studentId, teacherId, associatedId } =
+      req.body;
     if (!imageType) {
-      return res.status(400).json({ message: "Image type is required" });
+      return res.status(400).json({ message: t("image_type_required", lang) });
     }
 
-    // Validate that only one ID type is provided based on image type
-    if (imageType === 'student' && !studentId) {
-      return res.status(400).json({ message: "Student ID is required for student images" });
+    if (imageType === "student" && !studentId) {
+      return res.status(400).json({ message: t("student_id_required", lang) });
     }
-    if (imageType === 'teacher' && !teacherId) {
-      return res.status(400).json({ message: "Teacher ID is required for teacher images" });
+    if (imageType === "teacher" && !teacherId) {
+      return res.status(400).json({ message: t("teacher_id_required", lang) });
     }
-
-    console.log("Calling ImageService.uploadImage with:", {
-      file: req.file.filename,
-      data: { Description: description, ImageType: imageType, StudentID: studentId, TeacherID: teacherId, AssociatedID: associatedId }
-    });
 
     const image = await ImageService.uploadImage(req.file, {
       Description: description,
       ImageType: imageType,
       StudentID: studentId,
       TeacherID: teacherId,
-      AssociatedID: associatedId
+      AssociatedID: associatedId,
     });
 
     fs.unlinkSync(req.file.path);
@@ -51,14 +44,15 @@ export const uploadImage = async (req, res) => {
 export const updateImage = async (req, res) => {
   try {
     const { id } = req.params;
-    const { description, imageType, studentId, teacherId, associatedId } = req.body;
+    const { description, imageType, studentId, teacherId, associatedId } =
+      req.body;
 
     const updatedImage = await ImageService.updateImageData(id, {
       Description: description,
       ImageType: imageType,
       StudentID: studentId,
       TeacherID: teacherId,
-      AssociatedID: associatedId
+      AssociatedID: associatedId,
     });
 
     res.status(200).json(updatedImage);
@@ -68,9 +62,10 @@ export const updateImage = async (req, res) => {
 };
 
 export const replaceImageFile = async (req, res) => {
+  const lang = req.language;
   try {
     if (!req.file) {
-      return res.status(400).json({ message: "No file uploaded" });
+      return res.status(400).json({ message: t("no_file_uploaded", lang) });
     }
 
     const { id } = req.params;
@@ -87,10 +82,11 @@ export const replaceImageFile = async (req, res) => {
 };
 
 export const deleteImage = async (req, res) => {
+  const lang = req.language;
   try {
     const { id } = req.params;
     await ImageService.deleteImage(id);
-    res.status(200).json({ message: "Image deleted successfully" });
+    res.status(200).json({ message: t("image_deleted", lang) });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -107,11 +103,12 @@ export const getImagesByType = async (req, res) => {
 };
 
 export const getImage = async (req, res) => {
+  const lang = req.language;
   try {
     const { id } = req.params;
     const image = await ImageService.getImageDetails(id);
     if (!image) {
-      return res.status(404).json({ message: "Image not found" });
+      return res.status(404).json({ message: t("image_not_found", lang) });
     }
     res.status(200).json(image);
   } catch (error) {

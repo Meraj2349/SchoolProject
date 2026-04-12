@@ -1,5 +1,5 @@
-// filepath: /home/meraj/Dev/SchoolProject/server/controllers/admin.controller.js
 import bcrypt from "bcryptjs";
+import { t } from "../config/i18n.js";
 import {
   createAdmin,
   authenticateAdmin,
@@ -11,16 +11,17 @@ import {
 
 // Create a new admin
 const createAdminController = async (req, res) => {
+  const lang = req.language;
   const { Username, Email, Password } = req.body;
   if (!Username || !Email || !Password) {
     return res
       .status(400)
-      .json({ error: "Username, Email, and Password are required" });
+      .json({ error: t("username_email_password_required", lang) });
   }
 
   try {
     const result = await createAdmin(req.body);
-    res.status(201).json(result); // Send 201 status code for successful creation
+    res.status(201).json(result);
   } catch (error) {
     console.error("Error creating admin:", error);
     res.status(500).json({ error: error.message });
@@ -29,88 +30,83 @@ const createAdminController = async (req, res) => {
 
 // Login admin
 const loginAdminController = async (req, res) => {
+  const lang = req.language;
   try {
     const { Email, Password } = req.body;
     const admin = await authenticateAdmin(Email, Password);
     const token = generateAuthToken(admin.AdminID);
-    res.json({ token });
+    res.json({ token, message: t("login_success", lang) });
   } catch (error) {
-    res.status(401).json({ error: error.message });
+    res.status(401).json({ error: t("invalid_credentials", lang) });
   }
 };
 
 // Update admin
 const updateAdminController = async (req, res) => {
+  const lang = req.language;
   try {
     const result = await updateAdmin(req.params.id, req.body);
     res.json(result);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: t("internal_server_error", lang) });
   }
 };
 
 // Delete admin
 const deleteAdminController = async (req, res) => {
+  const lang = req.language;
   try {
     const result = await deleteAdmin(req.params.id);
     res.json(result);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: t("internal_server_error", lang) });
   }
 };
 
 const handleLogout = async (req, res) => {
+  const lang = req.language;
   try {
-    // Clear the authentication token cookie
     res.clearCookie("token", {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production", // Use secure cookies in production
+      secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
     });
-
-    // Optionally, invalidate the token on the server side (if implemented)
-    // const token = req.headers.authorization?.split(" ")[1];
-    // if (token) {
-    //   blacklist.add(token); // Add the token to your blacklist
-    // }
-
-    res.status(200).json({ message: "Admin logged out successfully" });
+    res.status(200).json({ message: t("logout_success", lang) });
   } catch (error) {
     console.error("Error during logout:", error);
-    res.status(500).json({ error: "Failed to log out" });
+    res.status(500).json({ error: t("logout_failed", lang) });
   }
 };
 
 const updateEmailPassword = async (req, res) => {
+  const lang = req.language;
   const { email, currentPassword, newPassword } = req.body;
   const adminId = req.adminId;
 
   if (!email || !currentPassword || !newPassword) {
-    return res.status(400).json({ error: "All fields are required." });
+    return res.status(400).json({ error: t("all_fields_required", lang) });
   }
 
   if (newPassword.length < 8) {
-    return res
-      .status(400)
-      .json({ error: "New password must be at least 8 characters." });
+    return res.status(400).json({ error: t("password_too_short", lang) });
   }
 
   try {
-    // Verify the current password
     const admin = await getAdminById(adminId);
     if (!admin) {
-      return res.status(404).json({ error: "Admin not found." });
+      return res.status(404).json({ error: t("admin_not_found", lang) });
     }
 
     const isPasswordValid = await bcrypt.compare(
       currentPassword,
-      admin.Password
+      admin.Password,
     );
     if (!isPasswordValid) {
-      return res.status(401).json({ error: "Current password is incorrect." });
+      return res
+        .status(401)
+        .json({ error: t("current_password_incorrect", lang) });
     }
 
-    // Update email and password
     const hashedPassword = await bcrypt.hash(newPassword, 10);
     await updateAdmin(adminId, {
       Email: email,
@@ -118,12 +114,12 @@ const updateEmailPassword = async (req, res) => {
     });
 
     res.status(200).json({
-      message: "Email and password updated successfully.",
+      message: t("email_password_updated", lang),
       email: email,
     });
   } catch (error) {
     console.error("Error updating email/password:", error);
-    res.status(500).json({ error: "Failed to update email/password." });
+    res.status(500).json({ error: t("email_password_update_failed", lang) });
   }
 };
 
