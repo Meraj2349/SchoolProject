@@ -5,20 +5,10 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { studentsService } from "@/services/students.service";
 import { queryKeys } from "@/lib/queryKeys";
 import { useTranslations } from "@/store/languageStore";
-import "@/styles/StudentPage.css";
 
 const EMPTY = {
-  FirstName: "",
-  LastName: "",
-  RollNumber: "",
-  ClassName: "",
-  Section: "",
-  Gender: "Male",
-  DateOfBirth: "",
-  ParentContact: "",
-  Address: "",
-  Email: "",
-  AdmissionDate: "",
+  FirstName: "", LastName: "", RollNumber: "", ClassName: "", Section: "",
+  Gender: "Male", DateOfBirth: "", ParentContact: "", Address: "", Email: "", AdmissionDate: "",
 };
 
 export default function AdminPage() {
@@ -36,38 +26,22 @@ export default function AdminPage() {
 
   const create = useMutation({
     mutationFn: studentsService.create,
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: queryKeys.students.all });
-      flash(t("studentAdded"));
-      resetForm();
-    },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: queryKeys.students.all }); flash(t("studentAdded")); resetForm(); },
   });
   const update = useMutation({
     mutationFn: ({ id, data }) => studentsService.update(id, data),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: queryKeys.students.all });
-      flash(t("studentUpdated"));
-      resetForm();
-    },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: queryKeys.students.all }); flash(t("studentUpdated")); resetForm(); },
   });
   const remove = useMutation({
     mutationFn: studentsService.remove,
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: queryKeys.students.all });
-      flash(t("deleted"));
-    },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: queryKeys.students.all }); flash(t("deleted")); },
   });
 
   const flash = (msg, isErr = false) => {
-    setStatus(
-      isErr ? { error: msg, success: null } : { error: null, success: msg },
-    );
+    setStatus(isErr ? { error: msg, success: null } : { error: null, success: msg });
     setTimeout(() => setStatus({ error: null, success: null }), 4000);
   };
-  const resetForm = () => {
-    setForm(EMPTY);
-    setEditId(null);
-  };
+  const resetForm = () => { setForm(EMPTY); setEditId(null); };
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((p) => ({ ...p, [name]: value }));
@@ -84,189 +58,98 @@ export default function AdminPage() {
   };
 
   const TEXT_FIELDS = [
-    ["FirstName", t("firstName")],
-    ["LastName", t("lastName")],
-    ["RollNumber", t("rollNumber")],
-    ["ClassName", t("class")],
-    ["Section", t("section")],
-    ["ParentContact", t("parentContact")],
-    ["Email", t("email")],
-    ["Address", t("address")],
+    ["FirstName", t("firstName")], ["LastName", t("lastName")],
+    ["RollNumber", t("rollNumber")], ["ClassName", t("class")],
+    ["Section", t("section")], ["ParentContact", t("parentContact")],
+    ["Email", t("email")], ["Address", t("address")],
   ];
 
-  const TABLE_HEADERS = [
-    t("name"),
-    t("class"),
-    t("section"),
-    t("rollNumber"),
-    t("contact"),
-    t("actions"),
-  ];
+  const TABLE_HEADERS = [t("name"), t("class"), t("section"), t("rollNumber"), t("contact"), t("actions")];
 
   return (
-    <div className="student-page">
-      <h1>{t("title")}</h1>
+    <div>
+      <h1 className="text-2xl font-bold text-gray-800 mb-6">{t("title")}</h1>
       {status.error && <div className="error-message">{status.error}</div>}
-      {status.success && (
-        <div className="success-message">{status.success}</div>
-      )}
-      <form
-        onSubmit={handleSave}
-        style={{
-          background: "#fff",
-          padding: 24,
-          borderRadius: 8,
-          border: "1px solid #e5e7eb",
-          marginBottom: 24,
-        }}
-      >
-        <h2>{editId ? t("editStudent") : t("addStudent")}</h2>
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr 1fr",
-            gap: 16,
-          }}
-        >
+      {status.success && <div className="success-message">{status.success}</div>}
+
+      <form onSubmit={handleSave} className="bg-white rounded-lg border border-gray-200 p-6 mb-6">
+        <h2 className="text-lg font-semibold text-gray-700 mb-4">
+          {editId ? t("editStudent") : t("addStudent")}
+        </h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {TEXT_FIELDS.map(([name, label]) => (
             <div key={name}>
-              <label style={{ fontSize: 14, fontWeight: 500 }}>{label}</label>
-              <input
-                type="text"
-                name={name}
-                value={form[name]}
-                onChange={handleChange}
-                className="form-input"
-                style={{ marginTop: 4, width: "100%" }}
-              />
+              <label className="block text-sm font-medium text-gray-600 mb-1">{label}</label>
+              <input type="text" name={name} value={form[name]} onChange={handleChange} className="form-input" />
             </div>
           ))}
           <div>
-            <label style={{ fontSize: 14, fontWeight: 500 }}>
-              {t("gender")}
-            </label>
-            <select
-              name="Gender"
-              value={form.Gender}
-              onChange={handleChange}
-              className="form-input"
-              style={{ marginTop: 4, width: "100%" }}
-            >
+            <label className="block text-sm font-medium text-gray-600 mb-1">{t("gender")}</label>
+            <select name="Gender" value={form.Gender} onChange={handleChange} className="form-input">
               <option value="Male">{t("male")}</option>
               <option value="Female">{t("female")}</option>
               <option value="Other">{t("other")}</option>
             </select>
           </div>
           <div>
-            <label style={{ fontSize: 14, fontWeight: 500 }}>
-              {t("dateOfBirth")}
-            </label>
-            <input
-              type="date"
-              name="DateOfBirth"
-              value={form.DateOfBirth}
-              onChange={handleChange}
-              className="form-input"
-              style={{ marginTop: 4, width: "100%" }}
-            />
+            <label className="block text-sm font-medium text-gray-600 mb-1">{t("dateOfBirth")}</label>
+            <input type="date" name="DateOfBirth" value={form.DateOfBirth} onChange={handleChange} className="form-input" />
           </div>
           <div>
-            <label style={{ fontSize: 14, fontWeight: 500 }}>
-              {t("admissionDate")}
-            </label>
-            <input
-              type="date"
-              name="AdmissionDate"
-              value={form.AdmissionDate}
-              onChange={handleChange}
-              className="form-input"
-              style={{ marginTop: 4, width: "100%" }}
-            />
+            <label className="block text-sm font-medium text-gray-600 mb-1">{t("admissionDate")}</label>
+            <input type="date" name="AdmissionDate" value={form.AdmissionDate} onChange={handleChange} className="form-input" />
           </div>
         </div>
-        <div style={{ display: "flex", gap: 8, marginTop: 16 }}>
-          <button type="submit" className="btn-primary">
-            {editId ? t("updateStudent") : t("addStudent")}
-          </button>
-          {editId && (
-            <button type="button" onClick={resetForm} className="btn-secondary">
-              {t("cancel")}
-            </button>
-          )}
+        <div className="flex gap-2 mt-4">
+          <button type="submit" className="btn-primary">{editId ? t("updateStudent") : t("addStudent")}</button>
+          {editId && <button type="button" onClick={resetForm} className="btn-secondary">{t("cancel")}</button>}
         </div>
       </form>
-      <div>
-        <h2>
-          {t("allStudents")} ({students.length})
-        </h2>
+
+      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+        <div className="px-6 py-4 border-b border-gray-100">
+          <h2 className="text-lg font-semibold text-gray-700">
+            {t("allStudents")} ({students.length})
+          </h2>
+        </div>
         {isLoading ? (
-          <p>{t("loading")}</p>
+          <p className="p-6 text-gray-500">{t("loading")}</p>
         ) : (
-          <table
-            style={{
-              width: "100%",
-              borderCollapse: "collapse",
-              background: "#fff",
-            }}
-          >
-            <thead style={{ background: "#f9fafb" }}>
-              <tr>
-                {TABLE_HEADERS.map((h) => (
-                  <th key={h} className="table-header">
-                    {h}
-                  </th>
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse">
+              <thead>
+                <tr>{TABLE_HEADERS.map((h) => <th key={h} className="table-header">{h}</th>)}</tr>
+              </thead>
+              <tbody>
+                {students.map((s) => (
+                  <tr key={s.StudentID} className="hover:bg-gray-50 transition-colors">
+                    <td className="table-cell font-medium">{s.FirstName} {s.LastName}</td>
+                    <td className="table-cell">{s.ClassName}</td>
+                    <td className="table-cell">{s.Section}</td>
+                    <td className="table-cell">{s.RollNumber}</td>
+                    <td className="table-cell">{s.ParentContact || "–"}</td>
+                    <td className="table-cell">
+                      <button
+                        onClick={() => {
+                          setEditId(s.StudentID);
+                          setForm({ ...s, DateOfBirth: s.DateOfBirth?.split("T")[0] || "", AdmissionDate: s.AdmissionDate?.split("T")[0] || "" });
+                        }}
+                        className="text-blue-600 bg-transparent border-none cursor-pointer text-sm font-medium hover:text-blue-800 mr-3 transition-colors"
+                      >
+                        {t("editStudent")}
+                      </button>
+                      <button
+                        onClick={() => { if (window.confirm(t("deleteConfirm"))) remove.mutate(s.StudentID); }}
+                        className="text-red-600 bg-transparent border-none cursor-pointer text-sm font-medium hover:text-red-800 transition-colors"
+                      >
+                        {t("deleted")}
+                      </button>
+                    </td>
+                  </tr>
                 ))}
-              </tr>
-            </thead>
-            <tbody>
-              {students.map((s) => (
-                <tr key={s.StudentID}>
-                  <td className="table-cell">
-                    {s.FirstName} {s.LastName}
-                  </td>
-                  <td className="table-cell">{s.ClassName}</td>
-                  <td className="table-cell">{s.Section}</td>
-                  <td className="table-cell">{s.RollNumber}</td>
-                  <td className="table-cell">{s.ParentContact || "–"}</td>
-                  <td className="table-cell">
-                    <button
-                      onClick={() => {
-                        setEditId(s.StudentID);
-                        setForm({
-                          ...s,
-                          DateOfBirth: s.DateOfBirth?.split("T")[0] || "",
-                          AdmissionDate: s.AdmissionDate?.split("T")[0] || "",
-                        });
-                      }}
-                      style={{
-                        color: "#2563eb",
-                        background: "none",
-                        border: "none",
-                        cursor: "pointer",
-                        marginRight: 8,
-                      }}
-                    >
-                      {t("editStudent")}
-                    </button>
-                    <button
-                      onClick={() => {
-                        if (window.confirm(t("deleteConfirm")))
-                          remove.mutate(s.StudentID);
-                      }}
-                      style={{
-                        color: "#dc2626",
-                        background: "none",
-                        border: "none",
-                        cursor: "pointer",
-                      }}
-                    >
-                      {t("deleted")}
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
     </div>

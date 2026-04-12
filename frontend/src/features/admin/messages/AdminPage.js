@@ -9,7 +9,6 @@ import {
   useDeleteMessage,
 } from "@/hooks/useMessages";
 import { useTranslations } from "@/store/languageStore";
-import "@/styles/MessagesPage.css";
 
 export default function AdminPage() {
   const { data: messages = [], isLoading } = useMessages();
@@ -65,38 +64,34 @@ export default function AdminPage() {
   };
 
   return (
-    <div className="messages-page">
-      <h1>{t("title")}</h1>
+    <div>
+      <h1 className="text-2xl font-bold text-gray-800 mb-6">{t("title")}</h1>
+
       {status.error && <div className="error-message">{status.error}</div>}
-      {status.success && (
-        <div className="success-message">{status.success}</div>
-      )}
-      <div className="form-section">
-        <h2>{editId ? t("editMessage") : t("addMessage")}</h2>
+      {status.success && <div className="success-message">{status.success}</div>}
+
+      {/* Form */}
+      <div className="bg-white rounded-lg border border-gray-200 p-6 mb-6">
+        <h2 className="text-lg font-semibold text-gray-700 mb-4">
+          {editId ? t("editMessage") : t("addMessage")}
+        </h2>
         <textarea
           value={form.Messages}
           onChange={(e) => setForm((p) => ({ ...p, Messages: e.target.value }))}
           rows={8}
           placeholder={t("messagePlaceholder")}
-          className="form-input"
-          style={{ width: "100%" }}
+          className="form-input mb-3"
         />
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 12,
-            marginTop: 12,
-          }}
-        >
-          <label>
+        <div className="flex items-center gap-3 mt-3">
+          <label className="flex items-center gap-2 text-sm font-medium text-gray-600 cursor-pointer">
             <input
               type="checkbox"
               checked={form.Show}
               onChange={(e) =>
                 setForm((p) => ({ ...p, Show: e.target.checked }))
               }
-            />{" "}
+              className="w-4 h-4 accent-blue-600"
+            />
             {t("showOnWebsite")}
           </label>
           <button onClick={handleSave} className="btn-primary">
@@ -115,40 +110,40 @@ export default function AdminPage() {
           )}
         </div>
       </div>
-      <div className="list-section">
-        <h2>{t("allMessages")}</h2>
+
+      {/* Message list */}
+      <div>
+        <h2 className="text-lg font-semibold text-gray-700 mb-4">
+          {t("allMessages")}
+        </h2>
         {isLoading ? (
-          <p>{t("loading")}</p>
+          <p className="text-gray-500">{t("loading")}</p>
         ) : (
-          <div>
+          <div className="space-y-3">
             {messages.map((m) => (
               <div
                 key={m.MessageID}
-                style={{
-                  background: "#fff",
-                  border: "1px solid #e5e7eb",
-                  borderRadius: 8,
-                  padding: 16,
-                  marginBottom: 12,
-                }}
+                className="bg-white border border-gray-200 rounded-lg p-4"
               >
-                <p style={{ marginBottom: 8 }}>
+                <p className="text-gray-700 text-sm mb-3 leading-relaxed">
                   {m.Messages?.substring(0, 200)}
                   {m.Messages?.length > 200 ? "…" : ""}
                 </p>
-                <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-                  <span style={{ fontSize: 12, color: "#6b7280" }}>
+                <div className="flex gap-2 items-center">
+                  <span className="text-xs text-gray-400">
                     {m.Show ? t("visible") : t("hidden")}
                   </span>
                   <button
                     onClick={() => handleEdit(m)}
                     className="btn-icon edit"
+                    title={t("editMessage")}
                   >
                     <FaEdit />
                   </button>
                   <button
                     onClick={() => handleDelete(m.MessageID)}
                     className="btn-icon delete"
+                    title={t("deleteConfirm")}
                   >
                     <FaTrash />
                   </button>

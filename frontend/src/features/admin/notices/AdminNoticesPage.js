@@ -9,7 +9,6 @@ import {
   useDeleteNotice,
 } from "@/hooks/useNotices";
 import { useTranslations } from "@/store/languageStore";
-import "@/styles/NoticesPage.css";
 
 export default function AdminNoticesPage() {
   const { data: notices = [], isLoading } = useNotices();
@@ -94,14 +93,21 @@ export default function AdminNoticesPage() {
   };
 
   return (
-    <div className="notices-page">
-      <h1 className="notices-title">{t("title")}</h1>
+    <div>
+      <h1 className="text-2xl font-bold text-gray-800 mb-6">{t("title")}</h1>
+
       {error && <div className="error-message">{error}</div>}
       {success && <div className="success-message">{success}</div>}
-      <div className="notices-form">
-        <h2>{editId ? t("editNotice") : t("addNewNotice")}</h2>
-        <div className="form-group">
-          <label>{t("titleLabel")}</label>
+
+      {/* Form */}
+      <div className="bg-white rounded-lg border border-gray-200 p-6 mb-6">
+        <h2 className="text-lg font-semibold text-gray-700 mb-4">
+          {editId ? t("editNotice") : t("addNewNotice")}
+        </h2>
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-600 mb-1">
+            {t("titleLabel")}
+          </label>
           <input
             type="text"
             value={title}
@@ -110,8 +116,10 @@ export default function AdminNoticesPage() {
             className="form-input"
           />
         </div>
-        <div className="form-group">
-          <label>{t("descriptionLabel")}</label>
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-600 mb-1">
+            {t("descriptionLabel")}
+          </label>
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
@@ -120,7 +128,7 @@ export default function AdminNoticesPage() {
             className="form-input"
           />
         </div>
-        <div className="form-actions">
+        <div className="flex gap-2">
           <button
             onClick={handleSave}
             className="btn-primary"
@@ -143,52 +151,60 @@ export default function AdminNoticesPage() {
         </div>
       </div>
 
-      <div className="notices-list">
-        <h2>
-          {t("allNotices")} ({notices.length})
-        </h2>
+      {/* Table */}
+      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+        <div className="px-6 py-4 border-b border-gray-100">
+          <h2 className="text-lg font-semibold text-gray-700">
+            {t("allNotices")} ({notices.length})
+          </h2>
+        </div>
         {isLoading ? (
-          <p>{t("allNotices")}…</p>
+          <p className="p-6 text-gray-500">{t("allNotices")}…</p>
         ) : (
-          <table className="notices-table">
-            <thead>
-              <tr>
-                <th>{t("titleLabel")}</th>
-                <th>{t("descriptionLabel")}</th>
-                <th>{t("show")}</th>
-                <th>{t("actions")}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {notices.map((n) => (
-                <tr key={n.NoticeID}>
-                  <td>{n.Title}</td>
-                  <td>{n.Description}</td>
-                  <td>
-                    <input
-                      type="checkbox"
-                      checked={n.Show === 1 || n.Show === true}
-                      onChange={() => handleToggleShow(n)}
-                    />
-                  </td>
-                  <td>
-                    <button
-                      onClick={() => handleEdit(n)}
-                      className="btn-icon edit"
-                    >
-                      <FaEdit />
-                    </button>
-                    <button
-                      onClick={() => handleDelete(n.NoticeID)}
-                      className="btn-icon delete"
-                    >
-                      <FaTrash />
-                    </button>
-                  </td>
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse">
+              <thead>
+                <tr>
+                  <th className="table-header">{t("titleLabel")}</th>
+                  <th className="table-header">{t("descriptionLabel")}</th>
+                  <th className="table-header">{t("show")}</th>
+                  <th className="table-header">{t("actions")}</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {notices.map((n) => (
+                  <tr key={n.NoticeID} className="hover:bg-gray-50 transition-colors">
+                    <td className="table-cell font-medium">{n.Title}</td>
+                    <td className="table-cell max-w-xs truncate">{n.Description}</td>
+                    <td className="table-cell">
+                      <input
+                        type="checkbox"
+                        checked={n.Show === 1 || n.Show === true}
+                        onChange={() => handleToggleShow(n)}
+                        className="w-4 h-4 accent-blue-600 cursor-pointer"
+                      />
+                    </td>
+                    <td className="table-cell">
+                      <button
+                        onClick={() => handleEdit(n)}
+                        className="btn-icon edit"
+                        title={t("editNotice")}
+                      >
+                        <FaEdit />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(n.NoticeID)}
+                        className="btn-icon delete"
+                        title={t("deleteNotice")}
+                      >
+                        <FaTrash />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
     </div>

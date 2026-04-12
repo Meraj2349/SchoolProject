@@ -9,14 +9,8 @@ import {
 } from "@/hooks/useRoutines";
 import { useClasses } from "@/hooks/useClasses";
 import { useTranslations } from "@/store/languageStore";
-import "@/styles/AdminRoutine.css";
 
-const EMPTY = {
-  RoutineTitle: "",
-  ClassID: "",
-  RoutineDate: "",
-  Description: "",
-};
+const EMPTY = { RoutineTitle: "", ClassID: "", RoutineDate: "", Description: "" };
 
 export default function AdminPage() {
   const { data: routines = [], isLoading } = useRoutines();
@@ -59,67 +53,29 @@ export default function AdminPage() {
   };
 
   const fmtDate = (d) => {
-    try {
-      return new Date(d).toLocaleDateString();
-    } catch {
-      return d;
-    }
+    try { return new Date(d).toLocaleDateString(); } catch { return d; }
   };
 
-  const TABLE_HEADERS = [
-    t("titleCol"),
-    t("classCol"),
-    t("dateCol"),
-    t("fileCol"),
-    t("actionsCol"),
-  ];
+  const TABLE_HEADERS = [t("titleCol"), t("classCol"), t("dateCol"), t("fileCol"), t("actionsCol")];
 
   return (
-    <div className="admin-routine-page">
-      <h1>{t("title")}</h1>
+    <div>
+      <h1 className="text-2xl font-bold text-gray-800 mb-6">{t("title")}</h1>
       {status.error && <div className="error-message">{status.error}</div>}
-      {status.success && (
-        <div className="success-message">{status.success}</div>
-      )}
-      <form
-        onSubmit={handleSave}
-        style={{
-          background: "#fff",
-          padding: 24,
-          borderRadius: 8,
-          border: "1px solid #e5e7eb",
-          marginBottom: 24,
-        }}
-      >
-        <h2>{editId ? t("editRoutine") : t("addRoutine")}</h2>
-        <div
-          style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}
-        >
+      {status.success && <div className="success-message">{status.success}</div>}
+
+      <form onSubmit={handleSave} className="bg-white rounded-lg border border-gray-200 p-6 mb-6">
+        <h2 className="text-lg font-semibold text-gray-700 mb-4">
+          {editId ? t("editRoutine") : t("addRoutine")}
+        </h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label style={{ fontSize: 14, fontWeight: 500 }}>
-              {t("routineTitle")}
-            </label>
-            <input
-              type="text"
-              name="RoutineTitle"
-              value={form.RoutineTitle}
-              onChange={handleChange}
-              className="form-input"
-              style={{ marginTop: 4, width: "100%" }}
-              required
-            />
+            <label className="block text-sm font-medium text-gray-600 mb-1">{t("routineTitle")}</label>
+            <input type="text" name="RoutineTitle" value={form.RoutineTitle} onChange={handleChange} className="form-input" required />
           </div>
           <div>
-            <label style={{ fontSize: 14, fontWeight: 500 }}>
-              {t("class")}
-            </label>
-            <select
-              name="ClassID"
-              value={form.ClassID}
-              onChange={handleChange}
-              className="form-input"
-              style={{ marginTop: 4, width: "100%" }}
-            >
+            <label className="block text-sm font-medium text-gray-600 mb-1">{t("class")}</label>
+            <select name="ClassID" value={form.ClassID} onChange={handleChange} className="form-input">
               <option value="">{t("selectClass")}</option>
               {classes.map((c) => (
                 <option key={c.ClassID || c.id} value={c.ClassID || c.id}>
@@ -129,139 +85,87 @@ export default function AdminPage() {
             </select>
           </div>
           <div>
-            <label style={{ fontSize: 14, fontWeight: 500 }}>{t("date")}</label>
-            <input
-              type="date"
-              name="RoutineDate"
-              value={form.RoutineDate}
-              onChange={handleChange}
-              className="form-input"
-              style={{ marginTop: 4, width: "100%" }}
-              required
-            />
+            <label className="block text-sm font-medium text-gray-600 mb-1">{t("date")}</label>
+            <input type="date" name="RoutineDate" value={form.RoutineDate} onChange={handleChange} className="form-input" required />
           </div>
           <div>
-            <label style={{ fontSize: 14, fontWeight: 500 }}>{t("file")}</label>
+            <label className="block text-sm font-medium text-gray-600 mb-1">{t("file")}</label>
             <input
               type="file"
               ref={fileRef}
               accept=".pdf,image/*"
-              style={{ marginTop: 4, display: "block" }}
+              className="block mt-1 text-sm text-gray-600 file:mr-3 file:py-1.5 file:px-3 file:rounded file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
             />
           </div>
-          <div style={{ gridColumn: "1/-1" }}>
-            <label style={{ fontSize: 14, fontWeight: 500 }}>
-              {t("description")}
-            </label>
-            <textarea
-              name="Description"
-              value={form.Description}
-              onChange={handleChange}
-              rows={3}
-              className="form-input"
-              style={{ marginTop: 4, width: "100%" }}
-            />
+          <div className="sm:col-span-2">
+            <label className="block text-sm font-medium text-gray-600 mb-1">{t("description")}</label>
+            <textarea name="Description" value={form.Description} onChange={handleChange} rows={3} className="form-input" />
           </div>
         </div>
-        <div style={{ display: "flex", gap: 8, marginTop: 16 }}>
-          <button
-            type="submit"
-            className="btn-primary"
-            disabled={create.isPending || update.isPending}
-          >
+        <div className="flex gap-2 mt-4">
+          <button type="submit" className="btn-primary" disabled={create.isPending || update.isPending}>
             {editId ? t("updateRoutine") : t("addRoutine")}
           </button>
-          {editId && (
-            <button type="button" onClick={reset} className="btn-secondary">
-              {t("cancel")}
-            </button>
-          )}
+          {editId && <button type="button" onClick={reset} className="btn-secondary">{t("cancel")}</button>}
         </div>
       </form>
-      <h2>
-        {t("allRoutines")} ({routines.length})
-      </h2>
-      {isLoading ? (
-        <p>{t("loading")}</p>
-      ) : (
-        <table
-          style={{
-            width: "100%",
-            borderCollapse: "collapse",
-            background: "#fff",
-          }}
-        >
-          <thead style={{ background: "#f9fafb" }}>
-            <tr>
-              {TABLE_HEADERS.map((h) => (
-                <th key={h} className="table-header">
-                  {h}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {routines.map((r) => (
-              <tr key={r.RoutineID}>
-                <td className="table-cell">{r.RoutineTitle}</td>
-                <td className="table-cell">
-                  {r.ClassName} – {r.Section}
-                </td>
-                <td className="table-cell">{fmtDate(r.RoutineDate)}</td>
-                <td className="table-cell">
-                  {r.FileURL ? (
-                    <a
-                      href={r.FileURL}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      {t("view")}
-                    </a>
-                  ) : (
-                    "–"
-                  )}
-                </td>
-                <td className="table-cell">
-                  <button
-                    onClick={() => {
-                      setEditId(r.RoutineID);
-                      setForm({
-                        RoutineTitle: r.RoutineTitle || "",
-                        ClassID: r.ClassID || "",
-                        RoutineDate: r.RoutineDate?.split("T")[0] || "",
-                        Description: r.Description || "",
-                      });
-                    }}
-                    style={{
-                      color: "#2563eb",
-                      background: "none",
-                      border: "none",
-                      cursor: "pointer",
-                      marginRight: 8,
-                    }}
-                  >
-                    {t("editRoutine")}
-                  </button>
-                  <button
-                    onClick={() => {
-                      if (window.confirm(t("deleteConfirm")))
-                        remove.mutate(r.RoutineID);
-                    }}
-                    style={{
-                      color: "#dc2626",
-                      background: "none",
-                      border: "none",
-                      cursor: "pointer",
-                    }}
-                  >
-                    {t("deleted")}
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
+
+      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+        <div className="px-6 py-4 border-b border-gray-100">
+          <h2 className="text-lg font-semibold text-gray-700">
+            {t("allRoutines")} ({routines.length})
+          </h2>
+        </div>
+        {isLoading ? (
+          <p className="p-6 text-gray-500">{t("loading")}</p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse">
+              <thead>
+                <tr>{TABLE_HEADERS.map((h) => <th key={h} className="table-header">{h}</th>)}</tr>
+              </thead>
+              <tbody>
+                {routines.map((r) => (
+                  <tr key={r.RoutineID} className="hover:bg-gray-50 transition-colors">
+                    <td className="table-cell font-medium">{r.RoutineTitle}</td>
+                    <td className="table-cell">{r.ClassName} – {r.Section}</td>
+                    <td className="table-cell">{fmtDate(r.RoutineDate)}</td>
+                    <td className="table-cell">
+                      {r.FileURL ? (
+                        <a href={r.FileURL} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline text-sm">
+                          {t("view")}
+                        </a>
+                      ) : "–"}
+                    </td>
+                    <td className="table-cell">
+                      <button
+                        onClick={() => {
+                          setEditId(r.RoutineID);
+                          setForm({
+                            RoutineTitle: r.RoutineTitle || "",
+                            ClassID: r.ClassID || "",
+                            RoutineDate: r.RoutineDate?.split("T")[0] || "",
+                            Description: r.Description || "",
+                          });
+                        }}
+                        className="text-blue-600 bg-transparent border-none cursor-pointer text-sm font-medium hover:text-blue-800 mr-3 transition-colors"
+                      >
+                        {t("editRoutine")}
+                      </button>
+                      <button
+                        onClick={() => { if (window.confirm(t("deleteConfirm"))) remove.mutate(r.RoutineID); }}
+                        className="text-red-600 bg-transparent border-none cursor-pointer text-sm font-medium hover:text-red-800 transition-colors"
+                      >
+                        {t("deleted")}
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

@@ -7,18 +7,11 @@ import { examsService } from "@/services/exams.service";
 import { subjectsService } from "@/services/subjects.service";
 import { queryKeys } from "@/lib/queryKeys";
 import { useTranslations } from "@/store/languageStore";
-import "@/styles/StudentResultEntry.css";
 
 export default function AdminPage() {
   const [form, setForm] = useState({
-    className: "",
-    section: "",
-    examId: "",
-    subjectId: "",
-    firstName: "",
-    rollNumber: "",
-    marksObtained: "",
-    totalMarks: "100",
+    className: "", section: "", examId: "", subjectId: "",
+    firstName: "", rollNumber: "", marksObtained: "", totalMarks: "100",
   });
   const [status, setStatus] = useState({ error: null, success: null });
   const t = useTranslations("admin.results");
@@ -38,12 +31,7 @@ export default function AdminPage() {
     mutationFn: resultsService.createByDetails,
     onSuccess: () => {
       flash(t("resultAdded"));
-      setForm((p) => ({
-        ...p,
-        firstName: "",
-        rollNumber: "",
-        marksObtained: "",
-      }));
+      setForm((p) => ({ ...p, firstName: "", rollNumber: "", marksObtained: "" }));
     },
     onError: (err) => flash(err.message || t("failed"), true),
   });
@@ -72,9 +60,7 @@ export default function AdminPage() {
   };
 
   const filteredExams = form.className
-    ? exams.filter(
-        (ex) => ex.ClassName?.toLowerCase() === form.className.toLowerCase(),
-      )
+    ? exams.filter((ex) => ex.ClassName?.toLowerCase() === form.className.toLowerCase())
     : exams;
 
   const TEXT_FIELDS = [
@@ -87,87 +73,40 @@ export default function AdminPage() {
   ];
 
   return (
-    <div className="student-result-entry">
-      <h1>{t("title")}</h1>
+    <div>
+      <h1 className="text-2xl font-bold text-gray-800 mb-6">{t("title")}</h1>
       {status.error && <div className="error-message">{status.error}</div>}
-      {status.success && (
-        <div className="success-message">{status.success}</div>
-      )}
-      <form
-        onSubmit={handleSubmit}
-        style={{
-          background: "#fff",
-          padding: 24,
-          borderRadius: 8,
-          border: "1px solid #e5e7eb",
-        }}
-      >
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr 1fr",
-            gap: 16,
-          }}
-        >
+      {status.success && <div className="success-message">{status.success}</div>}
+
+      <form onSubmit={handleSubmit} className="bg-white rounded-lg border border-gray-200 p-6">
+        <h2 className="text-lg font-semibold text-gray-700 mb-4">{t("addResult")}</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {TEXT_FIELDS.map(([name, label, type, req]) => (
             <div key={name}>
-              <label style={{ fontSize: 14, fontWeight: 500 }}>{label}</label>
-              <input
-                type={type}
-                name={name}
-                value={form[name]}
-                onChange={handleChange}
-                className="form-input"
-                style={{ marginTop: 4, width: "100%" }}
-                required={req}
-              />
+              <label className="block text-sm font-medium text-gray-600 mb-1">{label}</label>
+              <input type={type} name={name} value={form[name]} onChange={handleChange} className="form-input" required={req} />
             </div>
           ))}
           <div>
-            <label style={{ fontSize: 14, fontWeight: 500 }}>{t("exam")}</label>
-            <select
-              name="examId"
-              value={form.examId}
-              onChange={handleChange}
-              className="form-input"
-              style={{ marginTop: 4, width: "100%" }}
-              required
-            >
+            <label className="block text-sm font-medium text-gray-600 mb-1">{t("exam")}</label>
+            <select name="examId" value={form.examId} onChange={handleChange} className="form-input" required>
               <option value="">{t("selectExam")}</option>
               {filteredExams.map((ex) => (
-                <option key={ex.ExamID} value={ex.ExamID}>
-                  {ex.ExamName} – {ex.ExamType}
-                </option>
+                <option key={ex.ExamID} value={ex.ExamID}>{ex.ExamName} – {ex.ExamType}</option>
               ))}
             </select>
           </div>
           <div>
-            <label style={{ fontSize: 14, fontWeight: 500 }}>
-              {t("subject")}
-            </label>
-            <select
-              name="subjectId"
-              value={form.subjectId}
-              onChange={handleChange}
-              className="form-input"
-              style={{ marginTop: 4, width: "100%" }}
-              required
-            >
+            <label className="block text-sm font-medium text-gray-600 mb-1">{t("subject")}</label>
+            <select name="subjectId" value={form.subjectId} onChange={handleChange} className="form-input" required>
               <option value="">{t("selectSubject")}</option>
               {subjects.map((s) => (
-                <option key={s.SubjectID} value={s.SubjectID}>
-                  {s.SubjectName}
-                </option>
+                <option key={s.SubjectID} value={s.SubjectID}>{s.SubjectName}</option>
               ))}
             </select>
           </div>
         </div>
-        <button
-          type="submit"
-          className="btn-primary"
-          style={{ marginTop: 16 }}
-          disabled={add.isPending}
-        >
+        <button type="submit" className="btn-primary mt-4" disabled={add.isPending}>
           {add.isPending ? t("saving") : t("addResult")}
         </button>
       </form>

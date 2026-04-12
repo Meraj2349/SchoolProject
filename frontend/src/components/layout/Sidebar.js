@@ -23,7 +23,6 @@ import { authService } from "@/services/auth.service";
 import { useAuthStore } from "@/store/authStore";
 import { useTranslations } from "@/store/languageStore";
 import LanguageSwitcher from "@/components/ui/LanguageSwitcher";
-import "@/styles/Sidebar.css";
 
 export default function Sidebar() {
   const pathname = usePathname();
@@ -103,54 +102,119 @@ export default function Sidebar() {
   };
 
   return (
-    <div className="dashboard-container">
-      <div className="mobile-menu-button">
-        <button onClick={() => setOpen((o) => !o)} className="menu-button">
-          {open ? <FiX className="icon" /> : <FiMenu className="icon" />}
+    <div className="font-sans">
+      {/* Mobile hamburger button */}
+      <div className="fixed top-4 left-4 z-[1001] md:hidden">
+        <button
+          onClick={() => setOpen((o) => !o)}
+          className="flex items-center justify-center p-3 rounded-xl border-none cursor-pointer text-white shadow-lg transition-all duration-300 hover:-translate-y-0.5"
+          style={{ background: "linear-gradient(135deg,#667eea 0%,#764ba2 100%)" }}
+          aria-label="Toggle menu"
+        >
+          {open ? (
+            <FiX className="text-xl" />
+          ) : (
+            <FiMenu className="text-xl" />
+          )}
         </button>
       </div>
 
-      <aside className={`sidebar ${open ? "open" : ""}`}>
-        <div className="sidebar-content">
-          <div className="sidebar-header">
-            <h2>{t("sidebar.adminDashboard")}</h2>
-            <div style={{ marginTop: "8px" }}>
-              <LanguageSwitcher />
-            </div>
+      {/* Sidebar */}
+      <aside
+        className={[
+          "fixed left-0 top-0 w-70 h-screen z-[1000] flex flex-col",
+          "shadow-xl border-r border-white/10 transition-transform duration-300",
+          "md:translate-x-0",
+          open ? "translate-x-0 shadow-2xl" : "-translate-x-full md:translate-x-0",
+        ].join(" ")}
+        style={{ background: "linear-gradient(180deg,#1e293b 0%,#0f172a 100%)", width: "280px" }}
+      >
+        {/* Header */}
+        <div
+          className="px-6 pt-8 pb-6 relative overflow-hidden flex-shrink-0"
+          style={{ background: "linear-gradient(135deg,#667eea 0%,#764ba2 100%)" }}
+        >
+          <h2 className="text-white text-2xl font-bold text-center tracking-tight relative z-10 m-0">
+            {t("sidebar.adminDashboard")}
+          </h2>
+          <div className="mt-2 flex justify-center relative z-10">
+            <LanguageSwitcher />
           </div>
-          <nav className="sidebar-nav">
-            <div className="nav-links">
-              {NAV_LINKS.map((item) => (
+        </div>
+
+        {/* Nav links */}
+        <nav className="flex-1 overflow-y-auto py-4 scrollbar-thin">
+          <div className="px-2">
+            {NAV_LINKS.map((item) => {
+              const isActive = pathname === item.path;
+              return (
                 <Link
                   key={item.path}
                   href={item.path}
                   onClick={() => setOpen(false)}
-                  className={`nav-link ${pathname === item.path ? "active" : ""}`}
+                  className={[
+                    "flex items-center px-4 py-3.5 my-1 rounded-xl no-underline",
+                    "transition-all duration-300 relative overflow-hidden group",
+                    isActive
+                      ? "text-white shadow-lg border border-white/20 translate-x-1"
+                      : "text-slate-300 hover:text-slate-100 hover:translate-x-2",
+                  ].join(" ")}
+                  style={
+                    isActive
+                      ? { background: "linear-gradient(135deg,#667eea 0%,#764ba2 100%)" }
+                      : undefined
+                  }
                 >
-                  <span className="nav-icon">{item.icon}</span>
-                  <span className="nav-label">{t(item.key)}</span>
+                  {/* Active right indicator */}
+                  {isActive && (
+                    <span className="absolute right-0 top-1/2 -translate-y-1/2 w-1 h-7 bg-white rounded-l" />
+                  )}
+                  <span
+                    className={[
+                      "flex items-center justify-center mr-3.5 text-lg min-w-5",
+                      "transition-transform duration-300",
+                      isActive ? "scale-110" : "group-hover:scale-110",
+                    ].join(" ")}
+                  >
+                    {item.icon}
+                  </span>
+                  <span
+                    className={[
+                      "text-sm tracking-wide",
+                      isActive ? "font-semibold" : "font-medium group-hover:font-semibold",
+                    ].join(" ")}
+                  >
+                    {t(item.key)}
+                  </span>
                 </Link>
-              ))}
-            </div>
-          </nav>
-          <div className="sidebar-footer">
-            {loggingOut ? (
-              <div className="logout-loading">
-                <div className="spinner" />
-                <span>{t("sidebar.loggingOut")}</span>
-              </div>
-            ) : (
-              <button onClick={handleLogout} className="logout-button">
-                {t("sidebar.logout")}
-              </button>
-            )}
+              );
+            })}
           </div>
+        </nav>
+
+        {/* Footer */}
+        <div className="flex-shrink-0 p-6 border-t border-white/10 bg-black/20">
+          {loggingOut ? (
+            <div className="flex items-center justify-center gap-3 text-slate-300 text-sm py-3.5">
+              <div className="w-5 h-5 border-2 border-slate-300/30 border-t-slate-300 rounded-full animate-spin" />
+              <span>{t("sidebar.loggingOut")}</span>
+            </div>
+          ) : (
+            <button
+              onClick={handleLogout}
+              className="w-full flex items-center justify-center gap-2 py-3.5 px-4 text-white font-semibold text-base rounded-xl border-none cursor-pointer transition-all duration-300 hover:-translate-y-0.5"
+              style={{ background: "linear-gradient(135deg,#ef4444 0%,#dc2626 100%)" }}
+            >
+              {t("sidebar.logout")}
+            </button>
+          )}
         </div>
       </aside>
 
+      {/* Mobile overlay */}
       {open && (
         <div
-          className="overlay"
+          className="fixed inset-0 bg-black/50 z-[999] backdrop-blur-sm md:hidden animate-[fadeIn_0.3s_ease_forwards]"
           onClick={() => setOpen(false)}
           aria-hidden="true"
         />

@@ -1,7 +1,6 @@
 "use client";
 
 import { useLanguageStore } from "@/store/languageStore";
-import "@/styles/LanguageSwitcher.css";
 
 /**
  * Toggle button between English and Bangla.
@@ -13,21 +12,31 @@ export default function LanguageSwitcher() {
 
   return (
     <div
-      className="language-switcher"
+      className="inline-flex items-center gap-1 bg-white/15 border border-white/40 rounded-full px-2 py-0.5 text-xs"
       role="group"
       aria-label="Language selector"
     >
       <button
-        className={`lang-btn ${language === "bn" ? "active" : ""}`}
+        className={[
+          "border-none cursor-pointer text-xs px-1.5 py-0.5 rounded-full font-medium whitespace-nowrap transition-all duration-200",
+          language === "bn"
+            ? "bg-white/85 text-[#2d5a27] font-bold"
+            : "bg-transparent text-inherit hover:bg-white/25",
+        ].join(" ")}
         onClick={() => setLanguage("bn")}
         aria-pressed={language === "bn"}
         title="বাংলা"
       >
         বাংলা
       </button>
-      <span className="lang-divider">|</span>
+      <span className="opacity-50 select-none">|</span>
       <button
-        className={`lang-btn ${language === "en" ? "active" : ""}`}
+        className={[
+          "border-none cursor-pointer text-xs px-1.5 py-0.5 rounded-full font-medium whitespace-nowrap transition-all duration-200",
+          language === "en"
+            ? "bg-white/85 text-[#2d5a27] font-bold"
+            : "bg-transparent text-inherit hover:bg-white/25",
+        ].join(" ")}
         onClick={() => setLanguage("en")}
         aria-pressed={language === "en"}
         title="English"

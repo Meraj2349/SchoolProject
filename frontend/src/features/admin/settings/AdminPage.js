@@ -3,14 +3,9 @@
 import { useState } from "react";
 import { authService } from "@/services/auth.service";
 import { useTranslations } from "@/store/languageStore";
-import "@/styles/UpdateEmailPasswordPage.css";
 
 export default function AdminPage() {
-  const [form, setForm] = useState({
-    email: "",
-    currentPassword: "",
-    newPassword: "",
-  });
+  const [form, setForm] = useState({ email: "", currentPassword: "", newPassword: "" });
   const [status, setStatus] = useState({ error: "", success: "" });
   const [loading, setLoading] = useState(false);
   const t = useTranslations("admin.settings");
@@ -23,10 +18,7 @@ export default function AdminPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (form.newPassword.length < 8) {
-      setStatus({
-        error: t("passwordMinLength"),
-        success: "",
-      });
+      setStatus({ error: t("passwordMinLength"), success: "" });
       return;
     }
     setLoading(true);
@@ -36,77 +28,39 @@ export default function AdminPage() {
       setStatus({ error: "", success: t("successMessage") });
       setForm({ email: "", currentPassword: "", newPassword: "" });
     } catch (err) {
-      setStatus({
-        error: err.response?.data?.error || err.message || t("errorMessage"),
-        success: "",
-      });
+      setStatus({ error: err.response?.data?.error || err.message || t("errorMessage"), success: "" });
     } finally {
       setLoading(false);
     }
   };
 
+  const FIELDS = [
+    ["email", t("email"), "email", t("emailPlaceholder")],
+    ["currentPassword", t("currentPassword"), "password", t("currentPasswordPlaceholder")],
+    ["newPassword", t("newPassword"), "password", t("newPasswordPlaceholder")],
+  ];
+
   return (
-    <div className="update-email-password-page">
-      <h1>{t("title")}</h1>
+    <div>
+      <h1 className="text-2xl font-bold text-gray-800 mb-6">{t("title")}</h1>
       {status.error && <div className="error-message">{status.error}</div>}
-      {status.success && (
-        <div className="success-message">{status.success}</div>
-      )}
-      <form
-        onSubmit={handleSubmit}
-        style={{
-          background: "#fff",
-          padding: 32,
-          borderRadius: 8,
-          border: "1px solid #e5e7eb",
-          maxWidth: 480,
-        }}
-      >
-        <div className="form-group" style={{ marginBottom: 20 }}>
-          <label style={{ fontWeight: 500, display: "block", marginBottom: 6 }}>
-            {t("email")}
-          </label>
-          <input
-            type="email"
-            name="email"
-            value={form.email}
-            onChange={handleChange}
-            className="form-input"
-            style={{ width: "100%" }}
-            placeholder={t("emailPlaceholder")}
-            required
-          />
-        </div>
-        <div className="form-group" style={{ marginBottom: 20 }}>
-          <label style={{ fontWeight: 500, display: "block", marginBottom: 6 }}>
-            {t("currentPassword")}
-          </label>
-          <input
-            type="password"
-            name="currentPassword"
-            value={form.currentPassword}
-            onChange={handleChange}
-            className="form-input"
-            style={{ width: "100%" }}
-            placeholder={t("currentPasswordPlaceholder")}
-            required
-          />
-        </div>
-        <div className="form-group" style={{ marginBottom: 24 }}>
-          <label style={{ fontWeight: 500, display: "block", marginBottom: 6 }}>
-            {t("newPassword")}
-          </label>
-          <input
-            type="password"
-            name="newPassword"
-            value={form.newPassword}
-            onChange={handleChange}
-            className="form-input"
-            style={{ width: "100%" }}
-            placeholder={t("newPasswordPlaceholder")}
-            required
-          />
-        </div>
+      {status.success && <div className="success-message">{status.success}</div>}
+
+      <form onSubmit={handleSubmit} className="bg-white rounded-lg border border-gray-200 p-8 max-w-lg">
+        {FIELDS.map(([name, label, type, placeholder]) => (
+          <div key={name} className="mb-5">
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">{label}</label>
+            <input
+              type={type}
+              name={name}
+              value={form[name]}
+              onChange={handleChange}
+              className="form-input"
+              placeholder={placeholder}
+              required
+            />
+          </div>
+        ))}
         <button type="submit" className="btn-primary" disabled={loading}>
           {loading ? t("updating") : t("update")}
         </button>

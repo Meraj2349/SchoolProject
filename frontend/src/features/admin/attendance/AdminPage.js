@@ -4,14 +4,12 @@ import { useState } from "react";
 import { attendanceService } from "@/services/attendance.service";
 import { studentsService } from "@/services/students.service";
 import { useTranslations } from "@/store/languageStore";
-import "@/styles/AttendancePage.css";
 
 export default function AdminPage() {
   const t = useTranslations("admin.attendance");
 
   const [filter, setFilter] = useState({
-    className: "",
-    section: "",
+    className: "", section: "",
     date: new Date().toISOString().split("T")[0],
   });
   const [students, setStudents] = useState([]);
@@ -32,16 +30,11 @@ export default function AdminPage() {
     }
     setLoading(true);
     try {
-      const res = await studentsService.getByClassSection(
-        filter.className,
-        filter.section,
-      );
+      const res = await studentsService.getByClassSection(filter.className, filter.section);
       const list = res?.data ?? res ?? [];
       setStudents(list);
       const init = {};
-      list.forEach((s) => {
-        init[s.StudentID] = "Present";
-      });
+      list.forEach((s) => { init[s.StudentID] = "Present"; });
       setAttendance(init);
     } catch (err) {
       flash(err.message || t("loadFailed"), true);
@@ -51,10 +44,7 @@ export default function AdminPage() {
   };
 
   const handleSave = async () => {
-    if (students.length === 0) {
-      flash(t("noStudentsLoaded"), true);
-      return;
-    }
+    if (students.length === 0) { flash(t("noStudentsLoaded"), true); return; }
     setSaving(true);
     try {
       const records = students.map((s) => ({
@@ -80,124 +70,76 @@ export default function AdminPage() {
   ];
 
   return (
-    <div className="admin-attendance-page">
-      <h1>{t("markTitle")}</h1>
+    <div>
+      <h1 className="text-2xl font-bold text-gray-800 mb-6">{t("markTitle")}</h1>
       {status.error && <div className="error-message">{status.error}</div>}
-      {status.success && (
-        <div className="success-message">{status.success}</div>
-      )}
-      <div
-        style={{
-          background: "#fff",
-          padding: 24,
-          borderRadius: 8,
-          border: "1px solid #e5e7eb",
-          marginBottom: 24,
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            gap: 16,
-            alignItems: "flex-end",
-            flexWrap: "wrap",
-          }}
-        >
+      {status.success && <div className="success-message">{status.success}</div>}
+
+      {/* Filter form */}
+      <div className="bg-white rounded-lg border border-gray-200 p-6 mb-6">
+        <div className="flex flex-wrap gap-4 items-end">
           {FIELDS.map(([n, l, type]) => (
             <div key={n}>
-              <label
-                style={{ fontSize: 14, fontWeight: 500, display: "block" }}
-              >
-                {l}
-              </label>
+              <label className="block text-sm font-medium text-gray-600 mb-1">{l}</label>
               <input
                 type={type}
                 value={filter[n]}
-                onChange={(e) =>
-                  setFilter((p) => ({ ...p, [n]: e.target.value }))
-                }
+                onChange={(e) => setFilter((p) => ({ ...p, [n]: e.target.value }))}
                 className="form-input"
-                style={{ marginTop: 4 }}
                 placeholder={l}
               />
             </div>
           ))}
-          <button
-            onClick={loadStudents}
-            className="btn-primary"
-            disabled={loading}
-          >
+          <button onClick={loadStudents} className="btn-primary" disabled={loading}>
             {loading ? t("loading") : t("loadStudents")}
           </button>
         </div>
       </div>
+
+      {/* Attendance table */}
       {students.length > 0 && (
-        <div
-          style={{
-            background: "#fff",
-            padding: 24,
-            borderRadius: 8,
-            border: "1px solid #e5e7eb",
-          }}
-        >
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              marginBottom: 16,
-            }}
-          >
-            <h2>
-              {students.length} {t("student")} – {filter.className} {filter.section} –{" "}
-              {filter.date}
+        <div className="bg-white rounded-lg border border-gray-200 p-6">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-base font-semibold text-gray-700">
+              {students.length} {t("student")} – {filter.className} {filter.section} – {filter.date}
             </h2>
-            <button
-              onClick={handleSave}
-              className="btn-primary"
-              disabled={saving}
-            >
+            <button onClick={handleSave} className="btn-primary" disabled={saving}>
               {saving ? t("saving") : t("saveAttendance")}
             </button>
           </div>
-          <table style={{ width: "100%", borderCollapse: "collapse" }}>
-            <thead style={{ background: "#f9fafb" }}>
-              <tr>
-                <th className="table-header">{t("roll")}</th>
-                <th className="table-header">{t("name")}</th>
-                <th className="table-header">{t("present")}</th>
-                <th className="table-header">{t("absent")}</th>
-                <th className="table-header">{t("late")}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {students.map((s) => (
-                <tr key={s.StudentID}>
-                  <td className="table-cell">{s.RollNumber}</td>
-                  <td className="table-cell">
-                    {s.FirstName} {s.LastName}
-                  </td>
-                  {["Present", "Absent", "Late"].map((stat) => (
-                    <td
-                      key={stat}
-                      className="table-cell"
-                      style={{ textAlign: "center" }}
-                    >
-                      <input
-                        type="radio"
-                        name={`att-${s.StudentID}`}
-                        value={stat}
-                        checked={attendance[s.StudentID] === stat}
-                        onChange={() =>
-                          setAttendance((p) => ({ ...p, [s.StudentID]: stat }))
-                        }
-                      />
-                    </td>
-                  ))}
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse">
+              <thead>
+                <tr>
+                  <th className="table-header">{t("roll")}</th>
+                  <th className="table-header">{t("name")}</th>
+                  <th className="table-header text-center">{t("present")}</th>
+                  <th className="table-header text-center">{t("absent")}</th>
+                  <th className="table-header text-center">{t("late")}</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {students.map((s) => (
+                  <tr key={s.StudentID} className="hover:bg-gray-50 transition-colors">
+                    <td className="table-cell">{s.RollNumber}</td>
+                    <td className="table-cell font-medium">{s.FirstName} {s.LastName}</td>
+                    {["Present", "Absent", "Late"].map((stat) => (
+                      <td key={stat} className="table-cell text-center">
+                        <input
+                          type="radio"
+                          name={`att-${s.StudentID}`}
+                          value={stat}
+                          checked={attendance[s.StudentID] === stat}
+                          onChange={() => setAttendance((p) => ({ ...p, [s.StudentID]: stat }))}
+                          className="w-4 h-4 accent-blue-600 cursor-pointer"
+                        />
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
     </div>

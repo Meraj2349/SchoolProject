@@ -14,9 +14,10 @@ export default function AdminLayoutInner({ children }) {
   }
 
   return (
-    <div style={{ display: "flex", minHeight: "100vh" }}>
+    <div className="flex min-h-screen">
       <Sidebar />
-      <main style={{ flex: 1, padding: "24px", background: "#f9fafb" }}>
+      {/* Offset main content by sidebar width on md+ screens */}
+      <main className="flex-1 p-6 bg-gray-50 md:ml-[280px]">
         {children}
       </main>
     </div>

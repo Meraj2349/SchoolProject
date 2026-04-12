@@ -5,7 +5,6 @@ import { useQuery } from "@tanstack/react-query";
 import { attendanceService } from "@/services/attendance.service";
 import { queryKeys } from "@/lib/queryKeys";
 import { useTranslations } from "@/store/languageStore";
-import "@/styles/AttendancePageGrid.css";
 
 export default function AdminAttendanceGridPage() {
   const t = useTranslations("admin.attendance");
@@ -23,101 +22,88 @@ export default function AdminAttendanceGridPage() {
   const filtered =
     data?.filter((r) => {
       if (!submitted) return false;
-      return (
-        r.ClassName === submitted.className && r.Section === submitted.section
-      );
+      return r.ClassName === submitted.className && r.Section === submitted.section;
     }) ?? [];
 
+  const statusColor = (status) => {
+    switch (status?.toLowerCase()) {
+      case "present": return "bg-green-100 text-green-700";
+      case "absent": return "bg-red-100 text-red-700";
+      case "late": return "bg-yellow-100 text-yellow-700";
+      default: return "bg-gray-100 text-gray-600";
+    }
+  };
+
   return (
-    <div className="attendance-grid-page">
-      <h1>{t("title")}</h1>
-      <div
-        style={{
-          background: "#fff",
-          padding: 24,
-          borderRadius: 8,
-          border: "1px solid #e5e7eb",
-          marginBottom: 24,
-        }}
-      >
-        <div style={{ display: "flex", gap: 16, alignItems: "flex-end" }}>
+    <div>
+      <h1 className="text-2xl font-bold text-gray-800 mb-6">{t("title")}</h1>
+
+      {/* Filter */}
+      <div className="bg-white rounded-lg border border-gray-200 p-6 mb-6">
+        <div className="flex flex-wrap gap-4 items-end">
           <div>
-            <label style={{ fontSize: 14, fontWeight: 500, display: "block" }}>
-              {t("class")}
-            </label>
+            <label className="block text-sm font-medium text-gray-600 mb-1">{t("class")}</label>
             <input
               type="text"
               value={filter.className}
-              onChange={(e) =>
-                setFilter((p) => ({ ...p, className: e.target.value }))
-              }
+              onChange={(e) => setFilter((p) => ({ ...p, className: e.target.value }))}
               className="form-input"
-              style={{ marginTop: 4 }}
               placeholder={t("className")}
             />
           </div>
           <div>
-            <label style={{ fontSize: 14, fontWeight: 500, display: "block" }}>
-              {t("section")}
-            </label>
+            <label className="block text-sm font-medium text-gray-600 mb-1">{t("section")}</label>
             <input
               type="text"
               value={filter.section}
-              onChange={(e) =>
-                setFilter((p) => ({ ...p, section: e.target.value }))
-              }
+              onChange={(e) => setFilter((p) => ({ ...p, section: e.target.value }))}
               className="form-input"
-              style={{ marginTop: 4 }}
               placeholder={t("section")}
             />
           </div>
-          <button
-            onClick={() => setSubmitted({ ...filter })}
-            className="btn-primary"
-          >
+          <button onClick={() => setSubmitted({ ...filter })} className="btn-primary">
             {t("search")}
           </button>
         </div>
       </div>
-      {isLoading && <p>{t("loading")}</p>}
+
+      {isLoading && <p className="text-gray-500">{t("loading")}</p>}
+
       {filtered.length > 0 ? (
-        <div style={{ overflowX: "auto" }}>
-          <table
-            style={{
-              width: "100%",
-              borderCollapse: "collapse",
-              background: "#fff",
-            }}
-          >
-            <thead style={{ background: "#f9fafb" }}>
-              <tr>
-                <th className="table-header">{t("student")}</th>
-                <th className="table-header">{t("date")}</th>
-                <th className="table-header">{t("status")}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map((r, i) => (
-                <tr key={i}>
-                  <td className="table-cell">{r.StudentName || r.StudentID}</td>
-                  <td className="table-cell">
-                    {r.AttendanceDate
-                      ? new Date(r.AttendanceDate).toLocaleDateString()
-                      : r.ClassDate || "–"}
-                  </td>
-                  <td className="table-cell">
-                    <span className={`status-badge ${r.Status?.toLowerCase()}`}>
-                      {r.Status}
-                    </span>
-                  </td>
+        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse">
+              <thead>
+                <tr>
+                  <th className="table-header">{t("student")}</th>
+                  <th className="table-header">{t("date")}</th>
+                  <th className="table-header">{t("status")}</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {filtered.map((r, i) => (
+                  <tr key={i} className="hover:bg-gray-50 transition-colors">
+                    <td className="table-cell font-medium">{r.StudentName || r.StudentID}</td>
+                    <td className="table-cell">
+                      {r.AttendanceDate
+                        ? new Date(r.AttendanceDate).toLocaleDateString()
+                        : r.ClassDate || "–"}
+                    </td>
+                    <td className="table-cell">
+                      <span className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold capitalize ${statusColor(r.Status)}`}>
+                        {r.Status}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       ) : (
-        submitted &&
-        !isLoading && <p className="no-data">{t("noRecords")}</p>
+        submitted && !isLoading && (
+          <p className="text-center py-8 text-gray-500">{t("noRecords")}</p>
+        )
       )}
     </div>
   );

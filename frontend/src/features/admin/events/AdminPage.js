@@ -8,7 +8,6 @@ import {
   useDeleteEvent,
 } from "@/hooks/useEvents";
 import { useTranslations } from "@/store/languageStore";
-import "@/styles/EventsPage.css";
 
 const EMPTY = {
   EventName: "",
@@ -35,10 +34,7 @@ export default function AdminPage() {
     setStatus(e ? { error: m, success: null } : { error: null, success: m });
     setTimeout(() => setStatus({ error: null, success: null }), 4000);
   };
-  const reset = () => {
-    setForm(EMPTY);
-    setEditId(null);
-  };
+  const reset = () => { setForm(EMPTY); setEditId(null); };
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((p) => ({ ...p, [name]: value }));
@@ -56,211 +52,115 @@ export default function AdminPage() {
     }
   };
 
-  const TABLE_HEADERS = [
-    t("name"),
-    t("type"),
-    t("start"),
-    t("end"),
-    t("venue"),
-    t("actions"),
-  ];
+  const TABLE_HEADERS = [t("name"), t("type"), t("start"), t("end"), t("venue"), t("actions")];
 
   return (
-    <div className="admin-events-page" style={{ padding: 0 }}>
-      <h1>{t("title")}</h1>
+    <div>
+      <h1 className="text-2xl font-bold text-gray-800 mb-6">{t("title")}</h1>
       {status.error && <div className="error-message">{status.error}</div>}
-      {status.success && (
-        <div className="success-message">{status.success}</div>
-      )}
-      <form
-        onSubmit={handleSave}
-        style={{
-          background: "#fff",
-          padding: 24,
-          borderRadius: 8,
-          border: "1px solid #e5e7eb",
-          marginBottom: 24,
-        }}
-      >
-        <h2>{editId ? t("editEvent") : t("addEvent")}</h2>
-        <div
-          style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}
-        >
+      {status.success && <div className="success-message">{status.success}</div>}
+
+      <form onSubmit={handleSave} className="bg-white rounded-lg border border-gray-200 p-6 mb-6">
+        <h2 className="text-lg font-semibold text-gray-700 mb-4">
+          {editId ? t("editEvent") : t("addEvent")}
+        </h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label style={{ fontSize: 14, fontWeight: 500 }}>
-              {t("eventName")}
-            </label>
-            <input
-              type="text"
-              name="EventName"
-              value={form.EventName}
-              onChange={handleChange}
-              className="form-input"
-              style={{ marginTop: 4, width: "100%" }}
-              required
-            />
+            <label className="block text-sm font-medium text-gray-600 mb-1">{t("eventName")}</label>
+            <input type="text" name="EventName" value={form.EventName} onChange={handleChange} className="form-input" required />
           </div>
           <div>
-            <label style={{ fontSize: 14, fontWeight: 500 }}>{t("type")}</label>
-            <select
-              name="EventType"
-              value={form.EventType}
-              onChange={handleChange}
-              className="form-input"
-              style={{ marginTop: 4, width: "100%" }}
-            >
+            <label className="block text-sm font-medium text-gray-600 mb-1">{t("type")}</label>
+            <select name="EventType" value={form.EventType} onChange={handleChange} className="form-input">
               {EVENT_TYPES.map((tp) => (
-                <option key={tp} value={tp}>
-                  {tp}
-                </option>
+                <option key={tp} value={tp}>{tp}</option>
               ))}
             </select>
           </div>
           <div>
-            <label style={{ fontSize: 14, fontWeight: 500 }}>
-              {t("startDate")}
-            </label>
-            <input
-              type="date"
-              name="StartDate"
-              value={form.StartDate}
-              onChange={handleChange}
-              className="form-input"
-              style={{ marginTop: 4, width: "100%" }}
-              required
-            />
+            <label className="block text-sm font-medium text-gray-600 mb-1">{t("startDate")}</label>
+            <input type="date" name="StartDate" value={form.StartDate} onChange={handleChange} className="form-input" required />
           </div>
           <div>
-            <label style={{ fontSize: 14, fontWeight: 500 }}>
-              {t("endDate")}
-            </label>
-            <input
-              type="date"
-              name="EndDate"
-              value={form.EndDate}
-              onChange={handleChange}
-              className="form-input"
-              style={{ marginTop: 4, width: "100%" }}
-              required
-            />
+            <label className="block text-sm font-medium text-gray-600 mb-1">{t("endDate")}</label>
+            <input type="date" name="EndDate" value={form.EndDate} onChange={handleChange} className="form-input" required />
           </div>
           <div>
-            <label style={{ fontSize: 14, fontWeight: 500 }}>
-              {t("venue")}
-            </label>
-            <input
-              type="text"
-              name="Venue"
-              value={form.Venue}
-              onChange={handleChange}
-              className="form-input"
-              style={{ marginTop: 4, width: "100%" }}
-            />
+            <label className="block text-sm font-medium text-gray-600 mb-1">{t("venue")}</label>
+            <input type="text" name="Venue" value={form.Venue} onChange={handleChange} className="form-input" />
           </div>
-          <div style={{ gridColumn: "1/-1" }}>
-            <label style={{ fontSize: 14, fontWeight: 500 }}>
-              {t("description")}
-            </label>
-            <textarea
-              name="Description"
-              value={form.Description}
-              onChange={handleChange}
-              rows={3}
-              className="form-input"
-              style={{ marginTop: 4, width: "100%" }}
-            />
+          <div className="sm:col-span-2">
+            <label className="block text-sm font-medium text-gray-600 mb-1">{t("description")}</label>
+            <textarea name="Description" value={form.Description} onChange={handleChange} rows={3} className="form-input" />
           </div>
         </div>
-        <div style={{ display: "flex", gap: 8, marginTop: 16 }}>
-          <button type="submit" className="btn-primary">
-            {editId ? t("updateEvent") : t("addEvent")}
-          </button>
-          {editId && (
-            <button type="button" onClick={reset} className="btn-secondary">
-              {t("cancel")}
-            </button>
-          )}
+        <div className="flex gap-2 mt-4">
+          <button type="submit" className="btn-primary">{editId ? t("updateEvent") : t("addEvent")}</button>
+          {editId && <button type="button" onClick={reset} className="btn-secondary">{t("cancel")}</button>}
         </div>
       </form>
-      <h2>
-        {t("allEvents")} ({events.length})
-      </h2>
-      {isLoading ? (
-        <p>{t("loading")}</p>
-      ) : (
-        <table
-          style={{
-            width: "100%",
-            borderCollapse: "collapse",
-            background: "#fff",
-          }}
-        >
-          <thead style={{ background: "#f9fafb" }}>
-            <tr>
-              {TABLE_HEADERS.map((h) => (
-                <th key={h} className="table-header">
-                  {h}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {events.map((ev) => (
-              <tr key={ev.EventID}>
-                <td className="table-cell">{ev.EventName}</td>
-                <td className="table-cell">{ev.EventType}</td>
-                <td className="table-cell">
-                  {ev.StartDate
-                    ? new Date(ev.StartDate).toLocaleDateString()
-                    : "–"}
-                </td>
-                <td className="table-cell">
-                  {ev.EndDate ? new Date(ev.EndDate).toLocaleDateString() : "–"}
-                </td>
-                <td className="table-cell">{ev.Venue || "–"}</td>
-                <td className="table-cell">
-                  <button
-                    onClick={() => {
-                      setEditId(ev.EventID);
-                      setForm({
-                        EventName: ev.EventName || "",
-                        EventType: ev.EventType || "Academic",
-                        StartDate: ev.StartDate?.split("T")[0] || "",
-                        EndDate: ev.EndDate?.split("T")[0] || "",
-                        Venue: ev.Venue || "",
-                        Description: ev.Description || "",
-                      });
-                    }}
-                    style={{
-                      color: "#2563eb",
-                      background: "none",
-                      border: "none",
-                      cursor: "pointer",
-                      marginRight: 8,
-                    }}
-                  >
-                    {t("editEvent")}
-                  </button>
-                  <button
-                    onClick={() => {
-                      if (window.confirm(t("deleteConfirm")))
-                        remove.mutate(ev.EventID);
-                    }}
-                    style={{
-                      color: "#dc2626",
-                      background: "none",
-                      border: "none",
-                      cursor: "pointer",
-                    }}
-                  >
-                    {t("deleted")}
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
+
+      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+        <div className="px-6 py-4 border-b border-gray-100">
+          <h2 className="text-lg font-semibold text-gray-700">
+            {t("allEvents")} ({events.length})
+          </h2>
+        </div>
+        {isLoading ? (
+          <p className="p-6 text-gray-500">{t("loading")}</p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse">
+              <thead>
+                <tr>
+                  {TABLE_HEADERS.map((h) => <th key={h} className="table-header">{h}</th>)}
+                </tr>
+              </thead>
+              <tbody>
+                {events.map((ev) => (
+                  <tr key={ev.EventID} className="hover:bg-gray-50 transition-colors">
+                    <td className="table-cell font-medium">{ev.EventName}</td>
+                    <td className="table-cell">
+                      <span className="inline-block px-2 py-0.5 bg-blue-50 text-blue-700 text-xs rounded-full">
+                        {ev.EventType}
+                      </span>
+                    </td>
+                    <td className="table-cell">{ev.StartDate ? new Date(ev.StartDate).toLocaleDateString() : "–"}</td>
+                    <td className="table-cell">{ev.EndDate ? new Date(ev.EndDate).toLocaleDateString() : "–"}</td>
+                    <td className="table-cell">{ev.Venue || "–"}</td>
+                    <td className="table-cell">
+                      <button
+                        onClick={() => {
+                          setEditId(ev.EventID);
+                          setForm({
+                            EventName: ev.EventName || "",
+                            EventType: ev.EventType || "Academic",
+                            StartDate: ev.StartDate?.split("T")[0] || "",
+                            EndDate: ev.EndDate?.split("T")[0] || "",
+                            Venue: ev.Venue || "",
+                            Description: ev.Description || "",
+                          });
+                        }}
+                        className="text-blue-600 bg-transparent border-none cursor-pointer text-sm font-medium hover:text-blue-800 mr-3 transition-colors"
+                      >
+                        {t("editEvent")}
+                      </button>
+                      <button
+                        onClick={() => {
+                          if (window.confirm(t("deleteConfirm"))) remove.mutate(ev.EventID);
+                        }}
+                        className="text-red-600 bg-transparent border-none cursor-pointer text-sm font-medium hover:text-red-800 transition-colors"
+                      >
+                        {t("deleted")}
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

@@ -28,48 +28,25 @@ export default function AdminNewsPage() {
   const [success, setSuccess] = useState(null);
 
   const flash = (msg, isErr = false) => {
-    if (isErr) {
-      setError(msg);
-      setSuccess(null);
-    } else {
-      setSuccess(msg);
-      setError(null);
-    }
-    setTimeout(() => {
-      setError(null);
-      setSuccess(null);
-    }, 4000);
+    if (isErr) { setError(msg); setSuccess(null); }
+    else { setSuccess(msg); setError(null); }
+    setTimeout(() => { setError(null); setSuccess(null); }, 4000);
   };
 
   const resetForm = () => {
-    setTitleBn("");
-    setTitleEn("");
-    setDate("");
-    setLink("/events");
-    setIsActive(true);
-    setEditId(null);
+    setTitleBn(""); setTitleEn(""); setDate(""); setLink("/events"); setIsActive(true); setEditId(null);
   };
 
   const handleSave = async () => {
     if (!titleBn.trim() || !titleEn.trim() || !date) {
-      flash(t("requiredFields"), true);
-      return;
+      flash(t("requiredFields"), true); return;
     }
     try {
       if (editId) {
-        await updateNews.mutateAsync({
-          id: editId,
-          data: { title_bn: titleBn, title_en: titleEn, date, link, is_active: isActive },
-        });
+        await updateNews.mutateAsync({ id: editId, data: { title_bn: titleBn, title_en: titleEn, date, link, is_active: isActive } });
         flash(t("newsUpdated"));
       } else {
-        await createNews.mutateAsync({
-          title_bn: titleBn,
-          title_en: titleEn,
-          date,
-          link,
-          is_active: isActive,
-        });
+        await createNews.mutateAsync({ title_bn: titleBn, title_en: titleEn, date, link, is_active: isActive });
         flash(t("newsAdded"));
       }
       resetForm();
@@ -99,225 +76,131 @@ export default function AdminNewsPage() {
 
   const fmtDate = (d) => {
     if (!d) return "—";
-    return new Date(d).toLocaleDateString(undefined, {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
+    return new Date(d).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
   };
 
   const isBusy = createNews.isPending || updateNews.isPending;
 
-  return (
-    <div style={{ padding: "1.5rem", maxWidth: "900px", margin: "0 auto" }}>
-      <h1 style={{ marginBottom: "1.5rem", fontSize: "1.5rem", fontWeight: 700 }}>
-        {t("title")}
-      </h1>
+  const isItemActive = (item) => item.is_active === 1 || item.is_active === true;
 
-      {error && (
-        <div style={{ background: "#fee2e2", color: "#b91c1c", padding: "0.75rem 1rem", borderRadius: "8px", marginBottom: "1rem" }}>
-          {error}
-        </div>
-      )}
-      {success && (
-        <div style={{ background: "#dcfce7", color: "#15803d", padding: "0.75rem 1rem", borderRadius: "8px", marginBottom: "1rem" }}>
-          {success}
-        </div>
-      )}
+  return (
+    <div className="max-w-4xl">
+      <h1 className="text-2xl font-bold text-gray-800 mb-6">{t("title")}</h1>
+
+      {error && <div className="error-message">{error}</div>}
+      {success && <div className="success-message">{success}</div>}
 
       {/* Form */}
-      <div style={{ background: "#fff", border: "1px solid #e2e8f0", borderRadius: "10px", padding: "1.25rem", marginBottom: "2rem" }}>
-        <h2 style={{ fontSize: "1rem", fontWeight: 600, marginBottom: "1rem" }}>
+      <div className="bg-white border border-gray-200 rounded-xl p-5 mb-8">
+        <h2 className="text-base font-semibold text-gray-700 mb-4">
           {editId ? t("editNews") : t("addNews")}
         </h2>
-
-        <div style={{ display: "grid", gap: "0.75rem" }}>
+        <div className="grid gap-3">
           <div>
-            <label style={{ display: "block", fontWeight: 500, marginBottom: "0.25rem", fontSize: "0.875rem" }}>
-              {t("titleBn")}
-            </label>
+            <label className="block text-sm font-medium text-gray-600 mb-1">{t("titleBn")}</label>
             <input
               type="text"
               value={titleBn}
               onChange={(e) => setTitleBn(e.target.value)}
               placeholder={t("titleBnPlaceholder")}
-              style={{ width: "100%", padding: "0.5rem 0.75rem", border: "1px solid #cbd5e1", borderRadius: "6px", fontSize: "0.875rem", boxSizing: "border-box" }}
+              className="form-input"
             />
           </div>
-
           <div>
-            <label style={{ display: "block", fontWeight: 500, marginBottom: "0.25rem", fontSize: "0.875rem" }}>
-              {t("titleEn")}
-            </label>
+            <label className="block text-sm font-medium text-gray-600 mb-1">{t("titleEn")}</label>
             <input
               type="text"
               value={titleEn}
               onChange={(e) => setTitleEn(e.target.value)}
               placeholder={t("titleEnPlaceholder")}
-              style={{ width: "100%", padding: "0.5rem 0.75rem", border: "1px solid #cbd5e1", borderRadius: "6px", fontSize: "0.875rem", boxSizing: "border-box" }}
+              className="form-input"
             />
           </div>
-
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem" }}>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label style={{ display: "block", fontWeight: 500, marginBottom: "0.25rem", fontSize: "0.875rem" }}>
-                {t("date")}
-              </label>
-              <input
-                type="date"
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
-                style={{ width: "100%", padding: "0.5rem 0.75rem", border: "1px solid #cbd5e1", borderRadius: "6px", fontSize: "0.875rem", boxSizing: "border-box" }}
-              />
+              <label className="block text-sm font-medium text-gray-600 mb-1">{t("date")}</label>
+              <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="form-input" />
             </div>
             <div>
-              <label style={{ display: "block", fontWeight: 500, marginBottom: "0.25rem", fontSize: "0.875rem" }}>
-                {t("link")}
-              </label>
-              <input
-                type="text"
-                value={link}
-                onChange={(e) => setLink(e.target.value)}
-                placeholder="/events"
-                style={{ width: "100%", padding: "0.5rem 0.75rem", border: "1px solid #cbd5e1", borderRadius: "6px", fontSize: "0.875rem", boxSizing: "border-box" }}
-              />
+              <label className="block text-sm font-medium text-gray-600 mb-1">{t("link")}</label>
+              <input type="text" value={link} onChange={(e) => setLink(e.target.value)} placeholder="/events" className="form-input" />
             </div>
           </div>
-
-          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+          <div className="flex items-center gap-2">
             <input
               type="checkbox"
               id="isActive"
               checked={isActive}
               onChange={(e) => setIsActive(e.target.checked)}
-              style={{ width: "16px", height: "16px" }}
+              className="w-4 h-4 accent-blue-600"
             />
-            <label htmlFor="isActive" style={{ fontWeight: 500, fontSize: "0.875rem" }}>
-              {t("isActive")}
-            </label>
+            <label htmlFor="isActive" className="text-sm font-medium text-gray-600">{t("isActive")}</label>
           </div>
-
-          <div style={{ display: "flex", gap: "0.5rem" }}>
-            <button
-              onClick={handleSave}
-              disabled={isBusy}
-              style={{
-                padding: "0.5rem 1.25rem",
-                background: "#2563eb",
-                color: "#fff",
-                border: "none",
-                borderRadius: "6px",
-                fontWeight: 600,
-                cursor: isBusy ? "not-allowed" : "pointer",
-                opacity: isBusy ? 0.7 : 1,
-              }}
-            >
+          <div className="flex gap-2">
+            <button onClick={handleSave} disabled={isBusy} className="btn-primary">
               {isBusy ? t("saving") : editId ? t("updateNews") : t("addNews")}
             </button>
             {editId && (
-              <button
-                onClick={resetForm}
-                style={{
-                  padding: "0.5rem 1.25rem",
-                  background: "#f1f5f9",
-                  color: "#334155",
-                  border: "1px solid #cbd5e1",
-                  borderRadius: "6px",
-                  fontWeight: 600,
-                  cursor: "pointer",
-                }}
-              >
-                {tCommon("cancel")}
-              </button>
+              <button onClick={resetForm} className="btn-secondary">{tCommon("cancel")}</button>
             )}
           </div>
         </div>
       </div>
 
       {/* News list */}
-      <h2 style={{ fontSize: "1rem", fontWeight: 600, marginBottom: "0.75rem" }}>
-        {t("allNews")}
-      </h2>
+      <h2 className="text-base font-semibold text-gray-700 mb-3">{t("allNews")}</h2>
 
       {isLoading ? (
-        <div style={{ color: "#64748b" }}>{tCommon("loading")}</div>
+        <div className="text-gray-500">{tCommon("loading")}</div>
       ) : newsItems.length === 0 ? (
-        <div style={{ color: "#64748b" }}>{t("noNews")}</div>
+        <div className="text-gray-500">{t("noNews")}</div>
       ) : (
-        <div style={{ overflowX: "auto" }}>
-          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.875rem" }}>
-            <thead>
-              <tr style={{ background: "#f8fafc", borderBottom: "2px solid #e2e8f0" }}>
-                <th style={{ padding: "0.6rem 0.75rem", textAlign: "left" }}>#</th>
-                <th style={{ padding: "0.6rem 0.75rem", textAlign: "left" }}>{t("titleBn")}</th>
-                <th style={{ padding: "0.6rem 0.75rem", textAlign: "left" }}>{t("titleEn")}</th>
-                <th style={{ padding: "0.6rem 0.75rem", textAlign: "left" }}>{t("date")}</th>
-                <th style={{ padding: "0.6rem 0.75rem", textAlign: "left" }}>{t("status")}</th>
-                <th style={{ padding: "0.6rem 0.75rem", textAlign: "left" }}>{t("actions")}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {newsItems.map((item, idx) => (
-                <tr key={item.id} style={{ borderBottom: "1px solid #e2e8f0" }}>
-                  <td style={{ padding: "0.6rem 0.75rem" }}>{idx + 1}</td>
-                  <td style={{ padding: "0.6rem 0.75rem", maxWidth: "200px", wordBreak: "break-word" }}>
-                    {item.title_bn}
-                  </td>
-                  <td style={{ padding: "0.6rem 0.75rem", maxWidth: "200px", wordBreak: "break-word" }}>
-                    {item.title_en}
-                  </td>
-                  <td style={{ padding: "0.6rem 0.75rem", whiteSpace: "nowrap" }}>
-                    {fmtDate(item.date)}
-                  </td>
-                  <td style={{ padding: "0.6rem 0.75rem" }}>
-                    <span
-                      style={{
-                        padding: "0.2rem 0.6rem",
-                        borderRadius: "999px",
-                        fontSize: "0.75rem",
-                        fontWeight: 600,
-                        background: (item.is_active === 1 || item.is_active === true) ? "#dcfce7" : "#fee2e2",
-                        color: (item.is_active === 1 || item.is_active === true) ? "#15803d" : "#b91c1c",
-                      }}
-                    >
-                      {(item.is_active === 1 || item.is_active === true) ? t("active") : t("inactive")}
-                    </span>
-                  </td>
-                  <td style={{ padding: "0.6rem 0.75rem", whiteSpace: "nowrap" }}>
-                    <button
-                      onClick={() => handleEdit(item)}
-                      style={{
-                        background: "#eff6ff",
-                        color: "#2563eb",
-                        border: "none",
-                        borderRadius: "6px",
-                        padding: "0.35rem 0.6rem",
-                        cursor: "pointer",
-                        marginRight: "0.4rem",
-                      }}
-                      title={tCommon("edit")}
-                    >
-                      <FaEdit />
-                    </button>
-                    <button
-                      onClick={() => handleDelete(item.id)}
-                      style={{
-                        background: "#fef2f2",
-                        color: "#dc2626",
-                        border: "none",
-                        borderRadius: "6px",
-                        padding: "0.35rem 0.6rem",
-                        cursor: "pointer",
-                      }}
-                      title={tCommon("delete")}
-                    >
-                      <FaTrash />
-                    </button>
-                  </td>
+        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse text-sm">
+              <thead>
+                <tr className="bg-gray-50 border-b-2 border-gray-200">
+                  <th className="px-3 py-2.5 text-left text-xs font-semibold text-gray-500">#</th>
+                  <th className="px-3 py-2.5 text-left text-xs font-semibold text-gray-500">{t("titleBn")}</th>
+                  <th className="px-3 py-2.5 text-left text-xs font-semibold text-gray-500">{t("titleEn")}</th>
+                  <th className="px-3 py-2.5 text-left text-xs font-semibold text-gray-500">{t("date")}</th>
+                  <th className="px-3 py-2.5 text-left text-xs font-semibold text-gray-500">{t("status")}</th>
+                  <th className="px-3 py-2.5 text-left text-xs font-semibold text-gray-500">{t("actions")}</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {newsItems.map((item, idx) => (
+                  <tr key={item.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                    <td className="px-3 py-2.5 text-gray-600">{idx + 1}</td>
+                    <td className="px-3 py-2.5 max-w-48 break-words text-gray-700">{item.title_bn}</td>
+                    <td className="px-3 py-2.5 max-w-48 break-words text-gray-700">{item.title_en}</td>
+                    <td className="px-3 py-2.5 whitespace-nowrap text-gray-600">{fmtDate(item.date)}</td>
+                    <td className="px-3 py-2.5">
+                      <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-semibold ${isItemActive(item) ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>
+                        {isItemActive(item) ? t("active") : t("inactive")}
+                      </span>
+                    </td>
+                    <td className="px-3 py-2.5 whitespace-nowrap">
+                      <button
+                        onClick={() => handleEdit(item)}
+                        className="inline-flex items-center justify-center w-8 h-8 bg-blue-50 text-blue-600 rounded-md border-none cursor-pointer hover:bg-blue-100 transition-colors mr-1"
+                        title={tCommon("edit")}
+                      >
+                        <FaEdit />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(item.id)}
+                        className="inline-flex items-center justify-center w-8 h-8 bg-red-50 text-red-600 rounded-md border-none cursor-pointer hover:bg-red-100 transition-colors"
+                        title={tCommon("delete")}
+                      >
+                        <FaTrash />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
     </div>
