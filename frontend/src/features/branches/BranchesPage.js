@@ -18,8 +18,14 @@ function fmtDate(d) {
 
 function BranchCard({ branch, language, t }) {
   const isProposed = branch.is_proposed === true || branch.is_proposed === 1;
-  const name = language === "bn" ? (branch.name_bn || branch.name_en) : (branch.name_en || branch.name_bn);
-  const address = language === "bn" ? (branch.address_bn || branch.address_en) : (branch.address_en || branch.address_bn);
+  const name =
+    language === "bn"
+      ? branch.name_bn || branch.name_en
+      : branch.name_en || branch.name_bn;
+  const address =
+    language === "bn"
+      ? branch.address_bn || branch.address_en
+      : branch.address_en || branch.address_bn;
   const hasCoords = branch.latitude != null && branch.longitude != null;
   const mapsUrl = hasCoords
     ? `https://www.google.com/maps?q=${branch.latitude},${branch.longitude}`

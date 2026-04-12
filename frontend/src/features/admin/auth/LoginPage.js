@@ -33,7 +33,7 @@ export default function LoginPage() {
       }
     } catch (err) {
       setError(
-        err.response?.data?.message || err.message || t("somethingWrong"),
+        err.response?.data?.error || err.response?.data?.message || err.message || t("somethingWrong"),
       );
     } finally {
       setLoading(false);
@@ -95,7 +95,9 @@ export default function LoginPage() {
             type="submit"
             disabled={loading}
             className="w-full py-3.5 text-white font-semibold text-base rounded-lg border-none cursor-pointer transition-all duration-300 mt-2.5 disabled:opacity-70 disabled:cursor-not-allowed hover:-translate-y-0.5 hover:shadow-lg"
-            style={{ background: "linear-gradient(135deg,#667eea 0%,#764ba2 100%)" }}
+            style={{
+              background: "linear-gradient(135deg,#667eea 0%,#764ba2 100%)",
+            }}
           >
             {loading ? t("loggingIn") : t("loginBtn")}
           </button>

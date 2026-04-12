@@ -9,6 +9,16 @@ const nextConfig = {
         port: '3000',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: '**',
+        pathname: '/**',
+      },
+      {
+        protocol: 'http',
+        hostname: '**',
+        pathname: '/**',
+      },
     ],
   },
   // Proxy API calls to backend during development

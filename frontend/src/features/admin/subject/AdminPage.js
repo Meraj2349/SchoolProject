@@ -6,6 +6,7 @@ import { subjectsService } from "@/services/subjects.service";
 import { classesService } from "@/services/classes.service";
 import { queryKeys } from "@/lib/queryKeys";
 import { useTranslations } from "@/store/languageStore";
+import { FiEdit2, FiTrash2, FiBook, FiPlusCircle } from "react-icons/fi";
 
 const EMPTY = { SubjectName: "", ClassID: "" };
 
@@ -27,15 +28,26 @@ export default function AdminPage() {
 
   const create = useMutation({
     mutationFn: subjectsService.create,
-    onSuccess: () => { qc.invalidateQueries({ queryKey: queryKeys.subjects.all }); flash(t("subjectAdded")); reset(); },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: queryKeys.subjects.all });
+      flash(t("subjectAdded"));
+      reset();
+    },
   });
   const update = useMutation({
     mutationFn: ({ id, data }) => subjectsService.update(id, data),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: queryKeys.subjects.all }); flash(t("subjectUpdated")); reset(); },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: queryKeys.subjects.all });
+      flash(t("subjectUpdated"));
+      reset();
+    },
   });
   const remove = useMutation({
     mutationFn: subjectsService.remove,
-    onSuccess: () => { qc.invalidateQueries({ queryKey: queryKeys.subjects.all }); flash(t("deleted")); },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: queryKeys.subjects.all });
+      flash(t("deleted"));
+    },
   });
 
   const [form, setForm] = useState(EMPTY);
@@ -46,7 +58,10 @@ export default function AdminPage() {
     setStatus(e ? { error: m, success: null } : { error: null, success: m });
     setTimeout(() => setStatus({ error: null, success: null }), 4000);
   };
-  const reset = () => { setForm(EMPTY); setEditId(null); };
+  const reset = () => {
+    setForm(EMPTY);
+    setEditId(null);
+  };
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((p) => ({ ...p, [name]: value }));
@@ -63,62 +78,94 @@ export default function AdminPage() {
   };
 
   return (
-    <div>
-      <h1 className="text-2xl font-bold text-gray-800 mb-6">{t("title")}</h1>
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-2xl font-bold text-slate-900">{t("title")}</h1>
+        <p className="text-sm text-slate-500 mt-1">
+          Manage subjects assigned to classes
+        </p>
+      </div>
+
       {status.error && <div className="error-message">{status.error}</div>}
-      {status.success && <div className="success-message">{status.success}</div>}
+      {status.success && (
+        <div className="success-message">{status.success}</div>
+      )}
 
-      <form onSubmit={handleSave} className="bg-white rounded-lg border border-gray-200 p-6 mb-6">
-        <h2 className="text-lg font-semibold text-gray-700 mb-4">
-          {editId ? t("editSubject") : t("addSubject")}
-        </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-600 mb-1">{t("subjectName")}</label>
-            <input
-              type="text"
-              name="SubjectName"
-              value={form.SubjectName}
-              onChange={handleChange}
-              className="form-input"
-              required
-            />
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        <div className="px-6 py-4 border-b border-slate-100 flex items-center gap-3">
+          <div className="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center">
+            <FiPlusCircle className="text-indigo-600 text-sm" />
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-600 mb-1">{t("className")}</label>
-            <select
-              name="ClassID"
-              value={form.ClassID}
-              onChange={handleChange}
-              className="form-input"
-            >
-              <option value="">{t("selectClass")}</option>
-              {classes.map((c) => (
-                <option key={c.ClassID || c.id} value={c.ClassID || c.id}>
-                  {c.className || c.ClassName} – {c.section || c.Section}
-                </option>
-              ))}
-            </select>
-          </div>
+          <h2 className="text-base font-semibold text-slate-800">
+            {editId ? t("editSubject") : t("addSubject")}
+          </h2>
         </div>
-        <div className="flex gap-2 mt-4">
-          <button type="submit" className="btn-primary">
-            {editId ? t("updateSubject") : t("addSubject")}
-          </button>
-          {editId && (
-            <button type="button" onClick={reset} className="btn-secondary">
-              {t("cancel")}
+        <form onSubmit={handleSave} className="p-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
+                {t("subjectName")}
+              </label>
+              <input
+                type="text"
+                name="SubjectName"
+                value={form.SubjectName}
+                onChange={handleChange}
+                className="form-input"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
+                {t("className")}
+              </label>
+              <select
+                name="ClassID"
+                value={form.ClassID}
+                onChange={handleChange}
+                className="form-input"
+              >
+                <option value="">{t("selectClass")}</option>
+                {classes.map((c) => (
+                  <option key={c.ClassID || c.id} value={c.ClassID || c.id}>
+                    {c.className || c.ClassName} – {c.section || c.Section}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+          <div className="flex gap-3 mt-6 pt-5 border-t border-slate-100">
+            <button type="submit" className="btn-primary">
+              {editId ? t("updateSubject") : t("addSubject")}
             </button>
-          )}
-        </div>
-      </form>
+            {editId && (
+              <button type="button" onClick={reset} className="btn-secondary">
+                {t("cancel")}
+              </button>
+            )}
+          </div>
+        </form>
+      </div>
 
-      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-100">
-          <h2 className="text-lg font-semibold text-gray-700">{t("allSubjects")}</h2>
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        <div className="px-6 py-4 border-b border-slate-100 flex items-center gap-3">
+          <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center">
+            <FiBook className="text-slate-600 text-sm" />
+          </div>
+          <div>
+            <h2 className="text-base font-semibold text-slate-800">
+              {t("allSubjects")}
+            </h2>
+            <p className="text-xs text-slate-400">
+              {subjects.length} total subjects
+            </p>
+          </div>
         </div>
         {isLoading ? (
-          <p className="p-6 text-gray-500">{t("loading")}</p>
+          <div className="flex items-center justify-center py-16 text-slate-400">
+            <div className="w-6 h-6 border-2 border-slate-200 border-t-indigo-500 rounded-full animate-spin mr-3" />
+            {t("loading")}
+          </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full border-collapse">
@@ -130,28 +177,45 @@ export default function AdminPage() {
                 </tr>
               </thead>
               <tbody>
-                {subjects.map((s) => (
-                  <tr key={s.SubjectID} className="hover:bg-gray-50 transition-colors">
-                    <td className="table-cell">{s.SubjectName}</td>
-                    <td className="table-cell">{s.ClassName || s.ClassID}</td>
+                {subjects.map((s, i) => (
+                  <tr
+                    key={s.SubjectID}
+                    className={`hover:bg-indigo-50/30 transition-colors ${i % 2 === 0 ? "" : "bg-slate-50/50"}`}
+                  >
+                    <td className="table-cell font-semibold text-slate-800">
+                      {s.SubjectName}
+                    </td>
                     <td className="table-cell">
-                      <button
-                        onClick={() => {
-                          setEditId(s.SubjectID);
-                          setForm({ SubjectName: s.SubjectName, ClassID: s.ClassID || "" });
-                        }}
-                        className="text-blue-600 bg-transparent border-none cursor-pointer text-sm font-medium hover:text-blue-800 mr-3 transition-colors"
-                      >
-                        {tCommon("edit")}
-                      </button>
-                      <button
-                        onClick={() => {
-                          if (window.confirm(t("deleteConfirm"))) remove.mutate(s.SubjectID);
-                        }}
-                        className="text-red-600 bg-transparent border-none cursor-pointer text-sm font-medium hover:text-red-800 transition-colors"
-                      >
-                        {tCommon("delete")}
-                      </button>
+                      <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 text-xs font-medium">
+                        {s.ClassName || s.ClassID}
+                      </span>
+                    </td>
+                    <td className="table-cell">
+                      <div className="flex items-center gap-1">
+                        <button
+                          onClick={() => {
+                            setEditId(s.SubjectID);
+                            setForm({
+                              SubjectName: s.SubjectName,
+                              ClassID: s.ClassID || "",
+                            });
+                          }}
+                          className="btn-icon edit"
+                          title={tCommon("edit")}
+                        >
+                          <FiEdit2 />
+                        </button>
+                        <button
+                          onClick={() => {
+                            if (window.confirm(t("deleteConfirm")))
+                              remove.mutate(s.SubjectID);
+                          }}
+                          className="btn-icon delete"
+                          title={tCommon("delete")}
+                        >
+                          <FiTrash2 />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}

@@ -51,20 +51,6 @@
   line-height: 1.5;
   display: flex;
   align-items: center;
-  gap: 8px;
-}
-
-.footer-info p:before {
-  content: "📍";
-  font-size: 0.9rem;
-}
-
-.footer-info p:nth-child(3):before {
-  content: "📞";
-}
-
-.footer-info p:nth-child(4):before {
-  content: "✉️";
 }
 
 /* Quick Links Section */
@@ -195,41 +181,41 @@
     padding: 30px 15px;
     gap: 25px;
   }
-  
+
   .footer-info {
     align-items: center;
     text-align: center;
   }
-  
+
   .footer-info h3 {
     font-size: 1.4rem;
   }
-  
+
   .footer-links h4 {
     font-size: 1.2rem;
     text-align: center;
   }
-  
+
   .footer-links ul {
     grid-template-columns: 1fr;
     gap: 8px;
   }
-  
+
   .footer-links a {
     text-align: center;
     padding: 10px 15px;
   }
-  
+
   .footer-maintained {
     order: -1; /* Move to top on mobile */
   }
-  
+
   .footer-bottom {
     flex-direction: column;
     text-align: center;
     gap: 10px;
   }
-  
+
   .footer-bottom p {
     font-size: 0.85rem;
   }
@@ -241,38 +227,38 @@
     padding: 25px 10px;
     gap: 20px;
   }
-  
+
   .school-logo {
     width: 60px;
     height: 60px;
   }
-  
+
   .footer-info h3 {
     font-size: 1.2rem;
   }
-  
+
   .footer-info p {
     font-size: 0.85rem;
     text-align: center;
   }
-  
+
   .footer-links h4 {
     font-size: 1.1rem;
   }
-  
+
   .footer-links a {
     font-size: 0.85rem;
     padding: 8px 12px;
   }
-  
+
   .maintained-logo {
     width: 100px;
   }
-  
+
   .footer-bottom {
     padding: 15px 10px;
   }
-  
+
   .footer-bottom p {
     font-size: 0.8rem;
   }
@@ -284,15 +270,15 @@
     grid-template-columns: 2fr 3fr 1.5fr;
     padding: 50px 40px;
   }
-  
+
   .footer-info h3 {
     font-size: 1.6rem;
   }
-  
+
   .footer-links ul {
     grid-template-columns: repeat(2, 1fr);
   }
-  
+
   .maintained-logo {
     width: 140px;
   }
@@ -329,11 +315,11 @@
     color: black !important;
     border-top: 1px solid #000;
   }
-  
+
   .footer-links a {
     color: black !important;
   }
-  
+
   .maintained-logo {
     filter: grayscale(100%);
   }

@@ -282,9 +282,7 @@ export default function OnlineApplyPage() {
               </div>
             </div>
 
-            {submitError && (
-              <div className="apply-error">{submitError}</div>
-            )}
+            {submitError && <div className="apply-error">{submitError}</div>}
 
             <div className="apply-form-footer">
               <button
