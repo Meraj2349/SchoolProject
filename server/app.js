@@ -8,6 +8,7 @@ import adminRouter from "./routes/admin.routes.js";
 import attendanceRoutes from "./routes/attendance.route.js";
 import applicationRoutes from "./routes/application.routes.js";
 import newsRoutes from "./routes/news.routes.js";
+import noticeAnnouncementRoutes from "./routes/notice-announcement.routes.js";
 import branchRoutes from "./routes/branch.routes.js";
 import classRoutes from "./routes/classes.routes.js";
 import eventRoutes from "./routes/event.routes.js";
@@ -70,6 +71,7 @@ app.use("/api/results", resultRoutes);
 app.use("/api/branches", branchRoutes);
 app.use("/api/applications", applicationRoutes);
 app.use("/api/news", newsRoutes);
+app.use("/api/notice-announcements", noticeAnnouncementRoutes);
 
 // Handle root URL (Welcome message)
 app.get("/", (req, res) => {

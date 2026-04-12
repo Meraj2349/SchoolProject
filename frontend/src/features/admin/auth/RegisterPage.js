@@ -9,6 +9,7 @@ import "@/styles/login.css";
 
 export default function RegisterPage() {
   const [form, setForm] = useState({
+    Username: "",
     Email: "",
     Password: "",
     confirmPassword: "",
@@ -33,6 +34,7 @@ export default function RegisterPage() {
     setError("");
     try {
       await authService.register({
+        Username: form.Username,
         Email: form.Email,
         Password: form.Password,
       });
@@ -66,6 +68,16 @@ export default function RegisterPage() {
           </div>
         )}
         <form onSubmit={handleSubmit}>
+          <div className="input-group">
+            <label>{t("username")}</label>
+            <input
+              type="text"
+              name="Username"
+              value={form.Username}
+              onChange={handleChange}
+              required
+            />
+          </div>
           <div className="input-group">
             <label>{t("email")}</label>
             <input

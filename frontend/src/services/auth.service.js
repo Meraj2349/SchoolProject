@@ -19,7 +19,7 @@ export const authService = {
   },
 
   register: async (credentials) => {
-    const { data } = await httpClient.post("/admin/register", credentials);
+    const { data } = await httpClient.post("/admin/createAdmin", credentials);
     return data;
   },
 

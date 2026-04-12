@@ -50,6 +50,11 @@ export const queryKeys = {
   },
   news: {
     all: ["news"],
+    adminAll: ["news", "admin"],
+  },
+  noticeAnnouncements: {
+    all: ["noticeAnnouncements"],
+    published: ["noticeAnnouncements", "published"],
   },
   images: {
     all: ["images"],

@@ -76,6 +76,16 @@ export default function Sidebar() {
       key: "sidebar.applications",
     },
     {
+      path: "/admin/news",
+      icon: <FaNoteSticky />,
+      key: "sidebar.news",
+    },
+    {
+      path: "/admin/notice-announcements",
+      icon: <FaHandshake />,
+      key: "sidebar.noticeAnnouncements",
+    },
+    {
       path: "/admin/updateEmailPassword",
       icon: <FaEnvelope />,
       key: "sidebar.settings",

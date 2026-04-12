@@ -564,6 +564,56 @@ const i18n = {
     bn: "সংবাদ মুছতে ব্যর্থ হয়েছে।",
   },
 
+  // ── Notice Announcements ──────────────────────────────────────────────────
+  notice_announcement_created: {
+    en: "Notice announcement created successfully.",
+    bn: "নোটিশ ঘোষণা সফলভাবে তৈরি হয়েছে।",
+  },
+  notice_announcement_updated: {
+    en: "Notice announcement updated successfully.",
+    bn: "নোটিশ ঘোষণা সফলভাবে আপডেট হয়েছে।",
+  },
+  notice_announcement_deleted: {
+    en: "Notice announcement deleted successfully.",
+    bn: "নোটিশ ঘোষণা সফলভাবে মুছে ফেলা হয়েছে।",
+  },
+  notice_announcement_not_found: {
+    en: "Notice announcement not found.",
+    bn: "নোটিশ ঘোষণা পাওয়া যায়নি।",
+  },
+  notice_announcement_fetch_failed: {
+    en: "Failed to fetch notice announcements.",
+    bn: "নোটিশ ঘোষণা আনতে ব্যর্থ হয়েছে।",
+  },
+  notice_announcement_required_fields: {
+    en: "title_bn, title_en, category, and date are required.",
+    bn: "title_bn, title_en, category এবং date আবশ্যক।",
+  },
+  notice_announcement_invalid_category: {
+    en: "Invalid category. Must be one of: Admission, Exam, Notice, Event.",
+    bn: "অবৈধ ক্যাটাগরি। Admission, Exam, Notice, Event এর মধ্যে একটি হতে হবে।",
+  },
+  notice_announcement_invalid_publish: {
+    en: "Invalid value for is_published. It must be a boolean.",
+    bn: "is_published এর জন্য অবৈধ মান। এটি একটি বুলিয়ান হতে হবে।",
+  },
+  notice_announcement_create_failed: {
+    en: "Failed to create notice announcement.",
+    bn: "নোটিশ ঘোষণা তৈরি করতে ব্যর্থ হয়েছে।",
+  },
+  notice_announcement_update_failed: {
+    en: "Failed to update notice announcement.",
+    bn: "নোটিশ ঘোষণা আপডেট করতে ব্যর্থ হয়েছে।",
+  },
+  notice_announcement_delete_failed: {
+    en: "Failed to delete notice announcement.",
+    bn: "নোটিশ ঘোষণা মুছতে ব্যর্থ হয়েছে।",
+  },
+  notice_announcement_publish_toggled: {
+    en: "Notice announcement publish status updated.",
+    bn: "নোটিশ ঘোষণার প্রকাশের অবস্থা আপডেট হয়েছে।",
+  },
+
   // ── Applications ──────────────────────────────────────────────────────────
   application_submitted: {
     en: "Application submitted successfully.",
