@@ -7,6 +7,7 @@ import {
   FaBell,
   FaCalendarCheck,
   FaEnvelope,
+  FaFileAlt,
   FaHandshake,
   FaImage,
 } from "react-icons/fa";
@@ -68,6 +69,11 @@ export default function Sidebar() {
       path: "/admin/attendance/grid",
       icon: <FaClipboardList />,
       key: "sidebar.attendanceGrid",
+    },
+    {
+      path: "/admin/applications",
+      icon: <FaFileAlt />,
+      key: "sidebar.applications",
     },
     {
       path: "/admin/updateEmailPassword",

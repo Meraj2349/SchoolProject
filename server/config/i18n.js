@@ -492,6 +492,70 @@ const i18n = {
     bn: "শিক্ষকের ছবির জন্য শিক্ষক আইডি আবশ্যক।",
   },
 
+  // ── Branches ──────────────────────────────────────────────────────────────
+  branch_created: {
+    en: "Branch created successfully.",
+    bn: "শাখা সফলভাবে তৈরি হয়েছে।",
+  },
+  branch_updated: {
+    en: "Branch updated successfully.",
+    bn: "শাখা সফলভাবে আপডেট হয়েছে।",
+  },
+  branch_deleted: {
+    en: "Branch deleted successfully.",
+    bn: "শাখা সফলভাবে মুছে ফেলা হয়েছে।",
+  },
+  branch_not_found: {
+    en: "Branch not found.",
+    bn: "শাখা পাওয়া যায়নি।",
+  },
+  branch_fetch_failed: {
+    en: "Failed to fetch branches.",
+    bn: "শাখা আনতে ব্যর্থ হয়েছে।",
+  },
+  branch_name_required: {
+    en: "At least one branch name (name_bn or name_en) is required.",
+    bn: "কমপক্ষে একটি শাখার নাম (name_bn বা name_en) আবশ্যক।",
+  },
+  branch_id_required: {
+    en: "Branch ID is required.",
+    bn: "শাখা আইডি আবশ্যক।",
+  },
+  branch_no_fields: {
+    en: "No fields provided for update.",
+    bn: "আপডেটের জন্য কোনো তথ্য প্রদান করা হয়নি।",
+  },
+
+  // ── Applications ──────────────────────────────────────────────────────────
+  application_submitted: {
+    en: "Application submitted successfully.",
+    bn: "আবেদন সফলভাবে জমা হয়েছে।",
+  },
+  application_submit_failed: {
+    en: "Failed to submit application.",
+    bn: "আবেদন জমা দিতে ব্যর্থ হয়েছে।",
+  },
+  application_not_found: {
+    en: "Application not found.",
+    bn: "আবেদন পাওয়া যায়নি।",
+  },
+  application_status_updated: {
+    en: "Application status updated successfully.",
+    bn: "আবেদনের অবস্থা সফলভাবে আপডেট হয়েছে।",
+  },
+  application_deleted: {
+    en: "Application deleted successfully.",
+    bn: "আবেদন সফলভাবে মুছে ফেলা হয়েছে।",
+  },
+  application_invalid_status: {
+    en: "Invalid status value. Must be one of: pending, reviewed, accepted, rejected.",
+    bn: "অবৈধ অবস্থার মান। pending, reviewed, accepted, rejected এর মধ্যে একটি হতে হবে।",
+  },
+  application_all_required: {
+    en: "Applicant name, date of birth, gender, applying class, parent name, and parent contact are required.",
+    bn: "আবেদনকারীর নাম, জন্ম তারিখ, লিঙ্গ, ভর্তির শ্রেণি, অভিভাবকের নাম এবং অভিভাবকের যোগাযোগ নম্বর আবশ্যক।",
+  },
+
   // ── Generic ───────────────────────────────────────────────────────────────
   internal_server_error: {
     en: "Internal server error.",

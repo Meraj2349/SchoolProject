@@ -1,5 +1,5 @@
 {
-  "schoolName": "Star Academic School",
+  "schoolName": "Star Shikkha Poribar",
   "establishedYear": "135479",
   "location": "Natiapara, Delduar, Tangail",
 
@@ -9,6 +9,7 @@
     "gallery": "GALLERY",
     "events": "EVENTS",
     "students": "STUDENTS",
+    "branches": "BRANCH",
     "onlineApply": "Online Apply",
     "quakerEducation": "A Quaker Education"
   },
@@ -38,7 +39,8 @@
     "attendanceGrid": "Attendance Grid",
     "settings": "Settings",
     "logout": "Log Out",
-    "loggingOut": "Logging out…"
+    "loggingOut": "Logging out…",
+    "applications": "Applications"
   },
 
   "latestUpdates": {
@@ -77,8 +79,8 @@
 
   "about": {
     "title": "About Us",
-    "subtitle": "Star Academic School – Excellence in Education",
-    "body1": "Education is the best means of self-improvement and of becoming an ideal human being. Keeping this in mind, Star Academic School started its voyage with the motto \"Shikkhai Alo\" (Knowledge is Light). It is located in the well-ordered and safe environment of Natiapara, Delduar, Tangail.",
+    "subtitle": "Star Shikkha Poribar – Excellence in Education",
+    "body1": "Education is the best means of self-improvement and of becoming an ideal human being. Keeping this in mind, Star Shikkha Poribar started its voyage with the motto \"Shikkhai Alo\" (Knowledge is Light). It is located in the well-ordered and safe environment of Natiapara, Delduar, Tangail.",
     "body2": "Founded on principles of academic excellence, discipline, and holistic development, the institution serves students from Class I through higher secondary level.",
     "visitTitle": "Visit Our School",
     "locationSubtitle": "Natiapara, Delduar, Tangail",
@@ -94,7 +96,7 @@
     "loading": "Loading chairman message…",
     "name": "Md. Rashedul Islam",
     "title": "Chairman",
-    "institution": "Star Academic School",
+    "institution": "Star Shikkha Poribar",
     "bestRegards": "Best regards,",
     "backToHome": "← Back to Home",
     "defaultMessage": "Welcome to our school! We are committed to providing excellent education."
@@ -577,13 +579,74 @@
       "passwordMismatch": "Passwords do not match",
       "registrationSuccess": "Registration successful! Please log in.",
       "registrationFailed": "Registration failed"
+    },
+    "applications": {
+      "title": "Admission Applications",
+      "applicantName": "Applicant Name",
+      "applyingForClass": "Applying for Class",
+      "parentContact": "Parent Contact",
+      "status": "Status",
+      "date": "Date",
+      "actions": "Actions",
+      "pending": "Pending",
+      "reviewed": "Reviewed",
+      "accepted": "Accepted",
+      "rejected": "Rejected",
+      "updateStatus": "Update Status",
+      "deleteConfirm": "Delete this application?",
+      "deleted": "Application deleted.",
+      "statusUpdated": "Status updated!",
+      "loading": "Loading…",
+      "noApplications": "No applications found.",
+      "operationFailed": "Operation failed"
     }
+  },
+
+  "branches": {
+    "pageTitle": "Our Branches",
+    "pageSubtitle": "Find a branch near you",
+    "activeBranches": "Active Branches",
+    "proposedBranches": "Proposed Branches",
+    "proposed": "Proposed",
+    "established": "Established",
+    "getDirections": "Get Directions",
+    "noActiveBranches": "No active branches found",
+    "noProposedBranches": "No proposed branches yet",
+    "loading": "Loading branches…",
+    "failedToLoad": "Failed to load branches",
+    "tryAgain": "Try Again"
   },
 
   "notFound": {
     "title": "Page Not Found",
     "subtitle": "Oops! The page you are looking for does not exist.",
     "backHome": "Back to Home"
+  },
+
+  "apply": {
+    "pageTitle": "Online Admission",
+    "pageSubtitle": "Fill in the form below to apply for admission",
+    "applicantName": "Student Full Name",
+    "dateOfBirth": "Date of Birth",
+    "gender": "Gender",
+    "male": "Male",
+    "female": "Female",
+    "other": "Other",
+    "applyingForClass": "Applying for Class",
+    "previousSchool": "Previous School (optional)",
+    "previousClass": "Previous Class (optional)",
+    "parentName": "Parent / Guardian Name",
+    "parentContact": "Parent Contact Number",
+    "parentEmail": "Parent Email (optional)",
+    "address": "Address",
+    "additionalInfo": "Additional Information (optional)",
+    "submitBtn": "Submit Application",
+    "submitting": "Submitting…",
+    "successTitle": "Application Submitted!",
+    "successMessage": "Your application has been received. We will contact you soon.",
+    "submitAnother": "Submit Another Application",
+    "requiredFields": "Please fill in all required fields",
+    "submitFailed": "Submission failed. Please try again."
   },
 
   "common": {

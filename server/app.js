@@ -6,6 +6,8 @@ import db from "./config/db.config.js";
 import { languageMiddleware } from "./middlewares/language.middleware.js";
 import adminRouter from "./routes/admin.routes.js";
 import attendanceRoutes from "./routes/attendance.route.js";
+import applicationRoutes from "./routes/application.routes.js";
+import branchRoutes from "./routes/branch.routes.js";
 import classRoutes from "./routes/classes.routes.js";
 import eventRoutes from "./routes/event.routes.js";
 import examRoutes from "./routes/exam.routes.js";
@@ -64,6 +66,8 @@ app.use("/api/routines", routineRoutes);
 app.use("/api/attendance", attendanceRoutes);
 app.use("/api/exams", examRoutes);
 app.use("/api/results", resultRoutes);
+app.use("/api/branches", branchRoutes);
+app.use("/api/applications", applicationRoutes);
 
 // Handle root URL (Welcome message)
 app.get("/", (req, res) => {

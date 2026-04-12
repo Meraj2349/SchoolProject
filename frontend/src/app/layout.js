@@ -2,8 +2,8 @@ import "./globals.css";
 import Providers from "@/components/shared/Providers";
 
 export const metadata = {
-  title: "Star Academic School",
-  description: "Star Academic School – Natiapara, Delduar, Tangail",
+  title: "Star Shikkha Poribar",
+  description: "Star Shikkha Poribar – Natiapara, Delduar, Tangail",
 };
 
 export default function RootLayout({ children }) {

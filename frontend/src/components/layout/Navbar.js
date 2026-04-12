@@ -19,6 +19,7 @@ export default function Navbar() {
     { key: "nav.about", path: "/about" },
     { key: "nav.gallery", path: "/gallery" },
     { key: "nav.events", path: "/events" },
+    { key: "nav.branches", path: "/branches" },
     { key: "nav.students", path: "/students" },
   ];
 
@@ -39,7 +40,9 @@ export default function Navbar() {
         </div>
         <div className="top-right-section">
           <div className="online-apply-dropdown">
-            <span>{t("nav.onlineApply")}</span>
+            <Link href="/apply">
+              <span>{t("nav.onlineApply")}</span>
+            </Link>
           </div>
           <div className="quaker-education">
             <span>{t("nav.quakerEducation")}</span>
