@@ -33,8 +33,8 @@ export default function LeadershipSection() {
   };
 
   const now = new Date();
-  const activeEvents = events
-    .filter((e) => new Date(e.EndDate) >= now)
+  const upcomingEvents = events.filter((e) => new Date(e.EndDate) >= now);
+  const activeEvents = (upcomingEvents.length > 0 ? upcomingEvents : events)
     .slice(0, 4)
     .map((e) => ({
       date: formatDate(e.StartDate),

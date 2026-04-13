@@ -23,10 +23,32 @@ export default function ChairmanMessagePage() {
       <div className="chairman-message-page">
         <Navbar />
         <LatestUpdatesNotice />
-        <div className="loading-container">
-          <div className="loading-spinner" />
-          <p>{t("loading")}</p>
-        </div>
+        <main className="chairman-message-main">
+          <div className="container">
+            <div
+              style={{
+                maxWidth: 800,
+                margin: "0 auto",
+                display: "flex",
+                flexDirection: "column",
+                gap: 24,
+                padding: "40px 0",
+              }}
+            >
+              <div className="skeleton" style={{ height: 48, width: "50%", margin: "0 auto", borderRadius: 8 }} />
+              <div className="skeleton" style={{ height: 4, width: 100, margin: "0 auto", borderRadius: 2 }} />
+              <div
+                className="skeleton"
+                style={{ height: 180, borderRadius: 20, marginTop: 16 }}
+              />
+              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                {[...Array(8)].map((_, i) => (
+                  <div key={i} className="skeleton" style={{ height: 16, width: i % 3 === 2 ? "70%" : "100%", borderRadius: 6 }} />
+                ))}
+              </div>
+            </div>
+          </div>
+        </main>
         <Footer />
       </div>
     );

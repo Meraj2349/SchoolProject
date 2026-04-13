@@ -11,9 +11,11 @@ export default function HomePage() {
     <div className="school-website">
       <Navbar />
       <LatestUpdatesNotice />
-      <HeroSection />
-      <LeadershipSection />
-      <ClassStatistics />
+      <main>
+        <HeroSection />
+        <LeadershipSection />
+        <ClassStatistics />
+      </main>
       <Footer />
     </div>
   );

@@ -2,15 +2,28 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import LanguageSwitcher from "@/components/ui/LanguageSwitcher";
 import { useTranslations } from "@/store/languageStore";
 import "@/styles/Navbar.css";
 
 export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
   const t = useTranslations();
+
+  // Add shadow + compact style once user scrolls
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 12);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  // Close mobile menu on route change
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [pathname]);
 
   const isActive = (path) => pathname === path;
 
@@ -25,19 +38,43 @@ export default function Navbar() {
 
   return (
     <>
-      <div className="top-bar">
+      {/* Top bar */}
+      <div
+        className="top-bar"
+        style={{
+          transition: "box-shadow 0.3s ease, padding 0.3s ease",
+          boxShadow: scrolled
+            ? "0 4px 20px rgba(0,0,0,0.12)"
+            : "0 2px 8px rgba(0,0,0,0.1)",
+          padding: scrolled ? "10px 30px" : "15px 30px",
+        }}
+      >
         <div className="logo-section">
           <img
             src="/images/logo1.png"
             className="logo-image"
             alt={`${t("schoolName")} Logo`}
+            style={{
+              transition: "width 0.3s ease, height 0.3s ease",
+              width: scrolled ? 64 : 80,
+              height: scrolled ? 64 : 80,
+            }}
           />
           <div className="logo-text">
             <span className="logo-estd">ESTD : {t("establishedYear")}</span>
-            <span className="logo-name">{t("schoolName")}</span>
+            <span
+              className="logo-name"
+              style={{
+                transition: "font-size 0.3s ease",
+                fontSize: scrolled ? "20px" : "24px",
+              }}
+            >
+              {t("schoolName")}
+            </span>
             <span className="logo-location">{t("location")}</span>
           </div>
         </div>
+
         <div className="top-right-section">
           <div className="online-apply-dropdown">
             <Link href="/apply">
@@ -52,13 +89,24 @@ export default function Navbar() {
           <button
             className={`mobile-menu-toggle ${mobileMenuOpen ? "hidden" : ""}`}
             onClick={() => setMobileMenuOpen((o) => !o)}
+            aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
           >
             {mobileMenuOpen ? "✕" : "☰"}
           </button>
         </div>
       </div>
 
-      <div className="main-navigation">
+      {/* Main nav bar */}
+      <div
+        className="main-navigation"
+        style={{
+          position: "sticky",
+          top: 0,
+          zIndex: 100,
+          transition: "box-shadow 0.3s ease",
+          boxShadow: scrolled ? "0 4px 16px rgba(0,0,0,0.1)" : "0 1px 3px rgba(0,0,0,0.08)",
+        }}
+      >
         <div className="nav-container">
           <ul className="nav-items">
             {NAV_ITEMS.map((item) => (
@@ -69,6 +117,7 @@ export default function Navbar() {
                 <Link
                   href={item.path}
                   className={isActive(item.path) ? "active-link" : ""}
+                  style={{ transition: "color 0.2s ease" }}
                 >
                   {t(item.key)}
                 </Link>
@@ -78,6 +127,7 @@ export default function Navbar() {
         </div>
       </div>
 
+      {/* Mobile menu overlay */}
       {mobileMenuOpen && (
         <div className="mobile-menu">
           <div className="mobile-menu-header">
@@ -94,10 +144,12 @@ export default function Navbar() {
             <button
               className="mobile-menu-close"
               onClick={() => setMobileMenuOpen(false)}
+              aria-label="Close menu"
             >
               ✕
             </button>
           </div>
+
           <ul>
             {NAV_ITEMS.map((item) => (
               <li key={item.path}>
@@ -111,6 +163,7 @@ export default function Navbar() {
               </li>
             ))}
           </ul>
+
           <div style={{ padding: "12px 16px" }}>
             <LanguageSwitcher />
           </div>

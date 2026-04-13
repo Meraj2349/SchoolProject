@@ -3,19 +3,20 @@
 .chairman-card {
   background: #fff;
   border-radius: 20px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
-  padding: 48px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+  padding: 48px 48px 48px 56px; /* extra left for accent bar */
   max-width: 1000px;
   margin: 0 auto;
   display: flex;
   gap: 48px;
   align-items: center;
-  transition: all 0.3s ease;
+  transition: transform 0.35s ease, box-shadow 0.35s ease;
+  border: 1px solid rgba(0, 0, 0, 0.05);
 }
 
 .chairman-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+  transform: translateY(-4px);
+  box-shadow: 0 20px 56px rgba(0, 0, 0, 0.14);
 }
 
 /* Image Section */

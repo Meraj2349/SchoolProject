@@ -33,9 +33,9 @@ export default function EventsPage() {
   const t = useTranslations("events");
 
   const now = new Date();
-  const events = (Array.isArray(allEvents) ? allEvents : []).filter(
-    (e) => new Date(e.EndDate) >= now,
-  );
+  const allEventsList = Array.isArray(allEvents) ? allEvents : [];
+  const events = allEventsList.filter((e) => new Date(e.EndDate) >= now);
+  const pastEvents = allEventsList.filter((e) => new Date(e.EndDate) < now);
 
   useEffect(() => {
     const tick = () => {
@@ -99,7 +99,7 @@ export default function EventsPage() {
               {t("tryAgain")}
             </button>
           </div>
-        ) : events.length === 0 ? (
+        ) : allEventsList.length === 0 ? (
           <div className="empty-state">
             <div className="empty-icon">📅</div>
             <h3>{t("noUpcomingEvents")}</h3>
@@ -107,9 +107,11 @@ export default function EventsPage() {
           </div>
         ) : (
           <div className="events-list-section">
-            <h2>
-              {t("upcomingEvents")} ({events.length})
-            </h2>
+            {events.length > 0 && (
+              <h2>
+                {t("upcomingEvents")} ({events.length})
+              </h2>
+            )}
             <div className="events-grid">
               {events.map((event) => {
                 const info = getTypeInfo(event.EventType);
@@ -178,6 +180,52 @@ export default function EventsPage() {
                 );
               })}
             </div>
+
+            {pastEvents.length > 0 && (
+              <>
+                <h2 style={{ marginTop: "2rem", opacity: 0.7 }}>
+                  Past Events ({pastEvents.length})
+                </h2>
+                <div className="events-grid" style={{ opacity: 0.65 }}>
+                  {pastEvents.map((event) => {
+                    const info = getTypeInfo(event.EventType);
+                    return (
+                      <div
+                        key={event.EventID}
+                        className="event-card expired"
+                        style={{ borderColor: info.color }}
+                      >
+                        <div className="event-header">
+                          <div
+                            className="event-type-badge"
+                            style={{ backgroundColor: info.bgColor, color: info.color }}
+                          >
+                            <span className="type-icon">{info.icon}</span>
+                            {event.EventType}
+                          </div>
+                          <div className="event-date">
+                            {fmtDate(event.StartDate)}
+                            {event.StartDate !== event.EndDate && (
+                              <> – {fmtDate(event.EndDate)}</>
+                            )}
+                          </div>
+                        </div>
+                        <div className="event-content">
+                          <h3 className="event-title">{event.EventName}</h3>
+                          {event.Venue && (
+                            <div className="event-venue">📍 {event.Venue}</div>
+                          )}
+                          {event.Description && (
+                            <p className="event-description">{event.Description}</p>
+                          )}
+                          <div className="expired-notice">{t("eventEnded")}</div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </>
+            )}
           </div>
         )}
       </div>

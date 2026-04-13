@@ -6,22 +6,36 @@
 
 .gallery-page {
   min-height: 100vh;
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  background: #f8fafc;
 }
 
-/* Simple Header */
+/* Page Header */
 .gallery-header {
-  padding: 2rem 0;
-  background: white;
-  border-bottom: 1px solid #e9ecef;
+  padding: 60px 0 48px;
+  background: linear-gradient(135deg, #064e3b 0%, #047857 50%, #059669 100%);
+  position: relative;
+  overflow: hidden;
+  text-align: center;
+}
+
+.gallery-header::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0.07;
+  background-image: radial-gradient(circle at 20% 50%, white 0%, transparent 60%),
+                    radial-gradient(circle at 80% 20%, white 0%, transparent 55%);
 }
 
 .gallery-title {
-  font-size: 2.5rem;
-  font-weight: 600;
-  color: #1f2937 !important;
+  font-size: clamp(1.75rem, 4vw, 2.75rem);
+  font-weight: 800;
+  color: #fff !important;
   margin: 0;
   text-align: center;
+  position: relative;
+  z-index: 1;
+  text-shadow: 0 2px 12px rgba(0,0,0,0.2);
 }
 
 /* Main Content */

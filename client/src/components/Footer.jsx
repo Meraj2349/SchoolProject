@@ -11,8 +11,8 @@ const Footer = () => {
         <div className="footer-info">
           <img src={logo1} alt="School Logo" className="school-logo" />
           <h3>Star Academic School</h3>
-          <p>Contact: 01997588476</p>
-          <p>Email: merajislam2349@gmail.com</p>
+          <p>Contact: 01915-680214</p>
+          <p>Email: stareducationfamily@gmail.com</p>
           <p>Natiapara, Delduar, Tangail</p>
         </div>
 
@@ -24,7 +24,7 @@ const Footer = () => {
             <li><a href="#">BANBEIS</a></li>
             <li><a href="#">BD National Portal</a></li>
             <li><a href="#">Ministry of Education</a></li>
-            <li><a href="#">Sylhet Board</a></li>
+            <li><a href="#">Dhaka Board</a></li>
             <li><a href="#">Primary & Mass Education</a></li>
             <li><a href="#">Form of BD. Govt</a></li>
             <li><a href="#">Pathshala EMIS</a></li>
@@ -37,7 +37,7 @@ const Footer = () => {
         {/* Maintained By */}
         <div className="footer-maintained">
           <h4>Maintained By</h4>
-          <img src={sustLogo} alt="Pathshala Logo" className="maintained-logo" />
+          <img src={sustLogo} alt="SUST Logo" className="maintained-logo" />
         </div>
       </div>
 
