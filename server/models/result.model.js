@@ -22,7 +22,8 @@ import db from "../config/db.config.js";
 const getAllResults = async () => {
   try {
     const [rows] = await db.query(`
-      SELECT 
+      SELECT
+        r.ResultID,
         r.MarksObtained,
         CONCAT(s.FirstName, ' ', s.LastName) as StudentName,
         s.FirstName,
@@ -881,7 +882,8 @@ const getStudentResultSummary = async (studentId, examId) => {
 const searchResults = async (filters) => {
   try {
     let query = `
-      SELECT 
+      SELECT
+        r.ResultID,
         r.MarksObtained,
         CONCAT(s.FirstName, ' ', s.LastName) as StudentName,
         s.FirstName,

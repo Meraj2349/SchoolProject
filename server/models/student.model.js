@@ -117,10 +117,15 @@ const addStudent = async (studentData) => {
 };
 
 const deleteStudent = async (studentID) => {
-  const sql = "DELETE FROM Students WHERE StudentID = ?";
-
   try {
-    const [result] = await db.query(sql, [studentID]);
+    // Remove child records first (FK constraints, no CASCADE)
+    await db.query("DELETE FROM Attendance WHERE StudentID = ?", [studentID]);
+    await db.query("DELETE FROM Results WHERE StudentID = ?", [studentID]);
+
+    const [result] = await db.query(
+      "DELETE FROM Students WHERE StudentID = ?",
+      [studentID],
+    );
 
     if (result.affectedRows === 0) {
       throw new Error("Student not found");

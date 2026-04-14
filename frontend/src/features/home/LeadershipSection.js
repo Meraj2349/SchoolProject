@@ -1,8 +1,11 @@
 "use client";
 
+import { useQuery } from "@tanstack/react-query";
 import { useMessages } from "@/hooks/useMessages";
 import { useEvents } from "@/hooks/useEvents";
 import { useNews } from "@/hooks/useNews";
+import { chairmanService } from "@/services/chairman.service";
+import { queryKeys } from "@/lib/queryKeys";
 import ChairmanCard from "@/components/shared/ChairmanCard";
 import EventNewsCard from "@/components/shared/EventNewsCard";
 import QuickLinks from "@/components/shared/QuickLinks";
@@ -13,10 +16,26 @@ export default function LeadershipSection() {
   const { data: messages = [], isLoading: msgLoading } = useMessages();
   const { data: events = [], isLoading: eventsLoading } = useEvents();
   const { data: newsItems = [], isLoading: newsLoading, isError: newsError } = useNews();
+  const { data: profileData } = useQuery({
+    queryKey: queryKeys.chairman.profile,
+    queryFn: chairmanService.getProfile,
+    select: (d) => d?.data ?? d,
+  });
   const language = useLanguageStore((s) => s.language);
   const tChairman = useTranslations("chairman");
   const tHome = useTranslations("home");
   const tEventNews = useTranslations("eventNews");
+
+  // Use API data, fall back to i18n hardcoded values
+  const chairmanImage =
+    profileData?.image_url ||
+    "/images/WhatsApp Image 2024-12-07 at 20.48.41_3423f492.jpg";
+  const chairmanName =
+    (language === "bn" ? profileData?.name_bn : profileData?.name_en) ||
+    tChairman("name");
+  const chairmanTitle =
+    (language === "bn" ? profileData?.title_bn : profileData?.title_en) ||
+    tChairman("title");
 
   const visibleMessages = messages.filter(
     (m) => m.Show === 1 || m.Show === true,
@@ -64,9 +83,9 @@ export default function LeadershipSection() {
       <div className="container">
         <div className="chairman-section">
           <ChairmanCard
-            image="/images/WhatsApp Image 2024-12-07 at 20.48.41_3423f492.jpg"
-            name={tChairman("name")}
-            title={tChairman("title")}
+            image={chairmanImage}
+            name={chairmanName}
+            title={chairmanTitle}
             message={chairmanMessage}
           />
         </div>

@@ -15,6 +15,10 @@ import {
 
 // Utility function for validation
 const validateStudentData = (data) => {
+  // Frontend sends "ClassName"; backend model uses "Class" — accept both.
+  const normalised = { ...data };
+  if (!normalised.Class && normalised.ClassName) normalised.Class = normalised.ClassName;
+
   const requiredFields = [
     "FirstName",
     "LastName",
@@ -24,7 +28,7 @@ const validateStudentData = (data) => {
     "Section",
     "RollNumber",
   ];
-  const missingFields = requiredFields.filter((field) => !data[field]);
+  const missingFields = requiredFields.filter((field) => !normalised[field]);
 
   if (missingFields.length > 0) {
     return `Missing required fields: ${missingFields.join(", ")}`;
@@ -64,7 +68,9 @@ const getAllStudentsController = async (req, res) => {
 const addStudentController = async (req, res) => {
   const lang = req.language;
   try {
-    const studentData = req.body;
+    const studentData = { ...req.body };
+    // Normalise ClassName → Class for the model layer
+    if (!studentData.Class && studentData.ClassName) studentData.Class = studentData.ClassName;
 
     const validationError = validateStudentData(studentData);
     if (validationError) {
@@ -117,7 +123,9 @@ const updateStudentController = async (req, res) => {
   const lang = req.language;
   try {
     const { id } = req.params;
-    const studentData = req.body;
+    const studentData = { ...req.body };
+    // Normalise ClassName → Class for the model layer
+    if (!studentData.Class && studentData.ClassName) studentData.Class = studentData.ClassName;
 
     if (!id || isNaN(id)) {
       return res

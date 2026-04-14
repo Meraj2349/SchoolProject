@@ -1,15 +1,31 @@
 "use client";
 
+import { useQuery } from "@tanstack/react-query";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import LatestUpdatesNotice from "@/components/shared/LatestUpdatesNotice";
 import { useMessages } from "@/hooks/useMessages";
+import { chairmanService } from "@/services/chairman.service";
+import { queryKeys } from "@/lib/queryKeys";
 import { useTranslations } from "@/store/languageStore";
 import "@/styles/ChairmanMessagePage.css";
 
 export default function ChairmanMessagePage() {
-  const { data: messages = [], isLoading } = useMessages();
+  const { data: messages = [], isLoading: messagesLoading } = useMessages();
+  const { data: profileData, isLoading: profileLoading } = useQuery({
+    queryKey: queryKeys.chairman.profile,
+    queryFn: chairmanService.getProfile,
+    select: (d) => d?.data ?? d,
+  });
   const t = useTranslations("chairman");
+
+  const isLoading = messagesLoading || profileLoading;
+
+  // Use API profile data, fall back to i18n hardcoded strings
+  const name        = profileData?.name_en        || t("name");
+  const title       = profileData?.title_en       || t("title");
+  const institution = profileData?.institution_en || t("institution");
+  const photoUrl    = profileData?.image_url      || null;
 
   const visible = messages
     .filter((m) => m.Show === 1 || m.Show === true)
@@ -37,10 +53,7 @@ export default function ChairmanMessagePage() {
             >
               <div className="skeleton" style={{ height: 48, width: "50%", margin: "0 auto", borderRadius: 8 }} />
               <div className="skeleton" style={{ height: 4, width: 100, margin: "0 auto", borderRadius: 2 }} />
-              <div
-                className="skeleton"
-                style={{ height: 180, borderRadius: 20, marginTop: 16 }}
-              />
+              <div className="skeleton" style={{ height: 180, borderRadius: 20, marginTop: 16 }} />
               <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                 {[...Array(8)].map((_, i) => (
                   <div key={i} className="skeleton" style={{ height: 16, width: i % 3 === 2 ? "70%" : "100%", borderRadius: 6 }} />
@@ -66,16 +79,24 @@ export default function ChairmanMessagePage() {
           </div>
           <div className="chairman-profile">
             <div className="profile-image-container">
-              <img
-                src="/images/WhatsApp Image 2024-12-07 at 20.48.41_3423f492.jpg"
-                alt={`${t("name")} – ${t("title")}`}
-                className="profile-image"
-              />
+              {photoUrl ? (
+                <img
+                  src={photoUrl}
+                  alt={`${name} – ${title}`}
+                  className="profile-image"
+                />
+              ) : (
+                <img
+                  src="/images/WhatsApp Image 2024-12-07 at 20.48.41_3423f492.jpg"
+                  alt={`${name} – ${title}`}
+                  className="profile-image"
+                />
+              )}
             </div>
             <div className="profile-info">
-              <h2>{t("name")}</h2>
-              <p className="title">{t("title")}</p>
-              <p className="institution">{t("institution")}</p>
+              <h2>{name}</h2>
+              <p className="title">{title}</p>
+              <p className="institution">{institution}</p>
             </div>
           </div>
           <div className="message-content">
@@ -84,9 +105,9 @@ export default function ChairmanMessagePage() {
             </div>
             <div className="message-signature">
               <p className="signature-regards">{t("bestRegards")}</p>
-              <p className="signature-name">{t("name")}</p>
-              <p className="signature-title">{t("title")}</p>
-              <p className="signature-institution">{t("institution")}</p>
+              <p className="signature-name">{name}</p>
+              <p className="signature-title">{title}</p>
+              <p className="signature-institution">{institution}</p>
             </div>
           </div>
           <div className="back-button-container">

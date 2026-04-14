@@ -329,37 +329,31 @@ const updateResultController = async (req, res) => {
       });
     }
 
-    // Validate input data
-    const validationError = validateResultData(resultData);
-    if (validationError) {
+    if (!resultData || Object.keys(resultData).length === 0) {
       return res.status(400).json({
         success: false,
-        message: validationError,
+        message: "No fields provided to update",
       });
     }
 
-    // Check if result exists
-    const existingResult = await getResultById(id);
-    if (!existingResult) {
-      return res.status(404).json({
-        success: false,
-        message: "Result not found",
-      });
+    // Validate marks if provided
+    if (resultData.MarksObtained !== undefined) {
+      const m = Number(resultData.MarksObtained);
+      if (isNaN(m) || m < 0 || m > 100) {
+        return res.status(400).json({
+          success: false,
+          message: "MarksObtained must be a number between 0 and 100",
+        });
+      }
+      resultData.MarksObtained = m;
     }
 
     const result = await updateResult(id, resultData);
 
-    if (result.affectedRows > 0) {
-      res.status(200).json({
-        success: true,
-        message: "Result updated successfully",
-      });
-    } else {
-      res.status(400).json({
-        success: false,
-        message: "Failed to update result",
-      });
-    }
+    res.status(200).json({
+      success: true,
+      message: "Result updated successfully",
+    });
   } catch (error) {
     res.status(500).json({
       success: false,

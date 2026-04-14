@@ -135,8 +135,8 @@ export default function AdminPage() {
               >
                 <option value="">{t("selectClass")}</option>
                 {classes.map((c) => (
-                  <option key={c.ClassID || c.id} value={c.ClassID || c.id}>
-                    {c.className || c.ClassName} – {c.section || c.Section}
+                  <option key={c.ClassID} value={c.ClassID}>
+                    {c.ClassName} – {c.Section}
                   </option>
                 ))}
               </select>
@@ -189,8 +189,8 @@ export default function AdminPage() {
               >
                 <option value="">All Classes</option>
                 {classes.map((c) => (
-                  <option key={c.ClassID || c.id} value={String(c.ClassID || c.id)}>
-                    {c.className || c.ClassName} – {c.section || c.Section}
+                  <option key={c.ClassID} value={String(c.ClassID)}>
+                    {c.ClassName} – {c.Section}
                   </option>
                 ))}
               </select>
@@ -243,7 +243,7 @@ export default function AdminPage() {
                       </td>
                       <td className="table-cell">
                         <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 text-xs font-medium">
-                          {s.ClassName || s.ClassID}
+                          {s.ClassName ? `${s.ClassName} – ${s.Section}` : s.ClassID}
                         </span>
                       </td>
                       <td className="table-cell">

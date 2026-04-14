@@ -48,6 +48,9 @@ export const queryKeys = {
     filters: ["routines", "filters"],
     byClassSection: (cls, sec) => ["routines", cls, sec],
   },
+  chairman: {
+    profile: ["chairman", "profile"],
+  },
   branches: {
     all: ["branches"],
   },

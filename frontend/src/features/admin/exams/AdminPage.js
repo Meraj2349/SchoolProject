@@ -1,12 +1,21 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { examsService } from "@/services/exams.service";
 import { classesService } from "@/services/classes.service";
 import { queryKeys } from "@/lib/queryKeys";
 import { useTranslations } from "@/store/languageStore";
 import { FiEdit2, FiTrash2, FiFileText, FiPlusCircle } from "react-icons/fi";
+
+// Must match DB ENUM exactly
+const EXAM_TYPE_OPTIONS = [
+  { value: "Monthly",     label: "Monthly" },
+  { value: "Quarterly",   label: "Quarterly" },
+  { value: "Half-Yearly", label: "Half-Yearly" },
+  { value: "Annual",      label: "Annual" },
+  { value: "Final",       label: "Final" },
+];
 
 const EMPTY = {
   ExamType: "",
@@ -59,6 +68,17 @@ export default function AdminPage() {
   const [editId, setEditId] = useState(null);
   const [status, setStatus] = useState({ error: null, success: null });
 
+  const uniqueClassNames = useMemo(
+    () => [...new Set(classes.map((c) => c.ClassName))].sort(),
+    [classes],
+  );
+  const sectionsForClass = useMemo(() => {
+    if (!form.ClassName) return [];
+    return classes
+      .filter((c) => c.ClassName === form.ClassName)
+      .map((c) => c.Section);
+  }, [classes, form.ClassName]);
+
   const flash = (m, e = false) => {
     setStatus(e ? { error: m, success: null } : { error: null, success: m });
     setTimeout(() => setStatus({ error: null, success: null }), 4000);
@@ -89,13 +109,6 @@ export default function AdminPage() {
     t("date"),
     t("actions"),
   ];
-  const EXAM_TYPES = [
-    t("halfYearly"),
-    t("annual"),
-    t("unitTest"),
-    t("monthly"),
-  ];
-  const EXAM_TYPE_VALUES = ["Half Yearly", "Annual", "Unit Test", "Monthly"];
 
   return (
     <div className="space-y-6">
@@ -122,6 +135,7 @@ export default function AdminPage() {
         </div>
         <form onSubmit={handleSave} className="p-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {/* Exam Type */}
             <div>
               <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
                 {t("examType")}
@@ -131,15 +145,18 @@ export default function AdminPage() {
                 value={form.ExamType}
                 onChange={handleChange}
                 className="form-input"
+                required
               >
                 <option value="">{t("selectType")}</option>
-                {EXAM_TYPE_VALUES.map((tp, i) => (
-                  <option key={tp} value={tp}>
-                    {EXAM_TYPES[i]}
+                {EXAM_TYPE_OPTIONS.map((o) => (
+                  <option key={o.value} value={o.value}>
+                    {o.label}
                   </option>
                 ))}
               </select>
             </div>
+
+            {/* Exam Name */}
             <div>
               <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
                 {t("examName")}
@@ -153,6 +170,8 @@ export default function AdminPage() {
                 required
               />
             </div>
+
+            {/* Class */}
             <div>
               <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
                 {t("class")}
@@ -160,32 +179,43 @@ export default function AdminPage() {
               <select
                 name="ClassName"
                 value={form.ClassName}
-                onChange={handleChange}
+                onChange={(e) =>
+                  setForm((p) => ({
+                    ...p,
+                    ClassName: e.target.value,
+                    SectionName: "",
+                  }))
+                }
                 className="form-input"
+                required
               >
                 <option value="">{t("selectClass")}</option>
-                {[
-                  ...new Set(classes.map((c) => c.className || c.ClassName)),
-                ].map((c) => (
-                  <option key={c} value={c}>
-                    {c}
-                  </option>
+                {uniqueClassNames.map((c) => (
+                  <option key={c} value={c}>{c}</option>
                 ))}
               </select>
             </div>
+
+            {/* Section */}
             <div>
               <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
                 {t("section")}
               </label>
-              <input
-                type="text"
+              <select
                 name="SectionName"
                 value={form.SectionName}
                 onChange={handleChange}
                 className="form-input"
-                placeholder={t("sectionPlaceholder")}
-              />
+                required
+              >
+                <option value="">Select section</option>
+                {sectionsForClass.map((s) => (
+                  <option key={s} value={s}>{s}</option>
+                ))}
+              </select>
             </div>
+
+            {/* Exam Date */}
             <div>
               <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
                 {t("examDate")}
@@ -196,6 +226,7 @@ export default function AdminPage() {
                 value={form.ExamDate}
                 onChange={handleChange}
                 className="form-input"
+                required
               />
             </div>
           </div>
@@ -257,7 +288,7 @@ export default function AdminPage() {
                     </td>
                     <td className="table-cell text-slate-600">
                       {ex.ClassName}
-                      {ex.SectionName && ` – ${ex.SectionName}`}
+                      {ex.Section && ` – ${ex.Section}`}
                     </td>
                     <td className="table-cell text-slate-600 whitespace-nowrap">
                       {ex.ExamDate
@@ -273,8 +304,10 @@ export default function AdminPage() {
                               ExamType: ex.ExamType || "",
                               ExamName: ex.ExamName || "",
                               ClassName: ex.ClassName || "",
-                              SectionName: ex.SectionName || "",
-                              ExamDate: ex.ExamDate?.split("T")[0] || "",
+                              SectionName: ex.Section || "",
+                              ExamDate: ex.ExamDate
+                                ? String(ex.ExamDate).split("T")[0]
+                                : "",
                             });
                           }}
                           className="btn-icon edit"

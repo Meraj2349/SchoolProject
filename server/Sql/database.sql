@@ -454,3 +454,23 @@ CREATE TABLE
         FOREIGN KEY (SessionID) REFERENCES QuizSessions (SessionID) ON DELETE CASCADE,
         FOREIGN KEY (QuestionID) REFERENCES QuizQuestions (QuestionID) ON DELETE CASCADE
     );
+
+-- Chairman Profile Table
+-- Single-row table (id=1) for the school chairman's public profile.
+CREATE TABLE
+    IF NOT EXISTS ChairmanProfile (
+        id INT PRIMARY KEY AUTO_INCREMENT,
+        name_en VARCHAR(255) NOT NULL DEFAULT 'Md. Rashedul Islam',
+        name_bn VARCHAR(255) NOT NULL DEFAULT 'মোঃ রাশেদুল ইসলাম',
+        title_en VARCHAR(255) NOT NULL DEFAULT 'Chairman',
+        title_bn VARCHAR(255) NOT NULL DEFAULT 'চেয়ারম্যান',
+        institution_en VARCHAR(255) NOT NULL DEFAULT 'Star Shikkha Poribar',
+        institution_bn VARCHAR(255) NOT NULL DEFAULT 'স্টার শিক্ষা পরিবার',
+        image_url VARCHAR(500),
+        image_public_id VARCHAR(255),
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    );
+
+-- Seed the single row (only if the table is empty)
+INSERT IGNORE INTO ChairmanProfile (id, name_en, name_bn, title_en, title_bn, institution_en, institution_bn)
+VALUES (1, 'Md. Rashedul Islam', 'মোঃ রাশেদুল ইসলাম', 'Chairman', 'চেয়ারম্যান', 'Star Shikkha Poribar', 'স্টার শিক্ষা পরিবার');

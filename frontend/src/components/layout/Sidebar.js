@@ -37,6 +37,11 @@ export default function Sidebar({ open, onClose }) {
       icon: <FaMessage />,
       key: "sidebar.chairMessage",
     },
+    {
+      path: "/admin/chairman",
+      icon: <FaHandshake />,
+      key: "sidebar.chairmanProfile",
+    },
     { path: "/admin/gallery", icon: <FaImage />, key: "sidebar.imageGallery" },
     { path: "/admin/routine", icon: <RiTimerLine />, key: "sidebar.routine" },
     {

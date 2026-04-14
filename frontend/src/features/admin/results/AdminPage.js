@@ -1,17 +1,33 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { resultsService } from "@/services/results.service";
 import { examsService } from "@/services/exams.service";
 import { subjectsService } from "@/services/subjects.service";
+import { classesService } from "@/services/classes.service";
+import { studentsService } from "@/services/students.service";
 import { queryKeys } from "@/lib/queryKeys";
 import { useTranslations } from "@/store/languageStore";
-import { FiAward, FiSearch, FiX, FiList } from "react-icons/fi";
+import {
+  FiAward,
+  FiSearch,
+  FiX,
+  FiList,
+  FiEdit2,
+  FiTrash2,
+  FiSave,
+} from "react-icons/fi";
 
 const RESULT_FILTER_EMPTY = { className: "", section: "", search: "" };
+const RESULTS_QK = ["results", "all"];
 
 export default function AdminPage() {
+  const qc = useQueryClient();
+  const t = useTranslations("admin.results");
+  const tCommon = useTranslations("common");
+
+  /* ── add form state ── */
   const [form, setForm] = useState({
     className: "",
     section: "",
@@ -22,10 +38,15 @@ export default function AdminPage() {
     marksObtained: "",
     totalMarks: "100",
   });
+
+  /* ── edit modal state ── */
+  const [editRow, setEditRow] = useState(null); // full result row being edited
+  const [editMarks, setEditMarks] = useState("");
+
   const [status, setStatus] = useState({ error: null, success: null });
   const [resultFilters, setResultFilters] = useState(RESULT_FILTER_EMPTY);
-  const t = useTranslations("admin.results");
 
+  /* ── data queries ── */
   const { data: exams = [] } = useQuery({
     queryKey: queryKeys.exams.all,
     queryFn: examsService.getAll,
@@ -36,28 +57,59 @@ export default function AdminPage() {
     queryFn: subjectsService.getAll,
     select: (d) => d?.data ?? d ?? [],
   });
-
-  // Fetch all results for the viewer table
+  const { data: classes = [] } = useQuery({
+    queryKey: queryKeys.classes.all,
+    queryFn: classesService.getAll,
+    select: (d) => d?.data ?? d ?? [],
+  });
   const { data: allResults = [], isLoading: resultsLoading } = useQuery({
-    queryKey: ["results", "all"],
-    queryFn: () =>
-      resultsService.search({}).then((r) => r?.data ?? r ?? []),
+    queryKey: RESULTS_QK,
+    queryFn: () => resultsService.search({}).then((r) => r?.data ?? r ?? []),
   });
 
+  // Load students for the selected class+section to power the student picker
+  const canFetchStudents = Boolean(form.className && form.section);
+  const { data: classStudents = [], isFetching: studentsLoading } = useQuery({
+    queryKey: queryKeys.students.byClassSection(form.className, form.section),
+    queryFn: () =>
+      studentsService
+        .getByClassSection(form.className, form.section)
+        .then((r) => r?.data ?? r ?? []),
+    enabled: canFetchStudents,
+  });
+
+  /* ── mutations ── */
   const add = useMutation({
     mutationFn: resultsService.createByDetails,
     onSuccess: () => {
+      qc.invalidateQueries({ queryKey: RESULTS_QK });
       flash(t("resultAdded"));
-      setForm((p) => ({
-        ...p,
-        firstName: "",
-        rollNumber: "",
-        marksObtained: "",
-      }));
+      setForm((p) => ({ ...p, firstName: "", rollNumber: "", marksObtained: "" }));
     },
     onError: (err) => flash(err.message || t("failed"), true),
   });
 
+  const edit = useMutation({
+    mutationFn: ({ id, marks }) =>
+      resultsService.update(id, { MarksObtained: Number(marks) }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: RESULTS_QK });
+      flash(t("resultUpdated") || "Result updated");
+      setEditRow(null);
+    },
+    onError: (err) => flash(err.message || t("failed"), true),
+  });
+
+  const remove = useMutation({
+    mutationFn: resultsService.remove,
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: RESULTS_QK });
+      flash(t("deleted") || "Result deleted");
+    },
+    onError: (err) => flash(err.message || t("failed"), true),
+  });
+
+  /* ── helpers ── */
   const flash = (m, e = false) => {
     setStatus(e ? { error: m, success: null } : { error: null, success: m });
     setTimeout(() => setStatus({ error: null, success: null }), 4000);
@@ -72,6 +124,33 @@ export default function AdminPage() {
   };
   const clearResultFilters = () => setResultFilters(RESULT_FILTER_EMPTY);
 
+  /* ── section options based on selected class in add form ── */
+  const sectionsForClass = useMemo(() => {
+    if (!form.className) return [];
+    return classes
+      .filter((c) => c.ClassName === form.className)
+      .map((c) => c.Section);
+  }, [classes, form.className]);
+
+  const uniqueClassNames = useMemo(
+    () => [...new Set(classes.map((c) => c.ClassName))].sort(),
+    [classes],
+  );
+
+  /* ── exam / subject options filtered by class ── */
+  const filteredExams = form.className
+    ? exams.filter(
+        (ex) => ex.ClassName?.toLowerCase() === form.className.toLowerCase(),
+      )
+    : exams;
+
+  const filteredSubjects = form.className
+    ? subjects.filter(
+        (s) => s.ClassName?.toLowerCase() === form.className.toLowerCase(),
+      )
+    : subjects;
+
+  /* ── add form submit ── */
   const handleSubmit = async (e) => {
     e.preventDefault();
     await add.mutateAsync({
@@ -86,13 +165,7 @@ export default function AdminPage() {
     });
   };
 
-  const filteredExams = form.className
-    ? exams.filter(
-        (ex) => ex.ClassName?.toLowerCase() === form.className.toLowerCase(),
-      )
-    : exams;
-
-  // Derive unique class/section options for the results viewer filter
+  /* ── results viewer filter logic ── */
   const classOptions = useMemo(
     () => [...new Set(allResults.map((r) => r.ClassName).filter(Boolean))].sort(),
     [allResults],
@@ -102,7 +175,6 @@ export default function AdminPage() {
     [allResults],
   );
 
-  // Client-side filter for the results viewer
   const filteredResults = useMemo(() => {
     const search = resultFilters.search.toLowerCase().trim();
     return allResults.filter((r) => {
@@ -117,7 +189,10 @@ export default function AdminPage() {
       )
         return false;
       if (search) {
-        const name = (r.StudentName || `${r.FirstName || ""} ${r.LastName || ""}`).toLowerCase();
+        const name = (
+          r.StudentName ||
+          `${r.FirstName || ""} ${r.LastName || ""}`
+        ).toLowerCase();
         const roll = (r.RollNumber || "").toLowerCase();
         if (!name.includes(search) && !roll.includes(search)) return false;
       }
@@ -128,14 +203,11 @@ export default function AdminPage() {
   const isFiltered =
     resultFilters.className || resultFilters.section || resultFilters.search;
 
-  const TEXT_FIELDS = [
-    ["className", t("className"), "text", true],
-    ["section", t("section"), "text", true],
-    ["firstName", t("firstName"), "text", true],
-    ["rollNumber", t("rollNumber"), "text", true],
-    ["marksObtained", t("marksObtained"), "number", true],
-    ["totalMarks", t("totalMarks"), "number", true],
-  ];
+  /* ── open edit modal ── */
+  const openEdit = (row) => {
+    setEditRow(row);
+    setEditMarks(String(row.MarksObtained));
+  };
 
   return (
     <div className="space-y-6">
@@ -147,11 +219,9 @@ export default function AdminPage() {
       </div>
 
       {status.error && <div className="error-message">{status.error}</div>}
-      {status.success && (
-        <div className="success-message">{status.success}</div>
-      )}
+      {status.success && <div className="success-message">{status.success}</div>}
 
-      {/* Add result form */}
+      {/* ── Add result form ── */}
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
         <div className="px-6 py-4 border-b border-slate-100 flex items-center gap-3">
           <div className="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center">
@@ -163,21 +233,148 @@ export default function AdminPage() {
         </div>
         <form onSubmit={handleSubmit} className="p-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {TEXT_FIELDS.map(([name, label, type, req]) => (
-              <div key={name}>
+            {/* Class */}
+            <div>
+              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
+                {t("className")}
+              </label>
+              <select
+                name="className"
+                value={form.className}
+                onChange={(e) => {
+                  setForm((p) => ({
+                    ...p,
+                    className: e.target.value,
+                    section: "",
+                    examId: "",
+                    subjectId: "",
+                    firstName: "",
+                    rollNumber: "",
+                  }));
+                }}
+                className="form-input"
+                required
+              >
+                <option value="">Select class</option>
+                {uniqueClassNames.map((cn) => (
+                  <option key={cn} value={cn}>{cn}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Section */}
+            <div>
+              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
+                {t("section")}
+              </label>
+              <select
+                name="section"
+                value={form.section}
+                onChange={(e) =>
+                  setForm((p) => ({
+                    ...p,
+                    section: e.target.value,
+                    firstName: "",
+                    rollNumber: "",
+                  }))
+                }
+                className="form-input"
+                required
+              >
+                <option value="">Select section</option>
+                {sectionsForClass.map((s) => (
+                  <option key={s} value={s}>{s}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Student picker — shown once class+section are selected */}
+            {canFetchStudents && (
+              <div className="sm:col-span-2">
                 <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
-                  {label}
+                  Student
+                  {studentsLoading && (
+                    <span className="ml-2 text-indigo-400 normal-case font-normal">
+                      loading…
+                    </span>
+                  )}
                 </label>
-                <input
-                  type={type}
-                  name={name}
-                  value={form[name]}
-                  onChange={handleChange}
+                <select
+                  value={
+                    form.rollNumber
+                      ? classStudents.findIndex(
+                          (s) => s.RollNumber === form.rollNumber,
+                        )
+                      : ""
+                  }
+                  onChange={(e) => {
+                    const idx = e.target.value;
+                    if (idx === "") {
+                      setForm((p) => ({ ...p, firstName: "", rollNumber: "" }));
+                      return;
+                    }
+                    const s = classStudents[Number(idx)];
+                    if (s)
+                      setForm((p) => ({
+                        ...p,
+                        firstName: s.FirstName,
+                        rollNumber: s.RollNumber,
+                      }));
+                  }}
                   className="form-input"
-                  required={req}
-                />
+                  required
+                >
+                  <option value="">
+                    {studentsLoading
+                      ? "Loading students…"
+                      : classStudents.length === 0
+                      ? "No students in this class/section"
+                      : "Select student"}
+                  </option>
+                  {classStudents.map((s, idx) => (
+                    <option key={s.StudentID} value={idx}>
+                      {s.FirstName} {s.LastName} — Roll {s.RollNumber}
+                    </option>
+                  ))}
+                </select>
               </div>
-            ))}
+            )}
+
+            {/* Fallback manual inputs when no class+section selected */}
+            {!canFetchStudents && (
+              <>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
+                    {t("firstName")}
+                  </label>
+                  <input
+                    type="text"
+                    name="firstName"
+                    value={form.firstName}
+                    onChange={handleChange}
+                    className="form-input"
+                    placeholder="Select class & section first"
+                    disabled
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
+                    {t("rollNumber")}
+                  </label>
+                  <input
+                    type="text"
+                    name="rollNumber"
+                    value={form.rollNumber}
+                    onChange={handleChange}
+                    className="form-input"
+                    placeholder="Select class & section first"
+                    disabled
+                  />
+                </div>
+              </>
+            )}
+
+            {/* Exam */}
             <div>
               <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
                 {t("exam")}
@@ -197,6 +394,8 @@ export default function AdminPage() {
                 ))}
               </select>
             </div>
+
+            {/* Subject */}
             <div>
               <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
                 {t("subject")}
@@ -209,14 +408,48 @@ export default function AdminPage() {
                 required
               >
                 <option value="">{t("selectSubject")}</option>
-                {subjects.map((s) => (
+                {filteredSubjects.map((s) => (
                   <option key={s.SubjectID} value={s.SubjectID}>
                     {s.SubjectName}
                   </option>
                 ))}
               </select>
             </div>
+
+            {/* Marks obtained */}
+            <div>
+              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
+                {t("marksObtained")}
+              </label>
+              <input
+                type="number"
+                name="marksObtained"
+                value={form.marksObtained}
+                onChange={handleChange}
+                className="form-input"
+                min={0}
+                max={100}
+                required
+              />
+            </div>
+
+            {/* Total marks */}
+            <div>
+              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
+                {t("totalMarks")}
+              </label>
+              <input
+                type="number"
+                name="totalMarks"
+                value={form.totalMarks}
+                onChange={handleChange}
+                className="form-input"
+                min={1}
+                required
+              />
+            </div>
           </div>
+
           <div className="mt-6 pt-5 border-t border-slate-100">
             <button
               type="submit"
@@ -229,7 +462,7 @@ export default function AdminPage() {
         </form>
       </div>
 
-      {/* Results viewer with filters */}
+      {/* ── Results viewer ── */}
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
         <div className="px-6 py-4 border-b border-slate-100 flex items-center gap-3">
           <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center">
@@ -248,7 +481,6 @@ export default function AdminPage() {
         {/* Filter bar */}
         <div className="px-6 py-4 border-b border-slate-100 bg-slate-50/60">
           <div className="flex flex-wrap gap-3 items-end">
-            {/* Search by student name / roll */}
             <div className="flex-1 min-w-48">
               <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
                 Search
@@ -265,8 +497,6 @@ export default function AdminPage() {
                 />
               </div>
             </div>
-
-            {/* Class filter */}
             <div className="min-w-40">
               <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
                 Class
@@ -283,8 +513,6 @@ export default function AdminPage() {
                 ))}
               </select>
             </div>
-
-            {/* Section filter */}
             <div className="min-w-32">
               <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
                 Section
@@ -301,12 +529,10 @@ export default function AdminPage() {
                 ))}
               </select>
             </div>
-
             {isFiltered && (
               <button
                 onClick={clearResultFilters}
                 className="btn-secondary flex items-center gap-1.5"
-                title="Clear filters"
               >
                 <FiX className="text-xs" />
                 Clear
@@ -333,12 +559,16 @@ export default function AdminPage() {
                   <th className="table-header">Exam</th>
                   <th className="table-header">Subject</th>
                   <th className="table-header">Marks</th>
+                  <th className="table-header">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {filteredResults.length === 0 ? (
                   <tr>
-                    <td colSpan={8} className="table-cell text-center text-slate-400 py-12">
+                    <td
+                      colSpan={9}
+                      className="table-cell text-center text-slate-400 py-12"
+                    >
                       {isFiltered
                         ? "No results match the current filters"
                         : "No results recorded yet"}
@@ -351,17 +581,28 @@ export default function AdminPage() {
                       : null;
                     return (
                       <tr
-                        key={i}
-                        className={`hover:bg-indigo-50/30 transition-colors ${i % 2 === 0 ? "" : "bg-slate-50/50"}`}
+                        key={r.ResultID ?? i}
+                        className={`hover:bg-indigo-50/30 transition-colors ${
+                          i % 2 === 0 ? "" : "bg-slate-50/50"
+                        }`}
                       >
-                        <td className="table-cell text-slate-400 text-xs">{i + 1}</td>
+                        <td className="table-cell text-slate-400 text-xs">
+                          {i + 1}
+                        </td>
                         <td className="table-cell">
                           <div className="flex items-center gap-2">
                             <div className="w-7 h-7 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold text-xs shrink-0">
-                              {(r.StudentName || r.FirstName || "?").charAt(0).toUpperCase()}
+                              {(
+                                r.StudentName ||
+                                r.FirstName ||
+                                "?"
+                              )
+                                .charAt(0)
+                                .toUpperCase()}
                             </div>
                             <span className="font-medium text-slate-800">
-                              {r.StudentName || `${r.FirstName || ""} ${r.LastName || ""}`}
+                              {r.StudentName ||
+                                `${r.FirstName || ""} ${r.LastName || ""}`}
                             </span>
                           </div>
                         </td>
@@ -375,15 +616,23 @@ export default function AdminPage() {
                             {r.ClassName}
                           </span>
                         </td>
-                        <td className="table-cell text-slate-600">{r.Section}</td>
-                        <td className="table-cell text-slate-600 text-xs">{r.ExamName}</td>
-                        <td className="table-cell text-slate-600 text-xs">{r.SubjectName}</td>
+                        <td className="table-cell text-slate-600">
+                          {r.Section}
+                        </td>
+                        <td className="table-cell text-slate-600 text-xs">
+                          {r.ExamName}
+                        </td>
+                        <td className="table-cell text-slate-600 text-xs">
+                          {r.SubjectName}
+                        </td>
                         <td className="table-cell">
                           <div className="flex items-center gap-2">
                             <span className="font-semibold text-slate-800">
                               {r.MarksObtained}
                               {r.TotalMarks ? (
-                                <span className="text-slate-400 font-normal">/{r.TotalMarks}</span>
+                                <span className="text-slate-400 font-normal">
+                                  /{r.TotalMarks}
+                                </span>
                               ) : null}
                             </span>
                             {pct !== null && (
@@ -403,6 +652,33 @@ export default function AdminPage() {
                             )}
                           </div>
                         </td>
+                        <td className="table-cell">
+                          <div className="flex items-center gap-1">
+                            <button
+                              onClick={() => openEdit(r)}
+                              className="btn-icon edit"
+                              title={tCommon("edit")}
+                            >
+                              <FiEdit2 />
+                            </button>
+                            <button
+                              onClick={() => {
+                                if (
+                                  window.confirm(
+                                    t("deleteConfirm") ||
+                                      "Delete this result?",
+                                  )
+                                )
+                                  remove.mutate(r.ResultID);
+                              }}
+                              className="btn-icon delete"
+                              title={tCommon("delete")}
+                              disabled={!r.ResultID}
+                            >
+                              <FiTrash2 />
+                            </button>
+                          </div>
+                        </td>
                       </tr>
                     );
                   })
@@ -412,6 +688,91 @@ export default function AdminPage() {
           </div>
         )}
       </div>
+
+      {/* ── Edit modal ── */}
+      {editRow && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden">
+            {/* Header */}
+            <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center">
+                  <FiEdit2 className="text-indigo-600 text-sm" />
+                </div>
+                <h2 className="text-base font-semibold text-slate-800">
+                  Edit Result
+                </h2>
+              </div>
+              <button
+                onClick={() => setEditRow(null)}
+                className="text-slate-400 hover:text-slate-600 transition-colors"
+              >
+                <FiX />
+              </button>
+            </div>
+
+            {/* Info */}
+            <div className="px-6 py-4 bg-slate-50 border-b border-slate-100 space-y-1 text-sm text-slate-600">
+              <p>
+                <span className="font-medium text-slate-700">Student:</span>{" "}
+                {editRow.StudentName ||
+                  `${editRow.FirstName || ""} ${editRow.LastName || ""}`}{" "}
+                <span className="font-mono text-xs text-slate-400">
+                  (Roll: {editRow.RollNumber})
+                </span>
+              </p>
+              <p>
+                <span className="font-medium text-slate-700">Class:</span>{" "}
+                {editRow.ClassName} – {editRow.Section}
+              </p>
+              <p>
+                <span className="font-medium text-slate-700">Exam:</span>{" "}
+                {editRow.ExamName}
+              </p>
+              <p>
+                <span className="font-medium text-slate-700">Subject:</span>{" "}
+                {editRow.SubjectName}
+              </p>
+            </div>
+
+            {/* Marks input */}
+            <div className="px-6 py-5">
+              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
+                Marks Obtained
+              </label>
+              <input
+                type="number"
+                value={editMarks}
+                onChange={(e) => setEditMarks(e.target.value)}
+                className="form-input"
+                min={0}
+                max={100}
+                autoFocus
+              />
+            </div>
+
+            {/* Footer */}
+            <div className="px-6 pb-6 flex gap-3">
+              <button
+                className="btn-primary flex items-center gap-2"
+                disabled={edit.isPending || !editRow.ResultID}
+                onClick={() =>
+                  edit.mutate({ id: editRow.ResultID, marks: editMarks })
+                }
+              >
+                <FiSave className="text-sm" />
+                {edit.isPending ? "Saving…" : "Save Changes"}
+              </button>
+              <button
+                className="btn-secondary"
+                onClick={() => setEditRow(null)}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

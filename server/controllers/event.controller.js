@@ -64,8 +64,13 @@ export const getEventByIdController = async (req, res) => {
 export const addEventController = async (req, res) => {
   const lang = req.language;
   try {
-    const { eventName, eventType, startDate, endDate, venue, description } =
-      req.body;
+    // Accept both PascalCase (frontend) and camelCase
+    const eventName = req.body.EventName ?? req.body.eventName;
+    const eventType = req.body.EventType ?? req.body.eventType;
+    const startDate = req.body.StartDate ?? req.body.startDate;
+    const endDate   = req.body.EndDate   ?? req.body.endDate;
+    const venue       = req.body.Venue       ?? req.body.venue;
+    const description = req.body.Description ?? req.body.description;
 
     if (!eventName || !eventType || !startDate || !endDate) {
       return res
@@ -73,14 +78,7 @@ export const addEventController = async (req, res) => {
         .json({ success: false, message: t("event_required_fields", lang) });
     }
 
-    const eventData = {
-      eventName,
-      eventType,
-      startDate,
-      endDate,
-      venue,
-      description,
-    };
+    const eventData = { eventName, eventType, startDate, endDate, venue, description };
     const result = await addEvent(eventData);
 
     res
@@ -124,28 +122,26 @@ export const updateEventController = async (req, res) => {
         .json({ success: false, message: t("event_title_required", lang) });
     }
 
-    const { eventName, eventType, startDate, endDate, venue, description } =
-      req.body;
+    // Accept both PascalCase (frontend) and camelCase
+    const eventName   = req.body.EventName   ?? req.body.eventName;
+    const eventType   = req.body.EventType   ?? req.body.eventType;
+    const startDate   = req.body.StartDate   ?? req.body.startDate;
+    const endDate     = req.body.EndDate     ?? req.body.endDate;
+    const venue       = req.body.Venue       ?? req.body.venue;
+    const description = req.body.Description ?? req.body.description;
 
-    if (
-      !eventName &&
-      !eventType &&
-      !startDate &&
-      !endDate &&
-      !venue &&
-      !description
-    ) {
+    if (!eventName && !eventType && !startDate && !endDate && !venue && !description) {
       return res
         .status(400)
         .json({ success: false, message: t("event_required_fields", lang) });
     }
 
     const eventData = {};
-    if (eventName !== undefined) eventData.eventName = eventName;
-    if (eventType !== undefined) eventData.eventType = eventType;
-    if (startDate !== undefined) eventData.startDate = startDate;
-    if (endDate !== undefined) eventData.endDate = endDate;
-    if (venue !== undefined) eventData.venue = venue;
+    if (eventName   !== undefined) eventData.eventName   = eventName;
+    if (eventType   !== undefined) eventData.eventType   = eventType;
+    if (startDate   !== undefined) eventData.startDate   = startDate;
+    if (endDate     !== undefined) eventData.endDate     = endDate;
+    if (venue       !== undefined) eventData.venue       = venue;
     if (description !== undefined) eventData.description = description;
 
     await updateEvent(id, eventData);

@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { studentsService } from "@/services/students.service";
+import { classesService } from "@/services/classes.service";
 import { queryKeys } from "@/lib/queryKeys";
 import { useTranslations } from "@/store/languageStore";
 import { FiEdit2, FiTrash2, FiUserPlus, FiUsers, FiSearch, FiX } from "react-icons/fi";
@@ -25,6 +26,7 @@ const FILTER_EMPTY = { search: "", className: "", section: "", gender: "" };
 
 export default function AdminPage() {
   const qc = useQueryClient();
+  const formRef = useRef(null);
   const [form, setForm] = useState(EMPTY);
   const [editId, setEditId] = useState(null);
   const [status, setStatus] = useState({ error: null, success: null });
@@ -36,6 +38,26 @@ export default function AdminPage() {
     queryFn: studentsService.getAll,
     select: (d) => d?.data ?? d ?? [],
   });
+
+  // Distinct classes for form dropdowns
+  const { data: distinctClasses = [] } = useQuery({
+    queryKey: queryKeys.classes.distinct,
+    queryFn: classesService.getDistinct,
+    select: (d) => d?.data ?? d ?? [],
+  });
+
+  const classNames = useMemo(
+    () => [...new Set(distinctClasses.map((c) => c.ClassName))].sort(),
+    [distinctClasses],
+  );
+  const formSections = useMemo(
+    () =>
+      distinctClasses
+        .filter((c) => c.ClassName === form.ClassName)
+        .map((c) => c.Section)
+        .sort(),
+    [distinctClasses, form.ClassName],
+  );
 
   const create = useMutation({
     mutationFn: studentsService.create,
@@ -74,6 +96,20 @@ export default function AdminPage() {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((p) => ({ ...p, [name]: value }));
+  };
+
+  // When class changes in the form, reset section and auto-fill if only one exists
+  const handleClassChange = (e) => {
+    const cls = e.target.value;
+    const sections = distinctClasses
+      .filter((c) => c.ClassName === cls)
+      .map((c) => c.Section)
+      .sort();
+    setForm((p) => ({
+      ...p,
+      ClassName: cls,
+      Section: sections.length === 1 ? sections[0] : "",
+    }));
   };
   const handleFilterChange = (e) => {
     const { name, value } = e.target;
@@ -132,8 +168,6 @@ export default function AdminPage() {
     ["FirstName", t("firstName")],
     ["LastName", t("lastName")],
     ["RollNumber", t("rollNumber")],
-    ["ClassName", t("class")],
-    ["Section", t("section")],
     ["ParentContact", t("parentContact")],
     ["Email", t("email")],
     ["Address", t("address")],
@@ -164,7 +198,7 @@ export default function AdminPage() {
       )}
 
       {/* Form card */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+      <div ref={formRef} className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
         <div className="px-6 py-4 border-b border-slate-100 flex items-center gap-3">
           <div className="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center">
             <FiUserPlus className="text-indigo-600 text-sm" />
@@ -175,7 +209,8 @@ export default function AdminPage() {
         </div>
         <form onSubmit={handleSave} className="p-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {TEXT_FIELDS.map(([name, label]) => (
+            {/* First Name, Last Name, Roll Number */}
+            {TEXT_FIELDS.slice(0, 3).map(([name, label]) => (
               <div key={name}>
                 <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
                   {label}
@@ -189,6 +224,45 @@ export default function AdminPage() {
                 />
               </div>
             ))}
+
+            {/* Class dropdown */}
+            <div>
+              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
+                {t("class")}
+              </label>
+              <select
+                name="ClassName"
+                value={form.ClassName}
+                onChange={handleClassChange}
+                className="form-input"
+              >
+                <option value="">Select class</option>
+                {classNames.map((cn) => (
+                  <option key={cn} value={cn}>{cn}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Section dropdown */}
+            <div>
+              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
+                {t("section")}
+              </label>
+              <select
+                name="Section"
+                value={form.Section}
+                onChange={handleChange}
+                className="form-input"
+                disabled={!form.ClassName}
+              >
+                <option value="">Select section</option>
+                {formSections.map((sec) => (
+                  <option key={sec} value={sec}>{sec}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Gender */}
             <div>
               <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
                 {t("gender")}
@@ -204,6 +278,23 @@ export default function AdminPage() {
                 <option value="Other">{t("other")}</option>
               </select>
             </div>
+
+            {/* Remaining text fields: contact, email, address */}
+            {TEXT_FIELDS.slice(3).map(([name, label]) => (
+              <div key={name}>
+                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
+                  {label}
+                </label>
+                <input
+                  type="text"
+                  name={name}
+                  value={form[name]}
+                  onChange={handleChange}
+                  className="form-input"
+                />
+              </div>
+            ))}
+
             <div>
               <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
                 {t("dateOfBirth")}
@@ -422,9 +513,9 @@ export default function AdminPage() {
                             setForm({
                               ...s,
                               DateOfBirth: s.DateOfBirth?.split("T")[0] || "",
-                              AdmissionDate:
-                                s.AdmissionDate?.split("T")[0] || "",
+                              AdmissionDate: s.AdmissionDate?.split("T")[0] || "",
                             });
+                            setTimeout(() => formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 50);
                           }}
                           className="btn-icon edit"
                           title={t("editStudent")}
