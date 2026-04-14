@@ -63,6 +63,11 @@ export default function Sidebar({ open, onClose }) {
     { path: "/admin/exams", icon: <FaClipboardList />, key: "sidebar.exams" },
     { path: "/admin/events", icon: <FaCalendarCheck />, key: "sidebar.events" },
     {
+      path: "/admin/attendance",
+      icon: <RiListCheck />,
+      key: "sidebar.attendance",
+    },
+    {
       path: "/admin/attendance/grid",
       icon: <FaClipboardList />,
       key: "sidebar.attendanceGrid",

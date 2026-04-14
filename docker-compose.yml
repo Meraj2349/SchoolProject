@@ -8,7 +8,7 @@ services:
       - PORT=3000
       - DB_HOST=db
       - DB_USER=root
-      - DB_PASS=schoolproject123
+      - DB_PASSWORD=schoolproject123
       - DB_NAME=School_Management
       - JWT_SECRET_KEY=q9R2$$hQv6jB
       - JWT_EXPIRES_IN=30h
@@ -25,10 +25,12 @@ services:
 
   frontend:
     build:
-      context: ./client
+      context: ./frontend
       dockerfile: Dockerfile
     ports:
-      - "5174:80"
+      - "5174:5174"
+    environment:
+      - BACKEND_URL=http://backend:3000
     depends_on:
       - backend
     restart: unless-stopped

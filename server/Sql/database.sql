@@ -1,4 +1,6 @@
 -- School Management System Database
+SET FOREIGN_KEY_CHECKS = 0;
+
 -- Routines Table (Using ClassID from Classes table - following Classes table structure)
 CREATE TABLE
     Routines (
@@ -113,7 +115,7 @@ CREATE TABLE
         FOREIGN KEY (ClassID) REFERENCES Classes (ClassID)
     );
 
---admin
+-- admin
 CREATE TABLE
     Admin (
         AdminID INT PRIMARY KEY AUTO_INCREMENT,
@@ -136,7 +138,7 @@ CREATE TABLE
     Messages (
         MessageID INT PRIMARY KEY AUTO_INCREMENT, -- Unique identifier for each message
         Messages TEXT NOT NULL, -- The message content
-        Show BOOLEAN NOT NULL DEFAULT FALSE, -- Whether the message is visible or not
+        `Show` BOOLEAN NOT NULL DEFAULT FALSE, -- Whether the message is visible or not
         CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Timestamp for when the message was created
         UpdatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP -- Timestamp for when the message was last updated
     );
@@ -221,3 +223,173 @@ CREATE TABLE
 --         FOREIGN KEY (StudentID) REFERENCES Students (StudentID),
 --         FOREIGN KEY (FeeID) REFERENCES Fees (FeeID)
 --     );
+SET FOREIGN_KEY_CHECKS = 1;
+-- Events Table for School Management System
+-- Simple Event Management with basic fields
+CREATE TABLE
+    Events (
+        EventID INT PRIMARY KEY AUTO_INCREMENT NOT NULL,
+        EventName VARCHAR(100) NOT NULL,
+        EventType ENUM ('Academic', 'Sports', 'Cultural', 'Other') NOT NULL DEFAULT 'Other',
+        StartDate DATE NOT NULL,
+        EndDate DATE NOT NULL,
+        Venue VARCHAR(100),
+        Description TEXT,
+        CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UpdatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    );
+
+-- Sample data for testing (optional)
+INSERT INTO
+    Events (
+        EventName,
+        EventType,
+        StartDate,
+        EndDate,
+        Venue,
+        Description
+    )
+VALUES
+    (
+        'Annual Sports Day',
+        'Sports',
+        '2025-10-15',
+        '2025-10-15',
+        'School Playground',
+        'Annual sports competition for all students'
+    ),
+    (
+        'Parent Teacher Meeting',
+        'Academic',
+        '2025-10-20',
+        '2025-10-20',
+        'School Hall',
+        'Monthly parent teacher interaction meeting'
+    ),
+    (
+        'Cultural Program',
+        'Cultural',
+        '2025-10-25',
+        '2025-10-26',
+        'School Auditorium',
+        'Annual cultural program with dance, music and drama'
+    ),
+    (
+        'Science Fair',
+        'Academic',
+        '2025-11-05',
+        '2025-11-07',
+        'Science Lab',
+        'Student science project exhibition'
+    );
+
+-- Index for better performance
+CREATE INDEX idx_events_date ON Events (StartDate, EndDate);
+
+CREATE INDEX idx_events_type ON Events (EventType);-- News Table for School Management System
+CREATE TABLE
+    IF NOT EXISTS News (
+        id INT PRIMARY KEY AUTO_INCREMENT,
+        title_bn VARCHAR(500) NOT NULL,
+        title_en VARCHAR(500) NOT NULL,
+        date DATE NOT NULL,
+        link VARCHAR(500) NOT NULL DEFAULT '/events',
+        is_active BOOLEAN NOT NULL DEFAULT TRUE,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    );
+
+-- Index for performance on active news ordered by date
+CREATE INDEX idx_news_active_date ON News (is_active, date DESC);
+
+-- Sample data for testing
+INSERT INTO
+    News (title_bn, title_en, date, link, is_active)
+VALUES
+    (
+        'সিলেট ক্যান্টনমেন্ট পাবলিক স্কুলে নবীন বরণ অনুষ্ঠান',
+        'Nobin Boron Program held in Sylhet Cantonment Public School',
+        '2023-10-11',
+        '/events',
+        TRUE
+    ),
+    (
+        'একাদশ শ্রেণি ভর্তি বিজ্ঞপ্তি-২০২৫',
+        'Class XI Admission Notice-2025',
+        '2025-07-26',
+        '/events',
+        TRUE
+    ),
+    (
+        '২১ সেপ্টেম্বর ২০২৪ লিখিত পরীক্ষার প্রার্থী তালিকা',
+        'Candidates list for Written Exam 21 September 2024',
+        '2024-09-19',
+        '/events',
+        TRUE
+    ),
+    (
+        'শিক্ষা বীমা',
+        'Education Insurance',
+        '2024-08-14',
+        '/events',
+        TRUE
+    );
+-- Notice Announcements Table for School Management System
+CREATE TABLE IF NOT EXISTS NoticeAnnouncements (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    title_bn VARCHAR(500) NOT NULL,
+    title_en VARCHAR(500) NOT NULL,
+    image_url VARCHAR(500),
+    category ENUM('Admission', 'Exam', 'Notice', 'Event') NOT NULL,
+    date DATE NOT NULL,
+    is_published BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- Index for performance on published announcements ordered by date
+CREATE INDEX idx_notice_announcements_published_date ON NoticeAnnouncements (is_published, date DESC);
+
+-- Index for filtering by category
+CREATE INDEX idx_notice_announcements_category ON NoticeAnnouncements (category);
+
+-- Ensure upload directory exists (run manually): mkdir -p server/public/uploads/notice-announcements
+-- Branches Table for School Management System
+CREATE TABLE
+    IF NOT EXISTS Branches (
+        id INT PRIMARY KEY AUTO_INCREMENT,
+        name_bn VARCHAR(255),
+        name_en VARCHAR(255),
+        description_bn TEXT,
+        description_en TEXT,
+        image_url VARCHAR(500),
+        image_public_id VARCHAR(255),
+        latitude DECIMAL(10, 8),
+        longitude DECIMAL(11, 8),
+        address_bn VARCHAR(500),
+        address_en VARCHAR(500),
+        is_proposed BOOLEAN DEFAULT FALSE,
+        established_date DATE,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    );CREATE TABLE IF NOT EXISTS Applications (
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  applicant_name VARCHAR(255) NOT NULL,
+  date_of_birth DATE NOT NULL,
+  gender ENUM('male', 'female', 'other') NOT NULL,
+  applying_for_class VARCHAR(100) NOT NULL,
+  previous_school VARCHAR(255),
+  previous_class VARCHAR(100),
+  parent_name VARCHAR(255) NOT NULL,
+  parent_contact VARCHAR(20) NOT NULL,
+  parent_email VARCHAR(255),
+  address TEXT,
+  additional_info TEXT,
+  status ENUM('pending', 'reviewed', 'accepted', 'rejected') DEFAULT 'pending',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+-- Migration: add language preference to Admin table
+-- Run once: mysql -u root -p School_Management < server/Sql/add_language_to_admin.sql
+ALTER TABLE Admin
+ADD COLUMN Language VARCHAR(2) NOT NULL DEFAULT 'bn' COMMENT 'UI language preference: "bn" (Bangla, default) or "en" (English)';

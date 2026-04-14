@@ -374,6 +374,58 @@ export const checkAttendanceExists = async (studentID, classID, classDate) => {
   }
 };
 
+// Get attendance grid data: all records for a class+section within a date range
+// Returns rows: { StudentID, FirstName, LastName, RollNumber, ClassDate, Status }
+export const getAttendanceGrid = async (className, section, startDate, endDate) => {
+  try {
+    const [rows] = await db.query(
+      `SELECT
+        s.StudentID,
+        s.FirstName,
+        s.LastName,
+        s.RollNumber,
+        a.ClassDate,
+        a.Status
+      FROM Students s
+      JOIN Classes c ON s.ClassID = c.ClassID
+      LEFT JOIN Attendance a ON a.StudentID = s.StudentID
+        AND a.ClassID = c.ClassID
+        AND a.ClassDate BETWEEN ? AND ?
+      WHERE c.ClassName = ? AND c.Section = ?
+      ORDER BY s.RollNumber ASC, a.ClassDate ASC`,
+      [startDate, endDate, className, section],
+    );
+    return rows;
+  } catch (error) {
+    throw new Error("Error fetching attendance grid: " + error.message);
+  }
+};
+
+// Upsert (create or update) a single attendance cell
+export const upsertAttendance = async (studentID, classID, classDate, status) => {
+  try {
+    const [existing] = await db.query(
+      `SELECT AttendanceID FROM Attendance WHERE StudentID = ? AND ClassID = ? AND ClassDate = ?`,
+      [studentID, classID, classDate],
+    );
+    if (existing.length > 0) {
+      await db.query(
+        `UPDATE Attendance SET Status = ? WHERE AttendanceID = ?`,
+        [status, existing[0].AttendanceID],
+      );
+      return { action: "updated", attendanceID: existing[0].AttendanceID };
+    } else {
+      const [result] = await db.query(
+        `INSERT INTO Attendance (StudentID, ClassID, ClassDate, Status) VALUES (?, ?, ?, ?)`,
+        [studentID, classID, classDate, status],
+      );
+      return { action: "created", attendanceID: result.insertId };
+    }
+  } catch (error) {
+    throw new Error("Error upserting attendance: " + error.message);
+  }
+};
+
 // Get attendance statistics
 export const getAttendanceStatistics = async () => {
   try {

@@ -14,11 +14,13 @@ import {
   getAttendanceByNameRollClassSectionController,
   getAttendanceByStudentIdController,
   getAttendanceCountController,
+  getAttendanceGridController,
   getAttendanceStatisticsController,
   getAttendanceSummaryByStudentController,
   getClassAttendanceSummaryByClassAndDateController,
   markAttendanceController,
   updateAttendanceController,
+  upsertAttendanceCellController,
   validateDatabaseSyncController,
 } from "../controllers/attendance.controller.js";
 
@@ -27,6 +29,12 @@ const router = express.Router();
 // Statistics and Count Routes (More specific routes first)
 // Route to get attendance statistics
 router.get("/statistics", getAttendanceStatisticsController);
+
+// Grid route: GET /attendance/grid?className=&section=&startDate=&endDate=
+router.get("/grid", getAttendanceGridController);
+
+// Upsert a single attendance cell
+router.post("/cell", upsertAttendanceCellController);
 
 // Route to get attendance count
 router.get("/count", getAttendanceCountController);

@@ -39,6 +39,7 @@ export const queryKeys = {
     all: ["attendance"],
     byStudent: (id) => ["attendance", "student", id],
     stats: ["attendance", "statistics"],
+    grid: (cls, sec, start, end) => ["attendance", "grid", cls, sec, start, end],
   },
   routines: {
     all: ["routines"],

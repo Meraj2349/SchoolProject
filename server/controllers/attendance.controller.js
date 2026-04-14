@@ -1,4 +1,11 @@
 import { t } from "../config/i18n.js";
+
+// Month names used by forceSyncController
+const MONTH_NAMES = [
+  "January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December",
+];
+
 import {
   bulkCreateAttendance,
   checkAttendanceExists,
@@ -13,10 +20,12 @@ import {
   getAttendanceByNameRollClassSection,
   getAttendanceByStudentId,
   getAttendanceCount,
+  getAttendanceGrid,
   getAttendanceStatistics,
   getAttendanceSummaryByStudent,
   getClassAttendanceSummaryByClassAndDate,
   updateAttendance,
+  upsertAttendance,
 } from "../models/attendance.model.js";
 
 // Utility function for date validation
@@ -894,7 +903,7 @@ export const forceSyncController = async (req, res) => {
         totalRecords: monthRecords.length,
         totalStudents: classStudents.length,
         syncTimestamp: new Date().toISOString(),
-        period: `${months[month]} ${year}`,
+        period: `${MONTH_NAMES[month]} ${year}`,
         className,
         section,
       },
@@ -908,18 +917,128 @@ export const forceSyncController = async (req, res) => {
   }
 };
 
-// Months array for reference
-const months = [
-  "January",
-  "February",
-  "March",
-  "April",
-  "May",
-  "June",
-  "July",
-  "August",
-  "September",
-  "October",
-  "November",
-  "December",
-];
+// Get attendance grid: students vs dates matrix for a class/section/date-range
+export const getAttendanceGridController = async (req, res) => {
+  try {
+    const { className, section, startDate, endDate } = req.query;
+
+    if (!className || !section || !startDate || !endDate) {
+      return res.status(400).json({
+        success: false,
+        message: "Required query params: className, section, startDate, endDate",
+      });
+    }
+
+    if (!validateDate(startDate) || !validateDate(endDate)) {
+      return res.status(400).json({
+        success: false,
+        message: "startDate and endDate must be in YYYY-MM-DD format",
+      });
+    }
+
+    const rows = await getAttendanceGrid(className, section, startDate, endDate);
+
+    // Build a structured response: unique students + date-keyed status map
+    const studentMap = {};
+    const dateSet = new Set();
+
+    for (const row of rows) {
+      if (!studentMap[row.StudentID]) {
+        studentMap[row.StudentID] = {
+          StudentID: row.StudentID,
+          FirstName: row.FirstName,
+          LastName: row.LastName,
+          RollNumber: row.RollNumber,
+          attendance: {},
+        };
+      }
+      if (row.ClassDate) {
+        // ClassDate comes back as a Date object from MySQL; normalise to YYYY-MM-DD
+        const dateKey =
+          row.ClassDate instanceof Date
+            ? row.ClassDate.toISOString().split("T")[0]
+            : String(row.ClassDate).split("T")[0];
+        studentMap[row.StudentID].attendance[dateKey] = row.Status;
+        dateSet.add(dateKey);
+      }
+    }
+
+    const students = Object.values(studentMap).sort((a, b) =>
+      a.RollNumber.localeCompare(b.RollNumber, undefined, { numeric: true }),
+    );
+    const dates = Array.from(dateSet).sort();
+
+    res.status(200).json({
+      success: true,
+      message: "Attendance grid retrieved successfully",
+      data: { students, dates, className, section },
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Error retrieving attendance grid: " + error.message,
+    });
+  }
+};
+
+// Upsert a single attendance cell (used by the grid editor)
+export const upsertAttendanceCellController = async (req, res) => {
+  try {
+    const { studentId, classDate, status } = req.body;
+
+    if (!studentId || !classDate || !status) {
+      return res.status(400).json({
+        success: false,
+        message: "Required fields: studentId, classDate, status",
+      });
+    }
+
+    if (!validateDate(classDate)) {
+      return res.status(400).json({
+        success: false,
+        message: "classDate must be in YYYY-MM-DD format",
+      });
+    }
+
+    const validStatuses = ["Present", "Absent", "Late"];
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({
+        success: false,
+        message: "status must be one of: Present, Absent, Late",
+      });
+    }
+
+    const { getStudentById } = await import("../models/student.model.js");
+    const student = await getStudentById(parseInt(studentId));
+
+    if (!student) {
+      return res.status(404).json({ success: false, message: "Student not found" });
+    }
+
+    if (!student.ClassID) {
+      return res.status(404).json({
+        success: false,
+        message: "Class information not found for student",
+      });
+    }
+
+    const result = await upsertAttendance(
+      parseInt(studentId),
+      student.ClassID,
+      classDate,
+      status,
+    );
+
+    res.status(200).json({
+      success: true,
+      message: `Attendance ${result.action} successfully`,
+      data: result,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Error upserting attendance cell: " + error.message,
+    });
+  }
+};
+

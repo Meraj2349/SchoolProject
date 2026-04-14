@@ -57,14 +57,16 @@ export default function AdminPage() {
     }
     setSaving(true);
     try {
-      const records = students.map((s) => ({
-        StudentID: s.StudentID,
-        Status: attendance[s.StudentID] || "Absent",
-        AttendanceDate: filter.date,
-        ClassName: filter.className,
-        Section: filter.section,
-      }));
-      await attendanceService.bulkCreate(records);
+      // Use upsertCell per student — it resolves classID server-side from studentId
+      await Promise.all(
+        students.map((s) =>
+          attendanceService.upsertCell(
+            s.StudentID,
+            filter.date,
+            attendance[s.StudentID] || "Absent",
+          ),
+        ),
+      );
       flash(t("attendanceSaved"));
     } catch (err) {
       flash(err.message || t("saveFailed"), true);
