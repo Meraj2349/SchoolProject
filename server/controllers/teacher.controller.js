@@ -5,6 +5,7 @@ import {
   updateTeacher,
   deleteTeacher,
   checkDuplicateTeacher,
+  searchTeachers,
 } from "../models/teacher.model.js";
 
 const addTeacherController = async (req, res) => {
@@ -60,10 +61,23 @@ const checkDuplicateTeacherController = async (req, res) => {
   }
 };
 
+const searchTeachersController = async (req, res) => {
+  const lang = req.language;
+  const { q = "", className = "" } = req.query;
+  try {
+    const results = await searchTeachers(q.trim(), className.trim());
+    res.status(200).json(results);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: t("internal_server_error", lang) });
+  }
+};
+
 export {
   addTeacherController,
   getAllTeachersController,
   updateTeacherController,
   deleteTeacherController,
   checkDuplicateTeacherController,
+  searchTeachersController,
 };

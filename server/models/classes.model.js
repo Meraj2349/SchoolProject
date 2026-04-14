@@ -15,19 +15,22 @@ export const addClass = async ({ className, section, teacherId }) => {
   }
 };
 
-// Delete a class by ID
+// "Delete" on the Class Teacher Management page means unassign the teacher —
+// set TeacherID = NULL. The class row itself is preserved so that Students,
+// Subjects, Attendance, Exams, and Results (all FK-referenced to ClassID)
+// remain intact.
 export const deleteClass = async (classId) => {
-  const sql = `
-    DELETE FROM Classes WHERE ClassID = ?
-  `;
   try {
-    const [result] = await db.query(sql, [classId]);
+    const [result] = await db.query(
+      `UPDATE Classes SET TeacherID = NULL WHERE ClassID = ?`,
+      [classId]
+    );
     if (result.affectedRows === 0) {
       throw new Error("No class found with that ID");
     }
     return { success: true };
   } catch (error) {
-    console.error("Error deleting class:", error);
+    console.error("Error unassigning teacher from class:", error);
     throw error;
   }
 };
@@ -35,9 +38,15 @@ export const deleteClass = async (classId) => {
 // Get all classes
 export const getClasses = async () => {
   const sql = `
-    SELECT c.ClassID, c.ClassName, c.Section, t.FirstName AS TeacherFirstName, t.LastName AS TeacherLastName
+    SELECT c.ClassID, c.ClassName, c.Section, c.TeacherID,
+           t.FirstName AS TeacherFirstName, t.LastName AS TeacherLastName,
+           t.Subject AS TeacherSubject,
+           COUNT(s.StudentID) AS StudentCount
     FROM Classes c
     LEFT JOIN Teachers t ON c.TeacherID = t.TeacherID
+    LEFT JOIN Students s ON s.ClassID = c.ClassID
+    GROUP BY c.ClassID, c.ClassName, c.Section, c.TeacherID,
+             t.FirstName, t.LastName, t.Subject
   `;
   try {
     const [rows] = await db.query(sql);
@@ -86,6 +95,22 @@ export const getClasswiseStudentCount = async () => {
     return rows;
   } catch (error) {
     console.error("Error fetching classwise student count:", error);
+    throw error;
+  }
+};
+
+// Get distinct class names with their sections (for autocomplete/dropdowns)
+export const getDistinctClassesWithSections = async () => {
+  const sql = `
+    SELECT DISTINCT ClassName, Section
+    FROM Classes
+    ORDER BY ClassName, Section
+  `;
+  try {
+    const [rows] = await db.query(sql);
+    return rows;
+  } catch (error) {
+    console.error("Error fetching distinct classes:", error);
     throw error;
   }
 };

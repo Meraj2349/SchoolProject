@@ -67,10 +67,40 @@ const checkDuplicateTeacher = async (email, contactNumber) => {
   return { duplicate: rows[0].count > 0 }; // If count > 0, duplicate exists
 };
 
+// Search teachers by name (first or last) for autocomplete
+const searchTeachers = async (query, className = "") => {
+  const like = `%${query}%`;
+  if (className) {
+    // Return teachers already assigned to any section of the given class first,
+    // then fall back to all name-matching teachers so the list is never empty.
+    const sql = `
+      SELECT DISTINCT t.TeacherID, t.FirstName, t.LastName, t.Subject, t.Email,
+             (c.ClassID IS NOT NULL) AS assignedToClass
+      FROM Teachers t
+      LEFT JOIN Classes c ON c.TeacherID = t.TeacherID AND c.ClassName = ?
+      WHERE t.FirstName LIKE ? OR t.LastName LIKE ? OR CONCAT(t.FirstName, ' ', t.LastName) LIKE ?
+      ORDER BY assignedToClass DESC, t.FirstName, t.LastName
+      LIMIT 10
+    `;
+    const [rows] = await db.query(sql, [className, like, like, like]);
+    return rows;
+  }
+  const sql = `
+    SELECT TeacherID, FirstName, LastName, Subject, Email
+    FROM Teachers
+    WHERE FirstName LIKE ? OR LastName LIKE ? OR CONCAT(FirstName, ' ', LastName) LIKE ?
+    ORDER BY FirstName, LastName
+    LIMIT 10
+  `;
+  const [rows] = await db.query(sql, [like, like, like]);
+  return rows;
+};
+
 export {
   addTeacher,
   getAllTeachers,
   updateTeacher,
   deleteTeacher,
   checkDuplicateTeacher,
+  searchTeachers,
 };

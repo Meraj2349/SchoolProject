@@ -3,6 +3,11 @@ import httpClient from "@/lib/httpClient";
 export const teachersService = {
   getAll: () => httpClient.get("/teachers").then((r) => r.data),
 
+  search: (q, className = "") =>
+    httpClient
+      .get("/teachers/search", { params: { q, className } })
+      .then((r) => r.data),
+
   create: (data) =>
     httpClient.post("/teachers/addTeacher", data).then((r) => r.data),
 

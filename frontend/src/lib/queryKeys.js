@@ -17,9 +17,11 @@ export const queryKeys = {
   },
   teachers: {
     all: ["teachers"],
+    search: (q, className = "") => ["teachers", "search", q, className],
   },
   classes: {
     all: ["classes"],
+    distinct: ["classes", "distinct"],
     studentCount: (name) => ["classes", "count", name],
   },
   subjects: {

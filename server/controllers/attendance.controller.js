@@ -36,7 +36,7 @@ const validateDate = (date) => {
 
 // Utility function for status validation
 const validateStatus = (status) => {
-  const validStatuses = ["Present", "Absent"];
+  const validStatuses = ["Present", "Absent", "Late"];
   return validStatuses.includes(status);
 };
 
@@ -953,11 +953,8 @@ export const getAttendanceGridController = async (req, res) => {
         };
       }
       if (row.ClassDate) {
-        // ClassDate comes back as a Date object from MySQL; normalise to YYYY-MM-DD
-        const dateKey =
-          row.ClassDate instanceof Date
-            ? row.ClassDate.toISOString().split("T")[0]
-            : String(row.ClassDate).split("T")[0];
+        // ClassDate is now a plain "YYYY-MM-DD" string (dateStrings:["DATE"] in db config).
+        const dateKey = String(row.ClassDate).split("T")[0];
         studentMap[row.StudentID].attendance[dateKey] = row.Status;
         dateSet.add(dateKey);
       }

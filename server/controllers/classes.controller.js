@@ -5,6 +5,7 @@ import {
   getClasses,
   editClass,
   getTotalStudentsInClassByName,
+  getDistinctClassesWithSections,
 } from "../models/classes.model.js";
 
 // Add a new class
@@ -73,6 +74,18 @@ export const editClassController = async (req, res) => {
   } catch (error) {
     console.error("Error editing class:", error);
     res.status(500).json({ error: t("class_update_failed", lang) });
+  }
+};
+
+// Get distinct class names with their sections
+export const getDistinctClassesWithSectionsController = async (req, res) => {
+  const lang = req.language;
+  try {
+    const rows = await getDistinctClassesWithSections();
+    res.status(200).json(rows);
+  } catch (error) {
+    console.error("Error fetching distinct classes:", error);
+    res.status(500).json({ error: t("class_fetch_failed", lang) });
   }
 };
 

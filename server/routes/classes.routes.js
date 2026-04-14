@@ -5,6 +5,7 @@ import {
   getClassesController,
   editClassController,
   getTotalStudentsInClassByNameController,
+  getDistinctClassesWithSectionsController,
 } from "../controllers/classes.controller.js";
 
 const router = express.Router();
@@ -17,6 +18,9 @@ router.delete("/delete/:id", deleteClassController);
 
 // Get all classes
 router.get("/", getClassesController);
+
+// Get distinct class names with sections (for dropdowns/autocomplete)
+router.get("/distinct", getDistinctClassesWithSectionsController);
 
 // Edit a class by ID
 router.put("/edit/:id", editClassController);

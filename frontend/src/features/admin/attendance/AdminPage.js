@@ -1,8 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { attendanceService } from "@/services/attendance.service";
 import { studentsService } from "@/services/students.service";
+import { classesService } from "@/services/classes.service";
+import { queryKeys } from "@/lib/queryKeys";
 import { useTranslations } from "@/store/languageStore";
 import { FiSearch, FiSave, FiUsers } from "react-icons/fi";
 
@@ -20,9 +23,53 @@ export default function AdminPage() {
   const [saving, setSaving] = useState(false);
   const [status, setStatus] = useState({ error: "", success: "" });
 
+  // Load distinct classes for dropdowns
+  const { data: distinctClasses = [] } = useQuery({
+    queryKey: queryKeys.classes.distinct,
+    queryFn: classesService.getDistinct,
+    select: (d) => d?.data ?? d ?? [],
+  });
+
+  // Unique class names for the class dropdown
+  const classNames = useMemo(
+    () => [...new Set(distinctClasses.map((c) => c.ClassName))].sort(),
+    [distinctClasses],
+  );
+
+  // Sections available for the selected class
+  const availableSections = useMemo(
+    () =>
+      distinctClasses
+        .filter((c) => c.ClassName === filter.className)
+        .map((c) => c.Section)
+        .sort(),
+    [distinctClasses, filter.className],
+  );
+
   const flash = (m, e = false) => {
     setStatus(e ? { error: m, success: "" } : { error: "", success: m });
     setTimeout(() => setStatus({ error: "", success: "" }), 4000);
+  };
+
+  const handleClassChange = (e) => {
+    const cls = e.target.value;
+    const sections = distinctClasses
+      .filter((c) => c.ClassName === cls)
+      .map((c) => c.Section)
+      .sort();
+    setFilter((p) => ({
+      ...p,
+      className: cls,
+      section: sections.length === 1 ? sections[0] : "",
+    }));
+    setStudents([]);
+    setAttendance({});
+  };
+
+  const handleSectionChange = (e) => {
+    setFilter((p) => ({ ...p, section: e.target.value }));
+    setStudents([]);
+    setAttendance({});
   };
 
   const loadStudents = async () => {
@@ -57,7 +104,6 @@ export default function AdminPage() {
     }
     setSaving(true);
     try {
-      // Use upsertCell per student — it resolves classID server-side from studentId
       await Promise.all(
         students.map((s) =>
           attendanceService.upsertCell(
@@ -74,12 +120,6 @@ export default function AdminPage() {
       setSaving(false);
     }
   };
-
-  const FIELDS = [
-    ["className", t("className"), "text"],
-    ["section", t("section"), "text"],
-    ["date", t("date"), "date"],
-  ];
 
   return (
     <div className="space-y-6">
@@ -107,22 +147,60 @@ export default function AdminPage() {
         </div>
         <div className="p-6">
           <div className="flex flex-wrap gap-4 items-end">
-            {FIELDS.map(([n, l, type]) => (
-              <div key={n} className="flex-1 min-w-36">
-                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
-                  {l}
-                </label>
-                <input
-                  type={type}
-                  value={filter[n]}
-                  onChange={(e) =>
-                    setFilter((p) => ({ ...p, [n]: e.target.value }))
-                  }
-                  className="form-input"
-                  placeholder={l}
-                />
-              </div>
-            ))}
+            {/* Class dropdown */}
+            <div className="flex-1 min-w-36">
+              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
+                {t("className")}
+              </label>
+              <select
+                value={filter.className}
+                onChange={handleClassChange}
+                className="form-input"
+              >
+                <option value="">{t("className")}</option>
+                {classNames.map((cn) => (
+                  <option key={cn} value={cn}>
+                    {cn}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Section dropdown */}
+            <div className="flex-1 min-w-28">
+              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
+                {t("section")}
+              </label>
+              <select
+                value={filter.section}
+                onChange={handleSectionChange}
+                className="form-input"
+                disabled={!filter.className}
+              >
+                <option value="">{t("section")}</option>
+                {availableSections.map((sec) => (
+                  <option key={sec} value={sec}>
+                    {sec}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Date input */}
+            <div className="flex-1 min-w-36">
+              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
+                {t("date")}
+              </label>
+              <input
+                type="date"
+                value={filter.date}
+                onChange={(e) =>
+                  setFilter((p) => ({ ...p, date: e.target.value }))
+                }
+                className="form-input"
+              />
+            </div>
+
             <button
               onClick={loadStudents}
               className="btn-primary"
@@ -205,6 +283,17 @@ export default function AdminPage() {
               </tbody>
             </table>
           </div>
+        </div>
+      )}
+
+      {/* Empty state */}
+      {students.length === 0 && filter.className && filter.section && !loading && (
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-12 text-center">
+          <FiUsers className="mx-auto text-4xl text-slate-300 mb-3" />
+          <p className="text-slate-500 text-sm">
+            Click &ldquo;{t("loadStudents")}&rdquo; to load students for{" "}
+            {filter.className} &mdash; {filter.section}
+          </p>
         </div>
       )}
     </div>

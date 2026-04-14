@@ -1,5 +1,6 @@
 -- School Management System Database
-SET FOREIGN_KEY_CHECKS = 0;
+SET
+    FOREIGN_KEY_CHECKS = 0;
 
 -- Routines Table (Using ClassID from Classes table - following Classes table structure)
 CREATE TABLE
@@ -35,7 +36,8 @@ CREATE TABLE
         AdmissionDate DATE NOT NULL,
         Address TEXT,
         ParentContact VARCHAR(15),
-        FOREIGN KEY (ClassID) REFERENCES Classes (ClassID)
+        -- ON DELETE RESTRICT: students must not silently lose their class
+        CONSTRAINT fk_students_class FOREIGN KEY (ClassID) REFERENCES Classes (ClassID) ON DELETE RESTRICT
     );
 
 -- Teachers Table  
@@ -68,18 +70,18 @@ CREATE TABLE
         SubjectID INT PRIMARY KEY AUTO_INCREMENT,
         SubjectName VARCHAR(50),
         ClassID INT,
-        FOREIGN KEY (ClassID) REFERENCES Classes (ClassID)
+        CONSTRAINT fk_subjects_class FOREIGN KEY (ClassID) REFERENCES Classes (ClassID) ON DELETE SET NULL
     );
 
 CREATE TABLE
     Attendance (
         AttendanceID INT PRIMARY KEY AUTO_INCREMENT,
         StudentID INT NOT NULL,
-        ClassID INT NOT NULL,
+        ClassID INT NULL, -- nullable so ON DELETE SET NULL works
         ClassDate DATE NOT NULL,
-        Status ENUM ('Present', 'Absent') NOT NULL,
+        Status ENUM ('Present', 'Absent', 'Late') NOT NULL,
         FOREIGN KEY (StudentID) REFERENCES Students (StudentID),
-        FOREIGN KEY (ClassID) REFERENCES Classes (ClassID),
+        CONSTRAINT fk_attendance_class FOREIGN KEY (ClassID) REFERENCES Classes (ClassID) ON DELETE SET NULL,
         UNIQUE (StudentID, ClassID, ClassDate) -- prevent duplicate entries
     );
 
@@ -95,9 +97,9 @@ CREATE TABLE
             'Final'
         ) NOT NULL,
         ExamName VARCHAR(50) NOT NULL,
-        ClassID INT NOT NULL,
+        ClassID INT NULL, -- nullable so ON DELETE SET NULL works
         ExamDate DATE NOT NULL,
-        FOREIGN KEY (ClassID) REFERENCES Classes (ClassID)
+        CONSTRAINT fk_exams_class FOREIGN KEY (ClassID) REFERENCES Classes (ClassID) ON DELETE SET NULL
     );
 
 -- Results Table
@@ -107,12 +109,12 @@ CREATE TABLE
         StudentID INT NOT NULL,
         ExamID INT NOT NULL,
         SubjectID INT NOT NULL,
-        ClassID INT NOT NULL,
+        ClassID INT NULL, -- nullable so ON DELETE SET NULL works
         MarksObtained INT NOT NULL,
         FOREIGN KEY (StudentID) REFERENCES Students (StudentID),
         FOREIGN KEY (ExamID) REFERENCES Exams (ExamID),
         FOREIGN KEY (SubjectID) REFERENCES Subjects (SubjectID),
-        FOREIGN KEY (ClassID) REFERENCES Classes (ClassID)
+        CONSTRAINT fk_results_class FOREIGN KEY (ClassID) REFERENCES Classes (ClassID) ON DELETE SET NULL
     );
 
 -- admin
@@ -121,7 +123,8 @@ CREATE TABLE
         AdminID INT PRIMARY KEY AUTO_INCREMENT,
         Username VARCHAR(50),
         Email VARCHAR(100),
-        Password VARCHAR(255)
+        Password VARCHAR(255),
+        Language VARCHAR(2) NOT NULL DEFAULT 'bn' COMMENT 'UI language preference: bn (default) or en'
     );
 
 CREATE TABLE
@@ -223,7 +226,9 @@ CREATE TABLE
 --         FOREIGN KEY (StudentID) REFERENCES Students (StudentID),
 --         FOREIGN KEY (FeeID) REFERENCES Fees (FeeID)
 --     );
-SET FOREIGN_KEY_CHECKS = 1;
+SET
+    FOREIGN_KEY_CHECKS = 1;
+
 -- Events Table for School Management System
 -- Simple Event Management with basic fields
 CREATE TABLE
@@ -286,7 +291,9 @@ VALUES
 -- Index for better performance
 CREATE INDEX idx_events_date ON Events (StartDate, EndDate);
 
-CREATE INDEX idx_events_type ON Events (EventType);-- News Table for School Management System
+CREATE INDEX idx_events_type ON Events (EventType);
+
+-- News Table for School Management System
 CREATE TABLE
     IF NOT EXISTS News (
         id INT PRIMARY KEY AUTO_INCREMENT,
@@ -334,18 +341,20 @@ VALUES
         '/events',
         TRUE
     );
+
 -- Notice Announcements Table for School Management System
-CREATE TABLE IF NOT EXISTS NoticeAnnouncements (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    title_bn VARCHAR(500) NOT NULL,
-    title_en VARCHAR(500) NOT NULL,
-    image_url VARCHAR(500),
-    category ENUM('Admission', 'Exam', 'Notice', 'Event') NOT NULL,
-    date DATE NOT NULL,
-    is_published BOOLEAN NOT NULL DEFAULT TRUE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-);
+CREATE TABLE
+    IF NOT EXISTS NoticeAnnouncements (
+        id INT PRIMARY KEY AUTO_INCREMENT,
+        title_bn VARCHAR(500) NOT NULL,
+        title_en VARCHAR(500) NOT NULL,
+        image_url VARCHAR(500),
+        category ENUM ('Admission', 'Exam', 'Notice', 'Event') NOT NULL,
+        date DATE NOT NULL,
+        is_published BOOLEAN NOT NULL DEFAULT TRUE,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    );
 
 -- Index for performance on published announcements ordered by date
 CREATE INDEX idx_notice_announcements_published_date ON NoticeAnnouncements (is_published, date DESC);
@@ -372,24 +381,76 @@ CREATE TABLE
         established_date DATE,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-    );CREATE TABLE IF NOT EXISTS Applications (
-  id INT PRIMARY KEY AUTO_INCREMENT,
-  applicant_name VARCHAR(255) NOT NULL,
-  date_of_birth DATE NOT NULL,
-  gender ENUM('male', 'female', 'other') NOT NULL,
-  applying_for_class VARCHAR(100) NOT NULL,
-  previous_school VARCHAR(255),
-  previous_class VARCHAR(100),
-  parent_name VARCHAR(255) NOT NULL,
-  parent_contact VARCHAR(20) NOT NULL,
-  parent_email VARCHAR(255),
-  address TEXT,
-  additional_info TEXT,
-  status ENUM('pending', 'reviewed', 'accepted', 'rejected') DEFAULT 'pending',
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-);
--- Migration: add language preference to Admin table
--- Run once: mysql -u root -p School_Management < server/Sql/add_language_to_admin.sql
-ALTER TABLE Admin
-ADD COLUMN Language VARCHAR(2) NOT NULL DEFAULT 'bn' COMMENT 'UI language preference: "bn" (Bangla, default) or "en" (English)';
+    );
+
+CREATE TABLE
+    IF NOT EXISTS Applications (
+        id INT PRIMARY KEY AUTO_INCREMENT,
+        applicant_name VARCHAR(255) NOT NULL,
+        date_of_birth DATE NOT NULL,
+        gender ENUM ('male', 'female', 'other') NOT NULL,
+        applying_for_class VARCHAR(100) NOT NULL,
+        previous_school VARCHAR(255),
+        previous_class VARCHAR(100),
+        parent_name VARCHAR(255) NOT NULL,
+        parent_contact VARCHAR(20) NOT NULL,
+        parent_email VARCHAR(255),
+        address TEXT,
+        additional_info TEXT,
+        status ENUM ('pending', 'reviewed', 'accepted', 'rejected') DEFAULT 'pending',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    );
+
+-- Quiz Tables
+CREATE TABLE
+    IF NOT EXISTS QuizQuestions (
+        QuestionID INT PRIMARY KEY AUTO_INCREMENT,
+        SourceQuestionID INT DEFAULT NULL,
+        Prompt TEXT NOT NULL,
+        OptionsJSON JSON NOT NULL,
+        CorrectAnswer CHAR(1) NOT NULL,
+        Subject VARCHAR(100) DEFAULT NULL,
+        Grade VARCHAR(50) DEFAULT NULL,
+        Difficulty VARCHAR(50) DEFAULT NULL,
+        SourceFile VARCHAR(255) DEFAULT NULL,
+        Language VARCHAR(20) DEFAULT 'en',
+        CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UpdatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    );
+
+CREATE TABLE
+    IF NOT EXISTS QuizSessions (
+        SessionID BIGINT PRIMARY KEY AUTO_INCREMENT,
+        UserID INT DEFAULT NULL,
+        StudentID INT DEFAULT NULL,
+        StudentName VARCHAR(120) DEFAULT NULL,
+        ClassName VARCHAR(50) DEFAULT NULL,
+        Section VARCHAR(20) DEFAULT NULL,
+        Subject VARCHAR(100) DEFAULT NULL,
+        Grade VARCHAR(50) DEFAULT NULL,
+        TotalQuestions INT NOT NULL,
+        CorrectAnswers INT NOT NULL,
+        ScorePercentage DECIMAL(5, 2) NOT NULL,
+        TimeTakenSeconds INT NOT NULL,
+        StartedAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        CompletedAt DATETIME DEFAULT NULL,
+        INDEX idx_quiz_session_user (UserID),
+        INDEX idx_quiz_session_student (StudentID),
+        INDEX idx_quiz_session_subject (Subject),
+        INDEX idx_quiz_session_grade (Grade),
+        FOREIGN KEY (StudentID) REFERENCES Students (StudentID) ON DELETE SET NULL
+    );
+
+CREATE TABLE
+    IF NOT EXISTS QuizAttempts (
+        AttemptID BIGINT PRIMARY KEY AUTO_INCREMENT,
+        SessionID BIGINT NOT NULL,
+        QuestionID INT NOT NULL,
+        UserAnswer CHAR(1) DEFAULT NULL,
+        CorrectAnswer CHAR(1) NOT NULL,
+        IsCorrect TINYINT (1) NOT NULL,
+        TimeSpentSeconds INT DEFAULT NULL,
+        FOREIGN KEY (SessionID) REFERENCES QuizSessions (SessionID) ON DELETE CASCADE,
+        FOREIGN KEY (QuestionID) REFERENCES QuizQuestions (QuestionID) ON DELETE CASCADE
+    );
