@@ -79,8 +79,11 @@ export default function ClassStatistics() {
   if (isLoading) {
     return (
       <div className="class-statistics-container">
-        <h2>{t("studentStatistics")}</h2>
-        <p className="loading">{t("loadingClassStats")}</p>
+        <div className="cs-topbar" />
+        <div className="cs-header">
+          <h2>{t("studentStatistics")}</h2>
+          <p className="loading">{t("loadingClassStats")}</p>
+        </div>
       </div>
     );
   }
@@ -88,8 +91,11 @@ export default function ClassStatistics() {
   if (isError) {
     return (
       <div className="class-statistics-container">
-        <h2>{t("studentStatistics")}</h2>
-        <p className="error">{t("failedClassStats")}</p>
+        <div className="cs-topbar" />
+        <div className="cs-header">
+          <h2>{t("studentStatistics")}</h2>
+          <p className="error">{t("failedClassStats")}</p>
+        </div>
       </div>
     );
   }
@@ -117,8 +123,26 @@ export default function ClassStatistics() {
 
   return (
     <div className="class-statistics-container">
-      <h2>{t("studentStatistics")}</h2>
-      <p className="subtitle">{t("classWiseStudents")}</p>
+      {/* Top gold strip */}
+      <div className="cs-topbar" />
+
+      {/* Header */}
+      <div className="cs-header">
+        <div className="cs-rule">
+          <span className="cs-rule-line" />
+          <span className="cs-rule-icon">★</span>
+          <span className="cs-rule-line" />
+        </div>
+        <h2>{t("studentStatistics")}</h2>
+        <p className="subtitle">{t("classWiseStudents")}</p>
+        <div className="cs-divider">
+          <span className="cs-div-line" />
+          <span className="cs-div-diamond">◆</span>
+          <span className="cs-div-line" />
+        </div>
+      </div>
+
+      {/* Stats */}
       <div className="class-statistics">
         {classData.length > 0 ? (
           classData.map((d, i) => (

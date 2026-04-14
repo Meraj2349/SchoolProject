@@ -4,103 +4,43 @@ import { useState } from "react";
 import Link from "next/link";
 import { useTranslations } from "@/store/languageStore";
 
+/* ── Classic navy/gold palette ── */
+const NAVY  = "#0d1f3c";
+const GOLD  = "#c9a84c";
+const GOLD2 = "#e2c07a";
+const CREAM = "#fdf8f0";
+
 const LINK_CONFIGS = [
-  {
-    nameKey: "students",
-    icon: "👥",
-    gradient: "linear-gradient(135deg,#10b981 0%,#059669 100%)",
-    shadow: "rgba(16,185,129,0.4)",
-    path: "/students",
-  },
-  {
-    nameKey: "teachers",
-    icon: "🎓",
-    gradient: "linear-gradient(135deg,#f43f5e 0%,#e11d48 100%)",
-    shadow: "rgba(244,63,94,0.4)",
-    path: "/teachers",
-  },
-  {
-    nameKey: "attendance",
-    icon: "✅",
-    gradient: "linear-gradient(135deg,#f59e0b 0%,#d97706 100%)",
-    shadow: "rgba(245,158,11,0.4)",
-    path: "/attendance",
-  },
-  {
-    nameKey: "result",
-    icon: "📊",
-    gradient: "linear-gradient(135deg,#3b82f6 0%,#2563eb 100%)",
-    shadow: "rgba(59,130,246,0.4)",
-    path: "/result",
-  },
-  {
-    nameKey: "routine",
-    icon: "📅",
-    gradient: "linear-gradient(135deg,#8b5cf6 0%,#7c3aed 100%)",
-    shadow: "rgba(139,92,246,0.4)",
-    path: "/routine",
-  },
+  { nameKey: "students",   icon: "👥", path: "/students",   gradient: "linear-gradient(135deg,#10b981 0%,#059669 100%)", shadow: "rgba(16,185,129,0.35)"  },
+  { nameKey: "teachers",   icon: "🎓", path: "/teachers",   gradient: "linear-gradient(135deg,#f43f5e 0%,#e11d48 100%)", shadow: "rgba(244,63,94,0.35)"   },
+  { nameKey: "attendance", icon: "✅", path: "/attendance", gradient: "linear-gradient(135deg,#f59e0b 0%,#d97706 100%)", shadow: "rgba(245,158,11,0.35)"  },
+  { nameKey: "result",     icon: "📊", path: "/result",     gradient: "linear-gradient(135deg,#3b82f6 0%,#2563eb 100%)", shadow: "rgba(59,130,246,0.35)"  },
+  { nameKey: "routine",    icon: "📅", path: "/routine",    gradient: "linear-gradient(135deg,#8b5cf6 0%,#7c3aed 100%)", shadow: "rgba(139,92,246,0.35)"  },
 ];
 
-function QuickLinkItem({ link, index }) {
+function QuickLinkItem({ link }) {
   const [hovered, setHovered] = useState(false);
 
   return (
     <Link
       href={link.path}
+      className={`ql-item${hovered ? " ql-item--hovered" : ""}`}
       style={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: "18px 10px",
-        borderRadius: 14,
-        textDecoration: "none",
-        color: "#fff",
         background: link.gradient,
         boxShadow: hovered
           ? `0 10px 28px ${link.shadow}`
-          : `0 4px 14px ${link.shadow.replace("0.4", "0.25")}`,
-        transform: hovered ? "translateY(-6px) scale(1.04)" : "translateY(0) scale(1)",
-        transition: "all 0.25s cubic-bezier(0.4,0,0.2,1)",
-        minHeight: 88,
-        cursor: "pointer",
-        animationDelay: `${index * 60}ms`,
+          : `0 4px 14px ${link.shadow.replace("0.35", "0.18")}`,
       }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
       {/* Icon circle */}
-      <div
-        style={{
-          width: 42,
-          height: 42,
-          borderRadius: "50%",
-          background: "rgba(255,255,255,0.2)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          marginBottom: 8,
-          fontSize: 20,
-          transition: "transform 0.25s ease",
-          transform: hovered ? "rotate(-6deg) scale(1.1)" : "rotate(0) scale(1)",
-          boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-        }}
-      >
-        {link.icon}
+      <div className={`ql-icon${hovered ? " ql-icon--hovered" : ""}`}>
+        <span aria-hidden="true">{link.icon}</span>
       </div>
 
-      <span
-        style={{
-          fontSize: "0.82rem",
-          fontWeight: 700,
-          textAlign: "center",
-          letterSpacing: "0.02em",
-          textTransform: "capitalize",
-        }}
-      >
-        {link.displayName}
-      </span>
+      {/* Label */}
+      <span className="ql-label">{link.displayName}</span>
     </Link>
   );
 }
@@ -108,44 +48,110 @@ function QuickLinkItem({ link, index }) {
 export default function QuickLinks({ links }) {
   const t = useTranslations("quickLinks");
 
-  const resolvedLinks = (links
+  const resolvedLinks = links
     ? links.map((l) => ({ ...l, displayName: l.nameKey ? t(l.nameKey) : l.name }))
-    : LINK_CONFIGS.map((l) => ({ ...l, displayName: t(l.nameKey) }))
-  );
+    : LINK_CONFIGS.map((l) => ({ ...l, displayName: t(l.nameKey) }));
 
   return (
-    <div style={{ width: "100%", padding: "4px 4px" }}>
+    <div className="ql-wrap">
       {/* Section label */}
-      <div
-        style={{
-          textAlign: "center",
-          fontSize: 11,
-          fontWeight: 700,
-          letterSpacing: "0.1em",
-          textTransform: "uppercase",
-          color: "#6b7280",
-          marginBottom: 14,
-          display: "flex",
-          alignItems: "center",
-          gap: 8,
-        }}
-      >
-        <span style={{ flex: 1, height: 1, background: "#e5e7eb" }} />
-        Quick Links
-        <span style={{ flex: 1, height: 1, background: "#e5e7eb" }} />
+      <div className="ql-header">
+        <span className="ql-header__line" />
+        <span className="ql-header__text">Quick Links</span>
+        <span className="ql-header__line" />
       </div>
 
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(2, 1fr)",
-          gap: 10,
-        }}
-      >
-        {resolvedLinks.map((link, index) => (
-          <QuickLinkItem key={index} link={link} index={index} />
+      <div className="ql-grid">
+        {resolvedLinks.map((link, i) => (
+          <QuickLinkItem key={i} link={link} />
         ))}
       </div>
+
+      <style>{`
+        .ql-wrap {
+          width: 100%;
+          padding: 4px 2px;
+        }
+
+        /* Header */
+        .ql-header {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          margin-bottom: 14px;
+        }
+        .ql-header__line {
+          flex: 1;
+          height: 1px;
+          background: linear-gradient(90deg, transparent, rgba(201,168,76,.45));
+        }
+        .ql-header__line:last-child {
+          background: linear-gradient(270deg, transparent, rgba(201,168,76,.45));
+        }
+        .ql-header__text {
+          font-size: .68rem;
+          font-weight: 700;
+          letter-spacing: .14em;
+          text-transform: uppercase;
+          color: ${GOLD};
+          white-space: nowrap;
+        }
+
+        /* Grid */
+        .ql-grid {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 10px;
+        }
+
+        /* Item card */
+        .ql-item {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+          padding: 16px 8px 14px;
+          border-radius: 12px;
+          text-decoration: none;
+          color: #fff;
+          transition: transform .25s cubic-bezier(.34,1.56,.64,1),
+                      box-shadow .25s ease;
+          min-height: 86px;
+        }
+        .ql-item--hovered {
+          transform: translateY(-6px) scale(1.04);
+        }
+
+        /* Icon circle */
+        .ql-icon {
+          width: 42px;
+          height: 42px;
+          border-radius: 50%;
+          background: rgba(255,255,255,.22);
+          box-shadow: 0 2px 8px rgba(0,0,0,.1);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 1.2rem;
+          transition: transform .25s ease;
+          flex-shrink: 0;
+        }
+        .ql-icon--hovered {
+          transform: rotate(-6deg) scale(1.1);
+        }
+
+        /* Label */
+        .ql-label {
+          font-size: .8rem;
+          font-weight: 700;
+          text-align: center;
+          color: #fff;
+          letter-spacing: .02em;
+          text-transform: capitalize;
+          line-height: 1.2;
+        }
+      `}</style>
     </div>
   );
 }

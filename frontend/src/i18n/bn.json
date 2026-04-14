@@ -80,7 +80,8 @@
   },
 
   "chairmanCard": {
-    "viewFullMessage": "সম্পূর্ণ বার্তা দেখুন"
+    "viewFullMessage": "সম্পূর্ণ বার্তা দেখুন",
+    "chairmanMessage": "চেয়ারম্যানের বার্তা"
   },
 
   "about": {

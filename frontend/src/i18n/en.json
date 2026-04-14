@@ -80,7 +80,8 @@
   },
 
   "chairmanCard": {
-    "viewFullMessage": "View Full Message"
+    "viewFullMessage": "View Full Message",
+    "chairmanMessage": "Chairman's Message"
   },
 
   "about": {
