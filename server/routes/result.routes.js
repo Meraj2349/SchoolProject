@@ -22,6 +22,9 @@ import {
 
 const router = express.Router();
 
+// Public route — students can search their own results without logging in
+router.get("/search", searchResultsController);
+
 router.use(authMiddleware);
 
 // Route to get all results with pagination
@@ -38,9 +41,6 @@ router.post("/batch", addMultipleResultsController);
 
 // Route to get the total count of results
 router.get("/count", getResultCountController);
-
-// Route to search results with basic filters
-router.get("/search", searchResultsController);
 
 // Route to advanced search with pagination and comprehensive filters
 router.get("/search/advanced", advancedSearchResultsController);

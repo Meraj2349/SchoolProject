@@ -4,6 +4,8 @@ import {
   deleteSubject,
   editSubject,
   getSubjects,
+  getSubjectsByClassId,
+  getSubjectsByClassName,
 } from "../models/subjects.model.js";
 
 // Add a new subject
@@ -52,6 +54,45 @@ export const getSubjectsController = async (req, res) => {
   const branchId = req.branchId ?? null;
   try {
     const subjects = await getSubjects(branchId);
+    res.status(200).json(subjects);
+  } catch (error) {
+    res.status(500).json({ error: t("subject_fetch_failed", lang) });
+  }
+};
+
+// Get subjects by ClassID
+export const getSubjectsByClassIdController = async (req, res) => {
+  const lang = req.language;
+  const branchId = req.branchId ?? null;
+  const { classId } = req.params;
+
+  if (!classId || isNaN(classId)) {
+    return res.status(400).json({ error: "Valid ClassID is required" });
+  }
+
+  try {
+    const subjects = await getSubjectsByClassId(classId, branchId);
+    res.status(200).json(subjects);
+  } catch (error) {
+    res.status(500).json({ error: t("subject_fetch_failed", lang) });
+  }
+};
+
+// Get subjects by ClassName
+export const getSubjectsByClassNameController = async (req, res) => {
+  const lang = req.language;
+  const branchId = req.branchId ?? null;
+  const { className } = req.params;
+
+  if (!className) {
+    return res.status(400).json({ error: "ClassName is required" });
+  }
+
+  try {
+    const subjects = await getSubjectsByClassName(
+      decodeURIComponent(className),
+      branchId,
+    );
     res.status(200).json(subjects);
   } catch (error) {
     res.status(500).json({ error: t("subject_fetch_failed", lang) });

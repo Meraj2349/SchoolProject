@@ -4,6 +4,7 @@ import {
   createExamByClassNameAndSection,
   deleteExam,
   getAllExams,
+  getDistinctExamNames,
   getExamById,
   getExamsByClass,
   updateExam,
@@ -193,11 +194,22 @@ const deleteExamController = async (req, res) => {
   }
 };
 
+// Get distinct exam names — public endpoint for autocomplete (no auth required)
+const getDistinctExamNamesController = async (req, res) => {
+  try {
+    const names = await getDistinctExamNames();
+    res.status(200).json({ success: true, data: names });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
 export {
   addExamByClassDetailsController,
   createExamByClassNameAndSectionController,
   deleteExamController,
   getAllExamsController,
+  getDistinctExamNamesController,
   getExamByIdController,
   getExamsByClassController,
   updateExamController,

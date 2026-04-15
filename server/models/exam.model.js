@@ -364,11 +364,24 @@ const deleteExam = async (examId, branchId = null) => {
   }
 };
 
+// Get distinct exam names (public — no branch scoping, used for autocomplete on public pages)
+const getDistinctExamNames = async () => {
+  try {
+    const [rows] = await db.query(
+      `SELECT DISTINCT ExamName FROM Exams ORDER BY ExamName ASC`
+    );
+    return rows.map((r) => r.ExamName);
+  } catch (err) {
+    throw new Error("Error fetching exam names: " + err.message);
+  }
+};
+
 export {
   addExamByClassDetails,
   createExamByClassNameAndSection,
   deleteExam,
   getAllExams,
+  getDistinctExamNames,
   getExamById,
   getExamsByClass,
   updateExam,

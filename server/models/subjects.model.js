@@ -58,6 +58,50 @@ export const getSubjects = async (branchId = null) => {
   }
 };
 
+// Get subjects by ClassID (branch-scoped)
+export const getSubjectsByClassId = async (classId, branchId = null) => {
+  const { clause, params: branchParams } = branchFilter(branchId, "c");
+  try {
+    const [rows] = await db.query(`
+      SELECT
+        s.SubjectID,
+        s.SubjectName,
+        s.ClassID,
+        c.ClassName,
+        c.Section
+      FROM Subjects s
+      LEFT JOIN Classes c ON s.ClassID = c.ClassID
+      WHERE s.ClassID = ? ${clause}
+      ORDER BY s.SubjectName
+    `, [classId, ...branchParams]);
+    return rows;
+  } catch (error) {
+    throw new Error("Error fetching subjects by class: " + error.message);
+  }
+};
+
+// Get subjects by ClassName (branch-scoped via Classes join)
+export const getSubjectsByClassName = async (className, branchId = null) => {
+  const { clause, params: branchParams } = branchFilter(branchId, "c");
+  try {
+    const [rows] = await db.query(`
+      SELECT
+        s.SubjectID,
+        s.SubjectName,
+        s.ClassID,
+        c.ClassName,
+        c.Section
+      FROM Subjects s
+      LEFT JOIN Classes c ON s.ClassID = c.ClassID
+      WHERE c.ClassName = ? ${clause}
+      ORDER BY c.Section, s.SubjectName
+    `, [className, ...branchParams]);
+    return rows;
+  } catch (error) {
+    throw new Error("Error fetching subjects by class name: " + error.message);
+  }
+};
+
 // Edit a subject by ID (branch-scoped)
 export const editSubject = async (subjectId, { subjectName, classId }, branchId = null) => {
   const { clause, params: branchParams } = branchFilter(branchId);

@@ -6,8 +6,8 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import LatestUpdatesNotice from "@/components/shared/LatestUpdatesNotice";
 import { resultsService } from "@/services/results.service";
-import { examsService } from "@/services/exams.service";
 import { queryKeys } from "@/lib/queryKeys";
+import httpClient from "@/lib/httpClient";
 import { useTranslations } from "@/store/languageStore";
 import "@/styles/StudentListpage.css";
 
@@ -39,10 +39,11 @@ export default function ResultsPage() {
   const [submitted, setSubmitted] = useState(null);
   const t = useTranslations("results");
 
-  const { data: exams = [] } = useQuery({
-    queryKey: queryKeys.exams.all(),
-    queryFn: examsService.getAll,
-    select: (d) => d?.data ?? d ?? [],
+  // Public endpoint — returns distinct exam names for the datalist autocomplete
+  const { data: examNames = [] } = useQuery({
+    queryKey: ["exams", "public", "names"],
+    queryFn: () =>
+      httpClient.get("/exams/public/names").then((r) => r.data?.data ?? []),
   });
 
   const {
@@ -153,8 +154,8 @@ export default function ResultsPage() {
                 className="form-input"
               />
               <datalist id="exam-suggestions">
-                {exams.map((ex) => (
-                  <option key={ex.ExamID} value={ex.ExamName} />
+                {examNames.map((name) => (
+                  <option key={name} value={name} />
                 ))}
               </datalist>
             </div>

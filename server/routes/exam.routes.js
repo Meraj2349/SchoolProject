@@ -5,12 +5,16 @@ import {
   createExamByClassNameAndSectionController,
   deleteExamController,
   getAllExamsController,
+  getDistinctExamNamesController,
   getExamByIdController,
   getExamsByClassController,
   updateExamController,
 } from "../controllers/exam.controller.js";
 
 const router = express.Router();
+
+// Public route — distinct exam names for autocomplete on the public results page
+router.get("/public/names", getDistinctExamNamesController);
 
 router.use(authMiddleware);
 
