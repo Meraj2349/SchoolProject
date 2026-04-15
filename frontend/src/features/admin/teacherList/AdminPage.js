@@ -11,6 +11,7 @@ import {
 import { subjectsService } from "@/services/subjects.service";
 import { queryKeys } from "@/lib/queryKeys";
 import { useTranslations } from "@/store/languageStore";
+import { useBranchStore } from "@/store/branchStore";
 import { FiEdit2, FiTrash2, FiUserPlus, FiUsers, FiSearch, FiX } from "react-icons/fi";
 
 const EMPTY = { FirstName: "", LastName: "", Email: "", Subject: "", ContactNumber: "", JoiningDate: "" };
@@ -22,6 +23,7 @@ export default function AdminPage() {
   const update = useUpdateTeacher();
   const remove = useDeleteTeacher();
   const t = useTranslations("admin.teachers");
+  const branchId = useBranchStore((s) => s.currentBranchId);
 
   const [form, setForm] = useState(EMPTY);
   const [editId, setEditId] = useState(null);
@@ -30,7 +32,7 @@ export default function AdminPage() {
 
   // Load subjects so we can map subject->class for the class filter
   const { data: subjects = [] } = useQuery({
-    queryKey: queryKeys.subjects.all,
+    queryKey: queryKeys.subjects.all(branchId),
     queryFn: subjectsService.getAll,
     select: (d) => d?.data ?? d ?? [],
   });

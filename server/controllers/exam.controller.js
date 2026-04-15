@@ -12,8 +12,9 @@ import {
 // Get all exams
 const getAllExamsController = async (req, res) => {
   const lang = req.language;
+  const branchId = req.branchId ?? null;
   try {
-    const exams = await getAllExams();
+    const exams = await getAllExams(branchId);
     res.status(200).json({ success: true, data: exams, count: exams.length });
   } catch (error) {
     res
@@ -29,6 +30,7 @@ const getAllExamsController = async (req, res) => {
 // Get exam by ID
 const getExamByIdController = async (req, res) => {
   const lang = req.language;
+  const branchId = req.branchId ?? null;
   try {
     const { id } = req.params;
     if (!id || isNaN(id)) {
@@ -36,7 +38,7 @@ const getExamByIdController = async (req, res) => {
         .status(400)
         .json({ success: false, message: t("exam_required_fields", lang) });
     }
-    const exam = await getExamById(id);
+    const exam = await getExamById(id, branchId);
     if (!exam) {
       return res
         .status(404)
@@ -57,6 +59,7 @@ const getExamByIdController = async (req, res) => {
 // Get exams by class
 const getExamsByClassController = async (req, res) => {
   const lang = req.language;
+  const branchId = req.branchId ?? null;
   try {
     const { classId } = req.params;
     if (!classId || isNaN(classId)) {
@@ -64,7 +67,7 @@ const getExamsByClassController = async (req, res) => {
         .status(400)
         .json({ success: false, message: t("exam_class_required", lang) });
     }
-    const exams = await getExamsByClass(classId);
+    const exams = await getExamsByClass(classId, branchId);
     res.status(200).json({ success: true, data: exams, count: exams.length });
   } catch (error) {
     res
@@ -78,29 +81,33 @@ const getExamsByClassController = async (req, res) => {
 };
 
 // Add exam by class details (names instead of IDs)
+// Accepts both camelCase and PascalCase field names for compatibility
 const addExamByClassDetailsController = async (req, res) => {
   const lang = req.language;
+  const branchId = req.branchId ?? null;
   try {
-    const { examType, examName, className, sectionName, examDate } = req.body;
+    const examType = req.body.examType || req.body.ExamType;
+    const examName = req.body.examName || req.body.ExamName;
+    const className = req.body.className || req.body.ClassName;
+    const sectionName = req.body.sectionName || req.body.SectionName;
+    const examDate = req.body.examDate || req.body.ExamDate;
+
     if (!examType || !examName || !className || !sectionName || !examDate) {
       return res
         .status(400)
         .json({ success: false, message: t("exam_required_fields", lang) });
     }
-    const result = await addExamByClassDetails({
-      examType,
-      examName,
-      className,
-      sectionName,
-      examDate,
-    });
+    const result = await addExamByClassDetails(
+      { examType, examName, className, sectionName, examDate },
+      branchId,
+    );
     res.status(201).json({ ...result, message: t("exam_created", lang) });
   } catch (error) {
     res
       .status(400)
       .json({
         success: false,
-        message: t("exam_required_fields", lang),
+        message: error.message || t("exam_required_fields", lang),
         error: error.message,
       });
   }
@@ -109,6 +116,7 @@ const addExamByClassDetailsController = async (req, res) => {
 // Create exam by class name and section (alternative endpoint)
 const createExamByClassNameAndSectionController = async (req, res) => {
   const lang = req.language;
+  const branchId = req.branchId ?? null;
   try {
     const { examType, examName, className, sectionName, examDate } = req.body;
     if (!examType || !examName || !className || !sectionName || !examDate) {
@@ -122,6 +130,7 @@ const createExamByClassNameAndSectionController = async (req, res) => {
       className,
       sectionName,
       examDate,
+      branchId,
     );
     res.status(201).json({ ...result, message: t("exam_created", lang) });
   } catch (error) {
@@ -138,6 +147,7 @@ const createExamByClassNameAndSectionController = async (req, res) => {
 // Update exam
 const updateExamController = async (req, res) => {
   const lang = req.language;
+  const branchId = req.branchId ?? null;
   try {
     const { id } = req.params;
     const examData = req.body;
@@ -146,7 +156,7 @@ const updateExamController = async (req, res) => {
         .status(400)
         .json({ success: false, message: t("exam_required_fields", lang) });
     }
-    const result = await updateExam(id, examData);
+    const result = await updateExam(id, examData, branchId);
     res.status(200).json({ ...result, message: t("exam_updated", lang) });
   } catch (error) {
     res
@@ -162,6 +172,7 @@ const updateExamController = async (req, res) => {
 // Delete exam
 const deleteExamController = async (req, res) => {
   const lang = req.language;
+  const branchId = req.branchId ?? null;
   try {
     const { id } = req.params;
     if (!id || isNaN(id)) {
@@ -169,7 +180,7 @@ const deleteExamController = async (req, res) => {
         .status(400)
         .json({ success: false, message: t("exam_required_fields", lang) });
     }
-    const result = await deleteExam(id);
+    const result = await deleteExam(id, branchId);
     res.status(200).json({ ...result, message: t("exam_deleted", lang) });
   } catch (error) {
     res

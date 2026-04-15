@@ -7,6 +7,7 @@ export const authService = {
     if (data.token) {
       Cookies.set("token", data.token, { expires: 7 });
     }
+    // Return data including role and branch_id so the login page/store can save them
     return data;
   },
 

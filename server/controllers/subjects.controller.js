@@ -9,6 +9,7 @@ import {
 // Add a new subject
 export const addSubjectController = async (req, res) => {
   const lang = req.language;
+  const branchId = req.branchId ?? null;
   // Accept both camelCase and PascalCase field names
   const subjectName = req.body.SubjectName ?? req.body.subjectName;
   const classId = req.body.ClassID ?? req.body.classId;
@@ -20,7 +21,7 @@ export const addSubjectController = async (req, res) => {
   }
 
   try {
-    const result = await addSubject({ subjectName, classId });
+    const result = await addSubject({ subjectName, classId }, branchId);
     res
       .status(201)
       .json({ message: t("subject_added", lang), SubjectID: result.SubjectID });
@@ -32,10 +33,11 @@ export const addSubjectController = async (req, res) => {
 // Delete a subject by ID
 export const deleteSubjectController = async (req, res) => {
   const lang = req.language;
+  const branchId = req.branchId ?? null;
   const { id } = req.params;
 
   try {
-    const result = await deleteSubject(id);
+    const result = await deleteSubject(id, branchId);
     res
       .status(200)
       .json({ message: t("subject_deleted", lang), success: result.success });
@@ -47,8 +49,9 @@ export const deleteSubjectController = async (req, res) => {
 // Get all subjects
 export const getSubjectsController = async (req, res) => {
   const lang = req.language;
+  const branchId = req.branchId ?? null;
   try {
-    const subjects = await getSubjects();
+    const subjects = await getSubjects(branchId);
     res.status(200).json(subjects);
   } catch (error) {
     res.status(500).json({ error: t("subject_fetch_failed", lang) });
@@ -58,6 +61,7 @@ export const getSubjectsController = async (req, res) => {
 // Edit a subject by ID
 export const editSubjectController = async (req, res) => {
   const lang = req.language;
+  const branchId = req.branchId ?? null;
   const { id } = req.params;
   const subjectName = req.body.SubjectName ?? req.body.subjectName;
   const classId = req.body.ClassID ?? req.body.classId;
@@ -69,7 +73,7 @@ export const editSubjectController = async (req, res) => {
   }
 
   try {
-    const result = await editSubject(id, { subjectName, classId });
+    const result = await editSubject(id, { subjectName, classId }, branchId);
     res
       .status(200)
       .json({ message: t("subject_updated", lang), success: result.success });

@@ -6,6 +6,7 @@ import { studentsService } from "@/services/students.service";
 import { classesService } from "@/services/classes.service";
 import { queryKeys } from "@/lib/queryKeys";
 import { useTranslations } from "@/store/languageStore";
+import { useBranchStore } from "@/store/branchStore";
 import { FiEdit2, FiTrash2, FiUserPlus, FiUsers, FiSearch, FiX } from "react-icons/fi";
 
 const EMPTY = {
@@ -32,16 +33,17 @@ export default function AdminPage() {
   const [status, setStatus] = useState({ error: null, success: null });
   const [filters, setFilters] = useState(FILTER_EMPTY);
   const t = useTranslations("admin.students");
+  const branchId = useBranchStore((s) => s.currentBranchId);
 
   const { data: students = [], isLoading } = useQuery({
-    queryKey: queryKeys.students.all,
+    queryKey: queryKeys.students.all(branchId),
     queryFn: studentsService.getAll,
     select: (d) => d?.data ?? d ?? [],
   });
 
   // Distinct classes for form dropdowns
   const { data: distinctClasses = [] } = useQuery({
-    queryKey: queryKeys.classes.distinct,
+    queryKey: queryKeys.classes.distinct(branchId),
     queryFn: classesService.getDistinct,
     select: (d) => d?.data ?? d ?? [],
   });
@@ -62,7 +64,7 @@ export default function AdminPage() {
   const create = useMutation({
     mutationFn: studentsService.create,
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: queryKeys.students.all });
+      qc.invalidateQueries({ queryKey: queryKeys.students.all(branchId) });
       flash(t("studentAdded"));
       resetForm();
     },
@@ -70,7 +72,7 @@ export default function AdminPage() {
   const update = useMutation({
     mutationFn: ({ id, data }) => studentsService.update(id, data),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: queryKeys.students.all });
+      qc.invalidateQueries({ queryKey: queryKeys.students.all(branchId) });
       flash(t("studentUpdated"));
       resetForm();
     },
@@ -78,7 +80,7 @@ export default function AdminPage() {
   const remove = useMutation({
     mutationFn: studentsService.remove,
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: queryKeys.students.all });
+      qc.invalidateQueries({ queryKey: queryKeys.students.all(branchId) });
       flash(t("deleted"));
     },
   });

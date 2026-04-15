@@ -1,4 +1,5 @@
 import express from "express";
+import authMiddleware from "../middlewares/auth.middleware.js";
 import {
   addClassController,
   deleteClassController,
@@ -9,6 +10,8 @@ import {
 } from "../controllers/classes.controller.js";
 
 const router = express.Router();
+
+router.use(authMiddleware);
 
 // Add a new class
 router.post("/add", addClassController);

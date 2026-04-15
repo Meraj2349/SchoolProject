@@ -2,7 +2,6 @@
   "schoolName": "Star Shikkha Poribar",
   "establishedYear": "135479",
   "location": "Natiapara, Delduar, Tangail",
-
   "nav": {
     "home": "HOME",
     "about": "ABOUT",
@@ -13,7 +12,6 @@
     "onlineApply": "Online Apply",
     "quakerEducation": "A Quaker Education"
   },
-
   "footer": {
     "contact": "Contact",
     "email": "Email",
@@ -22,7 +20,6 @@
     "developedBy": "Developed By: Md.Meraj Mridha",
     "helpline": "Helpline: +88 019 97588476"
   },
-
   "sidebar": {
     "adminDashboard": "Admin Dashboard",
     "notice": "Notice",
@@ -46,13 +43,11 @@
     "noticeAnnouncements": "Notice & Announcement",
     "news": "News"
   },
-
   "latestUpdates": {
     "label": "Latest Updates",
     "labelMobile": "Updates",
     "loadingError": "Failed to load latest updates"
   },
-
   "home": {
     "loading": "Loading…",
     "studentStatistics": "Student Statistics",
@@ -61,7 +56,6 @@
     "failedClassStats": "Failed to load class statistics",
     "noClasses": "No classes found"
   },
-
   "quickLinks": {
     "students": "Students",
     "teachers": "Teachers",
@@ -69,7 +63,6 @@
     "result": "Result",
     "routine": "Routine"
   },
-
   "eventNews": {
     "events": "EVENTS",
     "news": "NEWS",
@@ -78,12 +71,10 @@
     "newsLoading": "Loading news…",
     "newsError": "Failed to load news"
   },
-
   "chairmanCard": {
     "viewFullMessage": "View Full Message",
     "chairmanMessage": "Chairman's Message"
   },
-
   "about": {
     "title": "About Us",
     "subtitle": "Star Shikkha Poribar – Excellence in Education",
@@ -97,7 +88,6 @@
     "phone": "Phone",
     "emailLabel": "Email"
   },
-
   "chairman": {
     "pageTitle": "Chairman's Message",
     "loading": "Loading chairman message…",
@@ -108,7 +98,6 @@
     "backToHome": "← Back to Home",
     "defaultMessage": "Welcome to our school! We are committed to providing excellent education."
   },
-
   "gallery": {
     "title": "Gallery",
     "browseByCategory": "Browse by Category",
@@ -132,7 +121,6 @@
       "notice": "Notices"
     }
   },
-
   "events": {
     "upcomingEvents": "Upcoming Events",
     "loadingEvents": "Loading events…",
@@ -148,7 +136,6 @@
     "minutes": "Minutes",
     "seconds": "Seconds"
   },
-
   "students": {
     "pageTitle": "Student Search",
     "pageSubtitle": "Search by name, roll number, class, and section",
@@ -179,7 +166,6 @@
     "parentContact": "Parent Contact",
     "noStudents": "No students found"
   },
-
   "teachers": {
     "pageTitle": "Our Teachers",
     "searchPlaceholder": "Search teachers…",
@@ -196,7 +182,6 @@
     "noTeachersFound": "No teachers found",
     "joined": "Joined:"
   },
-
   "results": {
     "pageTitle": "Student Results",
     "pageSubtitle": "Search by name, roll number, class, section, and exam",
@@ -223,7 +208,6 @@
     "total": "Total",
     "grade": "Grade"
   },
-
   "attendance": {
     "pageTitle": "Attendance Records",
     "pageSubtitle": "Search attendance by class and section",
@@ -243,7 +227,6 @@
     "noRecords": "No attendance records found.",
     "failedToFetch": "Failed to fetch attendance"
   },
-
   "routine": {
     "pageTitle": "School Routines",
     "searchPlaceholder": "Search routines…",
@@ -269,7 +252,6 @@
     "added": "Added:",
     "view": "View"
   },
-
   "admin": {
     "login": {
       "title": "Admin Login",
@@ -487,7 +469,12 @@
       "resultAdded": "Result added successfully!",
       "failed": "Failed to add result",
       "selectExam": "Select exam",
-      "selectSubject": "Select subject"
+      "selectSubject": "Select subject",
+      "resultUpdated": "Result updated successfully!",
+      "deleted": "Result deleted.",
+      "deleteConfirm": "Delete this result?",
+      "studentRequired": "Please select a student first",
+      "operationFailed": "Operation failed"
     },
     "routine": {
       "title": "Routine Management",
@@ -667,9 +654,28 @@
       "loading": "Loading…",
       "noApplications": "No applications found.",
       "operationFailed": "Operation failed"
+    },
+    "dashboard": {
+      "title": "Super Admin Dashboard",
+      "overview": "Branch Overview",
+      "totalBranches": "Total Branches",
+      "totalStudents": "Total Students",
+      "totalTeachers": "Total Teachers",
+      "totalClasses": "Total Classes",
+      "students": "Students",
+      "teachers": "Teachers",
+      "classes": "Classes",
+      "proposed": "Proposed",
+      "active": "Active",
+      "established": "Est.",
+      "loading": "Loading dashboard...",
+      "errorLoading": "Failed to load dashboard data",
+      "noData": "No branch data available",
+      "viewBranch": "View Details",
+      "allBranches": "All Branches",
+      "switchTo": "Switch to this branch"
     }
   },
-
   "branches": {
     "pageTitle": "Our Branches",
     "pageSubtitle": "Find a branch near you",
@@ -684,13 +690,11 @@
     "failedToLoad": "Failed to load branches",
     "tryAgain": "Try Again"
   },
-
   "notFound": {
     "title": "Page Not Found",
     "subtitle": "Oops! The page you are looking for does not exist.",
     "backHome": "Back to Home"
   },
-
   "apply": {
     "pageTitle": "Online Admission",
     "pageSubtitle": "Fill in the form below to apply for admission",
@@ -716,7 +720,6 @@
     "requiredFields": "Please fill in all required fields",
     "submitFailed": "Submission failed. Please try again."
   },
-
   "common": {
     "loading": "Loading…",
     "error": "An error occurred",

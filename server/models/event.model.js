@@ -3,6 +3,12 @@ import db from "../config/db.config.js";
 /**
  * Event Model for School Management System
  *
+ * Branch scoping logic for events:
+ *  - branchId == null (super_admin): show ALL events (no filter)
+ *  - branchId set (branch_admin): show branch-specific events PLUS global events
+ *    (branch_id IS NULL means school-wide / global)
+ *    → WHERE (branch_id = ? OR branch_id IS NULL)
+ *
  * Database Schema:
  * CREATE TABLE Events (
  *     EventID INT PRIMARY KEY AUTO_INCREMENT NOT NULL,
@@ -12,6 +18,7 @@ import db from "../config/db.config.js";
  *     EndDate DATE NOT NULL,
  *     Venue VARCHAR(100),
  *     Description TEXT,
+ *     branch_id INT NULL,
  *     CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
  *     UpdatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
  * );
@@ -20,11 +27,18 @@ import db from "../config/db.config.js";
 // Valid event types from database schema
 const VALID_EVENT_TYPES = ["Academic", "Sports", "Cultural", "Other"];
 
-// Get all events
-const getAllEvents = async () => {
+// Build the branch WHERE clause for events (special logic: null branch_id = global)
+const eventBranchClause = (branchId) => {
+  if (branchId == null) return { clause: "", params: [] };
+  return { clause: "AND (branch_id = ? OR branch_id IS NULL)", params: [branchId] };
+};
+
+// Get all events (branch-scoped with global fallback)
+const getAllEvents = async (branchId = null) => {
+  const { clause, params } = eventBranchClause(branchId);
   try {
     const [rows] = await db.query(`
-      SELECT 
+      SELECT
         EventID,
         EventName,
         EventType,
@@ -32,27 +46,29 @@ const getAllEvents = async () => {
         EndDate,
         Venue,
         Description,
+        branch_id,
         CreatedAt,
         UpdatedAt
       FROM Events
+      WHERE 1=1 ${clause}
       ORDER BY StartDate ASC, CreatedAt DESC
-    `);
+    `, params);
     return rows;
   } catch (err) {
     throw new Error("Error fetching events: " + err.message);
   }
 };
 
-// Get event by ID
-const getEventById = async (eventId) => {
+// Get event by ID (branch-scoped with global fallback)
+const getEventById = async (eventId, branchId = null) => {
+  const { clause, params } = eventBranchClause(branchId);
   try {
     if (!eventId) {
       throw new Error("Event ID is required");
     }
 
     const [rows] = await db.query(
-      `
-      SELECT 
+      `SELECT
         EventID,
         EventName,
         EventType,
@@ -60,12 +76,12 @@ const getEventById = async (eventId) => {
         EndDate,
         Venue,
         Description,
+        branch_id,
         CreatedAt,
         UpdatedAt
       FROM Events
-      WHERE EventID = ?
-    `,
-      [eventId],
+      WHERE EventID = ? ${clause}`,
+      [eventId, ...params],
     );
 
     return rows[0] || null;
@@ -75,31 +91,27 @@ const getEventById = async (eventId) => {
 };
 
 // Add new event
-const addEvent = async (eventData) => {
+const addEvent = async (eventData, branchId = null) => {
   try {
     const { eventName, eventType, startDate, endDate, venue, description } =
       eventData;
 
-    // Validate required fields
     if (!eventName || !eventType || !startDate || !endDate) {
       throw new Error(
         "Event name, type, start date, and end date are required",
       );
     }
 
-    // Validate event type
     if (!VALID_EVENT_TYPES.includes(eventType)) {
       throw new Error(
         `Invalid event type. Must be one of: ${VALID_EVENT_TYPES.join(", ")}`,
       );
     }
 
-    // Validate event name length
     if (eventName.length > 100) {
       throw new Error("Event name cannot exceed 100 characters");
     }
 
-    // Validate dates
     const startDateObj = new Date(startDate);
     const endDateObj = new Date(endDate);
 
@@ -111,26 +123,35 @@ const addEvent = async (eventData) => {
       throw new Error("End date cannot be before start date");
     }
 
-    // Validate venue length if provided
     if (venue && venue.length > 100) {
       throw new Error("Venue name cannot exceed 100 characters");
     }
 
-    // Insert the event
-    const [result] = await db.query(
-      `
-      INSERT INTO Events (EventName, EventType, StartDate, EndDate, Venue, Description)
-      VALUES (?, ?, ?, ?, ?, ?)
-    `,
-      [
+    let sql, values;
+    if (branchId != null) {
+      sql = `INSERT INTO Events (EventName, EventType, StartDate, EndDate, Venue, Description, branch_id) VALUES (?, ?, ?, ?, ?, ?, ?)`;
+      values = [
         eventName.trim(),
         eventType,
         startDate,
         endDate,
         venue?.trim() || null,
         description?.trim() || null,
-      ],
-    );
+        branchId,
+      ];
+    } else {
+      sql = `INSERT INTO Events (EventName, EventType, StartDate, EndDate, Venue, Description) VALUES (?, ?, ?, ?, ?, ?)`;
+      values = [
+        eventName.trim(),
+        eventType,
+        startDate,
+        endDate,
+        venue?.trim() || null,
+        description?.trim() || null,
+      ];
+    }
+
+    const [result] = await db.query(sql, values);
 
     return {
       success: true,
@@ -144,6 +165,7 @@ const addEvent = async (eventData) => {
         EndDate: endDate,
         Venue: venue?.trim() || null,
         Description: description?.trim() || null,
+        branch_id: branchId,
       },
     };
   } catch (err) {
@@ -151,19 +173,17 @@ const addEvent = async (eventData) => {
   }
 };
 
-// Update event
-const updateEvent = async (eventId, eventData) => {
+// Update event (branch-scoped)
+const updateEvent = async (eventId, eventData, branchId = null) => {
+  const { clause: branchScope, params: branchParams } = eventBranchClause(branchId);
   try {
     if (!eventId) {
       throw new Error("Event ID is required");
     }
 
-    // Check if event exists
     const [existingEvent] = await db.query(
-      `
-      SELECT * FROM Events WHERE EventID = ?
-    `,
-      [eventId],
+      `SELECT * FROM Events WHERE EventID = ? ${branchScope}`,
+      [eventId, ...branchParams],
     );
 
     if (existingEvent.length === 0) {
@@ -175,7 +195,6 @@ const updateEvent = async (eventId, eventData) => {
     const updates = [];
     const params = [];
 
-    // Build dynamic update query
     if (eventName !== undefined) {
       if (!eventName || eventName.trim().length === 0) {
         throw new Error("Event name cannot be empty");
@@ -215,7 +234,6 @@ const updateEvent = async (eventId, eventData) => {
       params.push(endDate);
     }
 
-    // Validate date relationship if both dates are being updated
     if (startDate !== undefined && endDate !== undefined) {
       if (new Date(endDate) < new Date(startDate)) {
         throw new Error("End date cannot be before start date");
@@ -239,14 +257,9 @@ const updateEvent = async (eventId, eventData) => {
       throw new Error("No valid fields to update");
     }
 
-    // Perform update
     params.push(eventId);
     const [result] = await db.query(
-      `
-      UPDATE Events 
-      SET ${updates.join(", ")}
-      WHERE EventID = ?
-    `,
+      `UPDATE Events SET ${updates.join(", ")} WHERE EventID = ?`,
       params,
     );
 
@@ -264,25 +277,22 @@ const updateEvent = async (eventId, eventData) => {
   }
 };
 
-// Delete event
-const deleteEvent = async (eventId) => {
+// Delete event (branch-scoped)
+const deleteEvent = async (eventId, branchId = null) => {
+  const { clause: branchScope, params: branchParams } = eventBranchClause(branchId);
   try {
     if (!eventId) {
       throw new Error("Event ID is required");
     }
 
-    // Check if event exists
-    const eventInfo = await getEventById(eventId);
+    const eventInfo = await getEventById(eventId, branchId);
     if (!eventInfo) {
       throw new Error("Event not found");
     }
 
-    // Delete the event
     const [result] = await db.query(
-      `
-      DELETE FROM Events WHERE EventID = ?
-    `,
-      [eventId],
+      `DELETE FROM Events WHERE EventID = ? ${branchScope}`,
+      [eventId, ...branchParams],
     );
 
     if (result.affectedRows === 0) {
@@ -307,12 +317,12 @@ const deleteEvent = async (eventId) => {
   }
 };
 
-// Get events by date range
-const getEventsByDateRange = async (startDate, endDate) => {
+// Get events by date range (branch-scoped with global fallback)
+const getEventsByDateRange = async (startDate, endDate, branchId = null) => {
+  const { clause, params } = eventBranchClause(branchId);
   try {
     const [rows] = await db.query(
-      `
-      SELECT 
+      `SELECT
         EventID,
         EventName,
         EventType,
@@ -320,13 +330,13 @@ const getEventsByDateRange = async (startDate, endDate) => {
         EndDate,
         Venue,
         Description,
+        branch_id,
         CreatedAt,
         UpdatedAt
       FROM Events
-      WHERE StartDate >= ? AND EndDate <= ?
-      ORDER BY StartDate ASC
-    `,
-      [startDate, endDate],
+      WHERE StartDate >= ? AND EndDate <= ? ${clause}
+      ORDER BY StartDate ASC`,
+      [startDate, endDate, ...params],
     );
 
     return rows;
@@ -335,8 +345,9 @@ const getEventsByDateRange = async (startDate, endDate) => {
   }
 };
 
-// Get events by type
-const getEventsByType = async (eventType) => {
+// Get events by type (branch-scoped with global fallback)
+const getEventsByType = async (eventType, branchId = null) => {
+  const { clause, params } = eventBranchClause(branchId);
   try {
     if (!VALID_EVENT_TYPES.includes(eventType)) {
       throw new Error(
@@ -345,8 +356,7 @@ const getEventsByType = async (eventType) => {
     }
 
     const [rows] = await db.query(
-      `
-      SELECT 
+      `SELECT
         EventID,
         EventName,
         EventType,
@@ -354,13 +364,13 @@ const getEventsByType = async (eventType) => {
         EndDate,
         Venue,
         Description,
+        branch_id,
         CreatedAt,
         UpdatedAt
       FROM Events
-      WHERE EventType = ?
-      ORDER BY StartDate ASC
-    `,
-      [eventType],
+      WHERE EventType = ? ${clause}
+      ORDER BY StartDate ASC`,
+      [eventType, ...params],
     );
 
     return rows;

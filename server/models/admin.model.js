@@ -12,12 +12,20 @@ export const findAdminByEmail = async (email) => {
 
 // Create a new admin
 export const createAdmin = async (adminData) => {
-  const { Username, Email, Password } = adminData;
+  const { Username, Email, Password, role, branch_id } = adminData;
   const hashedPassword = await bcrypt.hash(Password, 10); // Encrypt password
-  console.log(hashedPassword);
-  const sql = "INSERT INTO Admin (Username, Email, Password) VALUES (?, ?, ?)";
+  const adminRole = role || "branch_admin";
+  const adminBranchId = branch_id ?? null;
+  const sql =
+    "INSERT INTO Admin (Username, Email, Password, role, branch_id) VALUES (?, ?, ?, ?, ?)";
   try {
-    const [result] = await db.query(sql, [Username, Email, hashedPassword]);
+    const [result] = await db.query(sql, [
+      Username,
+      Email,
+      hashedPassword,
+      adminRole,
+      adminBranchId,
+    ]);
     return { message: "Admin created successfully", adminID: result.insertId };
   } catch (err) {
     throw new Error("Error creating admin: " + err.message);
@@ -39,9 +47,13 @@ export const authenticateAdmin = async (email, password) => {
   return admin; // Return the admin object if credentials are valid
 };
 
-// Generate JWT token
-export const generateAuthToken = (adminID) => {
-  const payload = { adminID };
+// Generate JWT token (includes role and branch_id for RBAC + branch scoping)
+export const generateAuthToken = (adminID, role, branch_id) => {
+  const payload = {
+    adminID,
+    role: role || "branch_admin",
+    branch_id: branch_id ?? null,
+  };
   const token = jwt.sign(payload, process.env.JWT_SECRET_KEY, {
     expiresIn: process.env.JWT_EXPIRES_IN,
   });

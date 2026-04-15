@@ -225,3 +225,65 @@ export const deleteBranch = async (id) => {
     throw new Error("Error deleting branch: " + err.message);
   }
 };
+
+// Get per-branch stats: student count, teacher count
+export const getBranchStats = async () => {
+  try {
+    // Fetch all branches
+    const [branches] = await db.query(`
+      SELECT id, name_bn, name_en, is_proposed, established_date, image_url
+      FROM Branches
+      ORDER BY created_at DESC
+    `);
+
+    if (branches.length === 0) return [];
+
+    // Student counts per branch
+    const [studentCounts] = await db.query(`
+      SELECT branch_id, COUNT(*) AS total
+      FROM Students
+      WHERE branch_id IS NOT NULL
+      GROUP BY branch_id
+    `);
+
+    // Teacher counts per branch
+    const [teacherCounts] = await db.query(`
+      SELECT branch_id, COUNT(*) AS total
+      FROM Teachers
+      WHERE branch_id IS NOT NULL
+      GROUP BY branch_id
+    `);
+
+    // Class counts per branch
+    const [classCounts] = await db.query(`
+      SELECT branch_id, COUNT(*) AS total
+      FROM Classes
+      WHERE branch_id IS NOT NULL
+      GROUP BY branch_id
+    `);
+
+    const studentMap = Object.fromEntries(
+      studentCounts.map((r) => [r.branch_id, Number(r.total)])
+    );
+    const teacherMap = Object.fromEntries(
+      teacherCounts.map((r) => [r.branch_id, Number(r.total)])
+    );
+    const classMap = Object.fromEntries(
+      classCounts.map((r) => [r.branch_id, Number(r.total)])
+    );
+
+    return branches.map((b) => ({
+      id: b.id,
+      name_bn: b.name_bn,
+      name_en: b.name_en,
+      is_proposed: b.is_proposed,
+      established_date: b.established_date,
+      image_url: b.image_url,
+      studentCount: studentMap[b.id] ?? 0,
+      teacherCount: teacherMap[b.id] ?? 0,
+      classCount: classMap[b.id] ?? 0,
+    }));
+  } catch (err) {
+    throw new Error("Error fetching branch stats: " + err.message);
+  }
+};

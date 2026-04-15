@@ -11,6 +11,7 @@ import {
 // Add a new class
 export const addClassController = async (req, res) => {
   const lang = req.language;
+  const branchId = req.branchId ?? null;
   const { className, section, teacherId } = req.body;
 
   if (!className || !section || !teacherId) {
@@ -18,7 +19,7 @@ export const addClassController = async (req, res) => {
   }
 
   try {
-    const result = await addClass({ className, section, teacherId });
+    const result = await addClass({ className, section, teacherId }, branchId);
     res
       .status(201)
       .json({ message: t("class_added", lang), ClassID: result.ClassID });
@@ -31,10 +32,11 @@ export const addClassController = async (req, res) => {
 // Delete a class by ID
 export const deleteClassController = async (req, res) => {
   const lang = req.language;
+  const branchId = req.branchId ?? null;
   const { id } = req.params;
 
   try {
-    const result = await deleteClass(id);
+    const result = await deleteClass(id, branchId);
     res
       .status(200)
       .json({ message: t("class_deleted", lang), success: result.success });
@@ -47,8 +49,9 @@ export const deleteClassController = async (req, res) => {
 // Get all classes
 export const getClassesController = async (req, res) => {
   const lang = req.language;
+  const branchId = req.branchId ?? null;
   try {
-    const classes = await getClasses();
+    const classes = await getClasses(branchId);
     res.status(200).json(classes);
   } catch (error) {
     console.error("Error fetching classes:", error);
@@ -59,6 +62,7 @@ export const getClassesController = async (req, res) => {
 // Edit a class by ID
 export const editClassController = async (req, res) => {
   const lang = req.language;
+  const branchId = req.branchId ?? null;
   const { id } = req.params;
   const { className, section, teacherId } = req.body;
 
@@ -67,7 +71,7 @@ export const editClassController = async (req, res) => {
   }
 
   try {
-    const result = await editClass(id, { className, section, teacherId });
+    const result = await editClass(id, { className, section, teacherId }, branchId);
     res
       .status(200)
       .json({ message: t("class_updated", lang), success: result.success });
@@ -80,8 +84,9 @@ export const editClassController = async (req, res) => {
 // Get distinct class names with their sections
 export const getDistinctClassesWithSectionsController = async (req, res) => {
   const lang = req.language;
+  const branchId = req.branchId ?? null;
   try {
-    const rows = await getDistinctClassesWithSections();
+    const rows = await getDistinctClassesWithSections(branchId);
     res.status(200).json(rows);
   } catch (error) {
     console.error("Error fetching distinct classes:", error);
@@ -92,6 +97,7 @@ export const getDistinctClassesWithSectionsController = async (req, res) => {
 // Get total students in a class by class name
 export const getTotalStudentsInClassByNameController = async (req, res) => {
   const lang = req.language;
+  const branchId = req.branchId ?? null;
   const { className } = req.params;
 
   if (!className) {
@@ -99,7 +105,7 @@ export const getTotalStudentsInClassByNameController = async (req, res) => {
   }
 
   try {
-    const count = await getTotalStudentsInClassByName(className);
+    const count = await getTotalStudentsInClassByName(className, branchId);
     res.status(200).json({ count });
   } catch (error) {
     console.error("Error fetching student count:", error);

@@ -6,6 +6,7 @@ import {
   deleteBranchController,
   getAllBranchesController,
   getBranchByIdController,
+  getBranchStatsController,
   updateBranchController,
 } from "../controllers/branch.controller.js";
 
@@ -13,6 +14,7 @@ const router = express.Router();
 
 // Public routes
 router.get("/", getAllBranchesController);
+router.get("/stats/overview", authMiddleware, getBranchStatsController);
 router.get("/:id", getBranchByIdController);
 
 // Protected routes (require auth)

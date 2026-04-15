@@ -6,6 +6,7 @@ import Link from "next/link";
 import { authService } from "@/services/auth.service";
 import { useAuthStore } from "@/store/authStore";
 import { useTranslations } from "@/store/languageStore";
+import { useBranchStore } from "@/store/branchStore";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -13,7 +14,8 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const router = useRouter();
-  const setToken = useAuthStore((s) => s.setToken);
+  const setAuth = useAuthStore((s) => s.setAuth);
+  const { lockBranch, resetBranch } = useBranchStore();
   const t = useTranslations("admin.login");
 
   const handleSubmit = async (e) => {
@@ -26,7 +28,13 @@ export default function LoginPage() {
         Password: password,
       });
       if (data.token) {
-        setToken(data.token);
+        setAuth(data.token, data.role, data.branch_id ?? null);
+        // Set branch context based on role
+        if (data.role === "branch_admin" && data.branch_id != null) {
+          lockBranch(data.branch_id, data.branchName || `Branch ${data.branch_id}`);
+        } else {
+          resetBranch();
+        }
         router.replace("/admin/notices");
       } else {
         setError(data.message || t("loginFailed"));

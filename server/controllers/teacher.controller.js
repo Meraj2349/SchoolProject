@@ -10,8 +10,9 @@ import {
 
 const addTeacherController = async (req, res) => {
   const lang = req.language;
+  const branchId = req.branchId ?? null;
   try {
-    const result = await addTeacher(req.body);
+    const result = await addTeacher(req.body, branchId);
     res.json(result);
   } catch (error) {
     res.status(500).json({ error: t("teacher_fetch_failed", lang) });
@@ -20,8 +21,9 @@ const addTeacherController = async (req, res) => {
 
 const getAllTeachersController = async (req, res) => {
   const lang = req.language;
+  const branchId = req.branchId ?? null;
   try {
-    const teachers = await getAllTeachers();
+    const teachers = await getAllTeachers(branchId);
     res.json(teachers);
   } catch (error) {
     res.status(500).json({ error: t("teacher_fetch_failed", lang) });
@@ -30,8 +32,9 @@ const getAllTeachersController = async (req, res) => {
 
 const updateTeacherController = async (req, res) => {
   const lang = req.language;
+  const branchId = req.branchId ?? null;
   try {
-    const result = await updateTeacher(req.params.id, req.body);
+    const result = await updateTeacher(req.params.id, req.body, branchId);
     res.json(result);
   } catch (error) {
     res.status(500).json({ error: t("internal_server_error", lang) });
@@ -40,8 +43,9 @@ const updateTeacherController = async (req, res) => {
 
 const deleteTeacherController = async (req, res) => {
   const lang = req.language;
+  const branchId = req.branchId ?? null;
   try {
-    const result = await deleteTeacher(req.params.id);
+    const result = await deleteTeacher(req.params.id, branchId);
     res.json(result);
   } catch (error) {
     res.status(500).json({ error: t("internal_server_error", lang) });
@@ -50,10 +54,11 @@ const deleteTeacherController = async (req, res) => {
 
 const checkDuplicateTeacherController = async (req, res) => {
   const lang = req.language;
+  const branchId = req.branchId ?? null;
   const { email, contactNumber } = req.query;
 
   try {
-    const result = await checkDuplicateTeacher(email, contactNumber);
+    const result = await checkDuplicateTeacher(email, contactNumber, branchId);
     res.status(200).json(result);
   } catch (error) {
     console.error(error);
@@ -63,9 +68,10 @@ const checkDuplicateTeacherController = async (req, res) => {
 
 const searchTeachersController = async (req, res) => {
   const lang = req.language;
+  const branchId = req.branchId ?? null;
   const { q = "", className = "" } = req.query;
   try {
-    const results = await searchTeachers(q.trim(), className.trim());
+    const results = await searchTeachers(q.trim(), className.trim(), branchId);
     res.status(200).json(results);
   } catch (error) {
     console.error(error);

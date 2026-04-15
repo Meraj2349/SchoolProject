@@ -1,4 +1,5 @@
 import express from "express";
+import authMiddleware from "../middlewares/auth.middleware.js";
 import {
   addMultipleResultsController,
   addResultByStudentDetailsController,
@@ -20,6 +21,8 @@ import {
 } from "../controllers/result.controller.js";
 
 const router = express.Router();
+
+router.use(authMiddleware);
 
 // Route to get all results with pagination
 router.get("/", getAllResultsController);

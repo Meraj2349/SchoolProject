@@ -40,7 +40,7 @@ export default function ResultsPage() {
   const t = useTranslations("results");
 
   const { data: exams = [] } = useQuery({
-    queryKey: queryKeys.exams.all,
+    queryKey: queryKeys.exams.all(),
     queryFn: examsService.getAll,
     select: (d) => d?.data ?? d ?? [],
   });

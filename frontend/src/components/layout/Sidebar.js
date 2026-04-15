@@ -17,7 +17,7 @@ import {
   FaNoteSticky,
   FaPeopleGroup,
 } from "react-icons/fa6";
-import { FiX, FiLogOut } from "react-icons/fi";
+import { FiX, FiLogOut, FiLayout } from "react-icons/fi";
 import { RiListCheck, RiTimerLine } from "react-icons/ri";
 import { authService } from "@/services/auth.service";
 import { useAuthStore } from "@/store/authStore";
@@ -29,8 +29,15 @@ export default function Sidebar({ open, onClose }) {
   const clearAuth = useAuthStore((s) => s.clearAuth);
   const [loggingOut, setLoggingOut] = useState(false);
   const t = useTranslations();
+  const role = useAuthStore((s) => s.role);
 
   const NAV_LINKS = [
+    {
+      path: "/admin/dashboard",
+      icon: <FiLayout />,
+      key: "sidebar.adminDashboard",
+      superAdminOnly: true,
+    },
     { path: "/admin/notices", icon: <FaBell />, key: "sidebar.notice" },
     {
       path: "/admin/messages",
@@ -153,7 +160,9 @@ export default function Sidebar({ open, onClose }) {
             <p className="text-slate-500 text-[10px] font-semibold uppercase tracking-widest px-3 mb-2 mt-1">
               Navigation
             </p>
-            {NAV_LINKS.map((item) => {
+            {NAV_LINKS.filter(
+              (item) => !item.superAdminOnly || role === "super_admin"
+            ).map((item) => {
               const isActive = pathname === item.path;
               return (
                 <Link

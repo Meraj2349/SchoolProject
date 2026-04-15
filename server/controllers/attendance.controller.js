@@ -42,6 +42,7 @@ const validateStatus = (status) => {
 
 // Get attendance by ID
 export const getAttendanceByIDController = async (req, res) => {
+  const branchId = req.branchId ?? null;
   try {
     const { id } = req.params;
 
@@ -52,7 +53,7 @@ export const getAttendanceByIDController = async (req, res) => {
       });
     }
 
-    const attendance = await getAttendanceByID(parseInt(id));
+    const attendance = await getAttendanceByID(parseInt(id), branchId);
 
     if (!attendance) {
       return res.status(404).json({
@@ -76,6 +77,7 @@ export const getAttendanceByIDController = async (req, res) => {
 
 // Get attendance by student ID
 export const getAttendanceByStudentIdController = async (req, res) => {
+  const branchId = req.branchId ?? null;
   try {
     const { studentID } = req.params;
 
@@ -86,7 +88,7 @@ export const getAttendanceByStudentIdController = async (req, res) => {
       });
     }
 
-    const attendance = await getAttendanceByStudentId(parseInt(studentID));
+    const attendance = await getAttendanceByStudentId(parseInt(studentID), branchId);
 
     res.status(200).json({
       success: true,
@@ -104,8 +106,9 @@ export const getAttendanceByStudentIdController = async (req, res) => {
 
 // Get all attendance records
 export const getAllAttendanceController = async (req, res) => {
+  const branchId = req.branchId ?? null;
   try {
-    const attendance = await getAllAttendance();
+    const attendance = await getAllAttendance(branchId);
 
     res.status(200).json({
       success: true,
@@ -149,8 +152,9 @@ export const createAttendanceController = async (req, res) => {
       });
     }
 
+    const branchId = req.branchId ?? null;
     const attendanceData = { studentID, classID, classDate, status };
-    const attendanceID = await createAttendance(attendanceData);
+    const attendanceID = await createAttendance(attendanceData, branchId);
 
     res.status(201).json({
       success: true,
@@ -251,6 +255,7 @@ export const deleteAttendanceController = async (req, res) => {
 
 // Get attendance by class ID
 export const getAttendanceByClassIDController = async (req, res) => {
+  const branchId = req.branchId ?? null;
   try {
     const { classID } = req.params;
 
@@ -261,7 +266,7 @@ export const getAttendanceByClassIDController = async (req, res) => {
       });
     }
 
-    const attendance = await getAttendanceByClassID(parseInt(classID));
+    const attendance = await getAttendanceByClassID(parseInt(classID), branchId);
 
     res.status(200).json({
       success: true,
@@ -298,7 +303,8 @@ export const getAttendanceByDateController = async (req, res) => {
       });
     }
 
-    const attendance = await getAttendanceByDate(date);
+    const branchId = req.branchId ?? null;
+    const attendance = await getAttendanceByDate(date, branchId);
 
     res.status(200).json({
       success: true,
@@ -326,7 +332,8 @@ export const getAttendanceSummaryByStudentController = async (req, res) => {
       });
     }
 
-    const summary = await getAttendanceSummaryByStudent(parseInt(studentID));
+    const branchId = req.branchId ?? null;
+    const summary = await getAttendanceSummaryByStudent(parseInt(studentID), branchId);
 
     if (!summary) {
       return res.status(404).json({
@@ -407,11 +414,13 @@ export const getAttendanceByNameRollClassSectionController = async (
       });
     }
 
+    const branchId = req.branchId ?? null;
     const attendance = await getAttendanceByNameRollClassSection(
       firstName,
       roll,
       className,
       section,
+      branchId,
     );
 
     res.status(200).json({
@@ -442,7 +451,8 @@ export const getAttendanceByClassAndSectionController = async (req, res) => {
       });
     }
 
-    const attendance = await getAttendanceByClassAndSection(className, section);
+    const branchId = req.branchId ?? null;
+    const attendance = await getAttendanceByClassAndSection(className, section, branchId);
 
     res.status(200).json({
       success: true,
@@ -480,7 +490,8 @@ export const getAttendanceByDateRangeController = async (req, res) => {
       });
     }
 
-    const attendance = await getAttendanceByDateRange(startDate, endDate);
+    const branchId = req.branchId ?? null;
+    const attendance = await getAttendanceByDateRange(startDate, endDate, branchId);
 
     res.status(200).json({
       success: true,
@@ -500,7 +511,8 @@ export const getAttendanceByDateRangeController = async (req, res) => {
 // Get attendance count
 export const getAttendanceCountController = async (req, res) => {
   try {
-    const count = await getAttendanceCount();
+    const branchId = req.branchId ?? null;
+    const count = await getAttendanceCount(branchId);
 
     res.status(200).json({
       success: true,
@@ -557,7 +569,8 @@ export const bulkCreateAttendanceController = async (req, res) => {
       }
     }
 
-    const affectedRows = await bulkCreateAttendance(attendanceRecords);
+    const branchId = req.branchId ?? null;
+    const affectedRows = await bulkCreateAttendance(attendanceRecords, branchId);
 
     res.status(201).json({
       success: true,
@@ -613,7 +626,8 @@ export const checkAttendanceExistsController = async (req, res) => {
 // Get attendance statistics
 export const getAttendanceStatisticsController = async (req, res) => {
   try {
-    const statistics = await getAttendanceStatistics();
+    const branchId = req.branchId ?? null;
+    const statistics = await getAttendanceStatistics(branchId);
 
     res.status(200).json({
       success: true,
@@ -630,6 +644,7 @@ export const getAttendanceStatisticsController = async (req, res) => {
 
 // Mark attendance (upsert - create or update)
 export const markAttendanceController = async (req, res) => {
+  const branchId = req.branchId ?? null;
   try {
     const { studentId, classDate, status } = req.body;
 
@@ -664,7 +679,7 @@ export const markAttendanceController = async (req, res) => {
 
     // Get student information including class details
     const { getStudentById } = await import("../models/student.model.js");
-    const student = await getStudentById(parseInt(studentId));
+    const student = await getStudentById(parseInt(studentId), branchId);
 
     if (!student) {
       return res.status(404).json({
@@ -735,7 +750,7 @@ export const markAttendanceController = async (req, res) => {
       };
 
       console.log("Creating attendance with data:", attendanceData);
-      const attendanceID = await createAttendance(attendanceData);
+      const attendanceID = await createAttendance(attendanceData, branchId);
 
       if (attendanceID) {
         console.log(
@@ -770,6 +785,7 @@ export const markAttendanceController = async (req, res) => {
 
 // Validate database synchronization
 export const validateDatabaseSyncController = async (req, res) => {
+  const branchId = req.branchId ?? null;
   try {
     const { className, section, month, year } = req.body;
 
@@ -782,7 +798,7 @@ export const validateDatabaseSyncController = async (req, res) => {
 
     // Get all students for the class
     const { getAllStudents } = await import("../models/student.model.js");
-    const allStudents = await getAllStudents();
+    const allStudents = await getAllStudents(branchId);
     const classStudents = allStudents.filter(
       (student) =>
         student.ClassName === className && student.Section === section,
@@ -802,6 +818,7 @@ export const validateDatabaseSyncController = async (req, res) => {
     const attendanceRecords = await getAttendanceByClassAndSection(
       className,
       section,
+      branchId,
     );
 
     // Filter records by date range
@@ -848,6 +865,7 @@ export const validateDatabaseSyncController = async (req, res) => {
 
 // Force complete data synchronization
 export const forceSyncController = async (req, res) => {
+  const branchId = req.branchId ?? null;
   try {
     const { className, section, month, year } = req.body;
 
@@ -860,7 +878,7 @@ export const forceSyncController = async (req, res) => {
 
     // Get all students for the class
     const { getAllStudents } = await import("../models/student.model.js");
-    const allStudents = await getAllStudents();
+    const allStudents = await getAllStudents(branchId);
     const classStudents = allStudents.filter(
       (student) =>
         student.ClassName === className && student.Section === section,
@@ -877,6 +895,7 @@ export const forceSyncController = async (req, res) => {
     const attendanceRecords = await getAttendanceByClassAndSection(
       className,
       section,
+      branchId,
     );
 
     // Filter by month and year
@@ -936,7 +955,8 @@ export const getAttendanceGridController = async (req, res) => {
       });
     }
 
-    const rows = await getAttendanceGrid(className, section, startDate, endDate);
+    const branchId = req.branchId ?? null;
+    const rows = await getAttendanceGrid(className, section, startDate, endDate, branchId);
 
     // Build a structured response: unique students + date-keyed status map
     const studentMap = {};
@@ -980,6 +1000,7 @@ export const getAttendanceGridController = async (req, res) => {
 
 // Upsert a single attendance cell (used by the grid editor)
 export const upsertAttendanceCellController = async (req, res) => {
+  const branchId = req.branchId ?? null;
   try {
     const { studentId, classDate, status } = req.body;
 
@@ -1006,7 +1027,7 @@ export const upsertAttendanceCellController = async (req, res) => {
     }
 
     const { getStudentById } = await import("../models/student.model.js");
-    const student = await getStudentById(parseInt(studentId));
+    const student = await getStudentById(parseInt(studentId), branchId);
 
     if (!student) {
       return res.status(404).json({ success: false, message: "Student not found" });
@@ -1024,6 +1045,7 @@ export const upsertAttendanceCellController = async (req, res) => {
       student.ClassID,
       classDate,
       status,
+      branchId,
     );
 
     res.status(200).json({

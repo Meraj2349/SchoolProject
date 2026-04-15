@@ -9,6 +9,7 @@ import { classesService } from "@/services/classes.service";
 import { studentsService } from "@/services/students.service";
 import { queryKeys } from "@/lib/queryKeys";
 import { useTranslations } from "@/store/languageStore";
+import { useBranchStore } from "@/store/branchStore";
 import {
   FiAward,
   FiSearch,
@@ -20,19 +21,21 @@ import {
 } from "react-icons/fi";
 
 const RESULT_FILTER_EMPTY = { className: "", section: "", search: "" };
-const RESULTS_QK = ["results", "all"];
 
 export default function AdminPage() {
   const qc = useQueryClient();
   const t = useTranslations("admin.results");
   const tCommon = useTranslations("common");
+  const branchId = useBranchStore((s) => s.currentBranchId);
 
   /* ── add form state ── */
   const [form, setForm] = useState({
     className: "",
     section: "",
+    classId: "",     // ClassID of the selected class row
     examId: "",
     subjectId: "",
+    studentId: "",   // StudentID of the selected student
     firstName: "",
     rollNumber: "",
     marksObtained: "",
@@ -48,29 +51,29 @@ export default function AdminPage() {
 
   /* ── data queries ── */
   const { data: exams = [] } = useQuery({
-    queryKey: queryKeys.exams.all,
+    queryKey: queryKeys.exams.all(branchId),
     queryFn: examsService.getAll,
     select: (d) => d?.data ?? d ?? [],
   });
   const { data: subjects = [] } = useQuery({
-    queryKey: queryKeys.subjects.all,
+    queryKey: queryKeys.subjects.all(branchId),
     queryFn: subjectsService.getAll,
     select: (d) => d?.data ?? d ?? [],
   });
   const { data: classes = [] } = useQuery({
-    queryKey: queryKeys.classes.all,
+    queryKey: queryKeys.classes.all(branchId),
     queryFn: classesService.getAll,
     select: (d) => d?.data ?? d ?? [],
   });
   const { data: allResults = [], isLoading: resultsLoading } = useQuery({
-    queryKey: RESULTS_QK,
+    queryKey: queryKeys.results.search({}, branchId),
     queryFn: () => resultsService.search({}).then((r) => r?.data ?? r ?? []),
   });
 
   // Load students for the selected class+section to power the student picker
   const canFetchStudents = Boolean(form.className && form.section);
   const { data: classStudents = [], isFetching: studentsLoading } = useQuery({
-    queryKey: queryKeys.students.byClassSection(form.className, form.section),
+    queryKey: queryKeys.students.byClassSection(form.className, form.section, branchId),
     queryFn: () =>
       studentsService
         .getByClassSection(form.className, form.section)
@@ -80,20 +83,20 @@ export default function AdminPage() {
 
   /* ── mutations ── */
   const add = useMutation({
-    mutationFn: resultsService.createByDetails,
+    mutationFn: resultsService.createById,
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: RESULTS_QK });
+      qc.invalidateQueries({ queryKey: queryKeys.results.search({}, branchId) });
       flash(t("resultAdded"));
-      setForm((p) => ({ ...p, firstName: "", rollNumber: "", marksObtained: "" }));
+      setForm((p) => ({ ...p, studentId: "", firstName: "", rollNumber: "", marksObtained: "" }));
     },
-    onError: (err) => flash(err.message || t("failed"), true),
+    onError: (err) => flash(err?.response?.data?.message || err.message || t("failed"), true),
   });
 
   const edit = useMutation({
     mutationFn: ({ id, marks }) =>
       resultsService.update(id, { MarksObtained: Number(marks) }),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: RESULTS_QK });
+      qc.invalidateQueries({ queryKey: queryKeys.results.search({}, branchId) });
       flash(t("resultUpdated") || "Result updated");
       setEditRow(null);
     },
@@ -103,7 +106,7 @@ export default function AdminPage() {
   const remove = useMutation({
     mutationFn: resultsService.remove,
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: RESULTS_QK });
+      qc.invalidateQueries({ queryKey: queryKeys.results.search({}, branchId) });
       flash(t("deleted") || "Result deleted");
     },
     onError: (err) => flash(err.message || t("failed"), true),
@@ -153,15 +156,21 @@ export default function AdminPage() {
   /* ── add form submit ── */
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!form.studentId) {
+      flash(t("studentRequired") || "Please select a student", true);
+      return;
+    }
+    if (!form.classId) {
+      flash("Class information missing", true);
+      return;
+    }
     await add.mutateAsync({
-      firstName: form.firstName,
-      rollNumber: form.rollNumber,
-      className: form.className,
-      section: form.section,
-      examId: form.examId,
-      subjectId: form.subjectId,
-      marksObtained: Number(form.marksObtained),
-      totalMarks: Number(form.totalMarks),
+      StudentID: Number(form.studentId),
+      ExamID: Number(form.examId),
+      SubjectID: Number(form.subjectId),
+      ClassID: Number(form.classId),
+      MarksObtained: Number(form.marksObtained),
+      TotalMarks: Number(form.totalMarks),
     });
   };
 
@@ -246,8 +255,10 @@ export default function AdminPage() {
                     ...p,
                     className: e.target.value,
                     section: "",
+                    classId: "",
                     examId: "",
                     subjectId: "",
+                    studentId: "",
                     firstName: "",
                     rollNumber: "",
                   }));
@@ -270,14 +281,21 @@ export default function AdminPage() {
               <select
                 name="section"
                 value={form.section}
-                onChange={(e) =>
+                onChange={(e) => {
+                  const sec = e.target.value;
+                  // Resolve classId for the chosen class+section pair
+                  const classRow = classes.find(
+                    (c) => c.ClassName === form.className && c.Section === sec,
+                  );
                   setForm((p) => ({
                     ...p,
-                    section: e.target.value,
+                    section: sec,
+                    classId: classRow ? String(classRow.ClassID) : "",
+                    studentId: "",
                     firstName: "",
                     rollNumber: "",
-                  }))
-                }
+                  }));
+                }}
                 className="form-input"
                 required
               >
@@ -300,23 +318,18 @@ export default function AdminPage() {
                   )}
                 </label>
                 <select
-                  value={
-                    form.rollNumber
-                      ? classStudents.findIndex(
-                          (s) => s.RollNumber === form.rollNumber,
-                        )
-                      : ""
-                  }
+                  value={form.studentId}
                   onChange={(e) => {
-                    const idx = e.target.value;
-                    if (idx === "") {
-                      setForm((p) => ({ ...p, firstName: "", rollNumber: "" }));
+                    const sid = e.target.value;
+                    if (!sid) {
+                      setForm((p) => ({ ...p, studentId: "", firstName: "", rollNumber: "" }));
                       return;
                     }
-                    const s = classStudents[Number(idx)];
+                    const s = classStudents.find((st) => String(st.StudentID) === sid);
                     if (s)
                       setForm((p) => ({
                         ...p,
+                        studentId: String(s.StudentID),
                         firstName: s.FirstName,
                         rollNumber: s.RollNumber,
                       }));
@@ -331,8 +344,8 @@ export default function AdminPage() {
                       ? "No students in this class/section"
                       : "Select student"}
                   </option>
-                  {classStudents.map((s, idx) => (
-                    <option key={s.StudentID} value={idx}>
+                  {classStudents.map((s) => (
+                    <option key={s.StudentID} value={String(s.StudentID)}>
                       {s.FirstName} {s.LastName} — Roll {s.RollNumber}
                     </option>
                   ))}

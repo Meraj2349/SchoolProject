@@ -12,15 +12,22 @@ import {
 // Create a new admin
 const createAdminController = async (req, res) => {
   const lang = req.language;
-  const { Username, Email, Password } = req.body;
+  const { Username, Email, Password, role, branch_id } = req.body;
   if (!Username || !Email || !Password) {
     return res
       .status(400)
       .json({ error: t("username_email_password_required", lang) });
   }
 
+  // branch_admin must have a branch_id
+  if (role === "branch_admin" && !branch_id) {
+    return res
+      .status(400)
+      .json({ error: "branch_id is required for branch_admin role" });
+  }
+
   try {
-    const result = await createAdmin(req.body);
+    const result = await createAdmin({ Username, Email, Password, role, branch_id });
     res.status(201).json(result);
   } catch (error) {
     console.error("Error creating admin:", error);
@@ -34,8 +41,27 @@ const loginAdminController = async (req, res) => {
   try {
     const { Email, Password } = req.body;
     const admin = await authenticateAdmin(Email, Password);
-    const token = generateAuthToken(admin.AdminID);
-    res.json({ token, message: t("login_success", lang) });
+    const token = generateAuthToken(admin.AdminID, admin.role, admin.branch_id);
+
+    // For branch_admin, also resolve the branch display name
+    let branchName = null;
+    if (admin.role === "branch_admin" && admin.branch_id != null) {
+      try {
+        const { getBranchById } = await import("../models/branch.model.js");
+        const branch = await getBranchById(admin.branch_id);
+        branchName = branch?.name_en || branch?.name_bn || `Branch ${admin.branch_id}`;
+      } catch {
+        branchName = `Branch ${admin.branch_id}`;
+      }
+    }
+
+    res.json({
+      token,
+      message: t("login_success", lang),
+      role: admin.role,
+      branch_id: admin.branch_id,
+      branchName,
+    });
   } catch (error) {
     res.status(401).json({ error: t("invalid_credentials", lang) });
   }

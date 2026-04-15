@@ -6,6 +6,7 @@ import { examsService } from "@/services/exams.service";
 import { classesService } from "@/services/classes.service";
 import { queryKeys } from "@/lib/queryKeys";
 import { useTranslations } from "@/store/languageStore";
+import { useBranchStore } from "@/store/branchStore";
 import { FiEdit2, FiTrash2, FiFileText, FiPlusCircle } from "react-icons/fi";
 
 // Must match DB ENUM exactly
@@ -28,14 +29,15 @@ const EMPTY = {
 export default function AdminPage() {
   const qc = useQueryClient();
   const t = useTranslations("admin.exams");
+  const branchId = useBranchStore((s) => s.currentBranchId);
 
   const { data: exams = [], isLoading } = useQuery({
-    queryKey: queryKeys.exams.all,
+    queryKey: queryKeys.exams.all(branchId),
     queryFn: examsService.getAll,
     select: (d) => d?.data ?? d ?? [],
   });
   const { data: classes = [] } = useQuery({
-    queryKey: queryKeys.classes.all,
+    queryKey: queryKeys.classes.all(branchId),
     queryFn: classesService.getAll,
     select: (d) => d?.data ?? d ?? [],
   });
@@ -43,7 +45,7 @@ export default function AdminPage() {
   const create = useMutation({
     mutationFn: examsService.create,
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: queryKeys.exams.all });
+      qc.invalidateQueries({ queryKey: queryKeys.exams.all(branchId) });
       flash(t("examAdded"));
       reset();
     },
@@ -51,7 +53,7 @@ export default function AdminPage() {
   const update = useMutation({
     mutationFn: ({ id, data }) => examsService.update(id, data),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: queryKeys.exams.all });
+      qc.invalidateQueries({ queryKey: queryKeys.exams.all(branchId) });
       flash(t("examUpdated"));
       reset();
     },
@@ -59,7 +61,7 @@ export default function AdminPage() {
   const remove = useMutation({
     mutationFn: examsService.remove,
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: queryKeys.exams.all });
+      qc.invalidateQueries({ queryKey: queryKeys.exams.all(branchId) });
       flash(t("deleted"));
     },
   });

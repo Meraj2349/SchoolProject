@@ -7,10 +7,12 @@ import { studentsService } from "@/services/students.service";
 import { classesService } from "@/services/classes.service";
 import { queryKeys } from "@/lib/queryKeys";
 import { useTranslations } from "@/store/languageStore";
+import { useBranchStore } from "@/store/branchStore";
 import { FiSearch, FiSave, FiUsers } from "react-icons/fi";
 
 export default function AdminPage() {
   const t = useTranslations("admin.attendance");
+  const branchId = useBranchStore((s) => s.currentBranchId);
 
   const [filter, setFilter] = useState({
     className: "",
@@ -25,7 +27,7 @@ export default function AdminPage() {
 
   // Load distinct classes for dropdowns
   const { data: distinctClasses = [] } = useQuery({
-    queryKey: queryKeys.classes.distinct,
+    queryKey: queryKeys.classes.distinct(branchId),
     queryFn: classesService.getDistinct,
     select: (d) => d?.data ?? d ?? [],
   });

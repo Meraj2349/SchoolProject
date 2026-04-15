@@ -46,8 +46,10 @@ const validateResultData = (data) => {
     return "MarksObtained cannot be negative";
   }
 
-  if (data.MarksObtained > 100) {
-    return "MarksObtained cannot exceed 100";
+  // Allow TotalMarks > 100 (some exams may have higher total)
+  const totalMarks = data.TotalMarks ?? 100;
+  if (data.MarksObtained > totalMarks) {
+    return `MarksObtained cannot exceed TotalMarks (${totalMarks})`;
   }
 
   return null;
@@ -56,8 +58,9 @@ const validateResultData = (data) => {
 // Get all results
 const getAllResultsController = async (req, res) => {
   const lang = req.language;
+  const branchId = req.branchId ?? null;
   try {
-    const results = await getAllResults();
+    const results = await getAllResults(branchId);
     res.status(200).json({ success: true, data: results });
   } catch (error) {
     res
@@ -72,6 +75,7 @@ const getAllResultsController = async (req, res) => {
 
 // Get result by ID
 const getResultByIdController = async (req, res) => {
+  const branchId = req.branchId ?? null;
   try {
     const { id } = req.params;
 
@@ -82,7 +86,7 @@ const getResultByIdController = async (req, res) => {
       });
     }
 
-    const result = await getResultById(id);
+    const result = await getResultById(id, branchId);
 
     if (!result) {
       return res.status(404).json({
@@ -107,6 +111,7 @@ const getResultByIdController = async (req, res) => {
 
 // Get results by student
 const getResultsByStudentController = async (req, res) => {
+  const branchId = req.branchId ?? null;
   try {
     const { studentId } = req.params;
 
@@ -117,7 +122,7 @@ const getResultsByStudentController = async (req, res) => {
       });
     }
 
-    const results = await getResultsByStudent(studentId);
+    const results = await getResultsByStudent(studentId, branchId);
     res.status(200).json({
       success: true,
       message: "Student results retrieved successfully",
@@ -134,6 +139,7 @@ const getResultsByStudentController = async (req, res) => {
 
 // Get results by exam
 const getResultsByExamController = async (req, res) => {
+  const branchId = req.branchId ?? null;
   try {
     const { examId } = req.params;
 
@@ -144,7 +150,7 @@ const getResultsByExamController = async (req, res) => {
       });
     }
 
-    const results = await getResultsByExam(examId);
+    const results = await getResultsByExam(examId, branchId);
     res.status(200).json({
       success: true,
       message: "Exam results retrieved successfully",
@@ -161,6 +167,7 @@ const getResultsByExamController = async (req, res) => {
 
 // Get results by class
 const getResultsByClassController = async (req, res) => {
+  const branchId = req.branchId ?? null;
   try {
     const { classId } = req.params;
 
@@ -171,7 +178,7 @@ const getResultsByClassController = async (req, res) => {
       });
     }
 
-    const results = await getResultsByClass(classId);
+    const results = await getResultsByClass(classId, branchId);
     res.status(200).json({
       success: true,
       message: "Class results retrieved successfully",
@@ -188,6 +195,7 @@ const getResultsByClassController = async (req, res) => {
 
 // Get results by subject
 const getResultsBySubjectController = async (req, res) => {
+  const branchId = req.branchId ?? null;
   try {
     const { subjectId } = req.params;
 
@@ -198,7 +206,7 @@ const getResultsBySubjectController = async (req, res) => {
       });
     }
 
-    const results = await getResultsBySubject(subjectId);
+    const results = await getResultsBySubject(subjectId, branchId);
     res.status(200).json({
       success: true,
       message: "Subject results retrieved successfully",
@@ -215,6 +223,7 @@ const getResultsBySubjectController = async (req, res) => {
 
 // Add new result
 const addResultController = async (req, res) => {
+  const branchId = req.branchId ?? null;
   try {
     const resultData = req.body;
     console.log("🔍 Received result data:", resultData);
@@ -244,7 +253,7 @@ const addResultController = async (req, res) => {
       });
     }
 
-    const result = await addResult(resultData);
+    const result = await addResult(resultData, branchId);
     console.log("🔍 Database result:", result);
 
     if (result && result.affectedRows > 0) {
@@ -272,6 +281,7 @@ const addResultController = async (req, res) => {
 
 // Add multiple results
 const addMultipleResultsController = async (req, res) => {
+  const branchId = req.branchId ?? null;
   try {
     const { results } = req.body;
 
@@ -293,7 +303,7 @@ const addMultipleResultsController = async (req, res) => {
       }
     }
 
-    const result = await addMultipleResults(results);
+    const result = await addMultipleResults(results, branchId);
 
     if (result.affectedRows > 0) {
       res.status(201).json({
@@ -318,6 +328,7 @@ const addMultipleResultsController = async (req, res) => {
 
 // Update result
 const updateResultController = async (req, res) => {
+  const branchId = req.branchId ?? null;
   try {
     const { id } = req.params;
     const resultData = req.body;
@@ -348,7 +359,7 @@ const updateResultController = async (req, res) => {
       resultData.MarksObtained = m;
     }
 
-    const result = await updateResult(id, resultData);
+    const result = await updateResult(id, resultData, branchId);
 
     res.status(200).json({
       success: true,
@@ -437,7 +448,8 @@ const deleteResultsByExamController = async (req, res) => {
 // Get result count
 const getResultCountController = async (req, res) => {
   try {
-    const count = await getResultCount();
+    const branchId = req.branchId ?? null;
+    const count = await getResultCount(branchId);
     res.status(200).json({
       success: true,
       message: "Result count retrieved successfully",
@@ -471,7 +483,8 @@ const getStudentResultSummaryController = async (req, res) => {
       });
     }
 
-    const results = await getStudentResultSummary(studentId, examId);
+    const branchId = req.branchId ?? null;
+    const results = await getStudentResultSummary(studentId, examId, branchId);
     res.status(200).json({
       success: true,
       message: "Student result summary retrieved successfully",
@@ -488,10 +501,11 @@ const getStudentResultSummaryController = async (req, res) => {
 
 // Search results
 const searchResultsController = async (req, res) => {
+  const branchId = req.branchId ?? null;
   try {
     const filters = req.query;
 
-    const results = await searchResults(filters);
+    const results = await searchResults(filters, branchId);
     res.status(200).json({
       success: true,
       message: "Results searched successfully",
@@ -618,6 +632,7 @@ const getSubjectWiseResultsController = async (req, res) => {
 
 // Add result by student details (names instead of IDs)
 const addResultByStudentDetailsController = async (req, res) => {
+  const branchId = req.branchId ?? null;
   try {
     const {
       studentName,
@@ -655,11 +670,11 @@ const addResultByStudentDetailsController = async (req, res) => {
       studentName,
       rollNumber,
       className,
-      sectionName,
+      section: sectionName,
       examName,
       subjectName,
       marksObtained,
-    });
+    }, branchId);
 
     res.status(201).json({
       success: true,
@@ -714,7 +729,8 @@ const advancedSearchResultsController = async (req, res) => {
       offset: parseInt(offset),
     };
 
-    const results = await advancedSearchResults(searchCriteria);
+    const branchId = req.branchId ?? null;
+    const results = await advancedSearchResults(searchCriteria, branchId);
 
     res.status(200).json({
       success: true,

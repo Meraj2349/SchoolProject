@@ -15,6 +15,10 @@ export const resultsService = {
   getByExam: (examId) =>
     httpClient.get(`/results/exam/${examId}`).then((r) => r.data),
 
+  // Create result using direct IDs (StudentID, ExamID, SubjectID, ClassID)
+  createById: (data) => httpClient.post("/results", data).then((r) => r.data),
+
+  // Legacy: create by student name/roll and exam/subject names
   create: (data) => httpClient.post("/results", data).then((r) => r.data),
 
   createByDetails: (data) =>

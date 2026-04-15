@@ -6,6 +6,7 @@ import { subjectsService } from "@/services/subjects.service";
 import { classesService } from "@/services/classes.service";
 import { queryKeys } from "@/lib/queryKeys";
 import { useTranslations } from "@/store/languageStore";
+import { useBranchStore } from "@/store/branchStore";
 import { FiEdit2, FiTrash2, FiBook, FiPlusCircle, FiX } from "react-icons/fi";
 
 const EMPTY = { SubjectName: "", ClassID: "" };
@@ -14,14 +15,15 @@ export default function AdminPage() {
   const qc = useQueryClient();
   const t = useTranslations("admin.subjects");
   const tCommon = useTranslations("common");
+  const branchId = useBranchStore((s) => s.currentBranchId);
 
   const { data: subjects = [], isLoading } = useQuery({
-    queryKey: queryKeys.subjects.all,
+    queryKey: queryKeys.subjects.all(branchId),
     queryFn: subjectsService.getAll,
     select: (d) => d?.data ?? d ?? [],
   });
   const { data: classes = [] } = useQuery({
-    queryKey: queryKeys.classes.all,
+    queryKey: queryKeys.classes.all(branchId),
     queryFn: classesService.getAll,
     select: (d) => d?.data ?? d ?? [],
   });
@@ -29,7 +31,7 @@ export default function AdminPage() {
   const create = useMutation({
     mutationFn: subjectsService.create,
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: queryKeys.subjects.all });
+      qc.invalidateQueries({ queryKey: queryKeys.subjects.all(branchId) });
       flash(t("subjectAdded"));
       reset();
     },
@@ -37,7 +39,7 @@ export default function AdminPage() {
   const update = useMutation({
     mutationFn: ({ id, data }) => subjectsService.update(id, data),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: queryKeys.subjects.all });
+      qc.invalidateQueries({ queryKey: queryKeys.subjects.all(branchId) });
       flash(t("subjectUpdated"));
       reset();
     },
@@ -45,7 +47,7 @@ export default function AdminPage() {
   const remove = useMutation({
     mutationFn: subjectsService.remove,
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: queryKeys.subjects.all });
+      qc.invalidateQueries({ queryKey: queryKeys.subjects.all(branchId) });
       flash(t("deleted"));
     },
   });

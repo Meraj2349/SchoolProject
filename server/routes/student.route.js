@@ -1,4 +1,5 @@
 import express from "express";
+import authMiddleware from "../middlewares/auth.middleware.js";
 import {
   addStudentController,
   checkRollNumberController,
@@ -14,6 +15,9 @@ import {
 } from "../controllers/student.controller.js";
 
 const router = express.Router();
+
+// Apply auth middleware to all student routes so branchId is available
+router.use(authMiddleware);
 
 // Route to get all students
 router.get("/", getAllStudentsController);

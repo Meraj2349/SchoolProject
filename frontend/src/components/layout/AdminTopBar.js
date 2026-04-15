@@ -7,8 +7,10 @@ import { useAuthStore } from "@/store/authStore";
 import { authService } from "@/services/auth.service";
 import { useRouter } from "next/navigation";
 import LanguageSwitcher from "@/components/ui/LanguageSwitcher";
+import BranchSelector from "@/components/ui/BranchSelector";
 
 const ROUTE_LABELS = {
+  "/admin/dashboard": "Dashboard",
   "/admin/notices": "Notices",
   "/admin/messages": "Chairman Messages",
   "/admin/gallery": "Image Gallery",
@@ -65,8 +67,11 @@ export default function AdminTopBar({ onMenuToggle }) {
         </div>
       </div>
 
-      {/* Right: language switcher + bell + avatar */}
+      {/* Right: branch selector + language switcher + bell + avatar */}
       <div className="flex items-center gap-2">
+        <div className="hidden sm:block">
+          <BranchSelector />
+        </div>
         <div className="hidden sm:block">
           <LanguageSwitcher />
         </div>

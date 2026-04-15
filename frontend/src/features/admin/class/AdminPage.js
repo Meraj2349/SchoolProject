@@ -12,6 +12,7 @@ import { classesService } from "@/services/classes.service";
 import { teachersService } from "@/services/teachers.service";
 import { queryKeys } from "@/lib/queryKeys";
 import { useTranslations } from "@/store/languageStore";
+import { useBranchStore } from "@/store/branchStore";
 import { toast } from "react-toastify";
 import {
   FiEdit2,
@@ -257,6 +258,7 @@ export default function AdminPage() {
   const update = useUpdateClass();
   const remove = useDeleteClass();
   const t = useTranslations("admin.classes");
+  const branchId = useBranchStore((s) => s.currentBranchId);
 
   const [form, setForm] = useState(EMPTY_FORM);
   const [editId, setEditId] = useState(null);
@@ -267,7 +269,7 @@ export default function AdminPage() {
   const teacherQuery = form.teacherInput.trim();
   const { data: teacherSuggestions = [], isFetching: teacherSearching } =
     useQuery({
-      queryKey: queryKeys.teachers.search(teacherQuery, form.className),
+      queryKey: queryKeys.teachers.search(teacherQuery, form.className, branchId),
       queryFn: () => teachersService.search(teacherQuery, form.className),
       enabled: teacherQuery.length >= 1 && !form.teacherId,
       staleTime: 10_000,
@@ -275,7 +277,7 @@ export default function AdminPage() {
 
   // Distinct classes (class name + section combos) for dropdowns
   const { data: distinctClasses = [] } = useQuery({
-    queryKey: queryKeys.classes.distinct,
+    queryKey: queryKeys.classes.distinct(branchId),
     queryFn: classesService.getDistinct,
     staleTime: 60_000,
   });

@@ -6,6 +6,7 @@ import { attendanceService } from "@/services/attendance.service";
 import { classesService } from "@/services/classes.service";
 import { queryKeys } from "@/lib/queryKeys";
 import { useTranslations } from "@/store/languageStore";
+import { useBranchStore } from "@/store/branchStore";
 import {
   FiSearch,
   FiUserCheck,
@@ -130,6 +131,7 @@ function TableSkeleton() {
 
 export default function AdminAttendanceGridPage() {
   const t = useTranslations("admin.attendance");
+  const branchId = useBranchStore((s) => s.currentBranchId);
 
   const todayStr = getLocalDateStr();
   const todayDate = new Date();
@@ -142,7 +144,7 @@ export default function AdminAttendanceGridPage() {
 
   // ── Distinct classes for dropdowns ────────────────────────────────────
   const { data: distinctClasses = [] } = useQuery({
-    queryKey: queryKeys.classes.distinct,
+    queryKey: queryKeys.classes.distinct(branchId),
     queryFn: classesService.getDistinct,
     select: (d) => d?.data ?? d ?? [],
   });
@@ -181,9 +183,10 @@ export default function AdminAttendanceGridPage() {
             submitted.section,
             startDate,
             endDate,
+            branchId,
           )
         : null,
-    [submitted, startDate, endDate],
+    [submitted, startDate, endDate, branchId],
   );
 
   const { data, isLoading } = useQuery({

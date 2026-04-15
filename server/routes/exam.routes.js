@@ -1,4 +1,5 @@
 import express from "express";
+import authMiddleware from "../middlewares/auth.middleware.js";
 import {
   addExamByClassDetailsController,
   createExamByClassNameAndSectionController,
@@ -10,6 +11,8 @@ import {
 } from "../controllers/exam.controller.js";
 
 const router = express.Router();
+
+router.use(authMiddleware);
 
 // Route to get all exams
 router.get("/", getAllExamsController);
