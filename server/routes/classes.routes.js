@@ -7,6 +7,7 @@ import {
   editClassController,
   getTotalStudentsInClassByNameController,
   getDistinctClassesWithSectionsController,
+  getDistinctClassNamesController,
 } from "../controllers/classes.controller.js";
 
 const router = express.Router();
@@ -21,6 +22,9 @@ router.delete("/delete/:id", deleteClassController);
 
 // Get all classes
 router.get("/", getClassesController);
+
+// Get all distinct class names across all branches (global — class names are universal)
+router.get("/names", getDistinctClassNamesController);
 
 // Get distinct class names with sections (for dropdowns/autocomplete)
 router.get("/distinct", getDistinctClassesWithSectionsController);

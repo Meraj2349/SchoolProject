@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useMemo, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
   useClasses,
@@ -8,8 +8,8 @@ import {
   useUpdateClass,
   useDeleteClass,
 } from "@/hooks/useClasses";
-import { classesService } from "@/services/classes.service";
 import { teachersService } from "@/services/teachers.service";
+import { classesService } from "@/services/classes.service";
 import { queryKeys } from "@/lib/queryKeys";
 import { useTranslations } from "@/store/languageStore";
 import { useBranchStore } from "@/store/branchStore";
@@ -19,7 +19,6 @@ import {
   FiPlusCircle,
   FiGrid,
   FiSearch,
-  FiChevronDown,
   FiX,
   FiUserMinus,
 } from "react-icons/fi";
@@ -120,127 +119,21 @@ function Autocomplete({
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Filterable select (dropdown with filter-as-you-type)
+// Standard class names — fetched from the ClassNames DB table via /classes/names
+// This fallback list is used only while the query is loading.
 // ─────────────────────────────────────────────────────────────────────────────
-function FilterableSelect({
-  label,
-  value,
-  onSelect,
-  options,
-  placeholder = "Select…",
-  required = false,
-  disabled = false,
-}) {
-  const [open, setOpen] = useState(false);
-  const [filter, setFilter] = useState("");
-  const containerRef = useRef(null);
-  const inputRef = useRef(null);
+const STANDARD_CLASSES = [
+  "Play", "Nursery", "KG",
+  "Class 1", "Class 2", "Class 3", "Class 4", "Class 5",
+  "Class 6", "Class 7", "Class 8", "Class 9", "Class 10",
+];
 
-  useEffect(() => {
-    const handler = (e) => {
-      if (containerRef.current && !containerRef.current.contains(e.target)) {
-        setOpen(false);
-        setFilter("");
-      }
-    };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, []);
-
-  const filtered = useMemo(() => {
-    if (!filter.trim()) return options;
-    const q = filter.toLowerCase();
-    return options.filter((o) => o.label.toLowerCase().includes(q));
-  }, [options, filter]);
-
-  const selectedLabel = options.find((o) => o.value === value)?.label ?? "";
-
-  const handleOpen = () => {
-    if (disabled) return;
-    setOpen(true);
-    setFilter("");
-    setTimeout(() => inputRef.current?.focus(), 0);
-  };
-
-  const handleSelect = (opt) => {
-    onSelect(opt);
-    setOpen(false);
-    setFilter("");
-  };
-
-  const handleClear = (e) => {
-    e.stopPropagation();
-    onSelect(null);
-  };
-
-  return (
-    <div ref={containerRef} className="relative">
-      <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
-        {label}
-        {required && <span className="text-red-400 ml-0.5">*</span>}
-      </label>
-      <button
-        type="button"
-        onClick={handleOpen}
-        disabled={disabled}
-        className={`form-input w-full flex items-center justify-between text-left ${
-          disabled ? "opacity-60 cursor-not-allowed bg-slate-50" : "cursor-pointer"
-        } ${!selectedLabel ? "text-slate-400" : "text-slate-800"}`}
-      >
-        <span className="truncate">{selectedLabel || placeholder}</span>
-        <div className="flex items-center gap-1 shrink-0">
-          {value && !disabled && (
-            <span
-              onMouseDown={handleClear}
-              className="text-slate-400 hover:text-slate-600 p-0.5"
-            >
-              <FiX className="text-xs" />
-            </span>
-          )}
-          <FiChevronDown
-            className={`text-slate-400 text-xs transition-transform ${open ? "rotate-180" : ""}`}
-          />
-        </div>
-      </button>
-      {open && (
-        <div className="absolute z-50 mt-1 w-full bg-white border border-slate-200 rounded-xl shadow-lg">
-          <div className="p-2 border-b border-slate-100">
-            <input
-              ref={inputRef}
-              type="text"
-              value={filter}
-              onChange={(e) => setFilter(e.target.value)}
-              placeholder="Filter…"
-              className="form-input text-sm py-1.5"
-              autoComplete="off"
-            />
-          </div>
-          <ul className="max-h-48 overflow-y-auto">
-            {filtered.length === 0 ? (
-              <li className="px-4 py-3 text-xs text-slate-400 text-center">
-                No options found
-              </li>
-            ) : (
-              filtered.map((opt) => (
-                <li
-                  key={opt.value}
-                  onMouseDown={() => handleSelect(opt)}
-                  className={`px-4 py-2.5 cursor-pointer hover:bg-indigo-50 text-sm border-b border-slate-50 last:border-0 ${
-                    opt.value === value
-                      ? "bg-indigo-50 text-indigo-700 font-medium"
-                      : "text-slate-700"
-                  }`}
-                >
-                  {opt.label}
-                </li>
-              ))
-            )}
-          </ul>
-        </div>
-      )}
-    </div>
-  );
-}
+// Common section names across all branches (datalist suggestions)
+const SECTION_SUGGESTIONS = [
+  "A", "B", "C", "D", "E",
+  "Morning", "Day", "Evening",
+  "Bangla", "English",
+];
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Main page
@@ -265,6 +158,13 @@ export default function AdminPage() {
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
   const formRef = useRef(null);
 
+  // Class names from DB (global — shared across all branches)
+  const { data: classNameOptions = STANDARD_CLASSES } = useQuery({
+    queryKey: queryKeys.classes.names(),
+    queryFn: classesService.getNames,
+    select: (d) => (Array.isArray(d) && d.length > 0 ? d : STANDARD_CLASSES),
+  });
+
   // Teacher autocomplete query — fires when user has typed >= 1 char
   const teacherQuery = form.teacherInput.trim();
   const { data: teacherSuggestions = [], isFetching: teacherSearching } =
@@ -275,32 +175,6 @@ export default function AdminPage() {
       staleTime: 10_000,
     });
 
-  // Distinct classes (class name + section combos) for dropdowns
-  const { data: distinctClasses = [] } = useQuery({
-    queryKey: queryKeys.classes.distinct(branchId),
-    queryFn: classesService.getDistinct,
-    staleTime: 60_000,
-  });
-
-  // Unique class names for the class combobox
-  const classNameOptions = useMemo(() => {
-    const seen = new Set();
-    return distinctClasses
-      .filter((r) => {
-        if (seen.has(r.ClassName)) return false;
-        seen.add(r.ClassName);
-        return true;
-      })
-      .map((r) => ({ value: r.ClassName, label: r.ClassName }));
-  }, [distinctClasses]);
-
-  // Sections that belong to the currently selected class
-  const sectionOptions = useMemo(() => {
-    if (!form.className) return [];
-    return distinctClasses
-      .filter((r) => r.ClassName === form.className)
-      .map((r) => ({ value: r.Section, label: r.Section }));
-  }, [distinctClasses, form.className]);
 
   const reset = useCallback(() => {
     setForm(EMPTY_FORM);
@@ -317,22 +191,6 @@ export default function AdminPage() {
       teacherId: String(teacher.TeacherID),
       teacherInput: `${teacher.FirstName} ${teacher.LastName}`,
     }));
-  };
-
-  const handleClassSelect = (opt) => {
-    if (!opt) {
-      setForm((p) => ({ ...p, className: "", section: "" }));
-      return;
-    }
-    const sections = distinctClasses
-      .filter((r) => r.ClassName === opt.value)
-      .map((r) => r.Section);
-    const autoSection = sections.length === 1 ? sections[0] : "";
-    setForm((p) => ({ ...p, className: opt.value, section: autoSection }));
-  };
-
-  const handleSectionSelect = (opt) => {
-    setForm((p) => ({ ...p, section: opt ? opt.value : "" }));
   };
 
   const handleSave = async (e) => {
@@ -476,28 +334,45 @@ export default function AdminPage() {
               )}
             />
 
-            {/* Class name combobox */}
-            <FilterableSelect
-              label={t("className") || "Class"}
-              value={form.className}
-              onSelect={handleClassSelect}
-              options={classNameOptions}
-              placeholder="Select class…"
-              required
-            />
+            {/* Class name — fixed shared list, same for all branches */}
+            <div>
+              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
+                {t("className") || "Class"} <span className="text-red-400">*</span>
+              </label>
+              <select
+                value={form.className}
+                onChange={(e) => setForm((p) => ({ ...p, className: e.target.value }))}
+                required
+                className="form-input cursor-pointer"
+              >
+                <option value="" disabled>Select class…</option>
+                {classNameOptions.map((c) => (
+                  <option key={c} value={c}>{c}</option>
+                ))}
+              </select>
+            </div>
 
-            {/* Section — auto-populated from chosen class */}
-            <FilterableSelect
-              label={t("section") || "Section"}
-              value={form.section}
-              onSelect={handleSectionSelect}
-              options={sectionOptions}
-              placeholder={
-                form.className ? "Select section…" : "Choose a class first"
-              }
-              disabled={!form.className}
-              required
-            />
+            {/* Section — free text, each branch sets its own sections */}
+            <div>
+              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
+                {t("section") || "Section"} <span className="text-red-400">*</span>
+              </label>
+              <input
+                list="section-list"
+                type="text"
+                value={form.section}
+                onChange={(e) => setForm((p) => ({ ...p, section: e.target.value }))}
+                placeholder="e.g. A, B, Morning…"
+                required
+                autoComplete="off"
+                className="form-input"
+              />
+              <datalist id="section-list">
+                {SECTION_SUGGESTIONS.map((s) => (
+                  <option key={s} value={s} />
+                ))}
+              </datalist>
+            </div>
           </div>
 
           {/* Confirmation strip — shows resolved teacher + class */}

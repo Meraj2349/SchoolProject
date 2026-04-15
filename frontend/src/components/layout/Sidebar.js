@@ -10,6 +10,7 @@ import {
   FaFileAlt,
   FaHandshake,
   FaImage,
+  FaCodeBranch,
 } from "react-icons/fa";
 import {
   FaClipboardList,
@@ -36,6 +37,12 @@ export default function Sidebar({ open, onClose }) {
       path: "/admin/dashboard",
       icon: <FiLayout />,
       key: "sidebar.adminDashboard",
+      superAdminOnly: true,
+    },
+    {
+      path: "/admin/branches",
+      icon: <FaCodeBranch />,
+      key: "sidebar.branches",
       superAdminOnly: true,
     },
     { path: "/admin/notices", icon: <FaBell />, key: "sidebar.notice" },

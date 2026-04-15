@@ -142,17 +142,19 @@ export default function AdminAttendanceGridPage() {
   const [year, setYear] = useState(todayDate.getFullYear());
   const [nameSearch, setNameSearch] = useState("");
 
-  // ── Distinct classes for dropdowns ────────────────────────────────────
+  // ── Class names — global (same across all branches) ──────────────────
+  const { data: classNames = [] } = useQuery({
+    queryKey: queryKeys.classes.names(),
+    queryFn: classesService.getNames,
+    select: (d) => (Array.isArray(d) ? d : d?.data ?? []),
+  });
+
+  // ── Branch-scoped (ClassName, Section) pairs — for sections only ──────
   const { data: distinctClasses = [] } = useQuery({
     queryKey: queryKeys.classes.distinct(branchId),
     queryFn: classesService.getDistinct,
     select: (d) => d?.data ?? d ?? [],
   });
-
-  const classNames = useMemo(
-    () => [...new Set(distinctClasses.map((c) => c.ClassName))].sort(),
-    [distinctClasses],
-  );
 
   const availableSections = useMemo(
     () =>

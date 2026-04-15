@@ -31,6 +31,8 @@ export const queryKeys = {
   },
   classes: {
     all: (branchId = null) => ["classes", { branchId }],
+    // Global — class names are the same across all branches, no branchId needed
+    names: () => ["classes", "names"],
     distinct: (branchId = null) => ["classes", "distinct", { branchId }],
     studentCount: (name, branchId = null) => ["classes", "count", name, { branchId }],
   },

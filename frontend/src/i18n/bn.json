@@ -22,6 +22,7 @@
   },
   "sidebar": {
     "adminDashboard": "অ্যাডমিন ড্যাশবোর্ড",
+    "branches": "শাখা ব্যবস্থাপনা",
     "notice": "নোটিশ",
     "chairMessage": "চেয়ারম্যানের বার্তা",
     "chairmanProfile": "চেয়ারম্যান প্রোফাইল",
@@ -264,7 +265,14 @@
       "noAccount": "অ্যাকাউন্ট নেই?",
       "signUp": "নিবন্ধন করুন",
       "loginFailed": "লগইন ব্যর্থ হয়েছে",
-      "somethingWrong": "কিছু একটা ভুল হয়েছে। আবার চেষ্টা করুন।"
+      "somethingWrong": "কিছু একটা ভুল হয়েছে। আবার চেষ্টা করুন।",
+      "selectBranch": "শাখা বেছে নিন",
+      "superAdmin": "সুপার অ্যাডমিন",
+      "branchPlaceholder": "-- শাখা বেছে নিন --",
+      "continueBtn": "পরবর্তী",
+      "backBtn": "পিছনে",
+      "loginAs": "লগইন করছেন",
+      "superAdminLogin": "সুপার অ্যাডমিন লগইন"
     },
     "notices": {
       "title": "নোটিশ পরিচালনা",
@@ -575,7 +583,14 @@
       "signIn": "সাইন ইন করুন",
       "passwordMismatch": "পাসওয়ার্ড মিলছে না",
       "registrationSuccess": "নিবন্ধন সফল হয়েছে! অনুগ্রহ করে লগইন করুন।",
-      "registrationFailed": "নিবন্ধন ব্যর্থ হয়েছে"
+      "registrationFailed": "নিবন্ধন ব্যর্থ হয়েছে",
+      "selectBranch": "শাখা বেছে নিন",
+      "branchPlaceholder": "-- শাখা বেছে নিন --",
+      "continueBtn": "পরবর্তী",
+      "backBtn": "পিছনে",
+      "registeringAs": "নিবন্ধন করছেন",
+      "superAdmin": "সুপার অ্যাডমিন",
+      "superAdminRegister": "সুপার অ্যাডমিন নিবন্ধন"
     },
     "news": {
       "title": "সংবাদ ব্যবস্থাপনা",
@@ -655,6 +670,35 @@
       "noApplications": "কোনো আবেদন পাওয়া যায়নি।",
       "operationFailed": "কার্যক্রম ব্যর্থ হয়েছে"
     },
+    "branches": {
+      "title": "শাখা ব্যবস্থাপনা",
+      "addBranch": "শাখা যোগ করুন",
+      "editBranch": "শাখা সম্পাদনা",
+      "updateBranch": "শাখা আপডেট করুন",
+      "cancel": "বাতিল",
+      "allBranches": "সকল শাখা",
+      "nameEn": "নাম (ইংরেজি)",
+      "nameBn": "নাম (বাংলা)",
+      "addressEn": "ঠিকানা (ইংরেজি)",
+      "addressBn": "ঠিকানা (বাংলা)",
+      "descriptionEn": "বিবরণ (ইংরেজি)",
+      "descriptionBn": "বিবরণ (বাংলা)",
+      "isProposed": "প্রস্তাবিত শাখা",
+      "establishedDate": "প্রতিষ্ঠার তারিখ",
+      "status": "অবস্থা",
+      "active": "সক্রিয়",
+      "proposed": "প্রস্তাবিত",
+      "actions": "কার্যক্রম",
+      "loading": "লোড হচ্ছে…",
+      "branchAdded": "শাখা যোগ হয়েছে!",
+      "branchUpdated": "শাখা আপডেট হয়েছে!",
+      "deleted": "শাখা মুছে ফেলা হয়েছে।",
+      "deleteConfirm": "এই শাখাটি মুছে ফেলবেন? এটি পূর্বাবস্থায় ফেরানো যাবে না।",
+      "operationFailed": "কার্যক্রম ব্যর্থ হয়েছে",
+      "nameRequired": "কমপক্ষে একটি শাখার নাম প্রয়োজন",
+      "noBranches": "কোনো শাখা পাওয়া যায়নি।",
+      "superAdminOnly": "শাখা ব্যবস্থাপনা শুধুমাত্র সুপার অ্যাডমিনের জন্য।"
+    },
     "dashboard": {
       "title": "সুপার অ্যাডমিন ড্যাশবোর্ড",
       "overview": "শাখার সারসংক্ষেপ",
@@ -688,7 +732,11 @@
     "noProposedBranches": "এখনো কোনো প্রস্তাবিত শাখা নেই",
     "loading": "শাখা লোড হচ্ছে…",
     "failedToLoad": "শাখা লোড করতে ব্যর্থ হয়েছে",
-    "tryAgain": "আবার চেষ্টা করুন"
+    "tryAgain": "আবার চেষ্টা করুন",
+    "students": "শিক্ষার্থী",
+    "teachers": "শিক্ষক",
+    "classes": "শ্রেণি",
+    "description": "বিবরণ"
   },
   "notFound": {
     "title": "পৃষ্ঠা পাওয়া যায়নি",

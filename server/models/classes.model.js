@@ -104,6 +104,18 @@ export const getClasswiseStudentCount = async (branchId = null) => {
   }
 };
 
+// Get all standard class names from the ClassNames reference table (global — not branch-scoped)
+export const getDistinctClassNames = async () => {
+  const sql = `SELECT name FROM ClassNames ORDER BY sort_order, name`;
+  try {
+    const [rows] = await db.query(sql);
+    return rows.map((r) => r.name);
+  } catch (error) {
+    console.error("Error fetching distinct class names:", error);
+    throw error;
+  }
+};
+
 // Get distinct class names with their sections (branch-scoped for dropdowns)
 export const getDistinctClassesWithSections = async (branchId = null) => {
   const { clause, params: branchParams } = branchFilter(branchId);

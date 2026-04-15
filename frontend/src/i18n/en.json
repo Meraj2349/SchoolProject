@@ -22,6 +22,7 @@
   },
   "sidebar": {
     "adminDashboard": "Admin Dashboard",
+    "branches": "Branch Management",
     "notice": "Notice",
     "chairMessage": "Chair Message",
     "chairmanProfile": "Chairman Profile",
@@ -264,7 +265,14 @@
       "noAccount": "Don't have an account?",
       "signUp": "Sign up",
       "loginFailed": "Login failed",
-      "somethingWrong": "Something went wrong. Please try again."
+      "somethingWrong": "Something went wrong. Please try again.",
+      "selectBranch": "Select Branch",
+      "superAdmin": "Super Admin",
+      "branchPlaceholder": "-- Choose a branch --",
+      "continueBtn": "Continue",
+      "backBtn": "Back",
+      "loginAs": "Logging in as",
+      "superAdminLogin": "Super Admin Login"
     },
     "notices": {
       "title": "Manage Notices",
@@ -575,7 +583,14 @@
       "signIn": "Sign in",
       "passwordMismatch": "Passwords do not match",
       "registrationSuccess": "Registration successful! Please log in.",
-      "registrationFailed": "Registration failed"
+      "registrationFailed": "Registration failed",
+      "selectBranch": "Select Branch",
+      "branchPlaceholder": "-- Choose a branch --",
+      "continueBtn": "Continue",
+      "backBtn": "Back",
+      "registeringAs": "Registering for",
+      "superAdmin": "Super Admin",
+      "superAdminRegister": "Super Admin Registration"
     },
     "news": {
       "title": "News Management",
@@ -655,6 +670,35 @@
       "noApplications": "No applications found.",
       "operationFailed": "Operation failed"
     },
+    "branches": {
+      "title": "Branch Management",
+      "addBranch": "Add Branch",
+      "editBranch": "Edit Branch",
+      "updateBranch": "Update Branch",
+      "cancel": "Cancel",
+      "allBranches": "All Branches",
+      "nameEn": "Name (English)",
+      "nameBn": "Name (Bangla)",
+      "addressEn": "Address (English)",
+      "addressBn": "Address (Bangla)",
+      "descriptionEn": "Description (English)",
+      "descriptionBn": "Description (Bangla)",
+      "isProposed": "Proposed Branch",
+      "establishedDate": "Established Date",
+      "status": "Status",
+      "active": "Active",
+      "proposed": "Proposed",
+      "actions": "Actions",
+      "loading": "Loading…",
+      "branchAdded": "Branch added!",
+      "branchUpdated": "Branch updated!",
+      "deleted": "Branch deleted.",
+      "deleteConfirm": "Delete this branch? This cannot be undone.",
+      "operationFailed": "Operation failed",
+      "nameRequired": "At least one branch name is required",
+      "noBranches": "No branches found. Add one above.",
+      "superAdminOnly": "Branch management is only available to super admins."
+    },
     "dashboard": {
       "title": "Super Admin Dashboard",
       "overview": "Branch Overview",
@@ -688,7 +732,11 @@
     "noProposedBranches": "No proposed branches yet",
     "loading": "Loading branches…",
     "failedToLoad": "Failed to load branches",
-    "tryAgain": "Try Again"
+    "tryAgain": "Try Again",
+    "students": "Students",
+    "teachers": "Teachers",
+    "classes": "Classes",
+    "description": "Description"
   },
   "notFound": {
     "title": "Page Not Found",

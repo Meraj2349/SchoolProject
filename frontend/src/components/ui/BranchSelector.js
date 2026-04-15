@@ -9,10 +9,8 @@ import { FiGitBranch } from "react-icons/fi";
 /**
  * BranchSelector — dropdown for super_admin to switch the active branch context.
  *
- * - Visible only to super_admin.
- * - branch_admin sees a read-only badge showing their assigned branch.
- * - Selecting a branch updates the global branchStore, which the httpClient
- *   interceptor reads to append ?branch_id=X to API calls.
+ * - super_admin: dropdown to switch between branches (null = All Branches).
+ * - branch_admin: read-only badge showing their assigned branch name.
  */
 export default function BranchSelector() {
   const role = useAuthStore((s) => s.role);
@@ -25,34 +23,36 @@ export default function BranchSelector() {
   const isSuperAdmin = role === "super_admin";
   const isBranchAdmin = role === "branch_admin";
 
-  // For branch_admin, lock the store to their own branch on mount
+  // Load branches for both roles:
+  // - super_admin: needs the list for the dropdown
+  // - branch_admin: needs it to resolve a real name from the assigned branch_id
   useEffect(() => {
-    if (isBranchAdmin && authBranchId != null) {
-      lockBranch(authBranchId, `Branch ${authBranchId}`);
-    }
-  }, [isBranchAdmin, authBranchId, lockBranch]);
-
-  // For super_admin, load the branch list
-  useEffect(() => {
-    if (!isSuperAdmin) return;
+    if (!isSuperAdmin && !isBranchAdmin) return;
     setLoading(true);
     branchService
       .getAll()
       .then((data) => {
         const list = Array.isArray(data) ? data : [];
         setBranches(list);
-        // If branch was locked to a specific one previously, update the name
-        if (currentBranchId != null) {
-          const found = list.find((b) => b.BranchID === currentBranchId || b.id === currentBranchId);
+
+        if (isBranchAdmin && authBranchId != null) {
+          const found = list.find((b) => b.id === authBranchId);
+          const name = found
+            ? found.name_en || found.name_bn || `Branch ${authBranchId}`
+            : `Branch ${authBranchId}`;
+          lockBranch(authBranchId, name);
+        } else if (isSuperAdmin && currentBranchId != null) {
+          // Refresh the display name if super_admin had a branch selected
+          const found = list.find((b) => b.id === currentBranchId);
           if (found) {
-            setBranch(currentBranchId, found.BranchName || found.name || `Branch ${currentBranchId}`);
+            setBranch(currentBranchId, found.name_en || found.name_bn || `Branch ${currentBranchId}`);
           }
         }
       })
       .catch(() => setBranches([]))
       .finally(() => setLoading(false));
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isSuperAdmin]);
+  }, [isSuperAdmin, isBranchAdmin, authBranchId]);
 
   const handleChange = (e) => {
     const val = e.target.value;
@@ -60,17 +60,16 @@ export default function BranchSelector() {
       setBranch(null, "All Branches");
     } else {
       const id = parseInt(val, 10);
-      const found = branches.find((b) => (b.BranchID ?? b.id) === id);
-      setBranch(id, found?.BranchName || found?.name || `Branch ${id}`);
+      const found = branches.find((b) => b.id === id);
+      setBranch(id, found?.name_en || found?.name_bn || `Branch ${id}`);
     }
   };
 
   if (isBranchAdmin) {
-    // Read-only badge for branch_admin
     return (
       <div className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 border border-indigo-200 rounded-lg text-sm text-indigo-700">
         <FiGitBranch className="text-indigo-500 flex-shrink-0" />
-        <span className="font-medium truncate max-w-32">{currentBranchName}</span>
+        <span className="font-medium truncate max-w-40">{currentBranchName}</span>
       </div>
     );
   }
@@ -84,19 +83,15 @@ export default function BranchSelector() {
         value={currentBranchId ?? ""}
         onChange={handleChange}
         disabled={loading}
-        className="text-sm border border-slate-200 rounded-lg px-2 py-1.5 bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-300 cursor-pointer disabled:opacity-60 max-w-40"
+        className="text-sm border border-slate-200 rounded-lg px-2 py-1.5 bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-300 cursor-pointer disabled:opacity-60 max-w-44"
         aria-label="Select branch"
       >
         <option value="">All Branches</option>
-        {branches.map((b) => {
-          const id = b.BranchID ?? b.id;
-          const name = b.BranchName || b.name || `Branch ${id}`;
-          return (
-            <option key={id} value={id}>
-              {name}
-            </option>
-          );
-        })}
+        {branches.map((b) => (
+          <option key={b.id} value={b.id}>
+            {b.name_en || b.name_bn || `Branch ${b.id}`}
+          </option>
+        ))}
       </select>
     </div>
   );

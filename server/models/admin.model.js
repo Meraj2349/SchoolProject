@@ -3,11 +3,24 @@ import db from "../config/db.config.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
-// Find an admin by email
-export const findAdminByEmail = async (email) => {
-  const sql = "SELECT * FROM Admin WHERE Email = ?";
-  const [rows] = await db.query(sql, [email]);
-  return rows[0]; // Return the admin row
+// Find an admin by email + login context (role + branch)
+// - isSuper=true  → look for super_admin row
+// - isSuper=false → look for branch_admin row with matching branch_id
+export const findAdminByEmail = async (email, isSuper = false, branchId = null) => {
+  let sql, params;
+  if (isSuper) {
+    sql = "SELECT * FROM Admin WHERE Email = ? AND role = 'super_admin' LIMIT 1";
+    params = [email];
+  } else if (branchId != null) {
+    sql = "SELECT * FROM Admin WHERE Email = ? AND role = 'branch_admin' AND branch_id = ? LIMIT 1";
+    params = [email, branchId];
+  } else {
+    // Fallback — original behaviour (used by updateEmailPassword etc.)
+    sql = "SELECT * FROM Admin WHERE Email = ? LIMIT 1";
+    params = [email];
+  }
+  const [rows] = await db.query(sql, params);
+  return rows[0] ?? null;
 };
 
 // Create a new admin
@@ -32,9 +45,9 @@ export const createAdmin = async (adminData) => {
   }
 };
 
-// Authenticate admin
-export const authenticateAdmin = async (email, password) => {
-  const admin = await findAdminByEmail(email);
+// Authenticate admin — isSuper and branchId guide which row to look up
+export const authenticateAdmin = async (email, password, isSuper = false, branchId = null) => {
+  const admin = await findAdminByEmail(email, isSuper, branchId);
   if (!admin) {
     throw new Error("Admin not found");
   }
@@ -44,7 +57,7 @@ export const authenticateAdmin = async (email, password) => {
     throw new Error("Invalid credentials");
   }
 
-  return admin; // Return the admin object if credentials are valid
+  return admin;
 };
 
 // Generate JWT token (includes role and branch_id for RBAC + branch scoping)

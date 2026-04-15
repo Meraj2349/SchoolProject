@@ -25,20 +25,21 @@ export default function AdminPage() {
   const [saving, setSaving] = useState(false);
   const [status, setStatus] = useState({ error: "", success: "" });
 
-  // Load distinct classes for dropdowns
+  // Class names — global (same across all branches)
+  const { data: classNames = [] } = useQuery({
+    queryKey: queryKeys.classes.names(),
+    queryFn: classesService.getNames,
+    select: (d) => (Array.isArray(d) ? d : d?.data ?? []),
+  });
+
+  // Branch-scoped (ClassName, Section) pairs — used only to derive available sections
   const { data: distinctClasses = [] } = useQuery({
     queryKey: queryKeys.classes.distinct(branchId),
     queryFn: classesService.getDistinct,
     select: (d) => d?.data ?? d ?? [],
   });
 
-  // Unique class names for the class dropdown
-  const classNames = useMemo(
-    () => [...new Set(distinctClasses.map((c) => c.ClassName))].sort(),
-    [distinctClasses],
-  );
-
-  // Sections available for the selected class
+  // Sections available for the selected class (branch-scoped)
   const availableSections = useMemo(
     () =>
       distinctClasses

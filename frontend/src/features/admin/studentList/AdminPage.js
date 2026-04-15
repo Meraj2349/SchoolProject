@@ -41,17 +41,20 @@ export default function AdminPage() {
     select: (d) => d?.data ?? d ?? [],
   });
 
-  // Distinct classes for form dropdowns
+  // Class names — global (same across all branches)
+  const { data: classNames = [] } = useQuery({
+    queryKey: queryKeys.classes.names(),
+    queryFn: classesService.getNames,
+    select: (d) => (Array.isArray(d) ? d : d?.data ?? []),
+  });
+
+  // Branch-scoped (ClassName, Section) pairs — used only to derive available sections
   const { data: distinctClasses = [] } = useQuery({
     queryKey: queryKeys.classes.distinct(branchId),
     queryFn: classesService.getDistinct,
     select: (d) => d?.data ?? d ?? [],
   });
 
-  const classNames = useMemo(
-    () => [...new Set(distinctClasses.map((c) => c.ClassName))].sort(),
-    [distinctClasses],
-  );
   const formSections = useMemo(
     () =>
       distinctClasses
