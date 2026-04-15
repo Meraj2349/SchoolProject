@@ -5,6 +5,7 @@ import Footer from "@/components/layout/Footer";
 import LatestUpdatesNotice from "@/components/shared/LatestUpdatesNotice";
 import { useBranches } from "@/hooks/useBranches";
 import { useBranchStats } from "@/hooks/useBranchStats";
+import { useBranchStore } from "@/store/branchStore";
 import { useTranslations, useLanguageStore } from "@/store/languageStore";
 import "@/styles/BranchesPage.css";
 
@@ -27,7 +28,7 @@ function StatChip({ icon, value, label }) {
   );
 }
 
-function BranchCard({ branch, stats, language, t }) {
+function BranchCard({ branch, stats, language, t, isSelected, onSelect }) {
   const isProposed = branch.is_proposed === true || branch.is_proposed === 1;
   const name =
     language === "bn"
@@ -47,7 +48,21 @@ function BranchCard({ branch, stats, language, t }) {
     : null;
 
   return (
-    <div className={`branch-card${isProposed ? " proposed" : ""}`}>
+    <div
+      className={`branch-card${isProposed ? " proposed" : ""}${isSelected ? " branch-card--selected" : ""}`}
+      style={{ cursor: isProposed ? "default" : "pointer" }}
+      onClick={() => !isProposed && onSelect && onSelect(branch.id, name)}
+      role={isProposed ? undefined : "button"}
+      tabIndex={isProposed ? undefined : 0}
+      onKeyDown={(e) => {
+        if (!isProposed && onSelect && (e.key === "Enter" || e.key === " ")) {
+          e.preventDefault();
+          onSelect(branch.id, name);
+        }
+      }}
+      aria-pressed={isSelected}
+      title={isProposed ? undefined : t("selectBranch")}
+    >
       {branch.image_url ? (
         <img
           src={branch.image_url}
@@ -71,9 +86,29 @@ function BranchCard({ branch, stats, language, t }) {
       <div className="branch-card-body">
         <div className="branch-card-header">
           <h3 className="branch-card-name">{name}</h3>
-          {isProposed && (
-            <span className="proposed-badge">{t("proposed")}</span>
-          )}
+          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            {isSelected && (
+              <span
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 4,
+                  padding: "2px 10px",
+                  borderRadius: 12,
+                  background: "linear-gradient(135deg,#10b981 0%,#059669 100%)",
+                  color: "#fff",
+                  fontSize: 11,
+                  fontWeight: 700,
+                  letterSpacing: "0.04em",
+                }}
+              >
+                ✓ {t("selected")}
+              </span>
+            )}
+            {isProposed && (
+              <span className="proposed-badge">{t("proposed")}</span>
+            )}
+          </div>
         </div>
 
         {address && <p className="branch-card-address">📍 {address}</p>}
@@ -111,7 +146,7 @@ function BranchCard({ branch, stats, language, t }) {
   );
 }
 
-function BranchSection({ title, branches, statsMap, emptyKey, language, t }) {
+function BranchSection({ title, branches, statsMap, emptyKey, language, t, selectedBranchId, onSelect }) {
   return (
     <div className="branches-section">
       <h2 className="branches-section-title">{title}</h2>
@@ -129,6 +164,8 @@ function BranchSection({ title, branches, statsMap, emptyKey, language, t }) {
               stats={statsMap[branch.id] ?? null}
               language={language}
               t={t}
+              isSelected={selectedBranchId === branch.id}
+              onSelect={onSelect}
             />
           ))}
         </div>
@@ -140,6 +177,7 @@ function BranchSection({ title, branches, statsMap, emptyKey, language, t }) {
 export default function BranchesPage() {
   const { data: allBranches = [], isLoading, isError, refetch } = useBranches();
   const { data: statsData = [] } = useBranchStats();
+  const { currentBranchId, setBranch, resetBranch } = useBranchStore();
   const t = useTranslations("branches");
   const language = useLanguageStore((s) => s.language);
 
@@ -155,6 +193,15 @@ export default function BranchesPage() {
     (b) => b.is_proposed === true || b.is_proposed === 1,
   );
 
+  const handleSelectBranch = (branchId, branchName) => {
+    // Toggle: clicking the already-selected branch deselects it (shows all)
+    if (currentBranchId === branchId) {
+      resetBranch();
+    } else {
+      setBranch(branchId, branchName);
+    }
+  };
+
   return (
     <div className="branches-page">
       <Navbar />
@@ -163,6 +210,51 @@ export default function BranchesPage() {
       <div className="branches-header">
         <h1>{t("pageTitle")}</h1>
         <p>{t("pageSubtitle")}</p>
+        {/* Active selection indicator */}
+        {currentBranchId != null && (
+          <div
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 10,
+              marginTop: 12,
+              padding: "8px 18px",
+              background: "linear-gradient(135deg,#ecfdf5 0%,#d1fae5 100%)",
+              border: "1.5px solid #10b981",
+              borderRadius: 24,
+              fontSize: 13,
+              color: "#065f46",
+              fontWeight: 600,
+            }}
+          >
+            <span>📍 {t("viewing")}:</span>
+            <span>
+              {allBranches.find((b) => b.id === currentBranchId)
+                ? (language === "bn"
+                    ? (allBranches.find((b) => b.id === currentBranchId).name_bn ||
+                       allBranches.find((b) => b.id === currentBranchId).name_en)
+                    : (allBranches.find((b) => b.id === currentBranchId).name_en ||
+                       allBranches.find((b) => b.id === currentBranchId).name_bn))
+                : `Branch ${currentBranchId}`}
+            </span>
+            <button
+              onClick={resetBranch}
+              style={{
+                background: "none",
+                border: "none",
+                color: "#059669",
+                fontSize: 14,
+                cursor: "pointer",
+                padding: "0 2px",
+                lineHeight: 1,
+              }}
+              aria-label={t("clearSelection")}
+              title={t("clearSelection")}
+            >
+              ✕
+            </button>
+          </div>
+        )}
       </div>
 
       <div className="branches-container">
@@ -188,6 +280,8 @@ export default function BranchesPage() {
               emptyKey="noActiveBranches"
               language={language}
               t={t}
+              selectedBranchId={currentBranchId}
+              onSelect={handleSelectBranch}
             />
             <BranchSection
               title={t("proposedBranches")}
@@ -196,6 +290,8 @@ export default function BranchesPage() {
               emptyKey="noProposedBranches"
               language={language}
               t={t}
+              selectedBranchId={currentBranchId}
+              onSelect={handleSelectBranch}
             />
           </>
         )}

@@ -1,5 +1,5 @@
 import express from "express";
-import authMiddleware from "../middlewares/auth.middleware.js";
+import authMiddleware, { optionalAuth } from "../middlewares/auth.middleware.js";
 import {
   bulkCreateAttendanceController,
   checkAttendanceExistsController,
@@ -27,9 +27,31 @@ import {
 
 const router = express.Router();
 
+// ── Public read routes (optionalAuth: branch-scoped via ?branch_id) ──
+// Students/parents can look up attendance without an admin token
+
+// Search by class + section (used by public AttendancePage)
+router.get(
+  "/search/class/:className/section/:section",
+  optionalAuth,
+  getAttendanceByClassAndSectionController,
+);
+
+// Search by name/roll/class/section
+router.get(
+  "/search/name/:firstName/roll/:roll/class/:class/section/:section",
+  optionalAuth,
+  getAttendanceByNameRollClassSectionController,
+);
+
+// Student-specific attendance lookup
+router.get("/student/:studentID", optionalAuth, getAttendanceByStudentIdController);
+router.get("/summary/student/:studentID", optionalAuth, getAttendanceSummaryByStudentController);
+
+// ── Admin-only routes — require a valid JWT ──
 router.use(authMiddleware);
 
-// Statistics and Count Routes (More specific routes first)
+// Statistics and Count Routes
 router.get("/statistics", getAttendanceStatisticsController);
 
 // Grid route: GET /attendance/grid?className=&section=&startDate=&endDate=
@@ -38,32 +60,12 @@ router.get("/grid", getAttendanceGridController);
 // Upsert a single attendance cell
 router.post("/cell", upsertAttendanceCellController);
 
-// Route to get attendance count
 router.get("/count", getAttendanceCountController);
-
-// Route to check if attendance exists
 router.get("/exists", checkAttendanceExistsController);
-
-// Summary Routes
-router.get(
-  "/summary/student/:studentID",
-  getAttendanceSummaryByStudentController,
-);
 
 router.get(
   "/summary/class/:classID/date/:date",
   getClassAttendanceSummaryByClassAndDateController,
-);
-
-// Search and Filter Routes
-router.get(
-  "/search/name/:firstName/roll/:roll/class/:class/section/:section",
-  getAttendanceByNameRollClassSectionController,
-);
-
-router.get(
-  "/search/class/:className/section/:section",
-  getAttendanceByClassAndSectionController,
 );
 
 router.get(
@@ -71,7 +73,6 @@ router.get(
   getAttendanceByDateRangeController,
 );
 
-router.get("/student/:studentID", getAttendanceByStudentIdController);
 router.get("/class/:classID", getAttendanceByClassIDController);
 router.get("/date/:date", getAttendanceByDateController);
 

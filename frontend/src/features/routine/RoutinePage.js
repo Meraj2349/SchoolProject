@@ -7,6 +7,7 @@ import Footer from "@/components/layout/Footer";
 import LatestUpdatesNotice from "@/components/shared/LatestUpdatesNotice";
 import { useRoutines, useRoutineFilterOptions } from "@/hooks/useRoutines";
 import { useTranslations } from "@/store/languageStore";
+import { useBranchStore } from "@/store/branchStore";
 import "@/styles/RoutinList.css";
 
 function fmtDate(d) {
@@ -36,6 +37,7 @@ export default function RoutinePage() {
   const { data: filterOptions = { classes: [], sections: [] } } =
     useRoutineFilterOptions();
   const t = useTranslations("routine");
+  const { currentBranchId, currentBranchName } = useBranchStore();
 
   const [selClass, setSelClass] = useState("");
   const [selSection, setSelSection] = useState("");
@@ -95,6 +97,26 @@ export default function RoutinePage() {
               <Calendar className="hero-icon" />
               {t("pageTitle")}
             </h1>
+            {currentBranchId != null && (
+              <div
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 6,
+                  marginTop: 10,
+                  padding: "5px 14px",
+                  background: "linear-gradient(135deg,#ecfdf5 0%,#d1fae5 100%)",
+                  border: "1.5px solid #10b981",
+                  borderRadius: 20,
+                  fontSize: 12,
+                  color: "#065f46",
+                  fontWeight: 600,
+                }}
+              >
+                <span>🏫</span>
+                <span>{currentBranchName}</span>
+              </div>
+            )}
           </div>
         </div>
         <div className="hero-decoration">

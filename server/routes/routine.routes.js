@@ -1,40 +1,43 @@
 import express from "express";
 import upload from "../config/multer.config.js";
 import * as RoutineController from "../controllers/routine.controller.js";
-import authMiddleware from "../middlewares/auth.middleware.js"; // For admin authentication
+import authMiddleware, { optionalAuth } from "../middlewares/auth.middleware.js"; // For admin authentication
 
 const router = express.Router();
 
 // ========== Public Routes (Students/Parents can view routines) ==========
+// optionalAuth: allows unauthenticated access but honours ?branch_id for filtering
 // Routes follow Classes table structure (ClassID, ClassName, Section)
 
 // Get all routines with ClassName and Section details
-router.get("/", RoutineController.getAllRoutines);
+router.get("/", optionalAuth, RoutineController.getAllRoutines);
 
 // Get routine by RoutineID with class details
-router.get("/:id", RoutineController.getRoutineById);
+router.get("/:id", optionalAuth, RoutineController.getRoutineById);
 
 // Get routines by ClassName and Section (filter by ClassName and Section)
 router.get(
   "/filter/class-section",
+  optionalAuth,
   RoutineController.getRoutinesByClassSection,
 );
 
 // Get routines by ClassID (specific class)
-router.get("/class/:classId", RoutineController.getRoutinesByClassId);
+router.get("/class/:classId", optionalAuth, RoutineController.getRoutinesByClassId);
 
 // Search routines (search in RoutineTitle, ClassName, Section, Description)
-router.get("/search/query", RoutineController.searchRoutines);
+router.get("/search/query", optionalAuth, RoutineController.searchRoutines);
 
 // Get all available classes from Classes table (ClassID, ClassName, Section)
-router.get("/options/classes", RoutineController.getAllClasses);
+router.get("/options/classes", optionalAuth, RoutineController.getAllClasses);
 
 // Get filter options (distinct ClassName and Section from Classes table)
-router.get("/options/filters", RoutineController.getFilterOptions);
+router.get("/options/filters", optionalAuth, RoutineController.getFilterOptions);
 
 // Get sections by ClassName (for dynamic section loading from Classes table)
 router.get(
   "/options/sections/:className",
+  optionalAuth,
   RoutineController.getSectionsByClassName,
 );
 

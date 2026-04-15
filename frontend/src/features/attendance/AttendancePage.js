@@ -6,6 +6,7 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import LatestUpdatesNotice from "@/components/shared/LatestUpdatesNotice";
 import { useTranslations } from "@/store/languageStore";
+import { useBranchStore } from "@/store/branchStore";
 import "@/styles/listcss/attendancelist.css";
 
 export default function AttendancePage() {
@@ -19,6 +20,7 @@ export default function AttendancePage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const t = useTranslations("attendance");
+  const { currentBranchId, currentBranchName } = useBranchStore();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -53,6 +55,26 @@ export default function AttendancePage() {
       <div className="attendance-header">
         <h1>{t("pageTitle")}</h1>
         <p>{t("pageSubtitle")}</p>
+        {currentBranchId != null && (
+          <div
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 6,
+              marginTop: 10,
+              padding: "5px 14px",
+              background: "linear-gradient(135deg,#ecfdf5 0%,#d1fae5 100%)",
+              border: "1.5px solid #10b981",
+              borderRadius: 20,
+              fontSize: 12,
+              color: "#065f46",
+              fontWeight: 600,
+            }}
+          >
+            <span>🏫</span>
+            <span>{currentBranchName}</span>
+          </div>
+        )}
       </div>
       <div className="attendance-search-section">
         <form onSubmit={handleSearch} className="attendance-search-form">

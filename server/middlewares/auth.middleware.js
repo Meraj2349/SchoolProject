@@ -71,6 +71,56 @@ export const protect = (req, res, next) => {
   }
 };
 
+/**
+ * optionalAuthMiddleware — allows unauthenticated requests through.
+ *
+ * Behaviour:
+ * - No token → req.branchId = parseInt(req.query.branch_id) if provided, else null
+ *   (public visitor; null = no branch filter = show all)
+ * - Valid token → same as authMiddleware (branch_admin locked; super_admin uses ?branch_id)
+ * - Invalid/expired token → 403 (explicit bad token is still rejected)
+ *
+ * Use this for read-only public endpoints (GET /students, GET /teachers, etc.)
+ * so that public visitors can filter by branch via ?branch_id without needing auth.
+ */
+export const optionalAuth = (req, res, next) => {
+  const authHeader = req.headers.authorization;
+
+  // No token at all — treat as unauthenticated public request
+  if (!authHeader) {
+    const qb = req.query?.branch_id;
+    req.branchId = qb != null && qb !== "" ? parseInt(qb, 10) : null;
+    req.role = "public";
+    return next();
+  }
+
+  const token = authHeader.split(" ")[1];
+  if (!token) {
+    const qb = req.query?.branch_id;
+    req.branchId = qb != null && qb !== "" ? parseInt(qb, 10) : null;
+    req.role = "public";
+    return next();
+  }
+
+  // Token provided — validate it
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
+    req.adminId = decoded.adminID;
+    req.role = decoded.role || "branch_admin";
+
+    if (req.role === "super_admin") {
+      const qb = req.query?.branch_id;
+      req.branchId = qb != null && qb !== "" ? parseInt(qb, 10) : null;
+    } else {
+      req.branchId = decoded.branch_id ?? null;
+    }
+
+    next();
+  } catch (error) {
+    return res.status(403).json({ error: "Invalid token" });
+  }
+};
+
 // Role-based authorization middleware — use after protect or authMiddleware
 export const authorize = (...allowedRoles) => {
   return (req, res, next) => {

@@ -288,3 +288,22 @@
   font-size: 2.5rem;
   margin-bottom: 0.75rem;
 }
+
+/* Selected branch highlight */
+.branch-card--selected {
+  outline: 2.5px solid #10b981;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(16,185,129,0.12), 0 8px 32px rgba(16,185,129,0.18) !important;
+  transform: translateY(-3px);
+}
+
+.branch-card:not(.proposed):hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.branch-card:not(.proposed):focus-visible {
+  outline: 2.5px solid #10b981;
+  outline-offset: 2px;
+}

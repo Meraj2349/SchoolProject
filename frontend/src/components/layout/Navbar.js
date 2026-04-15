@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 import LanguageSwitcher from "@/components/ui/LanguageSwitcher";
+import PublicBranchSelector from "@/components/ui/PublicBranchSelector";
 import { useTranslations } from "@/store/languageStore";
 import "@/styles/Navbar.css";
 
@@ -124,6 +125,10 @@ export default function Navbar() {
               </li>
             ))}
           </ul>
+          {/* Branch switcher — lets public visitors filter content by branch */}
+          <div style={{ display: "flex", alignItems: "center", padding: "6px 0" }}>
+            <PublicBranchSelector />
+          </div>
         </div>
       </div>
 
@@ -164,7 +169,8 @@ export default function Navbar() {
             ))}
           </ul>
 
-          <div style={{ padding: "12px 16px" }}>
+          <div style={{ padding: "12px 16px", display: "flex", flexDirection: "column", gap: 10 }}>
+            <PublicBranchSelector />
             <LanguageSwitcher />
           </div>
         </div>

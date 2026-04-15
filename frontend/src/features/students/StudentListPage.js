@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import LatestUpdatesNotice from "@/components/shared/LatestUpdatesNotice";
 import { studentsService } from "@/services/students.service";
 import { imagesService } from "@/services/images.service";
+import { useBranchStore } from "@/store/branchStore";
 import { useTranslations } from "@/store/languageStore";
 import "@/styles/StudentListpage.css";
 
@@ -67,6 +68,14 @@ export default function StudentListPage() {
   const [error, setError] = useState("");
   const [searched, setSearched] = useState(false);
   const t = useTranslations("students");
+  const { currentBranchId, currentBranchName } = useBranchStore();
+
+  // Reset results whenever the active branch changes so stale results are cleared
+  useEffect(() => {
+    setStudents([]);
+    setError("");
+    setSearched(false);
+  }, [currentBranchId]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -152,6 +161,26 @@ export default function StudentListPage() {
       <div className="search-header">
         <h1 className="search-title">{t("pageTitle")}</h1>
         <p className="search-subtitle">{t("pageSubtitle")}</p>
+        {currentBranchId != null && (
+          <div
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 6,
+              marginTop: 10,
+              padding: "5px 14px",
+              background: "linear-gradient(135deg,#ecfdf5 0%,#d1fae5 100%)",
+              border: "1.5px solid #10b981",
+              borderRadius: 20,
+              fontSize: 12,
+              color: "#065f46",
+              fontWeight: 600,
+            }}
+          >
+            <span>🏫</span>
+            <span>{currentBranchName}</span>
+          </div>
+        )}
       </div>
       <div className="search-form-container">
         <form onSubmit={handleSearch} className="search-form">

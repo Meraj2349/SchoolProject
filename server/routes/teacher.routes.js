@@ -1,5 +1,5 @@
 import express from "express";
-import authMiddleware from "../middlewares/auth.middleware.js";
+import authMiddleware, { optionalAuth } from "../middlewares/auth.middleware.js";
 import {
   addTeacherController,
   getAllTeachersController,
@@ -11,13 +11,14 @@ import {
 
 const router = express.Router();
 
-router.use(authMiddleware);
+// ── Public read routes (optionalAuth: branch-scoped if ?branch_id provided) ──
+router.get("/", optionalAuth, getAllTeachersController);
+router.get("/search", optionalAuth, searchTeachersController);
+router.get("/checkDuplicate", optionalAuth, checkDuplicateTeacherController);
 
-router.post("/addTeacher", addTeacherController);
-router.get("/", getAllTeachersController);
-router.get("/search", searchTeachersController);
-router.put("/updateTeacher/:id", updateTeacherController);
-router.delete("/deleteTeacher/:id", deleteTeacherController);
-router.get("/checkDuplicate", checkDuplicateTeacherController);
+// ── Write routes — require a valid JWT (admin only) ──
+router.post("/addTeacher", authMiddleware, addTeacherController);
+router.put("/updateTeacher/:id", authMiddleware, updateTeacherController);
+router.delete("/deleteTeacher/:id", authMiddleware, deleteTeacherController);
 
 export default router;

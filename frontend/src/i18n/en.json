@@ -736,7 +736,11 @@
     "students": "Students",
     "teachers": "Teachers",
     "classes": "Classes",
-    "description": "Description"
+    "description": "Description",
+    "selected": "Selected",
+    "selectBranch": "Click to select this branch",
+    "viewing": "Viewing",
+    "clearSelection": "Clear selection"
   },
   "notFound": {
     "title": "Page Not Found",
@@ -782,5 +786,10 @@
     "close": "Close",
     "back": "Back",
     "na": "N/A"
+  },
+  "branchSelector": {
+    "allBranches": "All Branches",
+    "switchBranch": "Switch Branch",
+    "selectBranch": "Select a branch"
   }
 }

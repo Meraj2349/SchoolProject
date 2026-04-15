@@ -736,7 +736,11 @@
     "students": "শিক্ষার্থী",
     "teachers": "শিক্ষক",
     "classes": "শ্রেণি",
-    "description": "বিবরণ"
+    "description": "বিবরণ",
+    "selected": "নির্বাচিত",
+    "selectBranch": "এই শাখাটি নির্বাচন করতে ক্লিক করুন",
+    "viewing": "দেখছেন",
+    "clearSelection": "নির্বাচন বাতিল করুন"
   },
   "notFound": {
     "title": "পৃষ্ঠা পাওয়া যায়নি",
@@ -782,5 +786,10 @@
     "close": "বন্ধ করুন",
     "back": "পিছনে",
     "na": "প্রযোজ্য নয়"
+  },
+  "branchSelector": {
+    "allBranches": "সকল শাখা",
+    "switchBranch": "শাখা পরিবর্তন করুন",
+    "selectBranch": "একটি শাখা নির্বাচন করুন"
   }
 }

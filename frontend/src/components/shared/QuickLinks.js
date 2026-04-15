@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useTranslations } from "@/store/languageStore";
+import { useBranchStore } from "@/store/branchStore";
 
 /* ── Classic navy/gold palette ── */
 const NAVY  = "#0d1f3c";
@@ -47,6 +48,7 @@ function QuickLinkItem({ link }) {
 
 export default function QuickLinks({ links }) {
   const t = useTranslations("quickLinks");
+  const { currentBranchId, currentBranchName } = useBranchStore();
 
   const resolvedLinks = links
     ? links.map((l) => ({ ...l, displayName: l.nameKey ? t(l.nameKey) : l.name }))
@@ -60,6 +62,38 @@ export default function QuickLinks({ links }) {
         <span className="ql-header__text">Quick Links</span>
         <span className="ql-header__line" />
       </div>
+
+      {/* Active branch context badge */}
+      {currentBranchId != null && (
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 5,
+            marginBottom: 10,
+            padding: "4px 10px",
+            background: "linear-gradient(135deg,rgba(16,185,129,0.12) 0%,rgba(5,150,105,0.08) 100%)",
+            border: "1px solid rgba(16,185,129,0.35)",
+            borderRadius: 12,
+            fontSize: 11,
+            color: "#065f46",
+            fontWeight: 600,
+          }}
+        >
+          <span style={{ fontSize: 10 }}>🏫</span>
+          <span
+            style={{
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+              maxWidth: 120,
+            }}
+          >
+            {currentBranchName}
+          </span>
+        </div>
+      )}
 
       <div className="ql-grid">
         {resolvedLinks.map((link, i) => (

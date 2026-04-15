@@ -7,6 +7,7 @@ import LatestUpdatesNotice from "@/components/shared/LatestUpdatesNotice";
 import LottieLoader from "@/components/ui/LottieLoader";
 import { useTeachers } from "@/hooks/useTeachers";
 import { useImagesByTeacher } from "@/hooks/useImages";
+import { useBranchStore } from "@/store/branchStore";
 import { useTranslations } from "@/store/languageStore";
 import "@/styles/listcss/teacherslist.css";
 
@@ -93,6 +94,7 @@ export default function TeacherListPage() {
   const [search, setSearch] = useState("");
   const [filterBy, setFilterBy] = useState("all");
   const t = useTranslations("teachers");
+  const { currentBranchId, currentBranchName } = useBranchStore();
 
   const filtered = teachers.filter((teacher) => {
     if (!search.trim()) return true;
@@ -134,6 +136,26 @@ export default function TeacherListPage() {
       <LatestUpdatesNotice />
       <div className="page-header">
         <h1>{t("pageTitle")}</h1>
+        {currentBranchId != null && (
+          <div
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 6,
+              marginTop: 10,
+              padding: "5px 14px",
+              background: "linear-gradient(135deg,#ecfdf5 0%,#d1fae5 100%)",
+              border: "1.5px solid #10b981",
+              borderRadius: 20,
+              fontSize: 12,
+              color: "#065f46",
+              fontWeight: 600,
+            }}
+          >
+            <span>🏫</span>
+            <span>{currentBranchName}</span>
+          </div>
+        )}
       </div>
       <div className="search-section">
         <div className="search-container">

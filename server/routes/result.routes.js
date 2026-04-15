@@ -1,5 +1,5 @@
 import express from "express";
-import authMiddleware from "../middlewares/auth.middleware.js";
+import authMiddleware, { optionalAuth } from "../middlewares/auth.middleware.js";
 import {
   addMultipleResultsController,
   addResultByStudentDetailsController,
@@ -23,7 +23,8 @@ import {
 const router = express.Router();
 
 // Public route — students can search their own results without logging in
-router.get("/search", searchResultsController);
+// optionalAuth sets req.branchId from ?branch_id param so results are branch-scoped
+router.get("/search", optionalAuth, searchResultsController);
 
 router.use(authMiddleware);
 

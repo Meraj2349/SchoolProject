@@ -1,5 +1,5 @@
 import express from "express";
-import authMiddleware from "../middlewares/auth.middleware.js";
+import authMiddleware, { optionalAuth } from "../middlewares/auth.middleware.js";
 import {
   addStudentController,
   checkRollNumberController,
@@ -16,43 +16,25 @@ import {
 
 const router = express.Router();
 
-// Apply auth middleware to all student routes so branchId is available
-router.use(authMiddleware);
-
-// Route to get all students
-router.get("/", getAllStudentsController);
-
-// Route to add a new student
-router.post("/", addStudentController);
-
-// Route to get the total count of students
-router.get("/count", getStudentCountController);
-
-// Route to search students with filters
-router.get("/search/filter", searchStudentsController);
-
-// Route to check if a roll number exists in a specific class and section
-router.get("/check-roll", checkRollNumberController);
-
-// Route to get all classes
-router.get("/classes", getAllClassesController);
-
-// Route to get students by class name
-router.get("/class/:className", getStudentsByClassController);
-
-// Route to get a student by ID
-router.get("/:id", getStudentByIdController);
-
-// Route to update a student by ID
-router.put("/:id", updateStudentController);
-
-// Route to delete a student by ID
-router.delete("/:id", deleteStudentController);
-
-// Route to get students by class and section
+// ── Public read routes (optionalAuth: branch-scoped if ?branch_id provided, else all) ──
+router.get("/", optionalAuth, getAllStudentsController);
+router.get("/count", optionalAuth, getStudentCountController);
+router.get("/search/filter", optionalAuth, searchStudentsController);
+router.get("/classes", optionalAuth, getAllClassesController);
+router.get("/class/:className", optionalAuth, getStudentsByClassController);
+router.get("/:id", optionalAuth, getStudentByIdController);
 router.get(
   "/class/:className/section/:sectionName",
+  optionalAuth,
   getStudentsByClassAndSectionController,
 );
+
+// ── Check roll — used during student creation in admin, keep optional (branch-scoped) ──
+router.get("/check-roll", optionalAuth, checkRollNumberController);
+
+// ── Write routes — require a valid JWT (admin only) ──
+router.post("/", authMiddleware, addStudentController);
+router.put("/:id", authMiddleware, updateStudentController);
+router.delete("/:id", authMiddleware, deleteStudentController);
 
 export default router;

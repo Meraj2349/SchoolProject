@@ -4,6 +4,7 @@ import { useClasses } from "@/hooks/useClasses";
 import { useQueries } from "@tanstack/react-query";
 import { classesService } from "@/services/classes.service";
 import { queryKeys } from "@/lib/queryKeys";
+import { useBranchStore } from "@/store/branchStore";
 import { useTranslations } from "@/store/languageStore";
 import "@/styles/ClassStatistics.css";
 
@@ -51,6 +52,7 @@ function fmtClass(name, lang) {
 
 export default function ClassStatistics() {
   const { data: classes = [], isLoading, isError } = useClasses();
+  const { currentBranchId: branchId, currentBranchName } = useBranchStore();
   const t = useTranslations("home");
   const lang =
     typeof window !== "undefined"
@@ -68,9 +70,10 @@ export default function ClassStatistics() {
     ...new Set(classes.map((c) => c.className || c.ClassName || c.name || c)),
   ];
 
+  // Pass branchId in the query key so switching branches invalidates these counts
   const countQueries = useQueries({
     queries: uniqueNames.map((name) => ({
-      queryKey: queryKeys.classes.studentCount(name),
+      queryKey: queryKeys.classes.studentCount(name, branchId),
       queryFn: () => classesService.getStudentCount(name),
       enabled: uniqueNames.length > 0,
     })),
@@ -135,6 +138,26 @@ export default function ClassStatistics() {
         </div>
         <h2>{t("studentStatistics")}</h2>
         <p className="subtitle">{t("classWiseStudents")}</p>
+        {branchId != null && (
+          <div
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 6,
+              margin: "8px auto 0",
+              padding: "4px 14px",
+              background: "linear-gradient(135deg,#ecfdf5 0%,#d1fae5 100%)",
+              border: "1.5px solid #10b981",
+              borderRadius: 20,
+              fontSize: 12,
+              color: "#065f46",
+              fontWeight: 600,
+            }}
+          >
+            <span>🏫</span>
+            <span>{currentBranchName}</span>
+          </div>
+        )}
         <div className="cs-divider">
           <span className="cs-div-line" />
           <span className="cs-div-diamond">◆</span>

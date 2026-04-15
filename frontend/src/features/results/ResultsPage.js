@@ -9,6 +9,7 @@ import { resultsService } from "@/services/results.service";
 import { queryKeys } from "@/lib/queryKeys";
 import httpClient from "@/lib/httpClient";
 import { useTranslations } from "@/store/languageStore";
+import { useBranchStore } from "@/store/branchStore";
 import "@/styles/StudentListpage.css";
 
 const GRADES = [
@@ -38,6 +39,7 @@ export default function ResultsPage() {
   const [filters, setFilters] = useState(EMPTY);
   const [submitted, setSubmitted] = useState(null);
   const t = useTranslations("results");
+  const { currentBranchId: branchId, currentBranchName } = useBranchStore();
 
   // Public endpoint — returns distinct exam names for the datalist autocomplete
   const { data: examNames = [] } = useQuery({
@@ -51,7 +53,7 @@ export default function ResultsPage() {
     isLoading,
     isError,
   } = useQuery({
-    queryKey: queryKeys.results.search(submitted),
+    queryKey: queryKeys.results.search(submitted, branchId),
     queryFn: () => resultsService.search(submitted),
     enabled: !!submitted,
     select: (d) => d?.data ?? d ?? [],
@@ -118,6 +120,26 @@ export default function ResultsPage() {
       <div className="search-header">
         <h1 className="search-title">{t("pageTitle")}</h1>
         <p className="search-subtitle">{t("pageSubtitle")}</p>
+        {branchId != null && (
+          <div
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 6,
+              marginTop: 10,
+              padding: "5px 14px",
+              background: "linear-gradient(135deg,#ecfdf5 0%,#d1fae5 100%)",
+              border: "1.5px solid #10b981",
+              borderRadius: 20,
+              fontSize: 12,
+              color: "#065f46",
+              fontWeight: 600,
+            }}
+          >
+            <span>🏫</span>
+            <span>{currentBranchName}</span>
+          </div>
+        )}
       </div>
       <div className="search-form-container">
         <form onSubmit={handleSearch} className="search-form">
