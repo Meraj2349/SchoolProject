@@ -10,17 +10,6 @@ import { useBranchStore } from "@/store/branchStore";
 import { useClassNames, useStandardSections } from "@/hooks/useClasses";
 import "@/styles/listcss/attendancelist.css";
 
-const CLASS_DROPDOWN_STYLE = {
-  width: "100%",
-  padding: "10px 14px",
-  borderRadius: 8,
-  border: "1.5px solid #d1d5db",
-  fontSize: 14,
-  background: "#fff",
-  cursor: "pointer",
-  outline: "none",
-};
-
 export default function AttendancePage() {
   const [className, setClassName] = useState("");
   const [section, setSection] = useState("");
@@ -76,21 +65,21 @@ export default function AttendancePage() {
         <h1>{t("pageTitle")}</h1>
         <p>{t("pageSubtitle")}</p>
         {currentBranchId != null && (
-          <div
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 6,
-              marginTop: 10,
-              padding: "5px 14px",
-              background: "linear-gradient(135deg,#ecfdf5 0%,#d1fae5 100%)",
-              border: "1.5px solid #10b981",
-              borderRadius: 20,
-              fontSize: 12,
-              color: "#065f46",
-              fontWeight: 600,
-            }}
-          >
+          <div style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 6,
+            marginTop: 14,
+            padding: "6px 16px",
+            background: "rgba(201,168,76,0.18)",
+            border: "1.5px solid rgba(201,168,76,0.5)",
+            borderRadius: 999,
+            fontSize: 12,
+            color: "#e8c97a",
+            fontWeight: 600,
+            position: "relative",
+            zIndex: 1,
+          }}>
             <span>🏫</span>
             <span>{currentBranchName}</span>
           </div>
@@ -105,7 +94,6 @@ export default function AttendancePage() {
                 value={className}
                 onChange={handleClassChange}
                 required
-                style={CLASS_DROPDOWN_STYLE}
               >
                 <option value="">{t("selectClass") || "Select Class"}</option>
                 {classNames.map((cn) => (
@@ -120,7 +108,6 @@ export default function AttendancePage() {
                 onChange={handleSectionChange}
                 required
                 disabled={!className}
-                style={{ ...CLASS_DROPDOWN_STYLE, opacity: className ? 1 : 0.5, cursor: className ? "pointer" : "not-allowed" }}
               >
                 <option value="">{t("selectSection") || "Select Section"}</option>
                 {sections.map((sec) => (
@@ -157,40 +144,40 @@ export default function AttendancePage() {
             </div>
           </div>
           {results.length > 0 ? (
-            <table className="attendance-table">
-              <thead>
-                <tr>
-                  <th>{t("student")}</th>
-                  <th>{t("date")}</th>
-                  <th>{t("status")}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {results.map((r, i) => (
-                  <tr key={i}>
-                    <td>
-                      {r.StudentName ||
-                        `${r.FirstName} ${r.LastName}` ||
-                        r.StudentID}
-                    </td>
-                    <td>
-                      {r.AttendanceDate
-                        ? new Date(r.AttendanceDate).toLocaleDateString()
-                        : r.ClassDate || "–"}
-                    </td>
-                    <td>
-                      <span
-                        className={`status-badge ${r.Status?.toLowerCase()}`}
-                      >
-                        {r.Status}
-                      </span>
-                    </td>
+            <div className="attendance-table-wrap">
+              <table className="attendance-table">
+                <thead>
+                  <tr>
+                    <th>{t("student")}</th>
+                    <th>{t("date")}</th>
+                    <th>{t("status")}</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {results.map((r, i) => (
+                    <tr key={i}>
+                      <td>
+                        {r.StudentName ||
+                          `${r.FirstName} ${r.LastName}` ||
+                          r.StudentID}
+                      </td>
+                      <td>
+                        {r.AttendanceDate
+                          ? new Date(r.AttendanceDate).toLocaleDateString()
+                          : r.ClassDate || "–"}
+                      </td>
+                      <td>
+                        <span className={`status-badge ${r.Status?.toLowerCase()}`}>
+                          {r.Status}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           ) : (
-            <p className="no-data">{t("noRecords")}</p>
+            <div className="no-data">{t("noRecords")}</div>
           )}
         </div>
       )}

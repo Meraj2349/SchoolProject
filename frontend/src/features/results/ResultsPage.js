@@ -36,17 +36,6 @@ const EMPTY = {
   examName: "",
 };
 
-const SELECT_STYLE = {
-  width: "100%",
-  padding: "10px 14px",
-  borderRadius: 8,
-  border: "1.5px solid #d1d5db",
-  fontSize: 14,
-  background: "#fff",
-  cursor: "pointer",
-  outline: "none",
-};
-
 export default function ResultsPage() {
   const [filters, setFilters] = useState(EMPTY);
   const [submitted, setSubmitted] = useState(null);
@@ -127,69 +116,34 @@ export default function ResultsPage() {
         <h1 className="search-title">{t("pageTitle")}</h1>
         <p className="search-subtitle">{t("pageSubtitle")}</p>
         {branchId != null && (
-          <div
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 6,
-              marginTop: 10,
-              padding: "5px 14px",
-              background: "linear-gradient(135deg,#ecfdf5 0%,#d1fae5 100%)",
-              border: "1.5px solid #10b981",
-              borderRadius: 20,
-              fontSize: 12,
-              color: "#065f46",
-              fontWeight: 600,
-            }}
-          >
+          <div className="branch-badge">
             <span>🏫</span>
             <span>{currentBranchName}</span>
           </div>
         )}
       </div>
 
-      {/* Class & Section dropdowns at the top */}
-      <div
-        style={{
-          maxWidth: 700,
-          margin: "0 auto 20px",
-          padding: "16px 20px",
-          background: "#f9fafb",
-          borderRadius: 12,
-          border: "1px solid #e5e7eb",
-          display: "grid",
-          gridTemplateColumns: "1fr 1fr",
-          gap: 16,
-        }}
-      >
-        <div>
-          <label
-            style={{ display: "block", fontWeight: 600, fontSize: 13, marginBottom: 6, color: "#374151" }}
-          >
-            {t("className") || "Class"} <span style={{ color: "#ef4444" }}>*</span>
+      {/* Class & Section filter bar */}
+      <div className="filter-bar">
+        <div className="filter-group">
+          <label className="filter-label">
+            {t("className") || "Class"} <span className="required">*</span>
           </label>
-          <select
-            value={filters.className}
-            onChange={handleClassDropdown}
-            style={SELECT_STYLE}
-          >
+          <select value={filters.className} onChange={handleClassDropdown}>
             <option value="">{t("selectClass") || "Select Class"}</option>
             {classNames.map((cn) => (
               <option key={cn} value={cn}>{cn}</option>
             ))}
           </select>
         </div>
-        <div>
-          <label
-            style={{ display: "block", fontWeight: 600, fontSize: 13, marginBottom: 6, color: "#374151" }}
-          >
-            {t("section") || "Section"} <span style={{ color: "#ef4444" }}>*</span>
+        <div className="filter-group">
+          <label className="filter-label">
+            {t("section") || "Section"} <span className="required">*</span>
           </label>
           <select
             value={filters.section}
             onChange={handleSectionDropdown}
             disabled={!filters.className}
-            style={{ ...SELECT_STYLE, opacity: filters.className ? 1 : 0.5, cursor: filters.className ? "pointer" : "not-allowed" }}
           >
             <option value="">{t("selectSection") || "Select Section"}</option>
             {sections.map((sec) => (
@@ -305,71 +259,79 @@ export default function ResultsPage() {
 
       {submitted && (
         <div className="results-container">
-          {isLoading && <p>{t("loading")}</p>}
-          {isError && <div className="error-message">{t("failedToFetch")}</div>}
+          {isLoading && (
+            <div style={{ textAlign: "center", padding: "32px 0", color: "#5a6580" }}>
+              {t("loading")}
+            </div>
+          )}
+          {isError && (
+            <div className="error-message">
+              <span className="error-icon">⚠</span> {t("failedToFetch")}
+            </div>
+          )}
           {results && results.length === 0 && (
-            <p className="no-data">{t("noResultsFound")}</p>
+            <div className="no-results">
+              <div className="no-results-icon">📋</div>
+              <h3>{t("noResultsFound")}</h3>
+            </div>
           )}
           {results && results.length > 0 && (
-            <table
-              style={{
-                width: "100%",
-                borderCollapse: "collapse",
-                marginTop: 24,
-              }}
-            >
-              <thead style={{ background: "#f9fafb" }}>
-                <tr>
-                  {TABLE_HEADERS.map((h) => (
-                    <th
-                      key={h}
-                      style={{
-                        padding: "10px 16px",
-                        textAlign: "left",
-                        borderBottom: "1px solid #e5e7eb",
-                        fontWeight: 600,
-                      }}
-                    >
-                      {h}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {results.map((r, i) => (
-                  <tr key={i} style={{ borderBottom: "1px solid #f3f4f6" }}>
-                    <td style={{ padding: "10px 16px" }}>
-                      {r.FirstName} {r.LastName}
-                    </td>
-                    <td style={{ padding: "10px 16px" }}>
-                      {r.ClassName} – {r.Section}
-                    </td>
-                    <td style={{ padding: "10px 16px" }}>
-                      {r.SubjectName || r.Subject}
-                    </td>
-                    <td style={{ padding: "10px 16px" }}>{r.ExamName}</td>
-                    <td style={{ padding: "10px 16px", fontWeight: 600 }}>
-                      {r.MarksObtained ?? r.marksObtained}
-                    </td>
-                    <td style={{ padding: "10px 16px" }}>
-                      {r.TotalMarks ?? r.totalMarks ?? 100}
-                    </td>
-                    <td
-                      style={{
-                        padding: "10px 16px",
-                        fontWeight: 700,
-                        color: "#2563eb",
-                      }}
-                    >
-                      {calcGrade(
-                        r.MarksObtained ?? r.marksObtained,
-                        r.TotalMarks ?? r.totalMarks ?? 100,
-                      )}
-                    </td>
+            <div style={{ overflowX: "auto" }}>
+              <table className="results-table">
+                <thead>
+                  <tr>
+                    {TABLE_HEADERS.map((h) => (
+                      <th key={h}>{h}</th>
+                    ))}
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {results.map((r, i) => {
+                    const grade = calcGrade(
+                      r.MarksObtained ?? r.marksObtained,
+                      r.TotalMarks ?? r.totalMarks ?? 100,
+                    );
+                    const gradeColor =
+                      grade === "A+" || grade === "A"
+                        ? { bg: "#dcfce7", color: "#166534", border: "#86efac" }
+                        : grade === "B+" || grade === "B"
+                        ? { bg: "#fef9c3", color: "#854d0e", border: "#fde047" }
+                        : grade === "C+" || grade === "C"
+                        ? { bg: "#ffedd5", color: "#9a3412", border: "#fdba74" }
+                        : { bg: "#fee2e2", color: "#991b1b", border: "#fca5a5" };
+                    return (
+                      <tr key={i}>
+                        <td>{r.FirstName} {r.LastName}</td>
+                        <td>{r.ClassName} – {r.Section}</td>
+                        <td>{r.SubjectName || r.Subject}</td>
+                        <td>{r.ExamName}</td>
+                        <td style={{ fontWeight: 700 }}>
+                          {r.MarksObtained ?? r.marksObtained}
+                        </td>
+                        <td>{r.TotalMarks ?? r.totalMarks ?? 100}</td>
+                        <td>
+                          <span style={{
+                            display: "inline-flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            minWidth: 44,
+                            padding: "4px 10px",
+                            borderRadius: 999,
+                            fontSize: "0.82rem",
+                            fontWeight: 800,
+                            background: gradeColor.bg,
+                            color: gradeColor.color,
+                            border: `1px solid ${gradeColor.border}`,
+                          }}>
+                            {grade}
+                          </span>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
           )}
         </div>
       )}

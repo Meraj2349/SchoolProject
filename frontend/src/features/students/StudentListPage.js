@@ -63,17 +63,6 @@ function StudentAvatar({ studentId, firstName, lastName }) {
 
 const EMPTY = { firstName: "", rollNumber: "", className: "", section: "" };
 
-const SELECT_STYLE = {
-  width: "100%",
-  padding: "10px 14px",
-  borderRadius: 8,
-  border: "1.5px solid #d1d5db",
-  fontSize: 14,
-  background: "#fff",
-  cursor: "pointer",
-  outline: "none",
-};
-
 export default function StudentListPage() {
   const [filters, setFilters] = useState(EMPTY);
   const [students, setStudents] = useState([]);
@@ -173,51 +162,22 @@ export default function StudentListPage() {
         <h1 className="search-title">{t("pageTitle")}</h1>
         <p className="search-subtitle">{t("pageSubtitle")}</p>
         {currentBranchId != null && (
-          <div
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 6,
-              marginTop: 10,
-              padding: "5px 14px",
-              background: "linear-gradient(135deg,#ecfdf5 0%,#d1fae5 100%)",
-              border: "1.5px solid #10b981",
-              borderRadius: 20,
-              fontSize: 12,
-              color: "#065f46",
-              fontWeight: 600,
-            }}
-          >
+          <div className="branch-badge">
             <span>🏫</span>
             <span>{currentBranchName}</span>
           </div>
         )}
       </div>
 
-      {/* Class & Section dropdowns at the top */}
-      <div
-        style={{
-          maxWidth: 700,
-          margin: "0 auto 20px",
-          padding: "16px 20px",
-          background: "#f9fafb",
-          borderRadius: 12,
-          border: "1px solid #e5e7eb",
-          display: "grid",
-          gridTemplateColumns: "1fr 1fr",
-          gap: 16,
-        }}
-      >
-        <div>
-          <label
-            style={{ display: "block", fontWeight: 600, fontSize: 13, marginBottom: 6, color: "#374151" }}
-          >
-            {t("className") || "Class"} <span style={{ color: "#ef4444" }}>*</span>
+      {/* Class & Section filter bar */}
+      <div className="filter-bar">
+        <div className="filter-group">
+          <label className="filter-label">
+            {t("className") || "Class"} <span className="required">*</span>
           </label>
           <select
             value={filters.className}
             onChange={handleClassDropdown}
-            style={SELECT_STYLE}
           >
             <option value="">{t("selectClass") || "Select Class"}</option>
             {classNames.map((cn) => (
@@ -225,17 +185,14 @@ export default function StudentListPage() {
             ))}
           </select>
         </div>
-        <div>
-          <label
-            style={{ display: "block", fontWeight: 600, fontSize: 13, marginBottom: 6, color: "#374151" }}
-          >
-            {t("section") || "Section"} <span style={{ color: "#ef4444" }}>*</span>
+        <div className="filter-group">
+          <label className="filter-label">
+            {t("section") || "Section"} <span className="required">*</span>
           </label>
           <select
             value={filters.section}
             onChange={handleSectionDropdown}
             disabled={!filters.className}
-            style={{ ...SELECT_STYLE, opacity: filters.className ? 1 : 0.5, cursor: filters.className ? "pointer" : "not-allowed" }}
           >
             <option value="">{t("selectSection") || "Select Section"}</option>
             {sections.map((sec) => (

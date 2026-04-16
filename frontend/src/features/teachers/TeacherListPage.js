@@ -26,17 +26,6 @@ const COLORS = [
   "#85C1E9",
 ];
 
-const SELECT_STYLE = {
-  width: "100%",
-  padding: "10px 14px",
-  borderRadius: 8,
-  border: "1.5px solid #d1d5db",
-  fontSize: 14,
-  background: "#fff",
-  cursor: "pointer",
-  outline: "none",
-};
-
 function avatar(fn, ln) {
   const initials = `${fn.charAt(0)}${ln.charAt(0)}`.toUpperCase();
   const color = COLORS[(fn.charCodeAt(0) + ln.charCodeAt(0)) % COLORS.length];
@@ -150,19 +139,25 @@ export default function TeacherListPage() {
   if (isLoading)
     return (
       <div className="teachers-page">
-        <LottieLoader size="medium" text={t("loadingTeachers")} />
+        <Navbar />
+        <div style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "60vh" }}>
+          <LottieLoader size="medium" text={t("loadingTeachers")} />
+        </div>
+        <Footer />
       </div>
     );
 
   if (isError)
     return (
       <div className="teachers-page">
+        <Navbar />
         <div className="error-container">
           <p className="error">{t("failedToFetch")}</p>
           <button onClick={refetch} className="btn-retry">
             {t("tryAgain")}
           </button>
         </div>
+        <Footer />
       </div>
     );
 
@@ -173,69 +168,44 @@ export default function TeacherListPage() {
       <div className="page-header">
         <h1>{t("pageTitle")}</h1>
         {currentBranchId != null && (
-          <div
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 6,
-              marginTop: 10,
-              padding: "5px 14px",
-              background: "linear-gradient(135deg,#ecfdf5 0%,#d1fae5 100%)",
-              border: "1.5px solid #10b981",
-              borderRadius: 20,
-              fontSize: 12,
-              color: "#065f46",
-              fontWeight: 600,
-            }}
-          >
+          <div style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 6,
+            marginTop: 14,
+            padding: "6px 16px",
+            background: "rgba(201,168,76,0.18)",
+            border: "1.5px solid rgba(201,168,76,0.5)",
+            borderRadius: 999,
+            fontSize: 12,
+            color: "#e8c97a",
+            fontWeight: 600,
+            position: "relative",
+            zIndex: 1,
+          }}>
             <span>🏫</span>
             <span>{currentBranchName}</span>
           </div>
         )}
       </div>
 
-      {/* Class & Section filter dropdowns */}
-      <div
-        style={{
-          maxWidth: 900,
-          margin: "0 auto 20px",
-          padding: "16px 20px",
-          background: "#f9fafb",
-          borderRadius: 12,
-          border: "1px solid #e5e7eb",
-          display: "grid",
-          gridTemplateColumns: "1fr 1fr",
-          gap: 16,
-        }}
-      >
-        <div>
-          <label
-            style={{ display: "block", fontWeight: 600, fontSize: 13, marginBottom: 6, color: "#374151" }}
-          >
-            {t("className") || "Class"}
-          </label>
-          <select
-            value={selectedClass}
-            onChange={handleClassChange}
-            style={SELECT_STYLE}
-          >
+      {/* Class & Section filter bar */}
+      <div className="teachers-filter-bar">
+        <div className="tf-group">
+          <label className="tf-label">{t("className") || "Class"}</label>
+          <select value={selectedClass} onChange={handleClassChange}>
             <option value="">{t("allClasses") || "All Classes"}</option>
             {classNames.map((cn) => (
               <option key={cn} value={cn}>{cn}</option>
             ))}
           </select>
         </div>
-        <div>
-          <label
-            style={{ display: "block", fontWeight: 600, fontSize: 13, marginBottom: 6, color: "#374151" }}
-          >
-            {t("section") || "Section"}
-          </label>
+        <div className="tf-group">
+          <label className="tf-label">{t("section") || "Section"}</label>
           <select
             value={selectedSection}
             onChange={(e) => setSelectedSection(e.target.value)}
             disabled={!selectedClass}
-            style={{ ...SELECT_STYLE, opacity: selectedClass ? 1 : 0.5, cursor: selectedClass ? "pointer" : "not-allowed" }}
           >
             <option value="">{t("allSections") || "All Sections"}</option>
             {sections.map((sec) => (
