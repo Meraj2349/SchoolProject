@@ -6,10 +6,7 @@ import { useTranslations } from "@/store/languageStore";
 import { useBranchStore } from "@/store/branchStore";
 
 /* ── Classic navy/gold palette ── */
-const NAVY  = "#0d1f3c";
 const GOLD  = "#c9a84c";
-const GOLD2 = "#e2c07a";
-const CREAM = "#fdf8f0";
 
 const LINK_CONFIGS = [
   { nameKey: "students",   icon: "👥", path: "/students",   gradient: "linear-gradient(135deg,#10b981 0%,#059669 100%)", shadow: "rgba(16,185,129,0.35)"  },
@@ -185,6 +182,7 @@ export default function QuickLinks({ links }) {
           text-transform: capitalize;
           line-height: 1.2;
         }
+
       `}</style>
     </div>
   );

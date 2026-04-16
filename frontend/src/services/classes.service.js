@@ -6,6 +6,10 @@ export const classesService = {
   // Global class names — not branch-scoped (class names are the same across all branches)
   getNames: () => httpClient.get("/classes/names").then((r) => r.data),
 
+  // Fixed standard sections — same for every branch: ["Better", "Good", "General"]
+  getStandardSections: () =>
+    httpClient.get("/classes/standard-sections").then((r) => r.data),
+
   // Branch-scoped (ClassName, Section) pairs — used to derive available sections per branch
   getDistinct: () => httpClient.get("/classes/distinct").then((r) => r.data),
 

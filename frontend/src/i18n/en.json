@@ -62,7 +62,11 @@
     "teachers": "Teachers",
     "attendance": "Attendance",
     "result": "Result",
-    "routine": "Routine"
+    "routine": "Routine",
+    "selectClass": "Select Class",
+    "selectSection": "Select Section",
+    "classLabel": "Class",
+    "sectionLabel": "Section"
   },
   "eventNews": {
     "events": "EVENTS",

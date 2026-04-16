@@ -2,11 +2,13 @@ import { t } from "../config/i18n.js";
 import {
   addClass,
   deleteClass,
+  hardDeleteClass,
   getClasses,
   editClass,
   getTotalStudentsInClassByName,
   getDistinctClassesWithSections,
   getDistinctClassNames,
+  STANDARD_SECTIONS,
 } from "../models/classes.model.js";
 
 // Add a new class
@@ -104,6 +106,27 @@ export const getDistinctClassNamesController = async (req, res) => {
   } catch (error) {
     console.error("Error fetching distinct class names:", error);
     res.status(500).json({ error: t("class_fetch_failed", lang) });
+  }
+};
+
+// Get the fixed list of standard sections (Better, Good, General) — no DB lookup
+export const getStandardSectionsController = (req, res) => {
+  res.status(200).json(STANDARD_SECTIONS);
+};
+
+// Hard-delete a class row entirely — super_admin only
+export const hardDeleteClassController = async (req, res) => {
+  const lang = req.language;
+  const { id } = req.params;
+
+  try {
+    const result = await hardDeleteClass(id);
+    res
+      .status(200)
+      .json({ message: t("class_deleted", lang), success: result.success });
+  } catch (error) {
+    console.error("Error hard-deleting class:", error);
+    res.status(500).json({ error: t("class_delete_failed", lang) });
   }
 };
 

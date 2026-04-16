@@ -7,35 +7,55 @@ import Footer from "@/components/layout/Footer";
 import LatestUpdatesNotice from "@/components/shared/LatestUpdatesNotice";
 import { useTranslations } from "@/store/languageStore";
 import { useBranchStore } from "@/store/branchStore";
+import { useClassNames, useStandardSections } from "@/hooks/useClasses";
 import "@/styles/listcss/attendancelist.css";
 
+const CLASS_DROPDOWN_STYLE = {
+  width: "100%",
+  padding: "10px 14px",
+  borderRadius: 8,
+  border: "1.5px solid #d1d5db",
+  fontSize: 14,
+  background: "#fff",
+  cursor: "pointer",
+  outline: "none",
+};
+
 export default function AttendancePage() {
-  const [searchData, setSearchData] = useState({
-    name: "",
-    roll: "",
-    className: "",
-    section: "",
-  });
+  const [className, setClassName] = useState("");
+  const [section, setSection] = useState("");
   const [results, setResults] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const t = useTranslations("attendance");
   const { currentBranchId, currentBranchName } = useBranchStore();
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setSearchData((p) => ({ ...p, [name]: value }));
+  const { data: classNames = [] } = useClassNames();
+  const { data: sections = [] } = useStandardSections();
+
+  const handleClassChange = (e) => {
+    setClassName(e.target.value);
+    setSection("");
+    setResults(null);
+    setError("");
+  };
+
+  const handleSectionChange = (e) => {
+    setSection(e.target.value);
+    setResults(null);
+    setError("");
   };
 
   const handleSearch = async (e) => {
     e.preventDefault();
+    if (!className || !section) {
+      setError(t("fillAllFields") || "Please select class and section.");
+      return;
+    }
     setLoading(true);
     setError("");
     try {
-      const res = await attendanceService.getByClassSection(
-        searchData.className,
-        searchData.section,
-      );
+      const res = await attendanceService.getByClassSection(className, section);
       setResults(Array.isArray(res) ? res : (res?.data ?? []));
     } catch (err) {
       setError(err.message || t("failedToFetch"));
@@ -81,30 +101,35 @@ export default function AttendancePage() {
           <div className="form-row">
             <div className="form-group">
               <label>{t("className")}</label>
-              <input
-                type="text"
-                name="className"
-                value={searchData.className}
-                onChange={handleChange}
-                placeholder={t("classNamePlaceholder")}
+              <select
+                value={className}
+                onChange={handleClassChange}
                 required
-                className="form-input"
-              />
+                style={CLASS_DROPDOWN_STYLE}
+              >
+                <option value="">{t("selectClass") || "Select Class"}</option>
+                {classNames.map((cn) => (
+                  <option key={cn} value={cn}>{cn}</option>
+                ))}
+              </select>
             </div>
             <div className="form-group">
               <label>{t("section")}</label>
-              <input
-                type="text"
-                name="section"
-                value={searchData.section}
-                onChange={handleChange}
-                placeholder={t("sectionPlaceholder")}
+              <select
+                value={section}
+                onChange={handleSectionChange}
                 required
-                className="form-input"
-              />
+                disabled={!className}
+                style={{ ...CLASS_DROPDOWN_STYLE, opacity: className ? 1 : 0.5, cursor: className ? "pointer" : "not-allowed" }}
+              >
+                <option value="">{t("selectSection") || "Select Section"}</option>
+                {sections.map((sec) => (
+                  <option key={sec} value={sec}>{sec}</option>
+                ))}
+              </select>
             </div>
           </div>
-          <button type="submit" className="btn-search" disabled={loading}>
+          <button type="submit" className="btn-search" disabled={loading || !className || !section}>
             {loading ? t("searching") : t("searchBtn")}
           </button>
         </form>

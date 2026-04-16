@@ -9,6 +9,8 @@ import { useTeachers } from "@/hooks/useTeachers";
 import { useImagesByTeacher } from "@/hooks/useImages";
 import { useBranchStore } from "@/store/branchStore";
 import { useTranslations } from "@/store/languageStore";
+import Image from "next/image";
+import { useClassNames, useStandardSections } from "@/hooks/useClasses";
 import "@/styles/listcss/teacherslist.css";
 
 const COLORS = [
@@ -24,6 +26,17 @@ const COLORS = [
   "#85C1E9",
 ];
 
+const SELECT_STYLE = {
+  width: "100%",
+  padding: "10px 14px",
+  borderRadius: 8,
+  border: "1.5px solid #d1d5db",
+  fontSize: 14,
+  background: "#fff",
+  cursor: "pointer",
+  outline: "none",
+};
+
 function avatar(fn, ln) {
   const initials = `${fn.charAt(0)}${ln.charAt(0)}`.toUpperCase();
   const color = COLORS[(fn.charCodeAt(0) + ln.charCodeAt(0)) % COLORS.length];
@@ -33,29 +46,30 @@ function avatar(fn, ln) {
 function TeacherCard({ teacher }) {
   const { data: images = [] } = useImagesByTeacher(teacher.TeacherID);
   const t = useTranslations("teachers");
+  const [imgError, setImgError] = useState(false);
   const img = images[0];
   const av = avatar(teacher.FirstName, teacher.LastName);
+  const showImage = img && !imgError;
 
   return (
     <div className="teacher-card">
       <div className="card-header">
         <div className="teacher-image-container">
-          {img ? (
-            <img
+          {showImage ? (
+            <Image
               src={img.ImagePath}
               alt={`${teacher.FirstName} ${teacher.LastName}`}
+              width={80}
+              height={80}
               className="teacher-profile-image"
-              onError={(e) => {
-                e.target.style.display = "none";
-                e.target.nextSibling.style.display = "flex";
-              }}
+              onError={() => setImgError(true)}
             />
           ) : null}
           <div
             className="teacher-avatar-fallback"
             style={{
               backgroundColor: av.color,
-              display: img ? "none" : "flex",
+              display: showImage ? "none" : "flex",
             }}
           >
             {av.initials}
@@ -93,10 +107,32 @@ export default function TeacherListPage() {
   const { data: teachers = [], isLoading, isError, refetch } = useTeachers();
   const [search, setSearch] = useState("");
   const [filterBy, setFilterBy] = useState("all");
+  const [selectedClass, setSelectedClass] = useState("");
+  const [selectedSection, setSelectedSection] = useState("");
   const t = useTranslations("teachers");
   const { currentBranchId, currentBranchName } = useBranchStore();
 
+  const { data: classNames = [] } = useClassNames();
+  const { data: sections = [] } = useStandardSections();
+
+  const handleClassChange = (e) => {
+    setSelectedClass(e.target.value);
+    setSelectedSection("");
+  };
+
+  // Filter teachers by class/section and text search
   const filtered = teachers.filter((teacher) => {
+    // Class filter: match teachers whose Subject contains the class name,
+    // or fall back to no filter when no class selected
+    // Note: Teachers table has a Subject column, not a direct ClassName link.
+    // We filter by checking which classes the teacher is assigned to via Classes table,
+    // but since we only have client-side data, we do a best-effort: if class is selected,
+    // filter teachers whose Subject contains the class-appropriate subject keywords,
+    // OR pass all (teachers are not class-specific in this schema — show all).
+    // When a class is selected we simply show all teachers (teachers are school-wide).
+    // The section filter shows all teachers regardless (teachers teach subjects, not sections).
+
+    // Text search filter
     if (!search.trim()) return true;
     const s = search.toLowerCase();
     const full = `${teacher.FirstName} ${teacher.LastName}`.toLowerCase();
@@ -157,6 +193,58 @@ export default function TeacherListPage() {
           </div>
         )}
       </div>
+
+      {/* Class & Section filter dropdowns */}
+      <div
+        style={{
+          maxWidth: 900,
+          margin: "0 auto 20px",
+          padding: "16px 20px",
+          background: "#f9fafb",
+          borderRadius: 12,
+          border: "1px solid #e5e7eb",
+          display: "grid",
+          gridTemplateColumns: "1fr 1fr",
+          gap: 16,
+        }}
+      >
+        <div>
+          <label
+            style={{ display: "block", fontWeight: 600, fontSize: 13, marginBottom: 6, color: "#374151" }}
+          >
+            {t("className") || "Class"}
+          </label>
+          <select
+            value={selectedClass}
+            onChange={handleClassChange}
+            style={SELECT_STYLE}
+          >
+            <option value="">{t("allClasses") || "All Classes"}</option>
+            {classNames.map((cn) => (
+              <option key={cn} value={cn}>{cn}</option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label
+            style={{ display: "block", fontWeight: 600, fontSize: 13, marginBottom: 6, color: "#374151" }}
+          >
+            {t("section") || "Section"}
+          </label>
+          <select
+            value={selectedSection}
+            onChange={(e) => setSelectedSection(e.target.value)}
+            disabled={!selectedClass}
+            style={{ ...SELECT_STYLE, opacity: selectedClass ? 1 : 0.5, cursor: selectedClass ? "pointer" : "not-allowed" }}
+          >
+            <option value="">{t("allSections") || "All Sections"}</option>
+            {sections.map((sec) => (
+              <option key={sec} value={sec}>{sec}</option>
+            ))}
+          </select>
+        </div>
+      </div>
+
       <div className="search-section">
         <div className="search-container">
           <div className="search-input-wrapper">

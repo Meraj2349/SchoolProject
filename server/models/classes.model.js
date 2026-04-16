@@ -104,6 +104,23 @@ export const getClasswiseStudentCount = async (branchId = null) => {
   }
 };
 
+// Hard-delete a class row entirely — super_admin only (irreversible)
+export const hardDeleteClass = async (classId) => {
+  try {
+    const [result] = await db.query(
+      `DELETE FROM Classes WHERE ClassID = ?`,
+      [classId],
+    );
+    if (result.affectedRows === 0) {
+      throw new Error("No class found with that ID");
+    }
+    return { success: true };
+  } catch (error) {
+    console.error("Error hard-deleting class:", error);
+    throw error;
+  }
+};
+
 // Get all standard class names from the ClassNames reference table (global — not branch-scoped)
 export const getDistinctClassNames = async () => {
   const sql = `SELECT name FROM ClassNames ORDER BY sort_order, name`;
@@ -115,6 +132,9 @@ export const getDistinctClassNames = async () => {
     throw error;
   }
 };
+
+// Standard fixed sections — same for every branch, no DB lookup needed
+export const STANDARD_SECTIONS = ["Better", "Good", "General"];
 
 // Get distinct class names with their sections (branch-scoped for dropdowns)
 export const getDistinctClassesWithSections = async (branchId = null) => {

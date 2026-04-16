@@ -123,17 +123,11 @@ function Autocomplete({
 // This fallback list is used only while the query is loading.
 // ─────────────────────────────────────────────────────────────────────────────
 const STANDARD_CLASSES = [
-  "Play", "Nursery", "KG",
-  "Class 1", "Class 2", "Class 3", "Class 4", "Class 5",
-  "Class 6", "Class 7", "Class 8", "Class 9", "Class 10",
+  "Nursery", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10",
 ];
 
-// Common section names across all branches (datalist suggestions)
-const SECTION_SUGGESTIONS = [
-  "A", "B", "C", "D", "E",
-  "Morning", "Day", "Evening",
-  "Bangla", "English",
-];
+// Standard fixed sections for all branches
+const SECTION_SUGGESTIONS = ["Better", "Good", "General"];
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Main page

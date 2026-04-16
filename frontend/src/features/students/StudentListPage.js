@@ -8,6 +8,8 @@ import { studentsService } from "@/services/students.service";
 import { imagesService } from "@/services/images.service";
 import { useBranchStore } from "@/store/branchStore";
 import { useTranslations } from "@/store/languageStore";
+import { useClassNames, useStandardSections } from "@/hooks/useClasses";
+import Image from "next/image";
 import "@/styles/StudentListpage.css";
 
 function StudentAvatar({ studentId, firstName, lastName }) {
@@ -25,12 +27,12 @@ function StudentAvatar({ studentId, firstName, lastName }) {
   });
 
   return url ? (
-    <img
+    <Image
       src={url}
       alt={`${firstName} ${lastName}`}
+      width={60}
+      height={60}
       style={{
-        width: 60,
-        height: 60,
         objectFit: "cover",
         borderRadius: "50%",
         border: "2px solid #e5e7eb",
@@ -61,6 +63,17 @@ function StudentAvatar({ studentId, firstName, lastName }) {
 
 const EMPTY = { firstName: "", rollNumber: "", className: "", section: "" };
 
+const SELECT_STYLE = {
+  width: "100%",
+  padding: "10px 14px",
+  borderRadius: 8,
+  border: "1.5px solid #d1d5db",
+  fontSize: 14,
+  background: "#fff",
+  cursor: "pointer",
+  outline: "none",
+};
+
 export default function StudentListPage() {
   const [filters, setFilters] = useState(EMPTY);
   const [students, setStudents] = useState([]);
@@ -69,6 +82,9 @@ export default function StudentListPage() {
   const [searched, setSearched] = useState(false);
   const t = useTranslations("students");
   const { currentBranchId, currentBranchName } = useBranchStore();
+
+  const { data: classNames = [] } = useClassNames();
+  const { data: sections = [] } = useStandardSections();
 
   // Reset results whenever the active branch changes so stale results are cleared
   useEffect(() => {
@@ -80,6 +96,24 @@ export default function StudentListPage() {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFilters((p) => ({ ...p, [name]: value }));
+  };
+
+  // When class dropdown changes, update filters.className and reset section
+  const handleClassDropdown = (e) => {
+    const val = e.target.value;
+    setFilters((p) => ({ ...p, className: val, section: "" }));
+    setStudents([]);
+    setError("");
+    setSearched(false);
+  };
+
+  // When section dropdown changes, update filters.section
+  const handleSectionDropdown = (e) => {
+    const val = e.target.value;
+    setFilters((p) => ({ ...p, section: val }));
+    setStudents([]);
+    setError("");
+    setSearched(false);
   };
 
   const handleSearch = async (e) => {
@@ -131,29 +165,6 @@ export default function StudentListPage() {
   };
   const fmtDate = (d) => (d ? new Date(d).toLocaleDateString() : "N/A");
 
-  const FIELDS = [
-    {
-      id: "firstName",
-      labelKey: "firstName",
-      placeholderKey: "firstNamePlaceholder",
-    },
-    {
-      id: "rollNumber",
-      labelKey: "rollNumber",
-      placeholderKey: "rollNumberPlaceholder",
-    },
-    {
-      id: "className",
-      labelKey: "className",
-      placeholderKey: "classNamePlaceholder",
-    },
-    {
-      id: "section",
-      labelKey: "section",
-      placeholderKey: "sectionPlaceholder",
-    },
-  ];
-
   return (
     <div className="student-search-container">
       <Navbar />
@@ -182,29 +193,96 @@ export default function StudentListPage() {
           </div>
         )}
       </div>
+
+      {/* Class & Section dropdowns at the top */}
+      <div
+        style={{
+          maxWidth: 700,
+          margin: "0 auto 20px",
+          padding: "16px 20px",
+          background: "#f9fafb",
+          borderRadius: 12,
+          border: "1px solid #e5e7eb",
+          display: "grid",
+          gridTemplateColumns: "1fr 1fr",
+          gap: 16,
+        }}
+      >
+        <div>
+          <label
+            style={{ display: "block", fontWeight: 600, fontSize: 13, marginBottom: 6, color: "#374151" }}
+          >
+            {t("className") || "Class"} <span style={{ color: "#ef4444" }}>*</span>
+          </label>
+          <select
+            value={filters.className}
+            onChange={handleClassDropdown}
+            style={SELECT_STYLE}
+          >
+            <option value="">{t("selectClass") || "Select Class"}</option>
+            {classNames.map((cn) => (
+              <option key={cn} value={cn}>{cn}</option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label
+            style={{ display: "block", fontWeight: 600, fontSize: 13, marginBottom: 6, color: "#374151" }}
+          >
+            {t("section") || "Section"} <span style={{ color: "#ef4444" }}>*</span>
+          </label>
+          <select
+            value={filters.section}
+            onChange={handleSectionDropdown}
+            disabled={!filters.className}
+            style={{ ...SELECT_STYLE, opacity: filters.className ? 1 : 0.5, cursor: filters.className ? "pointer" : "not-allowed" }}
+          >
+            <option value="">{t("selectSection") || "Select Section"}</option>
+            {sections.map((sec) => (
+              <option key={sec} value={sec}>{sec}</option>
+            ))}
+          </select>
+        </div>
+      </div>
+
       <div className="search-form-container">
         <form onSubmit={handleSearch} className="search-form">
           <div className="search-instruction">
             <p>{t("allFieldsRequired")}</p>
           </div>
           <div className="form-grid">
-            {FIELDS.map(({ id, labelKey, placeholderKey }) => (
-              <div key={id} className="form-group">
-                <label htmlFor={id} className="form-label">
-                  {t(labelKey)} <span className="required">*</span>
-                </label>
-                <input
-                  type="text"
-                  id={id}
-                  name={id}
-                  value={filters[id]}
-                  onChange={handleChange}
-                  placeholder={t(placeholderKey)}
-                  className="form-input"
-                  required
-                />
-              </div>
-            ))}
+            {/* First Name */}
+            <div className="form-group">
+              <label htmlFor="firstName" className="form-label">
+                {t("firstName")} <span className="required">*</span>
+              </label>
+              <input
+                type="text"
+                id="firstName"
+                name="firstName"
+                value={filters.firstName}
+                onChange={handleChange}
+                placeholder={t("firstNamePlaceholder")}
+                className="form-input"
+                required
+              />
+            </div>
+            {/* Roll Number */}
+            <div className="form-group">
+              <label htmlFor="rollNumber" className="form-label">
+                {t("rollNumber")} <span className="required">*</span>
+              </label>
+              <input
+                type="text"
+                id="rollNumber"
+                name="rollNumber"
+                value={filters.rollNumber}
+                onChange={handleChange}
+                placeholder={t("rollNumberPlaceholder")}
+                className="form-input"
+                required
+              />
+            </div>
           </div>
           <div className="form-actions">
             <button type="submit" className="btn btn-search" disabled={loading}>

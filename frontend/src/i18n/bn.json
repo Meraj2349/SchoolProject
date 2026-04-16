@@ -62,7 +62,11 @@
     "teachers": "শিক্ষক",
     "attendance": "উপস্থিতি",
     "result": "ফলাফল",
-    "routine": "রুটিন"
+    "routine": "রুটিন",
+    "selectClass": "শ্রেণি নির্বাচন করুন",
+    "selectSection": "বিভাগ নির্বাচন করুন",
+    "classLabel": "শ্রেণি",
+    "sectionLabel": "বিভাগ"
   },
   "eventNews": {
     "events": "ইভেন্ট",
