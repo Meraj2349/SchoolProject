@@ -7,7 +7,7 @@ export const metadata = {
 
 export default function QuakerLayout({ children }) {
   return (
-    <div className="min-h-screen bg-[#0a1628] text-white">
+    <div className="min-h-screen bg-white">
       <QuakerNav />
       <main>{children}</main>
     </div>

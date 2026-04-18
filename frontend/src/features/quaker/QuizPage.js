@@ -9,6 +9,30 @@ import { useQuizSessionStore } from "@/store/quizSessionStore";
 const DIFFICULTIES = ["all", "easy", "medium", "hard"];
 const QUESTION_COUNTS = [5, 10, 15, 20];
 
+/* Difficulty pill colours — borrowed from QuickLinks card palette */
+const DIFF_COLORS = {
+  easy: {
+    gradient: "linear-gradient(135deg,#10b981 0%,#059669 100%)",
+    shadow: "rgba(16,185,129,0.35)",
+  },
+  medium: {
+    gradient: "linear-gradient(135deg,#f59e0b 0%,#d97706 100%)",
+    shadow: "rgba(245,158,11,0.35)",
+  },
+  hard: {
+    gradient: "linear-gradient(135deg,#f43f5e 0%,#e11d48 100%)",
+    shadow: "rgba(244,63,94,0.35)",
+  },
+  all: {
+    gradient: "linear-gradient(135deg,#8b5cf6 0%,#7c3aed 100%)",
+    shadow: "rgba(139,92,246,0.35)",
+  },
+};
+
+/* Shared token strings */
+const inputClass =
+  "w-full px-4 py-3 rounded-xl border border-white/20 bg-white/10 text-white placeholder-white/50 transition-all focus:outline-none focus:border-amber-300 focus:bg-white/15 focus:ring-2 focus:ring-amber-300/40 cursor-pointer appearance-none";
+
 export default function QuizPage() {
   const router = useRouter();
   const { student, quizToken, hydrateFromStorage } = useQuizSessionStore();
@@ -31,7 +55,6 @@ export default function QuizPage() {
 
   const [result, setResult] = useState(null);
 
-  // Guard: if no quiz token, redirect to identity form
   useEffect(() => {
     hydrateFromStorage();
     const token = quizTokenHolder.get();
@@ -47,14 +70,16 @@ export default function QuizPage() {
       .catch(() => setMeta({ subjects: [], grades: [] }));
   }, []);
 
-  const inputClass =
-    "w-full px-4 py-3 rounded-xl border border-white/20 bg-white/10 text-white placeholder-white/50 transition-all focus:outline-none focus:border-amber-300 focus:bg-white/15 focus:ring-2 focus:ring-amber-300/40 cursor-pointer appearance-none";
-
   const handleStart = async () => {
     setLoading(true);
     setError("");
     try {
-      const data = await quizService.start({ subject, grade, difficulty, numQuestions });
+      const data = await quizService.start({
+        subject,
+        grade,
+        difficulty,
+        numQuestions,
+      });
       if (!data.questions?.length) {
         setError("No questions match those filters. Try different options.");
         setLoading(false);
@@ -81,13 +106,16 @@ export default function QuizPage() {
 
   const recordTime = (qid) => {
     if (perQuestionStart.current) {
-      const elapsed = Math.round((Date.now() - perQuestionStart.current) / 1000);
+      const elapsed = Math.round(
+        (Date.now() - perQuestionStart.current) / 1000,
+      );
       setQuestionTimes((p) => ({ ...p, [qid]: (p[qid] || 0) + elapsed }));
       perQuestionStart.current = Date.now();
     }
   };
 
-  const pickAnswer = (qid, letter) => setAnswers((p) => ({ ...p, [qid]: letter }));
+  const pickAnswer = (qid, letter) =>
+    setAnswers((p) => ({ ...p, [qid]: letter }));
 
   const goNext = () => {
     const q = questions[current];
@@ -113,7 +141,6 @@ export default function QuizPage() {
         timeSpentSeconds: questionTimes[q.id] || 0,
       }));
       const totalTime = Math.round((Date.now() - startedAt) / 1000);
-
       const studentName = student
         ? `${student.firstName} ${student.lastName}`.trim()
         : "Student";
@@ -130,7 +157,8 @@ export default function QuizPage() {
       setResult(data);
       setPhase("results");
     } catch (err) {
-      const msg = err.response?.data?.error || err.message || "Failed to submit";
+      const msg =
+        err.response?.data?.error || err.message || "Failed to submit";
       if (err.response?.status === 401) {
         router.replace("/quaker/start");
         return;
@@ -151,107 +179,211 @@ export default function QuizPage() {
     setError("");
   };
 
+  /* ── SETUP PHASE ── */
   if (phase === "setup") {
     return (
-      <div className="max-w-2xl mx-auto px-6 py-10">
-        <div className="mb-8">
-          <p className="text-amber-300 text-sm font-medium mb-2">Quiz</p>
-          <h1 className="text-4xl font-bold mb-2">Pick your quiz</h1>
-          {student && (
-            <p className="text-white/60">
-              Welcome, {student.firstName}! Choose filters to generate a random quiz.
+      <div className="bg-gradient-to-b from-[#fdf8f0] to-[#f5ede0] min-h-screen py-10">
+        {/* Gold strip top */}
+        <div
+          className="fixed top-0 left-0 right-0 h-[3px] pointer-events-none z-[1]"
+          style={{
+            backgroundImage:
+              "linear-gradient(90deg, transparent 0%, #c9a84c 30%, #e2c07a 50%, #c9a84c 70%, transparent 100%)",
+          }}
+        />
+
+        <div className="max-w-2xl mx-auto px-5">
+          {/* Section header */}
+          <div className="text-center mb-10">
+            <div className="inline-flex items-center gap-[14px] mb-4">
+              <span className="block w-14 h-px bg-gradient-to-r from-transparent to-[rgba(201,168,76,0.6)]" />
+              <span className="text-[0.75rem] text-[#c9a84c]">★</span>
+              <span className="block w-14 h-px bg-gradient-to-l from-transparent to-[rgba(201,168,76,0.6)]" />
+            </div>
+            <h1 className="text-[clamp(1.8rem,4vw,2.6rem)] font-extrabold text-[#0d1f3c] mb-2 tracking-tight leading-tight">
+              Pick your quiz
+            </h1>
+            <p className="text-[0.95rem] text-[#5a6072] leading-relaxed">
+              {student
+                ? `Welcome, ${student.firstName}! Choose filters to generate a random quiz.`
+                : "Choose filters to generate a fresh random quiz."}
             </p>
+          </div>
+
+          {error && (
+            <div className="bg-red-500/10 border border-red-400/30 text-red-700 px-4 py-2.5 rounded-lg mb-5 text-sm">
+              {error}
+            </div>
           )}
-          {!student && (
-            <p className="text-white/60">Choose filters to generate a fresh random quiz.</p>
-          )}
-        </div>
 
-        {error && (
-          <div className="bg-red-500/10 border border-red-400/30 text-red-200 px-4 py-2.5 rounded-lg mb-4 text-sm">
-            {error}
-          </div>
-        )}
-
-        <div className="bg-white/5 border border-white/10 rounded-2xl p-6 space-y-5">
-          <div>
-            <label className="block text-sm font-medium text-white/80 mb-2">Subject</label>
-            <select
-              value={subject}
-              onChange={(e) => setSubject(e.target.value)}
-              className={inputClass}
-              style={{ colorScheme: "dark" }}
-            >
-              <option value="all">All subjects</option>
-              {meta.subjects.map((s) => <option key={s} value={s}>{s}</option>)}
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-white/80 mb-2">Grade</label>
-            <select
-              value={grade}
-              onChange={(e) => setGrade(e.target.value)}
-              className={inputClass}
-              style={{ colorScheme: "dark" }}
-            >
-              <option value="all">All grades</option>
-              {meta.grades.map((g) => <option key={g} value={g}>{g}</option>)}
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-white/80 mb-2">Difficulty</label>
-            <div className="grid grid-cols-4 gap-2">
-              {DIFFICULTIES.map((d) => (
-                <button
-                  key={d}
-                  type="button"
-                  onClick={() => setDifficulty(d)}
-                  className={`py-2.5 rounded-lg text-sm font-semibold capitalize transition-all ${
-                    difficulty === d
-                      ? "bg-amber-400 text-[#0a1628]"
-                      : "bg-white/5 border border-white/10 text-white/70 hover:bg-white/10"
-                  }`}
+          {/* Card — LeadershipSection card style */}
+          <div className="bg-white rounded-2xl border border-[rgba(201,168,76,0.25)] shadow-[0_2px_6px_rgba(13,31,60,0.07),0_8px_24px_rgba(13,31,60,0.06)] overflow-hidden">
+            {/* Gold top accent */}
+            <div
+              className="h-[3px]"
+              style={{
+                backgroundImage:
+                  "linear-gradient(90deg, transparent 0%, #c9a84c 30%, #e2c07a 50%, #c9a84c 70%, transparent 100%)",
+              }}
+            />
+            <div className="p-6 space-y-6">
+              {/* Subject */}
+              <div>
+                <label className="block text-sm font-semibold text-[#0d1f3c] mb-2">
+                  Subject
+                </label>
+                <select
+                  value={subject}
+                  onChange={(e) => setSubject(e.target.value)}
+                  className={inputClass}
+                  style={{
+                    colorScheme: "light",
+                    color: "#0d1f3c",
+                    background: "#f9f9f9",
+                    borderColor: "rgba(201,168,76,0.4)",
+                  }}
                 >
-                  {d}
-                </button>
-              ))}
+                  <option value="all">All subjects</option>
+                  {meta.subjects.map((s) => (
+                    <option key={s} value={s}>
+                      {s}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Grade */}
+              <div>
+                <label className="block text-sm font-semibold text-[#0d1f3c] mb-2">
+                  Grade
+                </label>
+                <select
+                  value={grade}
+                  onChange={(e) => setGrade(e.target.value)}
+                  className={inputClass}
+                  style={{
+                    colorScheme: "light",
+                    color: "#0d1f3c",
+                    background: "#f9f9f9",
+                    borderColor: "rgba(201,168,76,0.4)",
+                  }}
+                >
+                  <option value="all">All grades</option>
+                  {meta.grades.map((g) => (
+                    <option key={g} value={g}>
+                      {g}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Difficulty pills */}
+              <div>
+                <label className="block text-sm font-semibold text-[#0d1f3c] mb-2">
+                  Difficulty
+                </label>
+                <div className="grid grid-cols-4 gap-2">
+                  {DIFFICULTIES.map((d) => {
+                    const isActive = difficulty === d;
+                    const colors = DIFF_COLORS[d];
+                    return (
+                      <button
+                        key={d}
+                        type="button"
+                        onClick={() => setDifficulty(d)}
+                        className="py-2.5 rounded-xl text-sm font-bold capitalize transition-all"
+                        style={
+                          isActive
+                            ? {
+                                background: colors.gradient,
+                                color: "#fff",
+                                boxShadow: `0 4px 14px ${colors.shadow}`,
+                                transform: "translateY(-2px)",
+                              }
+                            : {
+                                background: "#f5f5f5",
+                                color: "#5a6072",
+                                border: "1px solid rgba(201,168,76,0.2)",
+                              }
+                        }
+                      >
+                        {d}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Question count pills */}
+              <div>
+                <label className="block text-sm font-semibold text-[#0d1f3c] mb-2">
+                  Number of questions
+                </label>
+                <div className="grid grid-cols-4 gap-2">
+                  {QUESTION_COUNTS.map((n) => {
+                    const isActive = numQuestions === n;
+                    return (
+                      <button
+                        key={n}
+                        type="button"
+                        onClick={() => setNumQuestions(n)}
+                        className="py-2.5 rounded-xl text-sm font-bold transition-all"
+                        style={
+                          isActive
+                            ? {
+                                background:
+                                  "linear-gradient(135deg,#10b981 0%,#059669 100%)",
+                                color: "#fff",
+                                boxShadow: "0 4px 14px rgba(16,185,129,0.35)",
+                                transform: "translateY(-2px)",
+                              }
+                            : {
+                                background: "#f5f5f5",
+                                color: "#5a6072",
+                                border: "1px solid rgba(201,168,76,0.2)",
+                              }
+                        }
+                      >
+                        {n}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Start button — Navbar green CTA style */}
+              <button
+                onClick={handleStart}
+                disabled={loading}
+                className="w-full py-3.5 text-white font-bold text-base rounded-xl cursor-pointer transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+                style={{
+                  background:
+                    "linear-gradient(135deg, #10b981 0%, #059669 100%)",
+                  boxShadow: "0 4px 12px rgba(16,185,129,0.3)",
+                }}
+                onMouseEnter={(e) => {
+                  if (!loading) {
+                    e.currentTarget.style.transform = "translateY(-2px)";
+                    e.currentTarget.style.boxShadow =
+                      "0 8px 20px rgba(16,185,129,0.4)";
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = "translateY(0)";
+                  e.currentTarget.style.boxShadow =
+                    "0 4px 12px rgba(16,185,129,0.3)";
+                }}
+              >
+                {loading ? "Loading…" : "Start Quiz →"}
+              </button>
             </div>
           </div>
-
-          <div>
-            <label className="block text-sm font-medium text-white/80 mb-2">Number of questions</label>
-            <div className="grid grid-cols-4 gap-2">
-              {QUESTION_COUNTS.map((n) => (
-                <button
-                  key={n}
-                  type="button"
-                  onClick={() => setNumQuestions(n)}
-                  className={`py-2.5 rounded-lg text-sm font-semibold transition-all ${
-                    numQuestions === n
-                      ? "bg-amber-400 text-[#0a1628]"
-                      : "bg-white/5 border border-white/10 text-white/70 hover:bg-white/10"
-                  }`}
-                >
-                  {n}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <button
-            onClick={handleStart}
-            disabled={loading}
-            className="w-full py-3.5 bg-amber-400 text-[#0a1628] font-bold text-base rounded-xl transition-all disabled:opacity-60 disabled:cursor-not-allowed hover:bg-amber-300 hover:shadow-lg hover:shadow-amber-400/30"
-          >
-            {loading ? "Loading…" : "Start Quiz →"}
-          </button>
         </div>
       </div>
     );
   }
 
+  /* ── PLAYING PHASE ── */
   if (phase === "playing") {
     const q = questions[current];
     const options = Array.isArray(q.options) ? q.options : [];
@@ -260,167 +392,410 @@ export default function QuizPage() {
     const progressPct = ((current + 1) / questions.length) * 100;
 
     return (
-      <div className="max-w-3xl mx-auto px-6 py-8">
-        <div className="flex items-center justify-between mb-4">
-          <p className="text-sm text-white/60">Question {current + 1} of {questions.length}</p>
-          <p className="text-sm text-amber-300 font-semibold">{answeredCount} answered</p>
-        </div>
-
-        <div className="h-1.5 bg-white/10 rounded-full overflow-hidden mb-8">
-          <div className="h-full bg-amber-400 transition-all" style={{ width: `${progressPct}%` }} />
-        </div>
-
-        {error && (
-          <div className="bg-red-500/10 border border-red-400/30 text-red-200 px-4 py-2.5 rounded-lg mb-4 text-sm">
-            {error}
-          </div>
-        )}
-
-        <div className="bg-white/5 border border-white/10 rounded-2xl p-8 mb-6">
-          <div className="flex gap-2 mb-4">
-            {q.subject && (
-              <span className="px-2.5 py-1 rounded-md bg-amber-400/10 border border-amber-300/30 text-amber-200 text-xs font-semibold">
-                {q.subject}
-              </span>
-            )}
-            {q.grade && (
-              <span className="px-2.5 py-1 rounded-md bg-white/10 text-white/70 text-xs font-medium">{q.grade}</span>
-            )}
-            {q.difficulty && (
-              <span className="px-2.5 py-1 rounded-md bg-white/10 text-white/70 text-xs font-medium capitalize">{q.difficulty}</span>
-            )}
-          </div>
-
-          <h2 className="text-xl sm:text-2xl font-semibold leading-relaxed mb-6 whitespace-pre-wrap">
-            {q.question}
-          </h2>
-
-          <div className="space-y-3">
-            {options.map((opt, idx) => {
-              const letter = String.fromCharCode(65 + idx);
-              const isSelected = selected === letter;
-              return (
-                <button
-                  key={idx}
-                  type="button"
-                  onClick={() => pickAnswer(q.id, letter)}
-                  className={`w-full text-left px-5 py-4 rounded-xl border-2 transition-all ${
-                    isSelected
-                      ? "bg-amber-400/10 border-amber-300 text-white"
-                      : "bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/20"
-                  }`}
-                >
-                  <span
-                    className={`inline-flex items-center justify-center w-8 h-8 rounded-lg font-bold mr-3 text-sm ${
-                      isSelected ? "bg-amber-400 text-[#0a1628]" : "bg-white/10 text-white/80"
-                    }`}
-                  >
-                    {letter}
-                  </span>
-                  <span className="text-base">{opt}</span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        <div className="flex gap-3">
-          <button
-            type="button"
-            onClick={goPrev}
-            disabled={current === 0}
-            className="flex-1 py-3.5 text-white/80 font-semibold text-base rounded-xl border border-white/20 cursor-pointer transition-all hover:bg-white/5 bg-transparent disabled:opacity-40 disabled:cursor-not-allowed"
-          >
-            ← Previous
-          </button>
-          {current < questions.length - 1 ? (
-            <button
-              type="button"
-              onClick={goNext}
-              className="grow py-3.5 bg-amber-400 text-[#0a1628] font-bold text-base rounded-xl transition-all hover:bg-amber-300"
+      <div className="bg-gradient-to-b from-[#fdf8f0] to-[#f5ede0] min-h-screen py-8">
+        <div className="max-w-3xl mx-auto px-5">
+          {/* Progress header */}
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-sm font-semibold text-[#5a6072]">
+              Question {current + 1} of {questions.length}
+            </p>
+            <p
+              className="text-sm font-bold px-3 py-1 rounded-full"
+              style={{
+                background: "rgba(201,168,76,0.12)",
+                color: "#7a5c1e",
+                border: "1px solid rgba(201,168,76,0.35)",
+              }}
             >
-              Next →
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={handleFinish}
-              disabled={loading}
-              className="grow py-3.5 bg-amber-400 text-[#0a1628] font-bold text-base rounded-xl transition-all disabled:opacity-60 hover:bg-amber-300"
-            >
-              {loading ? "Submitting…" : "Submit Quiz ✓"}
-            </button>
+              {answeredCount} answered
+            </p>
+          </div>
+
+          {/* Progress bar */}
+          <div className="h-2 bg-gray-200 rounded-full overflow-hidden mb-8">
+            <div
+              className="h-full rounded-full transition-all"
+              style={{
+                width: `${progressPct}%`,
+                background: "linear-gradient(90deg, #10b981, #059669)",
+              }}
+            />
+          </div>
+
+          {error && (
+            <div className="bg-red-500/10 border border-red-400/30 text-red-700 px-4 py-2.5 rounded-lg mb-4 text-sm">
+              {error}
+            </div>
           )}
+
+          {/* Question card */}
+          <div className="bg-white rounded-2xl border border-[rgba(201,168,76,0.25)] shadow-[0_2px_6px_rgba(13,31,60,0.07),0_8px_24px_rgba(13,31,60,0.06)] overflow-hidden mb-5">
+            <div
+              className="h-[3px]"
+              style={{
+                backgroundImage:
+                  "linear-gradient(90deg, transparent 0%, #c9a84c 30%, #e2c07a 50%, #c9a84c 70%, transparent 100%)",
+              }}
+            />
+            <div className="p-6 sm:p-8">
+              {/* Tag chips */}
+              <div className="flex gap-2 flex-wrap mb-5">
+                {q.subject && (
+                  <span
+                    className="px-2.5 py-1 rounded-md text-xs font-bold"
+                    style={{
+                      background: "rgba(16,185,129,0.12)",
+                      color: "#047857",
+                      border: "1px solid rgba(16,185,129,0.3)",
+                    }}
+                  >
+                    {q.subject}
+                  </span>
+                )}
+                {q.grade && (
+                  <span
+                    className="px-2.5 py-1 rounded-md text-xs font-semibold"
+                    style={{
+                      background: "rgba(201,168,76,0.12)",
+                      color: "#7a5c1e",
+                      border: "1px solid rgba(201,168,76,0.3)",
+                    }}
+                  >
+                    {q.grade}
+                  </span>
+                )}
+                {q.difficulty && (
+                  <span
+                    className="px-2.5 py-1 rounded-md text-xs font-semibold capitalize"
+                    style={{
+                      background: "rgba(75,46,131,0.1)",
+                      color: "#4b2e83",
+                      border: "1px solid rgba(75,46,131,0.2)",
+                    }}
+                  >
+                    {q.difficulty}
+                  </span>
+                )}
+              </div>
+
+              <h2 className="text-xl sm:text-2xl font-bold text-[#0d1f3c] leading-relaxed mb-6 whitespace-pre-wrap">
+                {q.question}
+              </h2>
+
+              <div className="space-y-3">
+                {options.map((opt, idx) => {
+                  const letter = String.fromCharCode(65 + idx);
+                  const isSelected = selected === letter;
+                  return (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => pickAnswer(q.id, letter)}
+                      className="w-full text-left px-5 py-4 rounded-xl border-2 transition-all"
+                      style={
+                        isSelected
+                          ? {
+                              background: "rgba(16,185,129,0.08)",
+                              borderColor: "#10b981",
+                              boxShadow: "0 4px 16px rgba(16,185,129,0.2)",
+                            }
+                          : {
+                              background: "#fafafa",
+                              borderColor: "rgba(201,168,76,0.2)",
+                            }
+                      }
+                      onMouseEnter={(e) => {
+                        if (!isSelected) {
+                          e.currentTarget.style.background = "#f0fdf4";
+                          e.currentTarget.style.borderColor =
+                            "rgba(16,185,129,0.4)";
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        if (!isSelected) {
+                          e.currentTarget.style.background = "#fafafa";
+                          e.currentTarget.style.borderColor =
+                            "rgba(201,168,76,0.2)";
+                        }
+                      }}
+                    >
+                      <span
+                        className="inline-flex items-center justify-center w-8 h-8 rounded-lg font-bold mr-3 text-sm transition-all"
+                        style={
+                          isSelected
+                            ? {
+                                background:
+                                  "linear-gradient(135deg, #10b981 0%, #059669 100%)",
+                                color: "#fff",
+                              }
+                            : {
+                                background: "rgba(201,168,76,0.15)",
+                                color: "#7a5c1e",
+                              }
+                        }
+                      >
+                        {letter}
+                      </span>
+                      <span className="text-base text-[#0d1f3c] font-medium">
+                        {opt}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+
+          {/* Navigation buttons */}
+          <div className="flex gap-3">
+            <button
+              type="button"
+              onClick={goPrev}
+              disabled={current === 0}
+              className="flex-1 py-3.5 text-[#5a6072] font-semibold text-base rounded-xl border border-gray-200 cursor-pointer transition-all hover:bg-gray-50 bg-white disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              ← Previous
+            </button>
+            {current < questions.length - 1 ? (
+              <button
+                type="button"
+                onClick={goNext}
+                className="grow py-3.5 text-white font-bold text-base rounded-xl transition-all"
+                style={{
+                  background:
+                    "linear-gradient(135deg, #10b981 0%, #059669 100%)",
+                  boxShadow: "0 4px 12px rgba(16,185,129,0.3)",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = "translateY(-2px)";
+                  e.currentTarget.style.boxShadow =
+                    "0 8px 20px rgba(16,185,129,0.4)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = "translateY(0)";
+                  e.currentTarget.style.boxShadow =
+                    "0 4px 12px rgba(16,185,129,0.3)";
+                }}
+              >
+                Next →
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={handleFinish}
+                disabled={loading}
+                className="grow py-3.5 text-white font-bold text-base rounded-xl transition-all disabled:opacity-60"
+                style={{
+                  background:
+                    "linear-gradient(135deg, #10b981 0%, #059669 100%)",
+                  boxShadow: "0 4px 12px rgba(16,185,129,0.3)",
+                }}
+              >
+                {loading ? "Submitting…" : "Submit Quiz ✓"}
+              </button>
+            )}
+          </div>
         </div>
       </div>
     );
   }
 
+  /* ── RESULTS PHASE ── */
   if (phase === "results" && result) {
-    const { totalQuestions, correctAnswers, scorePercentage, grade: letterGrade, details } = result;
+    const {
+      totalQuestions,
+      correctAnswers,
+      scorePercentage,
+      grade: letterGrade,
+      details,
+    } = result;
+
+    /* Grade to colour mapping */
+    const gradeColor =
+      scorePercentage >= 80
+        ? {
+            text: "#047857",
+            bg: "rgba(16,185,129,0.1)",
+            border: "rgba(16,185,129,0.35)",
+          }
+        : scorePercentage >= 60
+          ? {
+              text: "#b45309",
+              bg: "rgba(245,158,11,0.1)",
+              border: "rgba(245,158,11,0.35)",
+            }
+          : {
+              text: "#b91c1c",
+              bg: "rgba(244,63,94,0.08)",
+              border: "rgba(244,63,94,0.3)",
+            };
 
     return (
-      <div className="max-w-3xl mx-auto px-6 py-10">
-        <div className="bg-linear-to-br from-amber-400 to-amber-300 text-[#0a1628] rounded-2xl p-10 text-center mb-8">
-          <p className="text-sm font-semibold mb-2 tracking-wide">QUIZ COMPLETE</p>
-          <div className="text-7xl font-black mb-2">{letterGrade}</div>
-          <div className="text-4xl font-bold mb-3">{scorePercentage.toFixed(1)}%</div>
-          <p className="text-lg font-medium">{correctAnswers} out of {totalQuestions} correct</p>
-        </div>
+      <div className="bg-gradient-to-b from-[#fdf8f0] to-[#f5ede0] min-h-screen py-10">
+        <div className="max-w-3xl mx-auto px-5">
+          {/* Score hero strip — echoes ClassStatistics dark strip + large counter circles */}
+          <div className="relative bg-[#0d1f3c] rounded-2xl overflow-hidden mb-8 text-center">
+            {/* Diagonal texture */}
+            <div
+              className="absolute inset-0 pointer-events-none"
+              style={{
+                backgroundImage:
+                  "repeating-linear-gradient(45deg,rgba(255,255,255,.025) 0,rgba(255,255,255,.025) 1px,transparent 1px,transparent 10px)",
+              }}
+            />
+            {/* Top gold strip */}
+            <div className="absolute top-0 left-0 right-0 h-[3px] bg-[linear-gradient(to_right,transparent_0%,#c9a84c_30%,#e2c07a_50%,#c9a84c_70%,transparent_100%)]" />
 
-        <div className="flex gap-3 mb-10">
-          <button
-            onClick={resetAll}
-            className="flex-1 py-3.5 bg-amber-400 text-[#0a1628] font-bold text-base rounded-xl hover:bg-amber-300 transition-all"
-          >
-            Another Quiz
-          </button>
-          <Link
-            href="/quaker/progress"
-            className="flex-1 py-3.5 text-center border border-white/20 text-white font-semibold text-base rounded-xl hover:bg-white/5 transition-all no-underline"
-          >
-            View Progress
-          </Link>
-        </div>
-
-        <h3 className="text-xl font-bold mb-4">Answer Review</h3>
-        <div className="space-y-3">
-          {details.map((d, idx) => {
-            const q = questions.find((x) => x.id === d.questionId);
-            return (
-              <div
-                key={d.questionId}
-                className={`bg-white/5 border rounded-xl p-5 ${d.isCorrect ? "border-emerald-400/40" : "border-red-400/40"}`}
-              >
-                <div className="flex items-start justify-between gap-3 mb-3">
-                  <p className="text-sm font-medium text-white/90">
-                    {idx + 1}. {q?.question || `Question ${d.questionId}`}
-                  </p>
-                  <span
-                    className={`px-2 py-0.5 rounded text-xs font-bold ${
-                      d.isCorrect ? "bg-emerald-400/20 text-emerald-200" : "bg-red-400/20 text-red-200"
-                    }`}
-                  >
-                    {d.isCorrect ? "✓ Correct" : "✗ Wrong"}
-                  </span>
-                </div>
-                <div className="text-xs space-y-1">
-                  <p className="text-white/60">
-                    Your answer:{" "}
-                    <span className={`font-semibold ${d.isCorrect ? "text-emerald-300" : "text-red-300"}`}>
-                      {d.userAnswer || "—"}
-                    </span>
-                  </p>
-                  {!d.isCorrect && (
-                    <p className="text-white/60">
-                      Correct:{" "}
-                      <span className="font-semibold text-emerald-300">{d.correctAnswer}</span>
-                    </p>
-                  )}
-                </div>
+            <div className="relative z-[1] px-8 py-10">
+              {/* Star rule */}
+              <div className="inline-flex items-center gap-[14px] mb-4">
+                <span className="block w-14 h-px bg-gradient-to-r from-transparent to-[rgba(201,168,76,0.6)]" />
+                <span className="text-[0.75rem] text-[#c9a84c]">★</span>
+                <span className="block w-14 h-px bg-gradient-to-l from-transparent to-[rgba(201,168,76,0.6)]" />
               </div>
-            );
-          })}
+              <p className="text-xs font-bold tracking-[0.18em] uppercase text-[rgba(226,192,122,0.7)] mb-3">
+                Quiz Complete
+              </p>
+
+              {/* Grade circle — ClassStatistics counter circle style */}
+              <div className="mx-auto w-28 h-28 rounded-full border-2 border-[rgba(201,168,76,0.45)] flex flex-col justify-center items-center bg-[rgba(255,255,255,0.05)] shadow-[0_0_0_6px_rgba(201,168,76,0.07),0_4px_18px_rgba(0,0,0,0.25)] mb-4">
+                <div className="absolute inset-[5px] rounded-full border border-[rgba(201,168,76,0.18)] pointer-events-none" />
+                <span className="text-4xl font-black text-[#e2c07a] leading-none [text-shadow:0_2px_8px_rgba(0,0,0,0.3)]">
+                  {letterGrade}
+                </span>
+              </div>
+
+              <div className="text-5xl font-black text-[#e2c07a] mb-2 [text-shadow:0_2px_8px_rgba(0,0,0,0.3)]">
+                {scorePercentage.toFixed(1)}%
+              </div>
+              <p className="text-[rgba(226,192,122,0.75)] text-lg font-medium">
+                {correctAnswers} out of {totalQuestions} correct
+              </p>
+
+              {/* Diamond divider */}
+              <div className="inline-flex items-center gap-[10px] mt-3">
+                <span className="block w-10 h-px bg-gradient-to-r from-transparent to-[rgba(201,168,76,0.5)]" />
+                <span className="text-[0.5rem] text-[#c9a84c]">◆</span>
+                <span className="block w-10 h-px bg-gradient-to-l from-transparent to-[rgba(201,168,76,0.5)]" />
+              </div>
+            </div>
+
+            {/* Bottom gold strip */}
+            <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-[linear-gradient(to_right,transparent_0%,#c9a84c_30%,#e2c07a_50%,#c9a84c_70%,transparent_100%)]" />
+          </div>
+
+          {/* Action buttons */}
+          <div className="flex gap-3 mb-10">
+            <button
+              onClick={resetAll}
+              className="flex-1 py-3.5 text-white font-bold text-base rounded-xl transition-all"
+              style={{
+                background: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
+                boxShadow: "0 4px 12px rgba(16,185,129,0.3)",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = "translateY(-2px)";
+                e.currentTarget.style.boxShadow =
+                  "0 8px 20px rgba(16,185,129,0.4)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = "translateY(0)";
+                e.currentTarget.style.boxShadow =
+                  "0 4px 12px rgba(16,185,129,0.3)";
+              }}
+            >
+              Another Quiz
+            </button>
+            <Link
+              href="/quaker/progress"
+              className="flex-1 py-3.5 text-center border border-gray-300 text-gray-700 font-semibold text-base rounded-xl hover:bg-gray-50 transition-all no-underline bg-white"
+            >
+              View Progress
+            </Link>
+          </div>
+
+          {/* Answer Review */}
+          <div className="bg-white rounded-2xl border border-[rgba(201,168,76,0.25)] shadow-[0_2px_6px_rgba(13,31,60,0.07)] overflow-hidden">
+            <div
+              className="h-[3px]"
+              style={{
+                backgroundImage:
+                  "linear-gradient(90deg, transparent 0%, #c9a84c 30%, #e2c07a 50%, #c9a84c 70%, transparent 100%)",
+              }}
+            />
+            <div className="px-6 py-4 border-b border-gray-100 flex items-center gap-3">
+              <div
+                className="w-2 h-2 rounded-full"
+                style={{ background: "#c9a84c" }}
+              />
+              <h3 className="text-lg font-bold text-[#0d1f3c]">
+                Answer Review
+              </h3>
+            </div>
+            <div className="p-4 space-y-3">
+              {details.map((d, idx) => {
+                const q = questions.find((x) => x.id === d.questionId);
+                return (
+                  <div
+                    key={d.questionId}
+                    className="rounded-xl p-5 border"
+                    style={
+                      d.isCorrect
+                        ? {
+                            background: "rgba(16,185,129,0.04)",
+                            borderColor: "rgba(16,185,129,0.3)",
+                          }
+                        : {
+                            background: "rgba(244,63,94,0.04)",
+                            borderColor: "rgba(244,63,94,0.25)",
+                          }
+                    }
+                  >
+                    <div className="flex items-start justify-between gap-3 mb-3">
+                      <p className="text-sm font-semibold text-[#0d1f3c] leading-snug">
+                        {idx + 1}. {q?.question || `Question ${d.questionId}`}
+                      </p>
+                      <span
+                        className="px-2.5 py-0.5 rounded-full text-xs font-bold whitespace-nowrap flex-shrink-0"
+                        style={
+                          d.isCorrect
+                            ? {
+                                background: "rgba(16,185,129,0.12)",
+                                color: "#047857",
+                              }
+                            : {
+                                background: "rgba(244,63,94,0.1)",
+                                color: "#be123c",
+                              }
+                        }
+                      >
+                        {d.isCorrect ? "✓ Correct" : "✗ Wrong"}
+                      </span>
+                    </div>
+                    <div className="text-xs space-y-1">
+                      <p className="text-[#5a6072]">
+                        Your answer:{" "}
+                        <span
+                          className="font-bold"
+                          style={{ color: d.isCorrect ? "#047857" : "#be123c" }}
+                        >
+                          {d.userAnswer || "—"}
+                        </span>
+                      </p>
+                      {!d.isCorrect && (
+                        <p className="text-[#5a6072]">
+                          Correct:{" "}
+                          <span className="font-bold text-[#047857]">
+                            {d.correctAnswer}
+                          </span>
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
         </div>
       </div>
     );

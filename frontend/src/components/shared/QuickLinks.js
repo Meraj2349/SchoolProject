@@ -48,8 +48,8 @@ const LINK_CONFIGS = [
     nameKey: "quaker",
     icon: "🧠",
     path: "/quaker",
-    gradient: "linear-gradient(135deg,#f59e0b 0%,#b45309 100%)",
-    shadow: "rgba(245,158,11,0.35)",
+    gradient: "linear-gradient(135deg,#0ea5e9 0%,#0369a1 100%)",
+    shadow: "rgba(14,165,233,0.35)",
   },
 ];
 

@@ -31,7 +31,10 @@ export default function LandingPage() {
   return (
     <div className="bg-white">
       {/* ── HERO — echoes HeroSection palette (emerald overlay + diagonal texture) ── */}
-      <section className="relative w-full overflow-hidden" style={{ minHeight: "70vh" }}>
+      <section
+        className="relative w-full overflow-hidden"
+        style={{ minHeight: "70vh" }}
+      >
         {/* Background image */}
         <div className="absolute inset-0">
           <Image
@@ -88,7 +91,11 @@ export default function LandingPage() {
 
         <div
           className="relative z-10 max-w-[1200px] mx-auto px-5 flex flex-col justify-center text-white"
-          style={{ minHeight: "70vh", paddingTop: "5rem", paddingBottom: "5rem" }}
+          style={{
+            minHeight: "70vh",
+            paddingTop: "5rem",
+            paddingBottom: "5rem",
+          }}
         >
           {/* Badge — HeroSection established-year pill style */}
           <div
@@ -177,7 +184,8 @@ export default function LandingPage() {
                 letterSpacing: "0.02em",
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.transform = "translateY(-4px) scale(1.02)";
+                e.currentTarget.style.transform =
+                  "translateY(-4px) scale(1.02)";
                 e.currentTarget.style.boxShadow =
                   "0 16px 40px rgba(16,185,129,0.55), inset 0 1px 0 rgba(255,255,255,0.15)";
               }}
@@ -324,7 +332,7 @@ export default function LandingPage() {
           }}
         />
         {/* Top gold strip */}
-        <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-transparent via-[#c9a84c] via-[#e2c07a] via-[#c9a84c] to-transparent" />
+        <div className="absolute top-0 left-0 right-0 h-[3px] bg-[linear-gradient(to_right,transparent_0%,#c9a84c_30%,#e2c07a_50%,#c9a84c_70%,transparent_100%)]" />
 
         <div className="relative z-[1] max-w-[1200px] mx-auto px-5">
           {/* Star rule */}
@@ -370,7 +378,7 @@ export default function LandingPage() {
         </div>
 
         {/* Bottom gold strip */}
-        <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-gradient-to-r from-transparent via-[#c9a84c] via-[#e2c07a] via-[#c9a84c] to-transparent" />
+        <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-[linear-gradient(to_right,transparent_0%,#c9a84c_30%,#e2c07a_50%,#c9a84c_70%,transparent_100%)]" />
       </section>
     </div>
   );
