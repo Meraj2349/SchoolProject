@@ -52,7 +52,7 @@ export default function LatestUpdatesNotice() {
         }
         .notice-marquee {
           display: inline-block;
-          animation: marquee 150s linear infinite;
+          animation: marquee 40s linear infinite;
           padding-left: 100%;
           will-change: transform;
           white-space: nowrap;
