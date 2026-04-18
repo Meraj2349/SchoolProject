@@ -123,10 +123,12 @@ export default function Navbar() {
               <span>{t("nav.onlineApply")}</span>
             </Link>
           </div>
-          <div className="hidden lg:flex items-center cursor-pointer text-gray-700 px-4 py-2 rounded-lg border border-gray-200 bg-gray-50 hover:bg-gray-200 transition-colors duration-200 gap-1">
-            <span>{t("nav.quakerEducation")}</span>
-            <span className="text-[10px] ml-1">▼</span>
-          </div>
+          <Link
+            href="/quaker"
+            className="hidden lg:flex items-center cursor-pointer text-gray-700 px-4 py-2 rounded-lg border border-gray-200 bg-gray-50 hover:bg-gray-200 transition-colors duration-200 no-underline"
+          >
+            <span className="font-medium">{t("nav.quakerEducation")}</span>
+          </Link>
           <LanguageSwitcher />
           {/* Hamburger — hidden on lg+ */}
           <button
@@ -237,7 +239,7 @@ export default function Navbar() {
                 <Link
                   href={item.path}
                   onClick={() => setMobileMenuOpen(false)}
-                  className={`mobile-link-arrow flex items-center justify-between px-6 py-[18px] text-base font-medium no-underline uppercase tracking-wide transition-all duration-300 ${
+                  className={`mobile-link-arrow flex items-center justify-between px-6 py-4.5 text-base font-medium no-underline uppercase tracking-wide transition-all duration-300 ${
                     isActive(item.path)
                       ? "text-white font-semibold"
                       : "text-gray-700 hover:text-white"
@@ -271,6 +273,45 @@ export default function Navbar() {
               </li>
             ))}
           </ul>
+
+          <div className="mx-4 my-2 rounded-xl overflow-hidden shadow-sm bg-white">
+            <Link
+              href="/quaker"
+              onClick={() => setMobileMenuOpen(false)}
+              className={`mobile-link-arrow flex items-center justify-between px-6 py-4.5 text-base font-medium no-underline uppercase tracking-wide transition-all duration-300 ${
+                isActive("/quaker")
+                  ? "text-white font-semibold"
+                  : "text-gray-700 hover:text-white"
+              }`}
+              style={
+                isActive("/quaker")
+                  ? {
+                      background:
+                        "linear-gradient(135deg, #10b981 0%, #059669 100%)",
+                      transform: "translateX(8px)",
+                      boxShadow: "0 4px 16px rgba(16,185,129,0.4)",
+                    }
+                  : {}
+              }
+              onMouseEnter={(e) => {
+                if (!isActive("/quaker")) {
+                  e.currentTarget.style.background =
+                    "linear-gradient(135deg, #059669 0%, #047857 100%)";
+                  e.currentTarget.style.transform = "translateX(8px)";
+                  e.currentTarget.style.color = "white";
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!isActive("/quaker")) {
+                  e.currentTarget.style.background = "";
+                  e.currentTarget.style.transform = "";
+                  e.currentTarget.style.color = "";
+                }
+              }}
+            >
+              {t("nav.quakerEducation")}
+            </Link>
+          </div>
 
           <div className="px-4 pb-5 flex flex-col gap-2.5">
             <PublicBranchSelector />

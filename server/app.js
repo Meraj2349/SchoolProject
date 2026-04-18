@@ -20,6 +20,7 @@ import noticeRoutes from "./routes/notices.routes.js";
 import resultRoutes from "./routes/result.routes.js";
 import routineRoutes from "./routes/routine.routes.js";
 import studentRouter from "./routes/student.route.js";
+import quizRoutes from "./routes/quiz.routes.js";
 import subjectRoutes from "./routes/subjects.routes.js";
 import teacherRoutes from "./routes/teacher.routes.js";
 import userRoutes from "./routes/user.routes.js";
@@ -74,6 +75,7 @@ app.use("/api/branches", branchRoutes);
 app.use("/api/applications", applicationRoutes);
 app.use("/api/news", newsRoutes);
 app.use("/api/notice-announcements", noticeAnnouncementRoutes);
+app.use("/api/quiz", quizRoutes);
 
 // Handle root URL (Welcome message)
 app.get("/", (req, res) => {

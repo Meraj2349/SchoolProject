@@ -44,6 +44,13 @@ const LINK_CONFIGS = [
     gradient: "linear-gradient(135deg,#8b5cf6 0%,#7c3aed 100%)",
     shadow: "rgba(139,92,246,0.35)",
   },
+  {
+    nameKey: "quaker",
+    icon: "🧠",
+    path: "/quaker",
+    gradient: "linear-gradient(135deg,#f59e0b 0%,#b45309 100%)",
+    shadow: "rgba(245,158,11,0.35)",
+  },
 ];
 
 function QuickLinkItem({ link }) {

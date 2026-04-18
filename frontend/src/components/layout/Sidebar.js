@@ -112,6 +112,11 @@ export default function Sidebar({ open, onClose }) {
       key: "sidebar.noticeAnnouncements",
     },
     {
+      path: "/admin/quaker",
+      icon: <FaClipboardList />,
+      key: "sidebar.quaker",
+    },
+    {
       path: "/admin/updateEmailPassword",
       icon: <FaEnvelope />,
       key: "sidebar.settings",

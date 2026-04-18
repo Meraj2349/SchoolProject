@@ -43,7 +43,8 @@
     "loggingOut": "লগ আউট হচ্ছে…",
     "applications": "আবেদনসমূহ",
     "news": "সংবাদ ব্যবস্থাপনা",
-    "noticeAnnouncements": "নোটিশ ও ঘোষণা"
+    "noticeAnnouncements": "নোটিশ ও ঘোষণা",
+    "quaker": "কুইকার এডুকেশন"
   },
   "latestUpdates": {
     "label": "সর্বশেষ আপডেট",
@@ -66,6 +67,7 @@
     "attendance": "উপস্থিতি",
     "result": "ফলাফল",
     "routine": "রুটিন",
+    "quaker": "কুইকার এডুকেশন",
     "selectClass": "শ্রেণি নির্বাচন করুন",
     "selectSection": "বিভাগ নির্বাচন করুন",
     "classLabel": "শ্রেণি",

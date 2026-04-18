@@ -43,7 +43,8 @@
     "loggingOut": "Logging out…",
     "applications": "Applications",
     "noticeAnnouncements": "Notice & Announcement",
-    "news": "News"
+    "news": "News",
+    "quaker": "A Quaker Education"
   },
   "latestUpdates": {
     "label": "Latest Updates",
@@ -66,6 +67,7 @@
     "attendance": "Attendance",
     "result": "Result",
     "routine": "Routine",
+    "quaker": "Quaker Education",
     "selectClass": "Select Class",
     "selectSection": "Select Section",
     "classLabel": "Class",
