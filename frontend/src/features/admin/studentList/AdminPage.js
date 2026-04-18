@@ -48,19 +48,19 @@ export default function AdminPage() {
     select: (d) => d?.data ?? d ?? [],
   });
 
-  // Class names — global (same across all branches)
-  const { data: classNames = [] } = useQuery({
-    queryKey: queryKeys.classes.names(),
-    queryFn: classesService.getNames,
-    select: (d) => (Array.isArray(d) ? d : (d?.data ?? [])),
-  });
-
-  // Branch-scoped (ClassName, Section) pairs — used only to derive available sections
+  // Branch-scoped (ClassName, Section) pairs — derive class names + sections from this
   const { data: distinctClasses = [] } = useQuery({
     queryKey: queryKeys.classes.distinct(branchId),
     queryFn: classesService.getDistinct,
     select: (d) => d?.data ?? d ?? [],
   });
+
+  // Class names available for this branch (from Classes table, not global ClassNames)
+  const classNames = useMemo(
+    () =>
+      [...new Set(distinctClasses.map((c) => c.ClassName).filter(Boolean))].sort(),
+    [distinctClasses],
+  );
 
   const formSections = useMemo(
     () =>

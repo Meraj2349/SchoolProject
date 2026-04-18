@@ -18,7 +18,7 @@ import {
   FaNoteSticky,
   FaPeopleGroup,
 } from "react-icons/fa6";
-import { FiX, FiLogOut, FiLayout } from "react-icons/fi";
+import { FiX, FiLogOut, FiLayout, FiGrid } from "react-icons/fi";
 import { RiListCheck, RiTimerLine } from "react-icons/ri";
 import { authService } from "@/services/auth.service";
 import { useAuthStore } from "@/store/authStore";
@@ -67,6 +67,11 @@ export default function Sidebar({ open, onClose }) {
       path: "/admin/teacherList",
       icon: <FaPeopleGroup />,
       key: "sidebar.teacherList",
+    },
+    {
+      path: "/admin/classes-sections",
+      icon: <FiGrid />,
+      key: "sidebar.classesSections",
     },
     {
       path: "/admin/class",

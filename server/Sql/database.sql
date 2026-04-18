@@ -54,13 +54,14 @@ CREATE TABLE
     );
 
 -- Classes Table
+-- NOTE: (ClassName, Section) uniqueness is scoped per branch.
+-- The per-branch UNIQUE is added by add_branch_id_migration.sql once branch_id exists.
 CREATE TABLE
     Classes (
         ClassID INT PRIMARY KEY AUTO_INCREMENT,
         ClassName VARCHAR(20),
         Section VARCHAR(10),
         TeacherID INT,
-        UNIQUE (ClassName, Section),
         FOREIGN KEY (TeacherID) REFERENCES Teachers (TeacherID)
     );
 

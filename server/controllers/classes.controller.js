@@ -17,17 +17,25 @@ export const addClassController = async (req, res) => {
   const branchId = req.branchId ?? null;
   const { className, section, teacherId } = req.body;
 
-  if (!className || !section || !teacherId) {
+  if (!className || !section) {
     return res.status(400).json({ error: t("class_name_required", lang) });
   }
 
   try {
-    const result = await addClass({ className, section, teacherId }, branchId);
+    const result = await addClass(
+      { className, section, teacherId: teacherId || null },
+      branchId,
+    );
     res
       .status(201)
       .json({ message: t("class_added", lang), ClassID: result.ClassID });
   } catch (error) {
     console.error("Error adding class:", error);
+    if (error?.code === "ER_DUP_ENTRY") {
+      return res.status(409).json({
+        error: `${className} - ${section} already exists in this branch`,
+      });
+    }
     res.status(500).json({ error: t("class_add_failed", lang) });
   }
 };
@@ -69,17 +77,26 @@ export const editClassController = async (req, res) => {
   const { id } = req.params;
   const { className, section, teacherId } = req.body;
 
-  if (!className || !section || !teacherId) {
+  if (!className || !section) {
     return res.status(400).json({ error: t("class_name_required", lang) });
   }
 
   try {
-    const result = await editClass(id, { className, section, teacherId }, branchId);
+    const result = await editClass(
+      id,
+      { className, section, teacherId: teacherId || null },
+      branchId,
+    );
     res
       .status(200)
       .json({ message: t("class_updated", lang), success: result.success });
   } catch (error) {
     console.error("Error editing class:", error);
+    if (error?.code === "ER_DUP_ENTRY") {
+      return res.status(409).json({
+        error: `${className} - ${section} already exists in this branch`,
+      });
+    }
     res.status(500).json({ error: t("class_update_failed", lang) });
   }
 };

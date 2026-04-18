@@ -21,6 +21,9 @@ export const classesService = {
   remove: (id) =>
     httpClient.delete(`/classes/delete/${id}`).then((r) => r.data),
 
+  hardRemove: (id) =>
+    httpClient.delete(`/classes/hard-delete/${id}`).then((r) => r.data),
+
   getStudentCount: (className) =>
     httpClient
       .get(`/classes/totalstudents/${encodeURIComponent(className)}`)

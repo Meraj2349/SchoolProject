@@ -1,18 +1,17 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
   useClasses,
-  useCreateClass,
   useUpdateClass,
   useDeleteClass,
 } from "@/hooks/useClasses";
 import { teachersService } from "@/services/teachers.service";
-import { classesService } from "@/services/classes.service";
 import { queryKeys } from "@/lib/queryKeys";
 import { useTranslations } from "@/store/languageStore";
 import { useBranchStore } from "@/store/branchStore";
+import { useAuthStore } from "@/store/authStore";
 import { toast } from "react-toastify";
 import {
   FiEdit2,
@@ -140,9 +139,6 @@ const STANDARD_CLASSES = [
   "10",
 ];
 
-// Standard fixed sections for all branches
-const SECTION_SUGGESTIONS = ["Better", "Good", "General"];
-
 // ─────────────────────────────────────────────────────────────────────────────
 // Main page
 // ─────────────────────────────────────────────────────────────────────────────
@@ -155,23 +151,35 @@ const EMPTY_FORM = {
 
 export default function AdminPage() {
   const { data: classes = [], isLoading } = useClasses();
-  const create = useCreateClass();
   const update = useUpdateClass();
   const remove = useDeleteClass();
   const t = useTranslations("admin.classes");
   const branchId = useBranchStore((s) => s.currentBranchId);
+  const role = useAuthStore((s) => s.role);
+  const isSuperAdmin = role === "super_admin";
+  const needsBranch = isSuperAdmin && branchId == null;
 
   const [form, setForm] = useState(EMPTY_FORM);
   const [editId, setEditId] = useState(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
   const formRef = useRef(null);
 
-  // Class names from DB (global — shared across all branches)
-  const { data: classNameOptions = STANDARD_CLASSES } = useQuery({
-    queryKey: queryKeys.classes.names(),
-    queryFn: classesService.getNames,
-    select: (d) => (Array.isArray(d) && d.length > 0 ? d : STANDARD_CLASSES),
-  });
+  // Class names for THIS branch — derived from actual Classes rows
+  // so newly-created classes (via /admin/classes-sections) appear immediately.
+  const classNameOptions = useMemo(() => {
+    const names = [...new Set(classes.map((c) => c.ClassName).filter(Boolean))];
+    return names.length > 0 ? names.sort() : STANDARD_CLASSES;
+  }, [classes]);
+
+  // Sections available for the selected class name in THIS branch.
+  const sectionOptions = useMemo(() => {
+    if (!form.className) return [];
+    const secs = classes
+      .filter((c) => c.ClassName === form.className)
+      .map((c) => c.Section)
+      .filter(Boolean);
+    return [...new Set(secs)].sort();
+  }, [classes, form.className]);
 
   // Teacher autocomplete query — fires when user has typed >= 1 char
   const teacherQuery = form.teacherInput.trim();
@@ -207,6 +215,10 @@ export default function AdminPage() {
   const handleSave = async (e) => {
     e.preventDefault();
 
+    if (needsBranch) {
+      toast.error("Select a branch from the top bar first");
+      return;
+    }
     if (!form.className.trim()) {
       toast.error("Class name is required");
       return;
@@ -220,20 +232,29 @@ export default function AdminPage() {
       return;
     }
 
-    const payload = {
-      className: form.className.trim(),
-      section: form.section.trim(),
-      teacherId: form.teacherId,
-    };
+    const cls = form.className.trim();
+    const sec = form.section.trim();
+
+    // Find the existing class row for (className, section) in current branch.
+    // This page only ASSIGNS teachers — class rows are created on /admin/classes-sections.
+    const targetId =
+      editId ||
+      classes.find((c) => c.ClassName === cls && c.Section === sec)?.ClassID;
+
+    if (!targetId) {
+      toast.error(
+        `No class "${cls} - ${sec}" in this branch. Add it on Class & Section page first.`,
+      );
+      return;
+    }
+
+    const payload = { className: cls, section: sec, teacherId: form.teacherId };
 
     try {
-      if (editId) {
-        await update.mutateAsync({ id: editId, data: payload });
-        toast.success(t("classUpdated") || "Class updated successfully");
-      } else {
-        await create.mutateAsync(payload);
-        toast.success(t("classAdded") || "Class added successfully");
-      }
+      await update.mutateAsync({ id: targetId, data: payload });
+      toast.success(
+        editId ? "Class teacher updated" : "Class teacher assigned",
+      );
       reset();
     } catch (err) {
       toast.error(
@@ -292,7 +313,7 @@ export default function AdminPage() {
     t("actions"),
   ];
 
-  const isBusy = create.isPending || update.isPending;
+  const isBusy = update.isPending;
 
   return (
     <div className="space-y-6">
@@ -303,6 +324,27 @@ export default function AdminPage() {
           Manage class sections and assigned class teachers
         </p>
       </div>
+
+      {needsBranch && (
+        <div className="rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+          <strong className="font-semibold">Select a branch</strong> from the
+          top bar first. Super admin must scope teacher assignment to a
+          specific branch.
+        </div>
+      )}
+
+      {!needsBranch && !isLoading && classes.length === 0 && (
+        <div className="rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-700">
+          No classes in this branch yet. Add class + section on{" "}
+          <a
+            href="/admin/classes-sections"
+            className="text-indigo-600 font-semibold hover:underline"
+          >
+            Class &amp; Section
+          </a>{" "}
+          page first, then assign teachers here.
+        </div>
+      )}
 
       {/* ── Form card ────────────────────────────────────────────────────── */}
       <div
@@ -389,29 +431,30 @@ export default function AdminPage() {
               </select>
             </div>
 
-            {/* Section — free text, each branch sets its own sections */}
+            {/* Section — existing sections for selected class in this branch */}
             <div>
               <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
                 {t("section") || "Section"}{" "}
                 <span className="text-red-400">*</span>
               </label>
-              <input
-                list="section-list"
-                type="text"
+              <select
                 value={form.section}
                 onChange={(e) =>
                   setForm((p) => ({ ...p, section: e.target.value }))
                 }
-                placeholder="e.g. A, B, Morning…"
                 required
-                autoComplete="off"
-                className="form-input"
-              />
-              <datalist id="section-list">
-                {SECTION_SUGGESTIONS.map((s) => (
-                  <option key={s} value={s} />
+                disabled={!form.className}
+                className="form-input cursor-pointer"
+              >
+                <option value="" disabled>
+                  {form.className ? "Select section…" : "Pick class first"}
+                </option>
+                {sectionOptions.map((s) => (
+                  <option key={s} value={s}>
+                    {s}
+                  </option>
                 ))}
-              </datalist>
+              </select>
             </div>
           </div>
 
@@ -436,7 +479,7 @@ export default function AdminPage() {
           <div className="flex gap-3 mt-6 pt-5 border-t border-slate-100">
             <button
               type="submit"
-              disabled={isBusy}
+              disabled={isBusy || needsBranch}
               className="btn-primary disabled:opacity-60"
             >
               {isBusy ? (

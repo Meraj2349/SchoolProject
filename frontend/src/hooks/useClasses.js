@@ -88,3 +88,15 @@ export function useDeleteClass() {
     },
   });
 }
+
+export function useHardDeleteClass() {
+  const qc = useQueryClient();
+  const branchId = useBranchStore((s) => s.currentBranchId);
+  return useMutation({
+    mutationFn: classesService.hardRemove,
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: queryKeys.classes.all(branchId) });
+      qc.invalidateQueries({ queryKey: queryKeys.classes.distinct(branchId) });
+    },
+  });
+}

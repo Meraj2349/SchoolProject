@@ -38,6 +38,26 @@ ALTER TABLE Classes
   ADD CONSTRAINT fk_classes_branch
   FOREIGN KEY (branch_id) REFERENCES Branches(id);
 
+-- Per-branch uniqueness: each branch has its own (ClassName, Section) namespace.
+-- Drops the legacy global unique (if present) then adds the scoped one.
+-- See also: fix_classes_unique_per_branch.sql (standalone version for DBs
+-- that already ran the old migration without this block).
+SET @has_legacy := (
+  SELECT COUNT(*) FROM information_schema.STATISTICS
+  WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'Classes' AND INDEX_NAME = 'ClassName'
+);
+SET @sql := IF(@has_legacy > 0, 'ALTER TABLE Classes DROP INDEX ClassName', 'SELECT 1');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @has_scoped := (
+  SELECT COUNT(*) FROM information_schema.STATISTICS
+  WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'Classes' AND INDEX_NAME = 'uq_class_section_branch'
+);
+SET @sql := IF(@has_scoped = 0,
+  'ALTER TABLE Classes ADD CONSTRAINT uq_class_section_branch UNIQUE (ClassName, Section, branch_id)',
+  'SELECT 1');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
 -- 5. Subjects
 ALTER TABLE Subjects
   ADD COLUMN IF NOT EXISTS branch_id INT NOT NULL DEFAULT 1;
