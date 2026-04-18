@@ -15,7 +15,8 @@ import { FiGitBranch } from "react-icons/fi";
 export default function BranchSelector() {
   const role = useAuthStore((s) => s.role);
   const authBranchId = useAuthStore((s) => s.branchId);
-  const { currentBranchId, currentBranchName, setBranch, lockBranch } = useBranchStore();
+  const { currentBranchId, currentBranchName, setBranch, lockBranch } =
+    useBranchStore();
 
   const [branches, setBranches] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -45,13 +46,16 @@ export default function BranchSelector() {
           // Refresh the display name if super_admin had a branch selected
           const found = list.find((b) => b.id === currentBranchId);
           if (found) {
-            setBranch(currentBranchId, found.name_en || found.name_bn || `Branch ${currentBranchId}`);
+            setBranch(
+              currentBranchId,
+              found.name_en || found.name_bn || `Branch ${currentBranchId}`,
+            );
           }
         }
       })
       .catch(() => setBranches([]))
       .finally(() => setLoading(false));
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isSuperAdmin, isBranchAdmin, authBranchId]);
 
   const handleChange = (e) => {
@@ -69,7 +73,9 @@ export default function BranchSelector() {
     return (
       <div className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 border border-indigo-200 rounded-lg text-sm text-indigo-700">
         <FiGitBranch className="text-indigo-500 flex-shrink-0" />
-        <span className="font-medium truncate max-w-40">{currentBranchName}</span>
+        <span className="font-medium truncate max-w-40">
+          {currentBranchName}
+        </span>
       </div>
     );
   }

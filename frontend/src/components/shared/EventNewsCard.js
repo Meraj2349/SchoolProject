@@ -4,25 +4,25 @@ import Link from "next/link";
 import { useTranslations } from "@/store/languageStore";
 
 /* ── Classic navy/gold palette (mirrors ChairmanCard) ── */
-const NAVY  = "#0d1f3c";
-const GOLD  = "#c9a84c";
+const NAVY = "#0d1f3c";
+const GOLD = "#c9a84c";
 const GOLD2 = "#e2c07a";
 const CREAM = "#fdf8f0";
 
 const CONFIG = {
   events: {
-    labelKey:   "events",
+    labelKey: "events",
     viewAllKey: "viewAllEvents",
-    href:       "/events",
-    emptyKey:   "noEventsAvailable",
-    icon:       "📅",
+    href: "/events",
+    emptyKey: "noEventsAvailable",
+    icon: "📅",
   },
   news: {
-    labelKey:   "news",
+    labelKey: "news",
     viewAllKey: "viewAllNews",
-    href:       "/events",
-    emptyKey:   "noNewsAvailable",
-    icon:       "📰",
+    href: "/events",
+    emptyKey: "noNewsAvailable",
+    icon: "📰",
   },
 };
 
@@ -30,9 +30,7 @@ function Row({ item, isLast }) {
   return (
     <div className={`enc-row${isLast ? " enc-row--last" : ""}`}>
       {/* Date badge */}
-      <div className="enc-date">
-        {item.date || "—"}
-      </div>
+      <div className="enc-date">{item.date || "—"}</div>
 
       {/* Text */}
       <div className="enc-row-body">
@@ -49,8 +47,12 @@ function Row({ item, isLast }) {
   );
 }
 
-export default function EventNewsCard({ type = "events", data = [], containerStyle = {} }) {
-  const t   = useTranslations("eventNews");
+export default function EventNewsCard({
+  type = "events",
+  data = [],
+  containerStyle = {},
+}) {
+  const t = useTranslations("eventNews");
   const cfg = CONFIG[type] ?? CONFIG.events;
 
   return (
@@ -62,7 +64,9 @@ export default function EventNewsCard({ type = "events", data = [], containerSty
       <div className="enc-header">
         <div className="enc-header__rule">
           <span className="enc-header__line" />
-          <span className="enc-header__icon" aria-hidden="true">{cfg.icon}</span>
+          <span className="enc-header__icon" aria-hidden="true">
+            {cfg.icon}
+          </span>
           <span className="enc-header__line" />
         </div>
         <p className="enc-header__label">{t(cfg.labelKey)}</p>
@@ -72,7 +76,8 @@ export default function EventNewsCard({ type = "events", data = [], containerSty
       <div className="enc-body">
         {data.length === 0 ? (
           <p className="enc-empty">
-            {t(cfg.emptyKey) ?? (type === "events" ? "No upcoming events" : "No news yet")}
+            {t(cfg.emptyKey) ??
+              (type === "events" ? "No upcoming events" : "No news yet")}
           </p>
         ) : (
           data.map((item, i) => (
@@ -90,10 +95,19 @@ export default function EventNewsCard({ type = "events", data = [], containerSty
         </div>
         <Link href={cfg.href} className="enc-cta">
           {t(cfg.viewAllKey)}
-          <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24"
-            fill="none" stroke="currentColor" strokeWidth="2.5"
-            strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-            <path d="M5 12h14M12 5l7 7-7 7"/>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="13"
+            height="13"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M5 12h14M12 5l7 7-7 7" />
           </svg>
         </Link>
       </div>

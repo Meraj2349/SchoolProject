@@ -86,7 +86,11 @@ function Autocomplete({
         {value && !disabled && (
           <button
             type="button"
-            onClick={() => { onChange(""); onSelect(null); setOpen(false); }}
+            onClick={() => {
+              onChange("");
+              onSelect(null);
+              setOpen(false);
+            }}
             className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
             tabIndex={-1}
           >
@@ -123,7 +127,17 @@ function Autocomplete({
 // This fallback list is used only while the query is loading.
 // ─────────────────────────────────────────────────────────────────────────────
 const STANDARD_CLASSES = [
-  "Nursery", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10",
+  "Nursery",
+  "1",
+  "2",
+  "3",
+  "4",
+  "5",
+  "6",
+  "7",
+  "8",
+  "9",
+  "10",
 ];
 
 // Standard fixed sections for all branches
@@ -163,12 +177,15 @@ export default function AdminPage() {
   const teacherQuery = form.teacherInput.trim();
   const { data: teacherSuggestions = [], isFetching: teacherSearching } =
     useQuery({
-      queryKey: queryKeys.teachers.search(teacherQuery, form.className, branchId),
+      queryKey: queryKeys.teachers.search(
+        teacherQuery,
+        form.className,
+        branchId,
+      ),
       queryFn: () => teachersService.search(teacherQuery, form.className),
       enabled: teacherQuery.length >= 1 && !form.teacherId,
       staleTime: 10_000,
     });
-
 
   const reset = useCallback(() => {
     setForm(EMPTY_FORM);
@@ -236,7 +253,11 @@ export default function AdminPage() {
         ? `${c.TeacherFirstName} ${c.TeacherLastName ?? ""}`.trim()
         : "",
     });
-    setTimeout(() => formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 50);
+    setTimeout(
+      () =>
+        formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }),
+      50,
+    );
   };
 
   const handleDelete = (c) => {
@@ -252,7 +273,10 @@ export default function AdminPage() {
         setConfirmDeleteId(null);
       },
       onError: (err) => {
-        const msg = err?.response?.data?.error || err.message || "Failed to unassign teacher";
+        const msg =
+          err?.response?.data?.error ||
+          err.message ||
+          "Failed to unassign teacher";
         toast.error(msg);
         setConfirmDeleteId(null);
       },
@@ -287,15 +311,27 @@ export default function AdminPage() {
           editId ? "border-2 border-amber-400" : "border border-slate-200"
         }`}
       >
-        <div className={`px-6 py-4 border-b flex items-center gap-3 ${editId ? "bg-amber-50 border-amber-100" : "border-slate-100"}`}>
-          <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${editId ? "bg-amber-100" : "bg-indigo-50"}`}>
-            <FiPlusCircle className={`text-sm ${editId ? "text-amber-600" : "text-indigo-600"}`} />
+        <div
+          className={`px-6 py-4 border-b flex items-center gap-3 ${editId ? "bg-amber-50 border-amber-100" : "border-slate-100"}`}
+        >
+          <div
+            className={`w-8 h-8 rounded-lg flex items-center justify-center ${editId ? "bg-amber-100" : "bg-indigo-50"}`}
+          >
+            <FiPlusCircle
+              className={`text-sm ${editId ? "text-amber-600" : "text-indigo-600"}`}
+            />
           </div>
           <h2 className="text-base font-semibold text-slate-800 flex-1">
-            {editId ? t("editClass") || "Edit Class Teacher" : t("addClass") || "Add Class Teacher"}
+            {editId
+              ? t("editClass") || "Edit Class Teacher"
+              : t("addClass") || "Add Class Teacher"}
           </h2>
           {editId && (
-            <button type="button" onClick={reset} className="text-xs text-slate-500 hover:text-slate-700 underline">
+            <button
+              type="button"
+              onClick={reset}
+              className="text-xs text-slate-500 hover:text-slate-700 underline"
+            >
               Cancel
             </button>
           )}
@@ -331,17 +367,24 @@ export default function AdminPage() {
             {/* Class name — fixed shared list, same for all branches */}
             <div>
               <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
-                {t("className") || "Class"} <span className="text-red-400">*</span>
+                {t("className") || "Class"}{" "}
+                <span className="text-red-400">*</span>
               </label>
               <select
                 value={form.className}
-                onChange={(e) => setForm((p) => ({ ...p, className: e.target.value }))}
+                onChange={(e) =>
+                  setForm((p) => ({ ...p, className: e.target.value }))
+                }
                 required
                 className="form-input cursor-pointer"
               >
-                <option value="" disabled>Select class…</option>
+                <option value="" disabled>
+                  Select class…
+                </option>
                 {classNameOptions.map((c) => (
-                  <option key={c} value={c}>{c}</option>
+                  <option key={c} value={c}>
+                    {c}
+                  </option>
                 ))}
               </select>
             </div>
@@ -349,13 +392,16 @@ export default function AdminPage() {
             {/* Section — free text, each branch sets its own sections */}
             <div>
               <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
-                {t("section") || "Section"} <span className="text-red-400">*</span>
+                {t("section") || "Section"}{" "}
+                <span className="text-red-400">*</span>
               </label>
               <input
                 list="section-list"
                 type="text"
                 value={form.section}
-                onChange={(e) => setForm((p) => ({ ...p, section: e.target.value }))}
+                onChange={(e) =>
+                  setForm((p) => ({ ...p, section: e.target.value }))
+                }
                 placeholder="e.g. A, B, Morning…"
                 required
                 autoComplete="off"
@@ -478,11 +524,13 @@ export default function AdminPage() {
                       {c.TeacherSubject ?? "–"}
                     </td>
                     <td className="table-cell text-center">
-                      <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
-                        c.StudentCount > 0
-                          ? "bg-blue-50 text-blue-700"
-                          : "bg-slate-100 text-slate-400"
-                      }`}>
+                      <span
+                        className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
+                          c.StudentCount > 0
+                            ? "bg-blue-50 text-blue-700"
+                            : "bg-slate-100 text-slate-400"
+                        }`}
+                      >
                         {c.StudentCount ?? 0}
                       </span>
                     </td>
@@ -521,7 +569,11 @@ export default function AdminPage() {
                             onClick={() => handleDelete(c)}
                             disabled={!c.TeacherID}
                             className={`btn-icon ${c.TeacherID ? "delete" : "opacity-30 cursor-not-allowed"}`}
-                            title={c.TeacherID ? "Unassign Teacher" : "No teacher to unassign"}
+                            title={
+                              c.TeacherID
+                                ? "Unassign Teacher"
+                                : "No teacher to unassign"
+                            }
                           >
                             <FiUserMinus />
                           </button>

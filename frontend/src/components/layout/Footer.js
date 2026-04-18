@@ -25,7 +25,8 @@ export default function Footer() {
       <div
         className="absolute top-0 left-0 right-0 h-1"
         style={{
-          background: "linear-gradient(90deg, #4b2e83 0%, #7c3aed 40%, #10b981 70%, #059669 100%)",
+          background:
+            "linear-gradient(90deg, #4b2e83 0%, #7c3aed 40%, #10b981 70%, #059669 100%)",
         }}
       />
 
@@ -50,7 +51,11 @@ export default function Footer() {
           <div className="flex flex-col gap-1.5">
             {[
               { icon: "📞", label: t("footer.contact"), value: "01997588476" },
-              { icon: "✉️", label: t("footer.email"), value: "merajislam2349@gmail.com" },
+              {
+                icon: "✉️",
+                label: t("footer.email"),
+                value: "merajislam2349@gmail.com",
+              },
               { icon: "📍", label: null, value: t("location") },
             ].map((item, i) => (
               <p
@@ -59,7 +64,9 @@ export default function Footer() {
               >
                 <span className="flex-shrink-0">{item.icon}</span>
                 {item.label && (
-                  <strong className="text-gray-700 mr-0.5">{item.label}:</strong>
+                  <strong className="text-gray-700 mr-0.5">
+                    {item.label}:
+                  </strong>
                 )}
                 {item.value}
               </p>
@@ -108,8 +115,12 @@ export default function Footer() {
           background: "linear-gradient(135deg, #4b2e83 0%, #3b1f6e 100%)",
         }}
       >
-        <p className="m-0 text-[0.9rem] font-medium text-white">{t("footer.developedBy")}</p>
-        <p className="m-0 text-[0.9rem] font-bold text-yellow-400">{t("footer.helpline")}</p>
+        <p className="m-0 text-[0.9rem] font-medium text-white">
+          {t("footer.developedBy")}
+        </p>
+        <p className="m-0 text-[0.9rem] font-bold text-yellow-400">
+          {t("footer.helpline")}
+        </p>
       </div>
     </footer>
   );

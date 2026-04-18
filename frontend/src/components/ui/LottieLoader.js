@@ -46,7 +46,9 @@ export default function LottieLoader({
     <div
       className={`flex flex-col items-center justify-center gap-2 p-4 bg-white rounded-lg ${className}`}
     >
-      <div className={`flex items-center justify-center relative ${sizes.anim}`}>
+      <div
+        className={`flex items-center justify-center relative ${sizes.anim}`}
+      >
         {animation}
       </div>
       {showText && (

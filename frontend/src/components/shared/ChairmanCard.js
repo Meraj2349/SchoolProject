@@ -31,7 +31,9 @@ export default function ChairmanCard({ image, name, title, message }) {
               src={image}
               alt={`${name} – ${title}`}
               className="w-full h-full object-cover object-top block"
-              onError={(e) => { e.target.style.display = "none"; }}
+              onError={(e) => {
+                e.target.style.display = "none";
+              }}
             />
           </div>
           {/* Gold corner ornaments */}
@@ -44,8 +46,12 @@ export default function ChairmanCard({ image, name, title, message }) {
         {/* Nameplate */}
         <div className="relative z-[1] text-center w-full flex flex-col items-center gap-[6px]">
           <span className="block w-[60px] h-px bg-gradient-to-r from-transparent via-[#c9a84c] to-transparent" />
-          <p className="m-0 text-[1.15rem] font-bold text-white tracking-[0.03em] leading-[1.25]">{name}</p>
-          <p className="m-0 text-[0.72rem] font-semibold text-[#e2c07a] tracking-[0.12em] uppercase">{title}</p>
+          <p className="m-0 text-[1.15rem] font-bold text-white tracking-[0.03em] leading-[1.25]">
+            {name}
+          </p>
+          <p className="m-0 text-[0.72rem] font-semibold text-[#e2c07a] tracking-[0.12em] uppercase">
+            {title}
+          </p>
           <span className="block w-[60px] h-px bg-gradient-to-r from-transparent via-[#c9a84c] to-transparent" />
         </div>
       </div>

@@ -29,7 +29,7 @@ export default function AdminPage() {
   const { data: classNames = [] } = useQuery({
     queryKey: queryKeys.classes.names(),
     queryFn: classesService.getNames,
-    select: (d) => (Array.isArray(d) ? d : d?.data ?? []),
+    select: (d) => (Array.isArray(d) ? d : (d?.data ?? [])),
   });
 
   // Branch-scoped (ClassName, Section) pairs — used only to derive available sections
@@ -290,15 +290,18 @@ export default function AdminPage() {
       )}
 
       {/* Empty state */}
-      {students.length === 0 && filter.className && filter.section && !loading && (
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-12 text-center">
-          <FiUsers className="mx-auto text-4xl text-slate-300 mb-3" />
-          <p className="text-slate-500 text-sm">
-            Click &ldquo;{t("loadStudents")}&rdquo; to load students for{" "}
-            {filter.className} &mdash; {filter.section}
-          </p>
-        </div>
-      )}
+      {students.length === 0 &&
+        filter.className &&
+        filter.section &&
+        !loading && (
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-12 text-center">
+            <FiUsers className="mx-auto text-4xl text-slate-300 mb-3" />
+            <p className="text-slate-500 text-sm">
+              Click &ldquo;{t("loadStudents")}&rdquo; to load students for{" "}
+              {filter.className} &mdash; {filter.section}
+            </p>
+          </div>
+        )}
     </div>
   );
 }

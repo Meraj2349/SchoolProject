@@ -46,14 +46,16 @@ export default function PublicBranchSelector() {
     return () => document.removeEventListener("mousedown", handler);
   }, [open]);
 
-  const displayName = currentBranchId
-    ? currentBranchName
-    : t("allBranches");
+  const displayName = currentBranchId ? currentBranchName : t("allBranches");
 
   return (
     <div
       data-branch-selector
-      style={{ position: "relative", display: "inline-flex", alignItems: "center" }}
+      style={{
+        position: "relative",
+        display: "inline-flex",
+        alignItems: "center",
+      }}
     >
       <button
         onClick={() => setOpen((o) => !o)}
@@ -81,7 +83,8 @@ export default function PublicBranchSelector() {
         }}
         onMouseEnter={(e) => {
           e.currentTarget.style.borderColor = "#10b981";
-          e.currentTarget.style.background = "linear-gradient(135deg,#ecfdf5 0%,#d1fae5 100%)";
+          e.currentTarget.style.background =
+            "linear-gradient(135deg,#ecfdf5 0%,#d1fae5 100%)";
           e.currentTarget.style.color = "#065f46";
         }}
         onMouseLeave={(e) => {
@@ -156,16 +159,22 @@ export default function PublicBranchSelector() {
               borderBottom: "1px solid #f3f4f6",
             }}
             onMouseEnter={(e) => {
-              if (currentBranchId !== null) e.currentTarget.style.background = "#f9fafb";
+              if (currentBranchId !== null)
+                e.currentTarget.style.background = "#f9fafb";
             }}
             onMouseLeave={(e) => {
-              if (currentBranchId !== null) e.currentTarget.style.background = "transparent";
+              if (currentBranchId !== null)
+                e.currentTarget.style.background = "transparent";
             }}
           >
             <FiGitBranch style={{ fontSize: 13, color: "#9ca3af" }} />
             {t("allBranches")}
             {currentBranchId === null && (
-              <span style={{ marginLeft: "auto", color: "#10b981", fontSize: 12 }}>✓</span>
+              <span
+                style={{ marginLeft: "auto", color: "#10b981", fontSize: 12 }}
+              >
+                ✓
+              </span>
             )}
           </button>
 
@@ -199,7 +208,8 @@ export default function PublicBranchSelector() {
                   if (!isSelected) e.currentTarget.style.background = "#f9fafb";
                 }}
                 onMouseLeave={(e) => {
-                  if (!isSelected) e.currentTarget.style.background = "transparent";
+                  if (!isSelected)
+                    e.currentTarget.style.background = "transparent";
                 }}
               >
                 <span
@@ -221,7 +231,15 @@ export default function PublicBranchSelector() {
                   {name}
                 </span>
                 {isSelected && (
-                  <span style={{ marginLeft: "auto", color: "#10b981", fontSize: 12 }}>✓</span>
+                  <span
+                    style={{
+                      marginLeft: "auto",
+                      color: "#10b981",
+                      fontSize: 12,
+                    }}
+                  >
+                    ✓
+                  </span>
                 )}
               </button>
             );

@@ -26,8 +26,18 @@ import {
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 const MONTH_NAMES = [
-  "January","February","March","April","May","June",
-  "July","August","September","October","November","December",
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
 ];
 
 const STATUS_CONFIG = {
@@ -57,8 +67,9 @@ const STATUS_CONFIG = {
 function generateMonthDays(year, month) {
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const pad = (n) => String(n).padStart(2, "0");
-  return Array.from({ length: daysInMonth }, (_, i) =>
-    `${year}-${pad(month + 1)}-${pad(i + 1)}`
+  return Array.from(
+    { length: daysInMonth },
+    (_, i) => `${year}-${pad(month + 1)}-${pad(i + 1)}`,
   );
 }
 
@@ -91,14 +102,28 @@ function getLocalDateStr(date = new Date()) {
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
-function StatCard({ icon: Icon, label, value, sub, colorClass, bgClass, warn }) {
+function StatCard({
+  icon: Icon,
+  label,
+  value,
+  sub,
+  colorClass,
+  bgClass,
+  warn,
+}) {
   return (
-    <div className={`bg-white rounded-2xl border shadow-sm p-5 flex items-center gap-4 ${warn ? "border-red-300 bg-red-50/30" : "border-slate-200"}`}>
-      <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${bgClass}`}>
+    <div
+      className={`bg-white rounded-2xl border shadow-sm p-5 flex items-center gap-4 ${warn ? "border-red-300 bg-red-50/30" : "border-slate-200"}`}
+    >
+      <div
+        className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${bgClass}`}
+      >
         <Icon className={`text-xl ${colorClass}`} />
       </div>
       <div className="min-w-0">
-        <p className={`text-2xl font-bold leading-tight ${warn ? "text-red-700" : "text-slate-800"}`}>
+        <p
+          className={`text-2xl font-bold leading-tight ${warn ? "text-red-700" : "text-slate-800"}`}
+        >
           {value}
         </p>
         <p className="text-sm text-slate-500 truncate">{label}</p>
@@ -115,11 +140,17 @@ function TableSkeleton() {
         <div className="h-4 bg-slate-200 rounded w-48 animate-pulse" />
       </div>
       {[...Array(6)].map((_, i) => (
-        <div key={i} className="flex gap-2 px-4 py-2.5 border-b border-slate-100">
+        <div
+          key={i}
+          className="flex gap-2 px-4 py-2.5 border-b border-slate-100"
+        >
           <div className="h-4 bg-slate-100 rounded w-8 animate-pulse shrink-0" />
           <div className="h-4 bg-slate-100 rounded w-36 animate-pulse shrink-0" />
           {[...Array(12)].map((__, j) => (
-            <div key={j} className="h-6 bg-slate-100 rounded w-7 animate-pulse shrink-0" />
+            <div
+              key={j}
+              className="h-6 bg-slate-100 rounded w-7 animate-pulse shrink-0"
+            />
           ))}
         </div>
       ))}
@@ -146,7 +177,7 @@ export default function AdminAttendanceGridPage() {
   const { data: classNames = [] } = useQuery({
     queryKey: queryKeys.classes.names(),
     queryFn: classesService.getNames,
-    select: (d) => (Array.isArray(d) ? d : d?.data ?? []),
+    select: (d) => (Array.isArray(d) ? d : (d?.data ?? [])),
   });
 
   // ── Branch-scoped (ClassName, Section) pairs — for sections only ──────
@@ -269,7 +300,10 @@ export default function AdminAttendanceGridPage() {
       .filter((c) => c.ClassName === cls)
       .map((c) => c.Section)
       .sort();
-    setFilter({ className: cls, section: sections.length === 1 ? sections[0] : "" });
+    setFilter({
+      className: cls,
+      section: sections.length === 1 ? sections[0] : "",
+    });
     setSubmitted(null);
     setNameSearch("");
   };
@@ -288,13 +322,17 @@ export default function AdminAttendanceGridPage() {
   };
 
   const prevMonth = () => {
-    if (month === 0) { setMonth(11); setYear((y) => y - 1); }
-    else setMonth((m) => m - 1);
+    if (month === 0) {
+      setMonth(11);
+      setYear((y) => y - 1);
+    } else setMonth((m) => m - 1);
   };
 
   const nextMonth = () => {
-    if (month === 11) { setMonth(0); setYear((y) => y + 1); }
-    else setMonth((m) => m + 1);
+    if (month === 11) {
+      setMonth(0);
+      setYear((y) => y + 1);
+    } else setMonth((m) => m + 1);
   };
 
   // ── Export: Excel ─────────────────────────────────────────────────────
@@ -310,9 +348,15 @@ export default function AdminAttendanceGridPage() {
     });
 
     const headers = [
-      "#", "Roll", "Student Name",
+      "#",
+      "Roll",
+      "Student Name",
       ...dayHeaders,
-      "Present", "Absent", "Late", "Marked Days", "Attendance %",
+      "Present",
+      "Absent",
+      "Late",
+      "Marked Days",
+      "Attendance %",
     ];
 
     const rows = filteredStudents.map((s, i) => {
@@ -339,9 +383,15 @@ export default function AdminAttendanceGridPage() {
 
     // Column widths
     ws["!cols"] = [
-      { wch: 4 }, { wch: 10 }, { wch: 24 },
+      { wch: 4 },
+      { wch: 10 },
+      { wch: 24 },
       ...allDays.map(() => ({ wch: 5 })),
-      { wch: 8 }, { wch: 8 }, { wch: 8 }, { wch: 12 }, { wch: 12 },
+      { wch: 8 },
+      { wch: 8 },
+      { wch: 8 },
+      { wch: 12 },
+      { wch: 12 },
     ];
 
     const wb = XLSX.utils.book_new();
@@ -378,7 +428,7 @@ export default function AdminAttendanceGridPage() {
             else if (status === "Present") bg = "#d1fae5";
             else if (status === "Absent") bg = "#fee2e2";
             else if (status === "Late") bg = "#fef3c7";
-            const label = we ? "–" : (status ? status.charAt(0) : "–");
+            const label = we ? "–" : status ? status.charAt(0) : "–";
             return `<td style="background:${bg};text-align:center;font-size:9px;padding:2px;${we ? "color:#9ca3af" : ""}">${label}</td>`;
           })
           .join("");
@@ -439,7 +489,10 @@ export default function AdminAttendanceGridPage() {
     </body></html>`;
 
     const win = window.open("", "_blank", "width=1400,height=900");
-    if (!win) { alert("Please allow popups to print."); return; }
+    if (!win) {
+      alert("Please allow popups to print.");
+      return;
+    }
     win.document.write(html);
     win.document.close();
     win.addEventListener("load", () => setTimeout(() => win.print(), 400));
@@ -485,7 +538,9 @@ export default function AdminAttendanceGridPage() {
               >
                 <option value="">Select class</option>
                 {classNames.map((cn) => (
-                  <option key={cn} value={cn}>{cn}</option>
+                  <option key={cn} value={cn}>
+                    {cn}
+                  </option>
                 ))}
               </select>
             </div>
@@ -503,7 +558,9 @@ export default function AdminAttendanceGridPage() {
               >
                 <option value="">Select section</option>
                 {availableSections.map((sec) => (
-                  <option key={sec} value={sec}>{sec}</option>
+                  <option key={sec} value={sec}>
+                    {sec}
+                  </option>
                 ))}
               </select>
             </div>
@@ -598,16 +655,12 @@ export default function AdminAttendanceGridPage() {
             icon={FiTrendingUp}
             label={`Avg. Attendance — ${MONTH_NAMES[month]}`}
             value={
-              summaryStats?.avgPct !== null
-                ? `${summaryStats.avgPct}%`
-                : "–"
+              summaryStats?.avgPct !== null ? `${summaryStats.avgPct}%` : "–"
             }
             sub={`${schoolDays.length} school days`}
             colorClass="text-violet-600"
             bgClass="bg-violet-50"
-            warn={
-              summaryStats?.avgPct !== null && summaryStats.avgPct < 75
-            }
+            warn={summaryStats?.avgPct !== null && summaryStats.avgPct < 75}
           />
         </div>
       )}
@@ -752,7 +805,8 @@ export default function AdminAttendanceGridPage() {
 
               <tbody className="divide-y divide-slate-100">
                 {filteredStudents.map((student, i) => {
-                  const { present, absent, late, pct } = studentSummary(student);
+                  const { present, absent, late, pct } =
+                    studentSummary(student);
                   const isLow = pct !== null && pct < 75;
 
                   return (
@@ -825,13 +879,19 @@ export default function AdminAttendanceGridPage() {
 
                       {/* Summary cells */}
                       <td className="table-cell text-center bg-emerald-50/30">
-                        <span className="font-semibold text-emerald-700">{present}</span>
+                        <span className="font-semibold text-emerald-700">
+                          {present}
+                        </span>
                       </td>
                       <td className="table-cell text-center bg-red-50/30">
-                        <span className="font-semibold text-red-600">{absent}</span>
+                        <span className="font-semibold text-red-600">
+                          {absent}
+                        </span>
                       </td>
                       <td className="table-cell text-center bg-amber-50/30">
-                        <span className="font-semibold text-amber-600">{late}</span>
+                        <span className="font-semibold text-amber-600">
+                          {late}
+                        </span>
                       </td>
                       <td className="table-cell text-center">
                         {pct !== null ? (

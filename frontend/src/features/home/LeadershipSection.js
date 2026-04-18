@@ -13,8 +13,16 @@ import { useLanguageStore, useTranslations } from "@/store/languageStore";
 
 export default function LeadershipSection() {
   const { data: messages = [], isLoading: msgLoading } = useMessages();
-  const { data: events = [], isLoading: eventsLoading, isError: eventsError } = useEvents();
-  const { data: newsItems = [], isLoading: newsLoading, isError: newsError } = useNews();
+  const {
+    data: events = [],
+    isLoading: eventsLoading,
+    isError: eventsError,
+  } = useEvents();
+  const {
+    data: newsItems = [],
+    isLoading: newsLoading,
+    isError: newsError,
+  } = useNews();
   const { data: profileData } = useQuery({
     queryKey: queryKeys.chairman.profile,
     queryFn: chairmanService.getProfile,
@@ -101,7 +109,6 @@ export default function LeadershipSection() {
       />
 
       <div className="relative z-[1] max-w-[1400px] mx-auto px-6">
-
         {/* ── Section header ── */}
         <div className="text-center mb-[52px]">
           {/* Star rule */}
@@ -136,7 +143,6 @@ export default function LeadershipSection() {
 
         {/* ── Three-column: Quick Links · Events · News ── */}
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-5 lg:grid-cols-3 lg:gap-8">
-
           {/* Quick Links */}
           <div className="flex flex-col min-h-[320px] bg-white rounded-sm border border-[rgba(201,168,76,0.25)] shadow-[0_2px_6px_rgba(13,31,60,0.07),0_8px_24px_rgba(13,31,60,0.06)] overflow-hidden transition-transform duration-[280ms] hover:-translate-y-[5px] hover:shadow-[0_4px_12px_rgba(13,31,60,0.1),0_20px_48px_rgba(13,31,60,0.1)] md:col-span-2 lg:col-span-1 lg:min-h-[280px]">
             {/* Top gold accent */}
@@ -160,7 +166,9 @@ export default function LeadershipSection() {
               />
               <div className="relative z-[1] flex items-center gap-[10px] mb-[6px]">
                 <span className="flex-1 h-px bg-gradient-to-r from-transparent to-[rgba(201,168,76,0.5)]" />
-                <span className="text-[0.9rem]" aria-hidden="true">🔗</span>
+                <span className="text-[0.9rem]" aria-hidden="true">
+                  🔗
+                </span>
                 <span className="flex-1 h-px bg-gradient-to-l from-transparent to-[rgba(201,168,76,0.5)]" />
               </div>
               <p className="relative z-[1] m-0 text-[0.72rem] font-bold tracking-[0.16em] uppercase text-[#e2c07a]">
@@ -215,7 +223,6 @@ export default function LeadershipSection() {
               <EventNewsCard type="news" data={activeNews} />
             )}
           </div>
-
         </div>
       </div>
     </section>

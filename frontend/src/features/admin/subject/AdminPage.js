@@ -228,7 +228,10 @@ export default function AdminPage() {
               <tbody>
                 {filtered.length === 0 ? (
                   <tr>
-                    <td colSpan={3} className="table-cell text-center text-slate-400 py-12">
+                    <td
+                      colSpan={3}
+                      className="table-cell text-center text-slate-400 py-12"
+                    >
                       {filterClassId
                         ? "No subjects found for the selected class"
                         : "No subjects found"}
@@ -245,7 +248,9 @@ export default function AdminPage() {
                       </td>
                       <td className="table-cell">
                         <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 text-xs font-medium">
-                          {s.ClassName ? `${s.ClassName} – ${s.Section}` : s.ClassID}
+                          {s.ClassName
+                            ? `${s.ClassName} – ${s.Section}`
+                            : s.ClassID}
                         </span>
                       </td>
                       <td className="table-cell">

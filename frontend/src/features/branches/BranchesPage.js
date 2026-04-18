@@ -21,8 +21,12 @@ function StatChip({ icon, value, label }) {
   return (
     <div className="flex flex-col items-center gap-[0.15rem] bg-gray-100 border border-gray-200 rounded-xl px-2.5 py-1.5 min-w-16 flex-1">
       <span className="text-lg leading-none">{icon}</span>
-      <span className="text-base font-bold text-gray-900 leading-none">{value}</span>
-      <span className="text-[0.7rem] text-gray-500 uppercase tracking-wide">{label}</span>
+      <span className="text-base font-bold text-gray-900 leading-none">
+        {value}
+      </span>
+      <span className="text-[0.7rem] text-gray-500 uppercase tracking-wide">
+        {label}
+      </span>
     </div>
   );
 }
@@ -52,8 +56,8 @@ function BranchCard({ branch, stats, language, t, isSelected, onSelect }) {
         isProposed
           ? "border-dashed border-2 border-gray-400 bg-gray-50"
           : isSelected
-          ? "border-emerald-500 outline outline-[2.5px] outline-emerald-500 outline-offset-2 -translate-y-0.5"
-          : "border border-gray-200 hover:-translate-y-1 hover:shadow-xl"
+            ? "border-emerald-500 outline outline-[2.5px] outline-emerald-500 outline-offset-2 -translate-y-0.5"
+            : "border border-gray-200 hover:-translate-y-1 hover:shadow-xl"
       }`}
       style={{
         cursor: isProposed ? "default" : "pointer",
@@ -95,11 +99,17 @@ function BranchCard({ branch, stats, language, t, isSelected, onSelect }) {
 
       <div className="p-5 flex-1 flex flex-col gap-2">
         <div className="flex items-start justify-between gap-2">
-          <h3 className="text-[1.05rem] font-bold text-gray-900 m-0 flex-1">{name}</h3>
+          <h3 className="text-[1.05rem] font-bold text-gray-900 m-0 flex-1">
+            {name}
+          </h3>
           <div className="flex items-center gap-1.5">
             {isSelected && (
-              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold text-white tracking-wide"
-                style={{ background: "linear-gradient(135deg,#10b981 0%,#059669 100%)" }}>
+              <span
+                className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold text-white tracking-wide"
+                style={{
+                  background: "linear-gradient(135deg,#10b981 0%,#059669 100%)",
+                }}
+              >
                 ✓ {t("selected")}
               </span>
             )}
@@ -111,23 +121,44 @@ function BranchCard({ branch, stats, language, t, isSelected, onSelect }) {
           </div>
         </div>
 
-        {address && <p className="text-sm text-gray-600 leading-relaxed m-0">📍 {address}</p>}
+        {address && (
+          <p className="text-sm text-gray-600 leading-relaxed m-0">
+            📍 {address}
+          </p>
+        )}
 
         {description && (
-          <p className="text-[0.85rem] text-gray-500 leading-snug m-0 line-clamp-3">{description}</p>
+          <p className="text-[0.85rem] text-gray-500 leading-snug m-0 line-clamp-3">
+            {description}
+          </p>
         )}
 
         {branch.established_date && (
           <p className="text-[0.8rem] text-gray-400 m-0">
-            <span className="font-semibold text-gray-500">{t("established")}:</span> {fmtDate(branch.established_date)}
+            <span className="font-semibold text-gray-500">
+              {t("established")}:
+            </span>{" "}
+            {fmtDate(branch.established_date)}
           </p>
         )}
 
         {stats && !isProposed && (
           <div className="flex gap-2 mt-1 flex-wrap">
-            <StatChip icon="🎓" value={stats.studentCount ?? 0} label={t("students")} />
-            <StatChip icon="👨‍🏫" value={stats.teacherCount ?? 0} label={t("teachers")} />
-            <StatChip icon="🏫" value={stats.classCount ?? 0} label={t("classes")} />
+            <StatChip
+              icon="🎓"
+              value={stats.studentCount ?? 0}
+              label={t("students")}
+            />
+            <StatChip
+              icon="👨‍🏫"
+              value={stats.teacherCount ?? 0}
+              label={t("teachers")}
+            />
+            <StatChip
+              icon="🏫"
+              value={stats.classCount ?? 0}
+              label={t("classes")}
+            />
           </div>
         )}
 
@@ -146,10 +177,21 @@ function BranchCard({ branch, stats, language, t, isSelected, onSelect }) {
   );
 }
 
-function BranchSection({ title, branches, statsMap, emptyKey, language, t, selectedBranchId, onSelect }) {
+function BranchSection({
+  title,
+  branches,
+  statsMap,
+  emptyKey,
+  language,
+  t,
+  selectedBranchId,
+  onSelect,
+}) {
   return (
     <div className="mb-12">
-      <h2 className="text-2xl font-bold text-gray-900 m-0 mb-6 pb-2 border-b-[3px] border-blue-600 inline-block">{title}</h2>
+      <h2 className="text-2xl font-bold text-gray-900 m-0 mb-6 pb-2 border-b-[3px] border-blue-600 inline-block">
+        {title}
+      </h2>
       {branches.length === 0 ? (
         <div className="text-center py-12 text-gray-400">
           <div className="text-4xl mb-3">🏫</div>
@@ -182,7 +224,7 @@ export default function BranchesPage() {
   const language = useLanguageStore((s) => s.language);
 
   const statsMap = Object.fromEntries(
-    (Array.isArray(statsData) ? statsData : []).map((s) => [s.id, s])
+    (Array.isArray(statsData) ? statsData : []).map((s) => [s.id, s]),
   );
 
   const active = (Array.isArray(allBranches) ? allBranches : []).filter(
@@ -208,21 +250,30 @@ export default function BranchesPage() {
       {/* Header */}
       <div
         className="text-white text-center px-6 py-12"
-        style={{ background: "linear-gradient(135deg, #1a3a6e 0%, #2563eb 100%)" }}
+        style={{
+          background: "linear-gradient(135deg, #1a3a6e 0%, #2563eb 100%)",
+        }}
       >
-        <h1 className="text-[2.25rem] font-extrabold m-0 mb-2 tracking-tight">{t("pageTitle")}</h1>
+        <h1 className="text-[2.25rem] font-extrabold m-0 mb-2 tracking-tight">
+          {t("pageTitle")}
+        </h1>
         <p className="text-[1.05rem] opacity-85 m-0">{t("pageSubtitle")}</p>
         {currentBranchId != null && (
-          <div className="inline-flex items-center gap-2.5 mt-3 px-4 py-2 rounded-3xl text-sm font-semibold text-green-900"
-            style={{ background: "linear-gradient(135deg,#ecfdf5 0%,#d1fae5 100%)", border: "1.5px solid #10b981" }}>
+          <div
+            className="inline-flex items-center gap-2.5 mt-3 px-4 py-2 rounded-3xl text-sm font-semibold text-green-900"
+            style={{
+              background: "linear-gradient(135deg,#ecfdf5 0%,#d1fae5 100%)",
+              border: "1.5px solid #10b981",
+            }}
+          >
             <span>📍 {t("viewing")}:</span>
             <span>
               {allBranches.find((b) => b.id === currentBranchId)
-                ? (language === "bn"
-                    ? (allBranches.find((b) => b.id === currentBranchId).name_bn ||
-                       allBranches.find((b) => b.id === currentBranchId).name_en)
-                    : (allBranches.find((b) => b.id === currentBranchId).name_en ||
-                       allBranches.find((b) => b.id === currentBranchId).name_bn))
+                ? language === "bn"
+                  ? allBranches.find((b) => b.id === currentBranchId).name_bn ||
+                    allBranches.find((b) => b.id === currentBranchId).name_en
+                  : allBranches.find((b) => b.id === currentBranchId).name_en ||
+                    allBranches.find((b) => b.id === currentBranchId).name_bn
                 : `Branch ${currentBranchId}`}
             </span>
             <button

@@ -100,7 +100,12 @@ export default function AdminPage() {
       }
       reset();
     } catch (err) {
-      toast.error(err?.response?.data?.message || err?.response?.data?.error || err.message || t("operationFailed"));
+      toast.error(
+        err?.response?.data?.message ||
+          err?.response?.data?.error ||
+          err.message ||
+          t("operationFailed"),
+      );
     }
   };
 
@@ -119,7 +124,11 @@ export default function AdminPage() {
         ? branch.established_date.split("T")[0]
         : "",
     });
-    setTimeout(() => formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 50);
+    setTimeout(
+      () =>
+        formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }),
+      50,
+    );
   };
 
   const handleDeleteRequest = (id) => {
@@ -133,7 +142,9 @@ export default function AdminPage() {
         setConfirmDeleteId(null);
       },
       onError: (err) => {
-        toast.error(err?.response?.data?.message || err.message || t("operationFailed"));
+        toast.error(
+          err?.response?.data?.message || err.message || t("operationFailed"),
+        );
         setConfirmDeleteId(null);
       },
     });
@@ -354,7 +365,9 @@ export default function AdminPage() {
             <h2 className="text-base font-semibold text-slate-800">
               {t("allBranches")}
             </h2>
-            <p className="text-xs text-slate-400">{branches.length} total branches</p>
+            <p className="text-xs text-slate-400">
+              {branches.length} total branches
+            </p>
           </div>
         </div>
 
@@ -412,7 +425,9 @@ export default function AdminPage() {
                     </td>
                     <td className="table-cell text-slate-600 text-sm">
                       {branch.established_date
-                        ? new Date(branch.established_date).toLocaleDateString("en-GB")
+                        ? new Date(branch.established_date).toLocaleDateString(
+                            "en-GB",
+                          )
                         : "—"}
                     </td>
                     <td className="table-cell">

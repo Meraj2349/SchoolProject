@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { chairmanService } from "@/services/chairman.service";
 import { queryKeys } from "@/lib/queryKeys";
@@ -20,7 +20,7 @@ export default function AdminPage() {
   const fileInputRef = useRef(null);
 
   const [form, setForm] = useState(EMPTY);
-  const [imageFile, setImageFile] = useState(null);   // File object to upload
+  const [imageFile, setImageFile] = useState(null); // File object to upload
   const [previewUrl, setPreviewUrl] = useState(null); // local blob URL
   const [status, setStatus] = useState({ error: null, success: null });
 
@@ -31,18 +31,18 @@ export default function AdminPage() {
     select: (d) => d?.data ?? d,
   });
 
-  useEffect(() => {
-    if (profileData) {
-      setForm({
-        name_en:        profileData.name_en        || "",
-        name_bn:        profileData.name_bn        || "",
-        title_en:       profileData.title_en       || "",
-        title_bn:       profileData.title_bn       || "",
-        institution_en: profileData.institution_en || "",
-        institution_bn: profileData.institution_bn || "",
-      });
-    }
-  }, [profileData]);
+  const [syncedProfile, setSyncedProfile] = useState(null);
+  if (profileData && profileData !== syncedProfile) {
+    setSyncedProfile(profileData);
+    setForm({
+      name_en: profileData.name_en || "",
+      name_bn: profileData.name_bn || "",
+      title_en: profileData.title_en || "",
+      title_bn: profileData.title_bn || "",
+      institution_en: profileData.institution_en || "",
+      institution_bn: profileData.institution_bn || "",
+    });
+  }
 
   // ── Save mutation ─────────────────────────────────────────────────────
   const save = useMutation({
@@ -57,7 +57,9 @@ export default function AdminPage() {
   });
 
   const flash = (msg, isErr = false) => {
-    setStatus(isErr ? { error: msg, success: null } : { error: null, success: msg });
+    setStatus(
+      isErr ? { error: msg, success: null } : { error: null, success: msg },
+    );
     setTimeout(() => setStatus({ error: null, success: null }), 4000);
   };
 
@@ -98,22 +100,46 @@ export default function AdminPage() {
     {
       label: "Name",
       fields: [
-        { name: "name_en", label: "Name (English)", placeholder: "e.g. Md. Rashedul Islam" },
-        { name: "name_bn", label: "Name (Bangla)", placeholder: "e.g. মোঃ রাশেদুল ইসলাম" },
+        {
+          name: "name_en",
+          label: "Name (English)",
+          placeholder: "e.g. Md. Rashedul Islam",
+        },
+        {
+          name: "name_bn",
+          label: "Name (Bangla)",
+          placeholder: "e.g. মোঃ রাশেদুল ইসলাম",
+        },
       ],
     },
     {
       label: "Title",
       fields: [
-        { name: "title_en", label: "Title (English)", placeholder: "e.g. Chairman" },
-        { name: "title_bn", label: "Title (Bangla)", placeholder: "e.g. চেয়ারম্যান" },
+        {
+          name: "title_en",
+          label: "Title (English)",
+          placeholder: "e.g. Chairman",
+        },
+        {
+          name: "title_bn",
+          label: "Title (Bangla)",
+          placeholder: "e.g. চেয়ারম্যান",
+        },
       ],
     },
     {
       label: "Institution",
       fields: [
-        { name: "institution_en", label: "Institution (English)", placeholder: "e.g. Star Shikkha Poribar" },
-        { name: "institution_bn", label: "Institution (Bangla)", placeholder: "e.g. স্টার শিক্ষা পরিবার" },
+        {
+          name: "institution_en",
+          label: "Institution (English)",
+          placeholder: "e.g. Star Shikkha Poribar",
+        },
+        {
+          name: "institution_bn",
+          label: "Institution (Bangla)",
+          placeholder: "e.g. স্টার শিক্ষা পরিবার",
+        },
       ],
     },
   ];
@@ -129,8 +155,10 @@ export default function AdminPage() {
         </p>
       </div>
 
-      {status.error   && <div className="error-message">{status.error}</div>}
-      {status.success && <div className="success-message">{status.success}</div>}
+      {status.error && <div className="error-message">{status.error}</div>}
+      {status.success && (
+        <div className="success-message">{status.success}</div>
+      )}
 
       {isLoading ? (
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-10 flex items-center justify-center gap-3 text-slate-400">

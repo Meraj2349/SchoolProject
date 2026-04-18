@@ -11,11 +11,11 @@ import { FiEdit2, FiTrash2, FiFileText, FiPlusCircle } from "react-icons/fi";
 
 // Must match DB ENUM exactly
 const EXAM_TYPE_OPTIONS = [
-  { value: "Monthly",     label: "Monthly" },
-  { value: "Quarterly",   label: "Quarterly" },
+  { value: "Monthly", label: "Monthly" },
+  { value: "Quarterly", label: "Quarterly" },
   { value: "Half-Yearly", label: "Half-Yearly" },
-  { value: "Annual",      label: "Annual" },
-  { value: "Final",       label: "Final" },
+  { value: "Annual", label: "Annual" },
+  { value: "Final", label: "Final" },
 ];
 
 const EMPTY = {
@@ -193,7 +193,9 @@ export default function AdminPage() {
               >
                 <option value="">{t("selectClass")}</option>
                 {uniqueClassNames.map((c) => (
-                  <option key={c} value={c}>{c}</option>
+                  <option key={c} value={c}>
+                    {c}
+                  </option>
                 ))}
               </select>
             </div>
@@ -212,7 +214,9 @@ export default function AdminPage() {
               >
                 <option value="">Select section</option>
                 {sectionsForClass.map((s) => (
-                  <option key={s} value={s}>{s}</option>
+                  <option key={s} value={s}>
+                    {s}
+                  </option>
                 ))}
               </select>
             </div>

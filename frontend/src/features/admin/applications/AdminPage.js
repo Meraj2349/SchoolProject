@@ -37,16 +37,25 @@ export default function AdminApplicationsPage() {
   };
 
   useEffect(() => {
-    setLoading(true);
-    applicationService.getAll()
-      .then((res) => setApplications(res.data || []))
-      .catch((err) =>
-        showFlash(
-          err?.response?.data?.message || err.message || "Operation failed",
-          true,
-        ),
-      )
-      .finally(() => setLoading(false));
+    let cancelled = false;
+    applicationService
+      .getAll()
+      .then((res) => {
+        if (!cancelled) setApplications(res.data || []);
+      })
+      .catch((err) => {
+        if (!cancelled)
+          showFlash(
+            err?.response?.data?.message || err.message || "Operation failed",
+            true,
+          );
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const handleStatusChange = async (id, newStatus) => {

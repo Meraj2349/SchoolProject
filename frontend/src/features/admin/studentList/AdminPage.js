@@ -7,7 +7,14 @@ import { classesService } from "@/services/classes.service";
 import { queryKeys } from "@/lib/queryKeys";
 import { useTranslations } from "@/store/languageStore";
 import { useBranchStore } from "@/store/branchStore";
-import { FiEdit2, FiTrash2, FiUserPlus, FiUsers, FiSearch, FiX } from "react-icons/fi";
+import {
+  FiEdit2,
+  FiTrash2,
+  FiUserPlus,
+  FiUsers,
+  FiSearch,
+  FiX,
+} from "react-icons/fi";
 
 const EMPTY = {
   FirstName: "",
@@ -45,7 +52,7 @@ export default function AdminPage() {
   const { data: classNames = [] } = useQuery({
     queryKey: queryKeys.classes.names(),
     queryFn: classesService.getNames,
-    select: (d) => (Array.isArray(d) ? d : d?.data ?? []),
+    select: (d) => (Array.isArray(d) ? d : (d?.data ?? [])),
   });
 
   // Branch-scoped (ClassName, Section) pairs — used only to derive available sections
@@ -203,7 +210,10 @@ export default function AdminPage() {
       )}
 
       {/* Form card */}
-      <div ref={formRef} className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+      <div
+        ref={formRef}
+        className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden"
+      >
         <div className="px-6 py-4 border-b border-slate-100 flex items-center gap-3">
           <div className="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center">
             <FiUserPlus className="text-indigo-600 text-sm" />
@@ -243,7 +253,9 @@ export default function AdminPage() {
               >
                 <option value="">Select class</option>
                 {classNames.map((cn) => (
-                  <option key={cn} value={cn}>{cn}</option>
+                  <option key={cn} value={cn}>
+                    {cn}
+                  </option>
                 ))}
               </select>
             </div>
@@ -262,7 +274,9 @@ export default function AdminPage() {
               >
                 <option value="">Select section</option>
                 {formSections.map((sec) => (
-                  <option key={sec} value={sec}>{sec}</option>
+                  <option key={sec} value={sec}>
+                    {sec}
+                  </option>
                 ))}
               </select>
             </div>
@@ -396,7 +410,9 @@ export default function AdminPage() {
               >
                 <option value="">All Classes</option>
                 {classOptions.map((c) => (
-                  <option key={c} value={c}>{c}</option>
+                  <option key={c} value={c}>
+                    {c}
+                  </option>
                 ))}
               </select>
             </div>
@@ -414,7 +430,9 @@ export default function AdminPage() {
               >
                 <option value="">All Sections</option>
                 {sectionOptions.map((s) => (
-                  <option key={s} value={s}>{s}</option>
+                  <option key={s} value={s}>
+                    {s}
+                  </option>
                 ))}
               </select>
             </div>
@@ -460,10 +478,15 @@ export default function AdminPage() {
           <div className="flex flex-col items-center justify-center py-16 text-slate-400">
             <FiUsers className="text-4xl mb-3 opacity-30" />
             <p className="text-sm">
-              {isFiltered ? "No students match the current filters" : "No students found"}
+              {isFiltered
+                ? "No students match the current filters"
+                : "No students found"}
             </p>
             {isFiltered && (
-              <button onClick={clearFilters} className="mt-3 text-xs text-indigo-600 hover:underline">
+              <button
+                onClick={clearFilters}
+                className="mt-3 text-xs text-indigo-600 hover:underline"
+              >
                 Clear filters
               </button>
             )}
@@ -518,9 +541,17 @@ export default function AdminPage() {
                             setForm({
                               ...s,
                               DateOfBirth: s.DateOfBirth?.split("T")[0] || "",
-                              AdmissionDate: s.AdmissionDate?.split("T")[0] || "",
+                              AdmissionDate:
+                                s.AdmissionDate?.split("T")[0] || "",
                             });
-                            setTimeout(() => formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 50);
+                            setTimeout(
+                              () =>
+                                formRef.current?.scrollIntoView({
+                                  behavior: "smooth",
+                                  block: "start",
+                                }),
+                              50,
+                            );
                           }}
                           className="btn-icon edit"
                           title={t("editStudent")}

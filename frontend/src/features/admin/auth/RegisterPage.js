@@ -36,7 +36,11 @@ export default function RegisterPage() {
     axios
       .get(`${BASE_URL}/branches`)
       .then((r) => {
-        const list = Array.isArray(r.data?.data) ? r.data.data : Array.isArray(r.data) ? r.data : [];
+        const list = Array.isArray(r.data?.data)
+          ? r.data.data
+          : Array.isArray(r.data)
+            ? r.data
+            : [];
         setBranches(list.filter((b) => !b.is_proposed || b.is_proposed === 0));
       })
       .catch(() => setBranches([]))
@@ -52,7 +56,9 @@ export default function RegisterPage() {
       setSelectedBranchName(t("superAdmin"));
     } else if (val) {
       const found = branches.find((b) => String(b.id) === val);
-      setSelectedBranchName(found?.name_en || found?.name_bn || `Branch ${val}`);
+      setSelectedBranchName(
+        found?.name_en || found?.name_bn || `Branch ${val}`,
+      );
     } else {
       setSelectedBranchName("");
     }
@@ -97,7 +103,10 @@ export default function RegisterPage() {
       router.replace("/admin/login");
     } catch (err) {
       setError(
-        err.response?.data?.error || err.response?.data?.message || err.message || t("registrationFailed"),
+        err.response?.data?.error ||
+          err.response?.data?.message ||
+          err.message ||
+          t("registrationFailed"),
       );
     } finally {
       setLoading(false);
@@ -119,12 +128,21 @@ export default function RegisterPage() {
       style={{ background: "linear-gradient(135deg,#667eea 0%,#764ba2 100%)" }}
     >
       <div className="bg-white p-10 rounded-xl shadow-2xl w-full max-w-sm border border-white/20">
-
         {/* Step indicator */}
         <div className="flex items-center justify-center gap-2 mb-6">
-          <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all ${step >= 1 ? "bg-indigo-600 text-white" : "bg-gray-200 text-gray-500"}`}>1</div>
-          <div className={`h-0.5 w-10 transition-all ${step >= 2 ? "bg-indigo-600" : "bg-gray-200"}`} />
-          <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all ${step >= 2 ? "bg-indigo-600 text-white" : "bg-gray-200 text-gray-500"}`}>2</div>
+          <div
+            className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all ${step >= 1 ? "bg-indigo-600 text-white" : "bg-gray-200 text-gray-500"}`}
+          >
+            1
+          </div>
+          <div
+            className={`h-0.5 w-10 transition-all ${step >= 2 ? "bg-indigo-600" : "bg-gray-200"}`}
+          />
+          <div
+            className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all ${step >= 2 ? "bg-indigo-600 text-white" : "bg-gray-200 text-gray-500"}`}
+          >
+            2
+          </div>
         </div>
 
         <h2 className="text-center text-2xl font-semibold text-gray-800 mb-2 tracking-tight">
@@ -159,7 +177,9 @@ export default function RegisterPage() {
                   required
                   className={inputClass + " cursor-pointer appearance-none"}
                 >
-                  <option value="" disabled>{t("branchPlaceholder")}</option>
+                  <option value="" disabled>
+                    {t("branchPlaceholder")}
+                  </option>
                   {branches.map((b) => (
                     <option key={b.id} value={String(b.id)}>
                       {b.name_en || b.name_bn}
@@ -173,23 +193,35 @@ export default function RegisterPage() {
             </div>
 
             {/* Branch info card */}
-            {selectedBranchId && !isSuperAdmin && (() => {
-              const b = branches.find((br) => String(br.id) === selectedBranchId);
-              return b ? (
-                <div className="mb-5 p-3 bg-indigo-50 border border-indigo-200 rounded-lg text-sm">
-                  <p className="font-semibold text-indigo-800">{b.name_en}</p>
-                  {b.name_bn && <p className="text-indigo-600 mt-0.5">{b.name_bn}</p>}
-                  {(b.address_en || b.address_bn) && (
-                    <p className="text-indigo-500 mt-1 text-xs">{b.address_en || b.address_bn}</p>
-                  )}
-                </div>
-              ) : null;
-            })()}
+            {selectedBranchId &&
+              !isSuperAdmin &&
+              (() => {
+                const b = branches.find(
+                  (br) => String(br.id) === selectedBranchId,
+                );
+                return b ? (
+                  <div className="mb-5 p-3 bg-indigo-50 border border-indigo-200 rounded-lg text-sm">
+                    <p className="font-semibold text-indigo-800">{b.name_en}</p>
+                    {b.name_bn && (
+                      <p className="text-indigo-600 mt-0.5">{b.name_bn}</p>
+                    )}
+                    {(b.address_en || b.address_bn) && (
+                      <p className="text-indigo-500 mt-1 text-xs">
+                        {b.address_en || b.address_bn}
+                      </p>
+                    )}
+                  </div>
+                ) : null;
+              })()}
 
             {isSuperAdmin && (
               <div className="mb-5 p-3 bg-amber-50 border border-amber-200 rounded-lg text-sm">
-                <p className="font-semibold text-amber-800">⚡ {t("superAdmin")}</p>
-                <p className="text-amber-600 mt-0.5 text-xs">Full access to all branches — no branch required</p>
+                <p className="font-semibold text-amber-800">
+                  ⚡ {t("superAdmin")}
+                </p>
+                <p className="text-amber-600 mt-0.5 text-xs">
+                  Full access to all branches — no branch required
+                </p>
               </div>
             )}
 
@@ -197,7 +229,9 @@ export default function RegisterPage() {
               type="submit"
               disabled={!selectedBranchId || branchesLoading}
               className="w-full py-3.5 text-white font-semibold text-base rounded-lg border-none cursor-pointer transition-all duration-300 mt-2 disabled:opacity-50 disabled:cursor-not-allowed hover:-translate-y-0.5 hover:shadow-lg"
-              style={{ background: "linear-gradient(135deg,#667eea 0%,#764ba2 100%)" }}
+              style={{
+                background: "linear-gradient(135deg,#667eea 0%,#764ba2 100%)",
+              }}
             >
               {t("continueBtn")} →
             </button>
@@ -280,7 +314,9 @@ export default function RegisterPage() {
                 type="submit"
                 disabled={loading}
                 className="flex-2 flex-grow py-3.5 text-white font-semibold text-base rounded-lg border-none cursor-pointer transition-all duration-300 disabled:opacity-70 disabled:cursor-not-allowed hover:-translate-y-0.5 hover:shadow-lg"
-                style={{ background: "linear-gradient(135deg,#667eea 0%,#764ba2 100%)" }}
+                style={{
+                  background: "linear-gradient(135deg,#667eea 0%,#764ba2 100%)",
+                }}
               >
                 {loading ? t("registering") : t("registerBtn")}
               </button>
@@ -291,7 +327,10 @@ export default function RegisterPage() {
         <div className="text-center mt-6 pt-5 border-t border-gray-200">
           <p className="text-gray-600 text-sm m-0">
             {t("haveAccount")}{" "}
-            <Link href="/admin/login" className="text-indigo-500 no-underline font-semibold hover:text-purple-700 hover:underline transition-colors">
+            <Link
+              href="/admin/login"
+              className="text-indigo-500 no-underline font-semibold hover:text-purple-700 hover:underline transition-colors"
+            >
               {t("signIn")}
             </Link>
           </p>

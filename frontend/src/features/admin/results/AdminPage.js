@@ -32,10 +32,10 @@ export default function AdminPage() {
   const [form, setForm] = useState({
     className: "",
     section: "",
-    classId: "",     // ClassID of the selected class row
+    classId: "", // ClassID of the selected class row
     examId: "",
     subjectId: "",
-    studentId: "",   // StudentID of the selected student
+    studentId: "", // StudentID of the selected student
     firstName: "",
     rollNumber: "",
     marksObtained: "",
@@ -73,7 +73,11 @@ export default function AdminPage() {
   // Load students for the selected class+section to power the student picker
   const canFetchStudents = Boolean(form.className && form.section);
   const { data: classStudents = [], isFetching: studentsLoading } = useQuery({
-    queryKey: queryKeys.students.byClassSection(form.className, form.section, branchId),
+    queryKey: queryKeys.students.byClassSection(
+      form.className,
+      form.section,
+      branchId,
+    ),
     queryFn: () =>
       studentsService
         .getByClassSection(form.className, form.section)
@@ -85,18 +89,29 @@ export default function AdminPage() {
   const add = useMutation({
     mutationFn: resultsService.createById,
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: queryKeys.results.search({}, branchId) });
+      qc.invalidateQueries({
+        queryKey: queryKeys.results.search({}, branchId),
+      });
       flash(t("resultAdded"));
-      setForm((p) => ({ ...p, studentId: "", firstName: "", rollNumber: "", marksObtained: "" }));
+      setForm((p) => ({
+        ...p,
+        studentId: "",
+        firstName: "",
+        rollNumber: "",
+        marksObtained: "",
+      }));
     },
-    onError: (err) => flash(err?.response?.data?.message || err.message || t("failed"), true),
+    onError: (err) =>
+      flash(err?.response?.data?.message || err.message || t("failed"), true),
   });
 
   const edit = useMutation({
     mutationFn: ({ id, marks }) =>
       resultsService.update(id, { MarksObtained: Number(marks) }),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: queryKeys.results.search({}, branchId) });
+      qc.invalidateQueries({
+        queryKey: queryKeys.results.search({}, branchId),
+      });
       flash(t("resultUpdated") || "Result updated");
       setEditRow(null);
     },
@@ -106,7 +121,9 @@ export default function AdminPage() {
   const remove = useMutation({
     mutationFn: resultsService.remove,
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: queryKeys.results.search({}, branchId) });
+      qc.invalidateQueries({
+        queryKey: queryKeys.results.search({}, branchId),
+      });
       flash(t("deleted") || "Result deleted");
     },
     onError: (err) => flash(err.message || t("failed"), true),
@@ -176,7 +193,8 @@ export default function AdminPage() {
 
   /* ── results viewer filter logic ── */
   const classOptions = useMemo(
-    () => [...new Set(allResults.map((r) => r.ClassName).filter(Boolean))].sort(),
+    () =>
+      [...new Set(allResults.map((r) => r.ClassName).filter(Boolean))].sort(),
     [allResults],
   );
   const sectionOptions = useMemo(
@@ -189,7 +207,8 @@ export default function AdminPage() {
     return allResults.filter((r) => {
       if (
         resultFilters.className &&
-        (r.ClassName || "").toLowerCase() !== resultFilters.className.toLowerCase()
+        (r.ClassName || "").toLowerCase() !==
+          resultFilters.className.toLowerCase()
       )
         return false;
       if (
@@ -199,8 +218,7 @@ export default function AdminPage() {
         return false;
       if (search) {
         const name = (
-          r.StudentName ||
-          `${r.FirstName || ""} ${r.LastName || ""}`
+          r.StudentName || `${r.FirstName || ""} ${r.LastName || ""}`
         ).toLowerCase();
         const roll = (r.RollNumber || "").toLowerCase();
         if (!name.includes(search) && !roll.includes(search)) return false;
@@ -228,7 +246,9 @@ export default function AdminPage() {
       </div>
 
       {status.error && <div className="error-message">{status.error}</div>}
-      {status.success && <div className="success-message">{status.success}</div>}
+      {status.success && (
+        <div className="success-message">{status.success}</div>
+      )}
 
       {/* ── Add result form ── */}
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
@@ -268,7 +288,9 @@ export default function AdminPage() {
               >
                 <option value="">Select class</option>
                 {uniqueClassNames.map((cn) => (
-                  <option key={cn} value={cn}>{cn}</option>
+                  <option key={cn} value={cn}>
+                    {cn}
+                  </option>
                 ))}
               </select>
             </div>
@@ -301,7 +323,9 @@ export default function AdminPage() {
               >
                 <option value="">Select section</option>
                 {sectionsForClass.map((s) => (
-                  <option key={s} value={s}>{s}</option>
+                  <option key={s} value={s}>
+                    {s}
+                  </option>
                 ))}
               </select>
             </div>
@@ -322,10 +346,17 @@ export default function AdminPage() {
                   onChange={(e) => {
                     const sid = e.target.value;
                     if (!sid) {
-                      setForm((p) => ({ ...p, studentId: "", firstName: "", rollNumber: "" }));
+                      setForm((p) => ({
+                        ...p,
+                        studentId: "",
+                        firstName: "",
+                        rollNumber: "",
+                      }));
                       return;
                     }
-                    const s = classStudents.find((st) => String(st.StudentID) === sid);
+                    const s = classStudents.find(
+                      (st) => String(st.StudentID) === sid,
+                    );
                     if (s)
                       setForm((p) => ({
                         ...p,
@@ -341,8 +372,8 @@ export default function AdminPage() {
                     {studentsLoading
                       ? "Loading students…"
                       : classStudents.length === 0
-                      ? "No students in this class/section"
-                      : "Select student"}
+                        ? "No students in this class/section"
+                        : "Select student"}
                   </option>
                   {classStudents.map((s) => (
                     <option key={s.StudentID} value={String(s.StudentID)}>
@@ -482,7 +513,9 @@ export default function AdminPage() {
             <FiList className="text-slate-600 text-sm" />
           </div>
           <div>
-            <h2 className="text-base font-semibold text-slate-800">All Results</h2>
+            <h2 className="text-base font-semibold text-slate-800">
+              All Results
+            </h2>
             <p className="text-xs text-slate-400">
               {isFiltered
                 ? `${filteredResults.length} of ${allResults.length} records`
@@ -522,7 +555,9 @@ export default function AdminPage() {
               >
                 <option value="">All Classes</option>
                 {classOptions.map((c) => (
-                  <option key={c} value={c}>{c}</option>
+                  <option key={c} value={c}>
+                    {c}
+                  </option>
                 ))}
               </select>
             </div>
@@ -538,7 +573,9 @@ export default function AdminPage() {
               >
                 <option value="">All Sections</option>
                 {sectionOptions.map((s) => (
-                  <option key={s} value={s}>{s}</option>
+                  <option key={s} value={s}>
+                    {s}
+                  </option>
                 ))}
               </select>
             </div>
@@ -605,11 +642,7 @@ export default function AdminPage() {
                         <td className="table-cell">
                           <div className="flex items-center gap-2">
                             <div className="w-7 h-7 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold text-xs shrink-0">
-                              {(
-                                r.StudentName ||
-                                r.FirstName ||
-                                "?"
-                              )
+                              {(r.StudentName || r.FirstName || "?")
                                 .charAt(0)
                                 .toUpperCase()}
                             </div>
@@ -654,10 +687,10 @@ export default function AdminPage() {
                                   pct >= 80
                                     ? "bg-emerald-100 text-emerald-700"
                                     : pct >= 60
-                                    ? "bg-blue-100 text-blue-700"
-                                    : pct >= 40
-                                    ? "bg-amber-100 text-amber-700"
-                                    : "bg-red-100 text-red-700"
+                                      ? "bg-blue-100 text-blue-700"
+                                      : pct >= 40
+                                        ? "bg-amber-100 text-amber-700"
+                                        : "bg-red-100 text-red-700"
                                 }`}
                               >
                                 {pct}%
@@ -678,8 +711,7 @@ export default function AdminPage() {
                               onClick={() => {
                                 if (
                                   window.confirm(
-                                    t("deleteConfirm") ||
-                                      "Delete this result?",
+                                    t("deleteConfirm") || "Delete this result?",
                                   )
                                 )
                                   remove.mutate(r.ResultID);

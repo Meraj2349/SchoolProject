@@ -6,14 +6,44 @@ import { useTranslations } from "@/store/languageStore";
 import { useBranchStore } from "@/store/branchStore";
 
 /* ── Classic navy/gold palette ── */
-const GOLD  = "#c9a84c";
+const GOLD = "#c9a84c";
 
 const LINK_CONFIGS = [
-  { nameKey: "students",   icon: "👥", path: "/students",   gradient: "linear-gradient(135deg,#10b981 0%,#059669 100%)", shadow: "rgba(16,185,129,0.35)"  },
-  { nameKey: "teachers",   icon: "🎓", path: "/teachers",   gradient: "linear-gradient(135deg,#f43f5e 0%,#e11d48 100%)", shadow: "rgba(244,63,94,0.35)"   },
-  { nameKey: "attendance", icon: "✅", path: "/attendance", gradient: "linear-gradient(135deg,#f59e0b 0%,#d97706 100%)", shadow: "rgba(245,158,11,0.35)"  },
-  { nameKey: "result",     icon: "📊", path: "/result",     gradient: "linear-gradient(135deg,#3b82f6 0%,#2563eb 100%)", shadow: "rgba(59,130,246,0.35)"  },
-  { nameKey: "routine",    icon: "📅", path: "/routine",    gradient: "linear-gradient(135deg,#8b5cf6 0%,#7c3aed 100%)", shadow: "rgba(139,92,246,0.35)"  },
+  {
+    nameKey: "students",
+    icon: "👥",
+    path: "/students",
+    gradient: "linear-gradient(135deg,#10b981 0%,#059669 100%)",
+    shadow: "rgba(16,185,129,0.35)",
+  },
+  {
+    nameKey: "teachers",
+    icon: "🎓",
+    path: "/teachers",
+    gradient: "linear-gradient(135deg,#f43f5e 0%,#e11d48 100%)",
+    shadow: "rgba(244,63,94,0.35)",
+  },
+  {
+    nameKey: "attendance",
+    icon: "✅",
+    path: "/attendance",
+    gradient: "linear-gradient(135deg,#f59e0b 0%,#d97706 100%)",
+    shadow: "rgba(245,158,11,0.35)",
+  },
+  {
+    nameKey: "result",
+    icon: "📊",
+    path: "/result",
+    gradient: "linear-gradient(135deg,#3b82f6 0%,#2563eb 100%)",
+    shadow: "rgba(59,130,246,0.35)",
+  },
+  {
+    nameKey: "routine",
+    icon: "📅",
+    path: "/routine",
+    gradient: "linear-gradient(135deg,#8b5cf6 0%,#7c3aed 100%)",
+    shadow: "rgba(139,92,246,0.35)",
+  },
 ];
 
 function QuickLinkItem({ link }) {
@@ -48,7 +78,10 @@ export default function QuickLinks({ links, hideHeader = false }) {
   const { currentBranchId, currentBranchName } = useBranchStore();
 
   const resolvedLinks = links
-    ? links.map((l) => ({ ...l, displayName: l.nameKey ? t(l.nameKey) : l.name }))
+    ? links.map((l) => ({
+        ...l,
+        displayName: l.nameKey ? t(l.nameKey) : l.name,
+      }))
     : LINK_CONFIGS.map((l) => ({ ...l, displayName: t(l.nameKey) }));
 
   return (

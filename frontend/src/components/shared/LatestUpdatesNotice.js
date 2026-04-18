@@ -62,7 +62,8 @@ export default function LatestUpdatesNotice() {
       <div
         className="relative overflow-hidden border-b border-white/15 transition-all duration-300 hover:-translate-y-0.5"
         style={{
-          background: "linear-gradient(135deg, #10b981 0%, #059669 25%, #047857 75%, #064e3b 100%)",
+          background:
+            "linear-gradient(135deg, #10b981 0%, #059669 25%, #047857 75%, #064e3b 100%)",
           boxShadow: "0 6px 24px rgba(16,185,129,0.3)",
         }}
       >
@@ -86,12 +87,15 @@ export default function LatestUpdatesNotice() {
             <div
               className="flex-1 mx-4 overflow-hidden relative h-7 flex items-center"
               style={{
-                maskImage: "linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%)",
-                WebkitMaskImage: "linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%)",
+                maskImage:
+                  "linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%)",
+                WebkitMaskImage:
+                  "linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%)",
               }}
             >
               {loopedNotices.map((notice, index) => {
-                const isDuplicate = notices.length > 1 && index >= notices.length;
+                const isDuplicate =
+                  notices.length > 1 && index >= notices.length;
                 return (
                   <div
                     key={`${notice.NoticeID}-${index}`}

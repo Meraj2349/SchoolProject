@@ -49,6 +49,21 @@ function fmtClass(name, lang) {
   );
 }
 
+function SectionHeader({ t }) {
+  return (
+    <div className="mb-[52px]">
+      <div className="inline-flex items-center gap-[14px] mb-4">
+        <span className="block w-14 h-px bg-gradient-to-r from-transparent to-[rgba(201,168,76,0.6)]" />
+        <span className="text-[0.75rem] text-[#c9a84c]">★</span>
+        <span className="block w-14 h-px bg-gradient-to-l from-transparent to-[rgba(201,168,76,0.6)]" />
+      </div>
+      <h2 className="text-[clamp(1.5rem,4vw,2.2rem)] font-extrabold text-[#e2c07a] mb-[10px] tracking-tight leading-[1.2]">
+        {t("studentStatistics")}
+      </h2>
+    </div>
+  );
+}
+
 export default function ClassStatistics() {
   const { data: classes = [], isLoading, isError } = useClasses();
   const { currentBranchId: branchId, currentBranchName } = useBranchStore();
@@ -99,21 +114,6 @@ export default function ClassStatistics() {
       return a.displayName.localeCompare(b.displayName);
     });
 
-  // Shared header block
-  const SectionHeader = () => (
-    <div className="mb-[52px]">
-      {/* Star rule */}
-      <div className="inline-flex items-center gap-[14px] mb-4">
-        <span className="block w-14 h-px bg-gradient-to-r from-transparent to-[rgba(201,168,76,0.6)]" />
-        <span className="text-[0.75rem] text-[#c9a84c]">★</span>
-        <span className="block w-14 h-px bg-gradient-to-l from-transparent to-[rgba(201,168,76,0.6)]" />
-      </div>
-      <h2 className="text-[clamp(1.5rem,4vw,2.2rem)] font-extrabold text-[#e2c07a] mb-[10px] tracking-tight leading-[1.2]">
-        {t("studentStatistics")}
-      </h2>
-    </div>
-  );
-
   if (isLoading) {
     return (
       <div className="relative w-full box-border py-[72px] px-6 pb-20 bg-[#0d1f3c] text-center overflow-hidden">
@@ -130,8 +130,10 @@ export default function ClassStatistics() {
         {/* Bottom gold strip */}
         <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-gradient-to-r from-transparent via-[#c9a84c] via-[#e2c07a] via-[#c9a84c] to-transparent" />
         <div className="relative z-[1]">
-          <SectionHeader />
-          <p className="text-[rgba(201,168,76,0.7)] text-[0.95rem]">{t("loadingClassStats")}</p>
+          <SectionHeader t={t} />
+          <p className="text-[rgba(201,168,76,0.7)] text-[0.95rem]">
+            {t("loadingClassStats")}
+          </p>
         </div>
       </div>
     );
@@ -150,8 +152,10 @@ export default function ClassStatistics() {
         <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-transparent via-[#c9a84c] via-[#e2c07a] via-[#c9a84c] to-transparent" />
         <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-gradient-to-r from-transparent via-[#c9a84c] via-[#e2c07a] via-[#c9a84c] to-transparent" />
         <div className="relative z-[1]">
-          <SectionHeader />
-          <p className="text-[rgba(201,168,76,0.7)] text-[0.95rem]">{t("failedClassStats")}</p>
+          <SectionHeader t={t} />
+          <p className="text-[rgba(201,168,76,0.7)] text-[0.95rem]">
+            {t("failedClassStats")}
+          </p>
         </div>
       </div>
     );
@@ -222,7 +226,9 @@ export default function ClassStatistics() {
               </div>
             ))
           ) : (
-            <p className="text-[rgba(201,168,76,0.7)] text-[0.95rem]">{t("noClasses")}</p>
+            <p className="text-[rgba(201,168,76,0.7)] text-[0.95rem]">
+              {t("noClasses")}
+            </p>
           )}
         </div>
       </div>

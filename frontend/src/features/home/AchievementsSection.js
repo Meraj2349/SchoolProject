@@ -5,34 +5,50 @@ import { usePublishedNoticeAnnouncements } from "@/hooks/useNoticeAnnouncements"
 import { useLanguageStore } from "@/store/languageStore";
 
 const SERVER_URL =
-  process.env.NEXT_PUBLIC_API_URL?.replace("/api", "") || "http://localhost:3000";
+  process.env.NEXT_PUBLIC_API_URL?.replace("/api", "") ||
+  "http://localhost:3000";
 
 /* Category colour tokens */
 const CAT = {
-  Admission: { label: "Admission", color: "#2563eb", bg: "rgba(37,99,235,0.12)" },
-  Exam:      { label: "Exam",      color: "#059669", bg: "rgba(5,150,105,0.12)" },
-  Notice:    { label: "Notice",    color: "#b45309", bg: "rgba(180,83,9,0.12)"  },
-  Event:     { label: "Event",     color: "#7c3aed", bg: "rgba(124,58,237,0.12)"},
+  Admission: {
+    label: "Admission",
+    color: "#2563eb",
+    bg: "rgba(37,99,235,0.12)",
+  },
+  Exam: { label: "Exam", color: "#059669", bg: "rgba(5,150,105,0.12)" },
+  Notice: { label: "Notice", color: "#b45309", bg: "rgba(180,83,9,0.12)" },
+  Event: { label: "Event", color: "#7c3aed", bg: "rgba(124,58,237,0.12)" },
 };
-const DEFAULT_CAT = { label: "General", color: "#c9a84c", bg: "rgba(201,168,76,0.12)" };
+const DEFAULT_CAT = {
+  label: "General",
+  color: "#c9a84c",
+  bg: "rgba(201,168,76,0.12)",
+};
 
 const LABELS = {
-  en: { heading: "Achievements & Announcements", sub: "Celebrating excellence and keeping you informed" },
-  bn: { heading: "অর্জন ও ঘোষণা",              sub: "শ্রেষ্ঠত্ব উদযাপন এবং সর্বশেষ তথ্য"         },
+  en: {
+    heading: "Achievements & Announcements",
+    sub: "Celebrating excellence and keeping you informed",
+  },
+  bn: { heading: "অর্জন ও ঘোষণা", sub: "শ্রেষ্ঠত্ব উদযাপন এবং সর্বশেষ তথ্য" },
 };
 
 function fmt(d, lang) {
   if (!d) return "";
   return new Date(d).toLocaleDateString(lang === "bn" ? "bn-BD" : "en-US", {
-    year: "numeric", month: "short", day: "numeric",
+    year: "numeric",
+    month: "short",
+    day: "numeric",
   });
 }
 
 function AchievCard({ item, lang }) {
-  const title  = lang === "bn" ? item.title_bn : item.title_en;
-  const cat    = CAT[item.category] ?? DEFAULT_CAT;
+  const title = lang === "bn" ? item.title_bn : item.title_en;
+  const cat = CAT[item.category] ?? DEFAULT_CAT;
   const imgSrc = item.image_url
-    ? item.image_url.startsWith("http") ? item.image_url : `${SERVER_URL}${item.image_url}`
+    ? item.image_url.startsWith("http")
+      ? item.image_url
+      : `${SERVER_URL}${item.image_url}`
     : null;
 
   return (
@@ -58,7 +74,11 @@ function AchievCard({ item, lang }) {
         {/* Category badge */}
         <span
           className="absolute top-3 left-3 text-[0.65rem] font-bold tracking-[0.1em] uppercase px-[10px] py-[4px] rounded-sm backdrop-blur-sm border"
-          style={{ color: cat.color, background: cat.bg, borderColor: cat.color }}
+          style={{
+            color: cat.color,
+            background: cat.bg,
+            borderColor: cat.color,
+          }}
         >
           {cat.label}
         </span>
@@ -67,7 +87,12 @@ function AchievCard({ item, lang }) {
       {/* Body */}
       <div className="relative p-[18px_20px_20px] flex-1 flex flex-col border-t border-[rgba(201,168,76,0.15)]">
         {/* Corner diamond ornament */}
-        <span className="absolute top-[14px] right-4 text-[0.45rem] text-[rgba(201,168,76,0.5)] leading-none" aria-hidden="true">◆</span>
+        <span
+          className="absolute top-[14px] right-4 text-[0.45rem] text-[rgba(201,168,76,0.5)] leading-none"
+          aria-hidden="true"
+        >
+          ◆
+        </span>
         <p className="m-0 mb-3 text-[0.92rem] font-bold text-[#0d1f3c] leading-[1.5] line-clamp-3 pr-3">
           {title}
         </p>
@@ -121,12 +146,13 @@ export default function AchievementsSection() {
       <div className="relative z-[1]">
         {isLoading ? (
           <div className="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-7 max-w-[1200px] mx-auto">
-            {[1,2,3].map(n => (
+            {[1, 2, 3].map((n) => (
               <div
                 key={n}
                 className="h-[320px] rounded-sm border border-[rgba(201,168,76,0.15)]"
                 style={{
-                  background: "linear-gradient(90deg,#f5ede0 25%,#fdf8f0 50%,#f5ede0 75%)",
+                  background:
+                    "linear-gradient(90deg,#f5ede0 25%,#fdf8f0 50%,#f5ede0 75%)",
                   backgroundSize: "200% 100%",
                   animation: "shimmer 1.6s infinite",
                 }}
@@ -135,7 +161,7 @@ export default function AchievementsSection() {
           </div>
         ) : (
           <div className="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-7 max-w-[1200px] mx-auto">
-            {items.map(item => (
+            {items.map((item) => (
               <AchievCard key={item.id} item={item} lang={language} />
             ))}
           </div>

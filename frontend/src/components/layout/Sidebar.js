@@ -168,7 +168,7 @@ export default function Sidebar({ open, onClose }) {
               Navigation
             </p>
             {NAV_LINKS.filter(
-              (item) => !item.superAdminOnly || role === "super_admin"
+              (item) => !item.superAdminOnly || role === "super_admin",
             ).map((item) => {
               const isActive = pathname === item.path;
               return (

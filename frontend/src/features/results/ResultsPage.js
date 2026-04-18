@@ -40,8 +40,10 @@ const EMPTY = {
   examName: "",
 };
 
-const inputCls = "w-full px-3.5 py-2.5 border-[1.5px] border-gray-200 rounded-lg bg-gray-50 text-[0.95rem] text-gray-900 transition-all duration-200 outline-none focus:bg-white";
-const selectCls = "w-full px-3.5 py-2.5 border-[1.5px] border-gray-200 rounded-lg bg-gray-50 text-[0.95rem] cursor-pointer outline-none transition-all duration-200 appearance-auto disabled:opacity-50 disabled:cursor-not-allowed";
+const inputCls =
+  "w-full px-3.5 py-2.5 border-[1.5px] border-gray-200 rounded-lg bg-gray-50 text-[0.95rem] text-gray-900 transition-all duration-200 outline-none focus:bg-white";
+const selectCls =
+  "w-full px-3.5 py-2.5 border-[1.5px] border-gray-200 rounded-lg bg-gray-50 text-[0.95rem] cursor-pointer outline-none transition-all duration-200 appearance-auto disabled:opacity-50 disabled:cursor-not-allowed";
 
 export default function ResultsPage() {
   const [filters, setFilters] = useState(EMPTY);
@@ -131,22 +133,44 @@ export default function ResultsPage() {
       {/* Header */}
       <div
         className="text-center px-6 py-14 relative overflow-hidden"
-        style={{ background: `linear-gradient(135deg, ${NAVY_DARK} 0%, ${NAVY} 50%, #243156 100%)` }}
+        style={{
+          background: `linear-gradient(135deg, ${NAVY_DARK} 0%, ${NAVY} 50%, #243156 100%)`,
+        }}
       >
-        <div className="absolute inset-0 pointer-events-none" style={{
-          background: `radial-gradient(ellipse 60% 50% at 20% 50%, rgba(201,168,76,0.15) 0%, transparent 70%),
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background: `radial-gradient(ellipse 60% 50% at 20% 50%, rgba(201,168,76,0.15) 0%, transparent 70%),
                        radial-gradient(ellipse 40% 60% at 80% 20%, rgba(201,168,76,0.1) 0%, transparent 60%)`,
-        }} />
-        <div className="absolute bottom-0 left-0 right-0 h-[4px]" style={{ background: `linear-gradient(90deg, transparent, ${GOLD}, ${GOLD_LIGHT}, ${GOLD}, transparent)` }} />
-        <h1 className="relative z-[1] m-0 mb-2.5 text-white font-extrabold tracking-tight" style={{ fontSize: "clamp(1.8rem, 4vw, 2.8rem)", letterSpacing: "-0.02em" }}>
+          }}
+        />
+        <div
+          className="absolute bottom-0 left-0 right-0 h-[4px]"
+          style={{
+            background: `linear-gradient(90deg, transparent, ${GOLD}, ${GOLD_LIGHT}, ${GOLD}, transparent)`,
+          }}
+        />
+        <h1
+          className="relative z-[1] m-0 mb-2.5 text-white font-extrabold tracking-tight"
+          style={{
+            fontSize: "clamp(1.8rem, 4vw, 2.8rem)",
+            letterSpacing: "-0.02em",
+          }}
+        >
           {t("pageTitle")}
         </h1>
         <p className="relative z-[1] max-w-[680px] mx-auto text-slate-300 text-[1.02rem] leading-relaxed m-0">
           {t("pageSubtitle")}
         </p>
         {branchId != null && (
-          <div className="relative z-[1] inline-flex items-center gap-1.5 mt-3.5 px-4 py-1.5 rounded-full text-xs font-semibold"
-            style={{ background: "rgba(201,168,76,0.18)", border: "1.5px solid rgba(201,168,76,0.5)", color: "#e8c97a" }}>
+          <div
+            className="relative z-[1] inline-flex items-center gap-1.5 mt-3.5 px-4 py-1.5 rounded-full text-xs font-semibold"
+            style={{
+              background: "rgba(201,168,76,0.18)",
+              border: "1.5px solid rgba(201,168,76,0.5)",
+              color: "#e8c97a",
+            }}
+          >
             <span>🏫</span>
             <span>{currentBranchName}</span>
           </div>
@@ -157,8 +181,12 @@ export default function ResultsPage() {
       <div className="max-w-[900px] mx-auto px-6">
         <div className="bg-white border border-gray-200 border-t-0 rounded-b-xl shadow-sm px-6 py-4 flex flex-wrap gap-5">
           <div className="flex flex-col gap-1 min-w-[180px] flex-1">
-            <label className="text-xs font-bold uppercase tracking-[0.06em]" style={{ color: NAVY }}>
-              {t("className") || "Class"} <span className="text-red-500">*</span>
+            <label
+              className="text-xs font-bold uppercase tracking-[0.06em]"
+              style={{ color: NAVY }}
+            >
+              {t("className") || "Class"}{" "}
+              <span className="text-red-500">*</span>
             </label>
             <select
               value={filters.className}
@@ -169,13 +197,19 @@ export default function ResultsPage() {
             >
               <option value="">{t("selectClass") || "Select Class"}</option>
               {classNames.map((cn) => (
-                <option key={cn} value={cn}>{cn}</option>
+                <option key={cn} value={cn}>
+                  {cn}
+                </option>
               ))}
             </select>
           </div>
           <div className="flex flex-col gap-1 min-w-[180px] flex-1">
-            <label className="text-xs font-bold uppercase tracking-[0.06em]" style={{ color: NAVY }}>
-              {t("section") || "Section"} <span className="text-red-500">*</span>
+            <label
+              className="text-xs font-bold uppercase tracking-[0.06em]"
+              style={{ color: NAVY }}
+            >
+              {t("section") || "Section"}{" "}
+              <span className="text-red-500">*</span>
             </label>
             <select
               value={filters.section}
@@ -187,7 +221,9 @@ export default function ResultsPage() {
             >
               <option value="">{t("selectSection") || "Select Section"}</option>
               {sections.map((sec) => (
-                <option key={sec} value={sec}>{sec}</option>
+                <option key={sec} value={sec}>
+                  {sec}
+                </option>
               ))}
             </select>
           </div>
@@ -204,7 +240,11 @@ export default function ResultsPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             {/* First Name */}
             <div className="flex flex-col gap-1.5">
-              <label htmlFor="firstName" className="text-xs font-bold uppercase tracking-[0.06em]" style={{ color: NAVY }}>
+              <label
+                htmlFor="firstName"
+                className="text-xs font-bold uppercase tracking-[0.06em]"
+                style={{ color: NAVY }}
+              >
                 {t("firstName")} <span className="text-red-500">*</span>
               </label>
               <input
@@ -223,7 +263,11 @@ export default function ResultsPage() {
 
             {/* Roll Number */}
             <div className="flex flex-col gap-1.5">
-              <label htmlFor="rollNumber" className="text-xs font-bold uppercase tracking-[0.06em]" style={{ color: NAVY }}>
+              <label
+                htmlFor="rollNumber"
+                className="text-xs font-bold uppercase tracking-[0.06em]"
+                style={{ color: NAVY }}
+              >
                 {t("rollNumber")} <span className="text-red-500">*</span>
               </label>
               <input
@@ -242,7 +286,11 @@ export default function ResultsPage() {
 
             {/* Class (text, synced with dropdown) */}
             <div className="flex flex-col gap-1.5">
-              <label htmlFor="className" className="text-xs font-bold uppercase tracking-[0.06em]" style={{ color: NAVY }}>
+              <label
+                htmlFor="className"
+                className="text-xs font-bold uppercase tracking-[0.06em]"
+                style={{ color: NAVY }}
+              >
                 {t("className")} <span className="text-red-500">*</span>
               </label>
               <input
@@ -261,7 +309,11 @@ export default function ResultsPage() {
 
             {/* Section (text, synced with dropdown) */}
             <div className="flex flex-col gap-1.5">
-              <label htmlFor="section" className="text-xs font-bold uppercase tracking-[0.06em]" style={{ color: NAVY }}>
+              <label
+                htmlFor="section"
+                className="text-xs font-bold uppercase tracking-[0.06em]"
+                style={{ color: NAVY }}
+              >
                 {t("section")} <span className="text-red-500">*</span>
               </label>
               <input
@@ -280,7 +332,11 @@ export default function ResultsPage() {
 
             {/* Exam name with datalist autocomplete */}
             <div className="flex flex-col gap-1.5 sm:col-span-2">
-              <label htmlFor="examName" className="text-xs font-bold uppercase tracking-[0.06em]" style={{ color: NAVY }}>
+              <label
+                htmlFor="examName"
+                className="text-xs font-bold uppercase tracking-[0.06em]"
+                style={{ color: NAVY }}
+              >
                 {t("examName")}
               </label>
               <input
@@ -307,9 +363,18 @@ export default function ResultsPage() {
             <button
               type="submit"
               className="inline-flex items-center justify-center min-w-[150px] px-8 py-3 border-none rounded-full text-white text-[0.95rem] font-bold tracking-wide cursor-pointer transition-all duration-[250ms] hover:-translate-y-0.5 max-sm:flex-1"
-              style={{ background: NAVY, boxShadow: "0 4px 14px rgba(26,39,68,0.3)" }}
-              onMouseEnter={e => { e.target.style.background = NAVY_DARK; e.target.style.boxShadow = "0 8px 24px rgba(26,39,68,0.35)"; }}
-              onMouseLeave={e => { e.target.style.background = NAVY; e.target.style.boxShadow = "0 4px 14px rgba(26,39,68,0.3)"; }}
+              style={{
+                background: NAVY,
+                boxShadow: "0 4px 14px rgba(26,39,68,0.3)",
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.background = NAVY_DARK;
+                e.target.style.boxShadow = "0 8px 24px rgba(26,39,68,0.35)";
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.background = NAVY;
+                e.target.style.boxShadow = "0 4px 14px rgba(26,39,68,0.3)";
+              }}
             >
               {t("searchBtn")}
             </button>
@@ -318,8 +383,12 @@ export default function ResultsPage() {
               onClick={handleReset}
               className="inline-flex items-center justify-center min-w-[120px] px-7 py-3 border-[1.5px] rounded-full text-[0.95rem] font-bold tracking-wide cursor-pointer transition-all duration-[250ms] hover:-translate-y-0.5 max-sm:flex-1"
               style={{ borderColor: GOLD, color: NAVY, background: "white" }}
-              onMouseEnter={e => { e.currentTarget.style.background = "#fdf8ee"; }}
-              onMouseLeave={e => { e.currentTarget.style.background = "white"; }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = "#fdf8ee";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = "white";
+              }}
             >
               {t("resetBtn")}
             </button>
@@ -343,7 +412,9 @@ export default function ResultsPage() {
           {results && results.length === 0 && (
             <div className="text-center py-12 px-6 bg-white rounded-2xl border border-gray-200 shadow-sm">
               <div className="text-5xl mb-4">📋</div>
-              <h3 className="text-lg font-semibold text-gray-600 m-0">{t("noResultsFound")}</h3>
+              <h3 className="text-lg font-semibold text-gray-600 m-0">
+                {t("noResultsFound")}
+              </h3>
             </div>
           )}
           {results && results.length > 0 && (
@@ -356,7 +427,11 @@ export default function ResultsPage() {
                         <th
                           key={h}
                           className="text-left text-[0.82rem] font-bold uppercase tracking-[0.06em]"
-                          style={{ padding: "14px 18px", background: NAVY, color: GOLD_LIGHT }}
+                          style={{
+                            padding: "14px 18px",
+                            background: NAVY,
+                            color: GOLD_LIGHT,
+                          }}
                         >
                           {h}
                         </th>
@@ -371,34 +446,70 @@ export default function ResultsPage() {
                       );
                       const gradeColor =
                         grade === "A+" || grade === "A"
-                          ? { bg: "#dcfce7", color: "#166534", border: "#86efac" }
+                          ? {
+                              bg: "#dcfce7",
+                              color: "#166534",
+                              border: "#86efac",
+                            }
                           : grade === "B+" || grade === "B"
-                          ? { bg: "#fef9c3", color: "#854d0e", border: "#fde047" }
-                          : grade === "C+" || grade === "C"
-                          ? { bg: "#ffedd5", color: "#9a3412", border: "#fdba74" }
-                          : { bg: "#fee2e2", color: "#991b1b", border: "#fca5a5" };
+                            ? {
+                                bg: "#fef9c3",
+                                color: "#854d0e",
+                                border: "#fde047",
+                              }
+                            : grade === "C+" || grade === "C"
+                              ? {
+                                  bg: "#ffedd5",
+                                  color: "#9a3412",
+                                  border: "#fdba74",
+                                }
+                              : {
+                                  bg: "#fee2e2",
+                                  color: "#991b1b",
+                                  border: "#fca5a5",
+                                };
                       return (
                         <tr
                           key={i}
                           className="border-b border-gray-200 last:border-0 transition-colors duration-150 hover:bg-[#eef1f8]"
-                          style={{ background: i % 2 === 1 ? "#f8f9fc" : "white" }}
+                          style={{
+                            background: i % 2 === 1 ? "#f8f9fc" : "white",
+                          }}
                         >
-                          <td className="text-[0.93rem]" style={{ padding: "13px 18px", color: NAVY }}>
+                          <td
+                            className="text-[0.93rem]"
+                            style={{ padding: "13px 18px", color: NAVY }}
+                          >
                             {r.FirstName} {r.LastName}
                           </td>
-                          <td className="text-[0.93rem]" style={{ padding: "13px 18px", color: NAVY }}>
+                          <td
+                            className="text-[0.93rem]"
+                            style={{ padding: "13px 18px", color: NAVY }}
+                          >
                             {r.ClassName} – {r.Section}
                           </td>
-                          <td className="text-[0.93rem]" style={{ padding: "13px 18px", color: NAVY }}>
+                          <td
+                            className="text-[0.93rem]"
+                            style={{ padding: "13px 18px", color: NAVY }}
+                          >
                             {r.SubjectName || r.Subject}
                           </td>
-                          <td className="text-[0.93rem]" style={{ padding: "13px 18px", color: NAVY }}>
+                          <td
+                            className="text-[0.93rem]"
+                            style={{ padding: "13px 18px", color: NAVY }}
+                          >
                             {r.ExamName}
                           </td>
-                          <td className="font-bold text-[0.93rem]" style={{ padding: "13px 18px", color: NAVY }}>
+                          <td
+                            className="font-bold text-[0.93rem]"
+                            style={{ padding: "13px 18px", color: NAVY }}
+                          >
                             {r.MarksObtained ?? r.marksObtained}
                           </td>
-                          <td className="text-[0.93rem]" style={{ padding: "13px 18px", color: NAVY }}>
+                          <td
+                            className="text-[0.93rem]"
+                            style={{ padding: "13px 18px", color: NAVY }}
+                          >
                             {r.TotalMarks ?? r.totalMarks ?? 100}
                           </td>
                           <td style={{ padding: "13px 18px" }}>
