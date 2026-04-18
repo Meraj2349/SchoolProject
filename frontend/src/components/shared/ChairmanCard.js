@@ -1,8 +1,8 @@
 "use client";
 
-import Link from "next/link";
-import Image from "next/image";
 import { useTranslations } from "@/store/languageStore";
+import Image from "next/image";
+import Link from "next/link";
 
 export default function ChairmanCard({ image, name, title, message }) {
   const t = useTranslations("chairmanCard");
