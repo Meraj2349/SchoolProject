@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 import LanguageSwitcher from "@/components/ui/LanguageSwitcher";
@@ -70,9 +71,11 @@ export default function Navbar() {
       >
         {/* Logo section */}
         <div className="flex-1 flex items-center gap-2.5 p-2.5 max-sm:flex-col max-sm:items-center max-sm:text-center">
-          <img
+          <Image
             src="/images/logo1.png"
             alt={`${t("schoolName")} Logo`}
+            width={80}
+            height={80}
             style={{
               transition: "width 0.3s ease, height 0.3s ease",
               width: scrolled ? 64 : 80,
@@ -200,8 +203,10 @@ export default function Navbar() {
             }}
           >
             <div className="flex items-center gap-3">
-              <img
+              <Image
                 src="/images/logo1.png"
+                width={50}
+                height={50}
                 className="w-[50px] h-[50px] rounded-lg"
                 alt={`${t("schoolName")} Logo`}
               />

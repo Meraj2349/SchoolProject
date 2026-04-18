@@ -1,13 +1,14 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useTranslations } from "@/store/languageStore";
 
 export default function ChairmanCard({ image, name, title, message }) {
   const t = useTranslations("chairmanCard");
 
   return (
-    <div className="relative flex max-w-[1000px] mx-auto bg-[#fdf8f0] rounded-sm overflow-hidden shadow-[0_2px_4px_rgba(0,0,0,0.06),0_8px_32px_rgba(13,31,60,0.12),inset_0_0_0_1px_rgba(201,168,76,0.35)] flex-col md:flex-row">
+    <div className="relative flex max-w-250 mx-auto bg-[#fdf8f0] rounded-sm overflow-hidden shadow-[0_2px_4px_rgba(0,0,0,0.06),0_8px_32px_rgba(13,31,60,0.12),inset_0_0_0_1px_rgba(201,168,76,0.35)] flex-col md:flex-row">
       {/* Top gold strip */}
       <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-transparent via-[#c9a84c] via-[#e2c07a] via-[#c9a84c] to-transparent z-[1]" />
       {/* Bottom gold strip */}
@@ -27,10 +28,13 @@ export default function ChairmanCard({ image, name, title, message }) {
         {/* Photo ring */}
         <div className="relative w-[170px] h-[170px]">
           <div className="w-full h-full rounded-full overflow-hidden border-[3px] border-[#c9a84c] shadow-[0_0_0_6px_rgba(201,168,76,0.18),0_0_0_12px_rgba(201,168,76,0.08),0_12px_40px_rgba(0,0,0,0.4)]">
-            <img
+            <Image
               src={image}
               alt={`${name} – ${title}`}
-              className="w-full h-full object-cover object-top block"
+              fill
+              sizes="170px"
+              unoptimized
+              className="object-cover object-top block"
               onError={(e) => {
                 e.target.style.display = "none";
               }}
@@ -94,7 +98,7 @@ export default function ChairmanCard({ image, name, title, message }) {
         {/* CTA */}
         <Link
           href="/chairman-message"
-          className="cc-cta-tw relative inline-flex items-center gap-2 self-start px-6 py-[10px] bg-[#0d1f3c] text-[#e2c07a] text-[0.82rem] font-bold tracking-[0.1em] uppercase no-underline rounded-sm border border-[#c9a84c] overflow-hidden transition-colors duration-[250ms] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#c9a84c] focus-visible:outline-offset-[3px]"
+          className="cc-cta-tw relative inline-flex items-center gap-2 self-start px-6 py-[10px] bg-[#0d1f3c] text-[#e2c07a] text-[0.82rem] font-bold tracking-[0.1em] uppercase no-underline rounded-sm border border-[#c9a84c] overflow-hidden transition-colors duration-[250ms] focus-visible:outline-2 focus-visible:outline-[#c9a84c] focus-visible:outline-offset-[3px]"
         >
           <span className="relative z-[1]">{t("viewFullMessage")}</span>
           <svg

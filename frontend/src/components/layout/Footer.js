@@ -1,7 +1,7 @@
 "use client";
 
-import { useTranslations } from "@/store/languageStore";
 import useScrollReveal from "@/hooks/useScrollReveal";
+import { useTranslations } from "@/store/languageStore";
 import Image from "next/image";
 
 const QUICK_LINKS = [
@@ -31,7 +31,7 @@ export default function Footer() {
       />
 
       {/* Main grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-[2fr_3fr_1.5fr] gap-8 max-w-[1200px] mx-auto px-5 py-10">
+      <div className="grid grid-cols-1 lg:grid-cols-[2fr_3fr_1.5fr] gap-8 max-w-300 mx-auto px-5 py-10">
         {/* School info */}
         <div className="flex flex-col items-start gap-4 max-md:items-center max-md:text-center">
           <div className="relative inline-block">
@@ -62,7 +62,7 @@ export default function Footer() {
                 key={i}
                 className="m-0 text-gray-500 text-[0.9rem] flex items-start gap-1.5"
               >
-                <span className="flex-shrink-0">{item.icon}</span>
+                <span className="shrink-0">{item.icon}</span>
                 {item.label && (
                   <strong className="text-gray-700 mr-0.5">
                     {item.label}:

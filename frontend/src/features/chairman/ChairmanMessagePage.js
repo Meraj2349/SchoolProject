@@ -1,6 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
+import Image from "next/image";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import LatestUpdatesNotice from "@/components/shared/LatestUpdatesNotice";
@@ -247,9 +248,12 @@ export default function ChairmanMessagePage() {
                 }}
               >
                 {photoUrl ? (
-                  <img
+                  <Image
                     src={photoUrl}
                     alt={`${name} – ${title}`}
+                    width={152}
+                    height={152}
+                    unoptimized
                     className="w-full h-full rounded-full object-cover block"
                   />
                 ) : (

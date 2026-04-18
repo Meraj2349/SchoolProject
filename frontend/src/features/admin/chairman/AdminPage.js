@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
+import Image from "next/image";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { chairmanService } from "@/services/chairman.service";
 import { queryKeys } from "@/lib/queryKeys";
@@ -182,9 +183,12 @@ export default function AdminPage() {
               <div className="relative shrink-0">
                 {currentImage ? (
                   <>
-                    <img
+                    <Image
                       src={currentImage}
                       alt="Chairman"
+                      width={128}
+                      height={128}
+                      unoptimized
                       className="w-32 h-32 rounded-2xl object-cover border-2 border-slate-200 shadow-sm"
                     />
                     {previewUrl && (

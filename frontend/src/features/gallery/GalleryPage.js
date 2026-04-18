@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
+import Image from "next/image";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import LatestUpdatesNotice from "@/components/shared/LatestUpdatesNotice";
@@ -43,15 +44,18 @@ export default function GalleryPage() {
     setSelected(img);
     setSelectedIdx(idx);
   };
-  const closeLightbox = () => setSelected(null);
-  const navigate = (dir) => {
-    const next =
-      dir === "next"
-        ? (selectedIdx + 1) % filtered.length
-        : (selectedIdx - 1 + filtered.length) % filtered.length;
-    setSelectedIdx(next);
-    setSelected(filtered[next]);
-  };
+  const closeLightbox = useCallback(() => setSelected(null), []);
+  const navigate = useCallback(
+    (dir) => {
+      const next =
+        dir === "next"
+          ? (selectedIdx + 1) % filtered.length
+          : (selectedIdx - 1 + filtered.length) % filtered.length;
+      setSelectedIdx(next);
+      setSelected(filtered[next]);
+    },
+    [selectedIdx, filtered],
+  );
 
   useEffect(() => {
     const handler = (e) => {
@@ -62,7 +66,7 @@ export default function GalleryPage() {
     };
     document.addEventListener("keydown", handler);
     return () => document.removeEventListener("keydown", handler);
-  }, [selected, selectedIdx, filtered]);
+  }, [selected, navigate, closeLightbox]);
 
   const catLabel = (type) =>
     CATEGORIES.find((c) => c.value === type)?.label ?? type;
@@ -222,11 +226,13 @@ export default function GalleryPage() {
                     >
                       {/* Image */}
                       <div className="relative w-full h-[250px] overflow-hidden">
-                        <img
+                        <Image
                           src={img.ImagePath || img.ImageUrl}
                           alt={img.Description || "Gallery image"}
-                          loading="lazy"
-                          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                          fill
+                          sizes="(max-width:768px) 100vw, 33vw"
+                          unoptimized
+                          className="object-cover transition-transform duration-300 group-hover:scale-105"
                           onError={(e) => {
                             e.target.style.display = "none";
                             e.target.nextSibling.style.display = "flex";
@@ -338,10 +344,13 @@ export default function GalleryPage() {
               transition={{ duration: 0.3 }}
               className="flex flex-col items-center max-w-full max-h-full"
             >
-              <img
+              <Image
                 src={selected.ImagePath || selected.ImageUrl}
                 alt={selected.Description || "Gallery"}
-                className="max-w-full max-h-[70vh] object-contain rounded-xl shadow-2xl"
+                width={1200}
+                height={800}
+                unoptimized
+                className="max-w-full max-h-[70vh] w-auto h-auto object-contain rounded-xl shadow-2xl"
               />
               <div className="bg-white/95 p-6 rounded-xl mt-4 text-center backdrop-blur-[10px] max-w-[600px]">
                 <span

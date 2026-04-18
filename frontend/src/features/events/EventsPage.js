@@ -37,10 +37,12 @@ export default function EventsPage() {
   const pastEvents = allEventsList.filter((e) => new Date(e.EndDate) < now);
 
   useEffect(() => {
+    const list = Array.isArray(allEvents) ? allEvents : [];
+    const active = list.filter((e) => new Date(e.EndDate) >= new Date());
     const tick = () => {
       const n = new Date();
       const next = {};
-      events.forEach((e) => {
+      active.forEach((e) => {
         const end = new Date(e.EndDate + "T23:59:59");
         const diff = end - n;
         if (diff > 0) {
@@ -66,7 +68,7 @@ export default function EventsPage() {
     tick();
     const id = setInterval(tick, 1000);
     return () => clearInterval(id);
-  }, [events.length]);
+  }, [allEvents]);
 
   const isToday = (s, e) => {
     const n = new Date();

@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import LatestUpdatesNotice from "@/components/shared/LatestUpdatesNotice";
@@ -56,7 +57,7 @@ function BranchCard({ branch, stats, language, t, isSelected, onSelect }) {
         isProposed
           ? "border-dashed border-2 border-gray-400 bg-gray-50"
           : isSelected
-            ? "border-emerald-500 outline outline-[2.5px] outline-emerald-500 outline-offset-2 -translate-y-0.5"
+            ? "border-emerald-500 outline-[2.5px] outline-emerald-500 outline-offset-2 -translate-y-0.5"
             : "border border-gray-200 hover:-translate-y-1 hover:shadow-xl"
       }`}
       style={{
@@ -78,9 +79,12 @@ function BranchCard({ branch, stats, language, t, isSelected, onSelect }) {
       title={isProposed ? undefined : t("selectBranch")}
     >
       {branch.image_url ? (
-        <img
+        <Image
           src={branch.image_url}
           alt={name}
+          width={400}
+          height={180}
+          unoptimized
           className="w-full h-[180px] object-cover block"
           onError={(e) => {
             e.currentTarget.style.display = "none";
