@@ -23,7 +23,6 @@ import studentRouter from "./routes/student.route.js";
 import quizRoutes from "./routes/quiz.routes.js";
 import subjectRoutes from "./routes/subjects.routes.js";
 import teacherRoutes from "./routes/teacher.routes.js";
-import userRoutes from "./routes/user.routes.js";
 
 dotenv.config();
 
@@ -59,7 +58,6 @@ db.connect((err) => {
 app.use("/api/admin", adminRouter);
 app.use("/api/students", studentRouter);
 app.use("/api/teachers", teacherRoutes);
-app.use("/api/users", userRoutes);
 app.use("/api/notices", noticeRoutes);
 app.use("/api/classes", classRoutes);
 app.use("/api/events", eventRoutes);

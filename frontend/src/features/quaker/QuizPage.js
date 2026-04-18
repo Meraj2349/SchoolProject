@@ -86,7 +86,7 @@ export default function QuizPage() {
     if (!token) {
       router.replace("/quaker/start");
     }
-  }, []);
+  }, [hydrateFromStorage, router]);
 
   useEffect(() => {
     quizService
