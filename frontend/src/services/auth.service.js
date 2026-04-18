@@ -3,6 +3,8 @@ import Cookies from "js-cookie";
 
 export const authService = {
   login: async (credentials) => {
+    // credentials = { Email, Password, branch_id }
+    // Use axios directly (no auth token needed, no branch_id appended from store)
     const { data } = await httpClient.post("/admin/login", credentials);
     if (data.token) {
       Cookies.set("token", data.token, { expires: 7 });

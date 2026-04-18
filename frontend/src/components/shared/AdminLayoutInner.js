@@ -22,9 +22,7 @@ export default function AdminLayoutInner({ children }) {
       {/* Main area: top bar + scrollable content */}
       <div className="flex flex-col flex-1 md:ml-70 min-h-screen">
         <AdminTopBar onMenuToggle={() => setSidebarOpen((o) => !o)} />
-        <main className="flex-1 p-5 md:p-7 overflow-auto">
-          {children}
-        </main>
+        <main className="flex-1 p-5 md:p-7 overflow-auto">{children}</main>
       </div>
     </div>
   );

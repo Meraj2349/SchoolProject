@@ -1,4 +1,5 @@
 import express from "express";
+import authMiddleware, { optionalAuth } from "../middlewares/auth.middleware.js";
 import {
   bulkCreateAttendanceController,
   checkAttendanceExistsController,
@@ -14,93 +15,77 @@ import {
   getAttendanceByNameRollClassSectionController,
   getAttendanceByStudentIdController,
   getAttendanceCountController,
+  getAttendanceGridController,
   getAttendanceStatisticsController,
   getAttendanceSummaryByStudentController,
   getClassAttendanceSummaryByClassAndDateController,
   markAttendanceController,
   updateAttendanceController,
+  upsertAttendanceCellController,
   validateDatabaseSyncController,
 } from "../controllers/attendance.controller.js";
 
 const router = express.Router();
 
-// Statistics and Count Routes (More specific routes first)
-// Route to get attendance statistics
-router.get("/statistics", getAttendanceStatisticsController);
+// ── Public read routes (optionalAuth: branch-scoped via ?branch_id) ──
+// Students/parents can look up attendance without an admin token
 
-// Route to get attendance count
-router.get("/count", getAttendanceCountController);
-
-// Route to check if attendance exists
-router.get("/exists", checkAttendanceExistsController);
-
-// Summary Routes
-// Route to get attendance summary by student ID
+// Search by class + section (used by public AttendancePage)
 router.get(
-  "/summary/student/:studentID",
-  getAttendanceSummaryByStudentController,
+  "/search/class/:className/section/:section",
+  optionalAuth,
+  getAttendanceByClassAndSectionController,
 );
 
-// Route to get class attendance summary by class ID and date
+// Search by name/roll/class/section
+router.get(
+  "/search/name/:firstName/roll/:roll/class/:class/section/:section",
+  optionalAuth,
+  getAttendanceByNameRollClassSectionController,
+);
+
+// Student-specific attendance lookup
+router.get("/student/:studentID", optionalAuth, getAttendanceByStudentIdController);
+router.get("/summary/student/:studentID", optionalAuth, getAttendanceSummaryByStudentController);
+
+// ── Admin-only routes — require a valid JWT ──
+router.use(authMiddleware);
+
+// Statistics and Count Routes
+router.get("/statistics", getAttendanceStatisticsController);
+
+// Grid route: GET /attendance/grid?className=&section=&startDate=&endDate=
+router.get("/grid", getAttendanceGridController);
+
+// Upsert a single attendance cell
+router.post("/cell", upsertAttendanceCellController);
+
+router.get("/count", getAttendanceCountController);
+router.get("/exists", checkAttendanceExistsController);
+
 router.get(
   "/summary/class/:classID/date/:date",
   getClassAttendanceSummaryByClassAndDateController,
 );
 
-// Search and Filter Routes
-// Route to get attendance by name, roll number, class, and section
-router.get(
-  "/search/name/:firstName/roll/:roll/class/:class/section/:section",
-  getAttendanceByNameRollClassSectionController,
-);
-
-// Route to get attendance by class name and section
-router.get(
-  "/search/class/:className/section/:section",
-  getAttendanceByClassAndSectionController,
-);
-
-// Route to get attendance by date range
 router.get(
   "/search/daterange/:startDate/:endDate",
   getAttendanceByDateRangeController,
 );
 
-// Route to get attendance by student ID
-router.get("/student/:studentID", getAttendanceByStudentIdController);
-
-// Route to get attendance by class ID
 router.get("/class/:classID", getAttendanceByClassIDController);
-
-// Route to get attendance by date
 router.get("/date/:date", getAttendanceByDateController);
 
 // CRUD Routes
-// Route to get all attendance records
 router.get("/", getAllAttendanceController);
-
-// Route to create a new attendance record
 router.post("/", createAttendanceController);
-
-// Route to mark attendance (upsert - create or update)
 router.post("/mark", markAttendanceController);
-
-// Route to bulk create attendance records
 router.post("/bulk", bulkCreateAttendanceController);
-
-// Route to validate database sync
 router.post("/validate-sync", validateDatabaseSyncController);
-
-// Route to force complete data sync
 router.post("/force-sync", forceSyncController);
 
-// Route to get a specific attendance record by ID
 router.get("/:id", getAttendanceByIDController);
-
-// Route to update an attendance record by ID
 router.put("/:id", updateAttendanceController);
-
-// Route to delete an attendance record by ID
 router.delete("/:id", deleteAttendanceController);
 
 export default router;

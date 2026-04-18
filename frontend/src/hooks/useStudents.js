@@ -3,10 +3,12 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/queryKeys";
 import { studentsService } from "@/services/students.service";
+import { useBranchStore } from "@/store/branchStore";
 
 export function useStudentSearch(filters, enabled = false) {
+  const branchId = useBranchStore((s) => s.currentBranchId);
   return useQuery({
-    queryKey: queryKeys.students.search(filters),
+    queryKey: queryKeys.students.search(filters, branchId),
     queryFn: () => studentsService.search(filters),
     enabled,
     staleTime: 0,
@@ -14,8 +16,9 @@ export function useStudentSearch(filters, enabled = false) {
 }
 
 export function useStudentsByClassSection(className, section, enabled = true) {
+  const branchId = useBranchStore((s) => s.currentBranchId);
   return useQuery({
-    queryKey: queryKeys.students.byClassSection(className, section),
+    queryKey: queryKeys.students.byClassSection(className, section, branchId),
     queryFn: () => studentsService.getByClassSection(className, section),
     enabled: enabled && !!className && !!section,
   });
@@ -23,24 +26,27 @@ export function useStudentsByClassSection(className, section, enabled = true) {
 
 export function useCreateStudent() {
   const qc = useQueryClient();
+  const branchId = useBranchStore((s) => s.currentBranchId);
   return useMutation({
     mutationFn: studentsService.create,
-    onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.students.all }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.students.all(branchId) }),
   });
 }
 
 export function useUpdateStudent() {
   const qc = useQueryClient();
+  const branchId = useBranchStore((s) => s.currentBranchId);
   return useMutation({
     mutationFn: ({ id, data }) => studentsService.update(id, data),
-    onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.students.all }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.students.all(branchId) }),
   });
 }
 
 export function useDeleteStudent() {
   const qc = useQueryClient();
+  const branchId = useBranchStore((s) => s.currentBranchId);
   return useMutation({
     mutationFn: studentsService.remove,
-    onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.students.all }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.students.all(branchId) }),
   });
 }

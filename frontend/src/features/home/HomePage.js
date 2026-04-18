@@ -3,17 +3,20 @@ import Footer from "@/components/layout/Footer";
 import LatestUpdatesNotice from "@/components/shared/LatestUpdatesNotice";
 import HeroSection from "./HeroSection";
 import LeadershipSection from "./LeadershipSection";
+import AchievementsSection from "./AchievementsSection";
 import ClassStatistics from "./ClassStatistics";
-import "@/styles/Homepage.css";
 
 export default function HomePage() {
   return (
-    <div className="school-website">
+    <div className="font-sans text-gray-900 min-h-screen scroll-smooth">
       <Navbar />
       <LatestUpdatesNotice />
-      <HeroSection />
-      <LeadershipSection />
-      <ClassStatistics />
+      <main>
+        <HeroSection />
+        <LeadershipSection />
+        <AchievementsSection />
+        <ClassStatistics />
+      </main>
       <Footer />
     </div>
   );

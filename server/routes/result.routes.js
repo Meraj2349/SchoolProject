@@ -1,4 +1,5 @@
 import express from "express";
+import authMiddleware, { optionalAuth } from "../middlewares/auth.middleware.js";
 import {
   addMultipleResultsController,
   addResultByStudentDetailsController,
@@ -21,6 +22,12 @@ import {
 
 const router = express.Router();
 
+// Public route — students can search their own results without logging in
+// optionalAuth sets req.branchId from ?branch_id param so results are branch-scoped
+router.get("/search", optionalAuth, searchResultsController);
+
+router.use(authMiddleware);
+
 // Route to get all results with pagination
 router.get("/", getAllResultsController);
 
@@ -35,9 +42,6 @@ router.post("/batch", addMultipleResultsController);
 
 // Route to get the total count of results
 router.get("/count", getResultCountController);
-
-// Route to search results with basic filters
-router.get("/search", searchResultsController);
 
 // Route to advanced search with pagination and comprehensive filters
 router.get("/search/advanced", advancedSearchResultsController);

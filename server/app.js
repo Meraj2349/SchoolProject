@@ -14,14 +14,15 @@ import classRoutes from "./routes/classes.routes.js";
 import eventRoutes from "./routes/event.routes.js";
 import examRoutes from "./routes/exam.routes.js";
 import imageRoutes from "./routes/image.routes.js";
+import chairmanRoutes from "./routes/chairman.routes.js";
 import messageRoutes from "./routes/messages.routes.js";
 import noticeRoutes from "./routes/notices.routes.js";
 import resultRoutes from "./routes/result.routes.js";
 import routineRoutes from "./routes/routine.routes.js";
 import studentRouter from "./routes/student.route.js";
+import quizRoutes from "./routes/quiz.routes.js";
 import subjectRoutes from "./routes/subjects.routes.js";
 import teacherRoutes from "./routes/teacher.routes.js";
-import userRoutes from "./routes/user.routes.js";
 
 dotenv.config();
 
@@ -57,10 +58,10 @@ db.connect((err) => {
 app.use("/api/admin", adminRouter);
 app.use("/api/students", studentRouter);
 app.use("/api/teachers", teacherRoutes);
-app.use("/api/users", userRoutes);
 app.use("/api/notices", noticeRoutes);
 app.use("/api/classes", classRoutes);
 app.use("/api/events", eventRoutes);
+app.use("/api/chairman", chairmanRoutes);
 app.use("/api/messages", messageRoutes);
 app.use("/api/subjects", subjectRoutes);
 app.use("/api/images", imageRoutes);
@@ -72,6 +73,7 @@ app.use("/api/branches", branchRoutes);
 app.use("/api/applications", applicationRoutes);
 app.use("/api/news", newsRoutes);
 app.use("/api/notice-announcements", noticeAnnouncementRoutes);
+app.use("/api/quiz", quizRoutes);
 
 // Handle root URL (Welcome message)
 app.get("/", (req, res) => {

@@ -2,7 +2,6 @@
   "schoolName": "স্টার শিক্ষা পরিবার",
   "establishedYear": "১৩৫৪৭৯",
   "location": "নাটিয়াপাড়া, দেলদুয়ার, টাঙ্গাইল",
-
   "nav": {
     "home": "হোম",
     "about": "আমাদের সম্পর্কে",
@@ -13,7 +12,6 @@
     "onlineApply": "অনলাইন আবেদন",
     "quakerEducation": "একটি কোয়েকার শিক্ষা"
   },
-
   "footer": {
     "contact": "যোগাযোগ",
     "email": "ইমেইল",
@@ -22,65 +20,73 @@
     "developedBy": "নির্মাতা: মোঃ মেরাজ মৃধা",
     "helpline": "হেল্পলাইন: +৮৮ ০১৯ ৯৭৫৮৮৪৭৬"
   },
-
   "sidebar": {
     "adminDashboard": "অ্যাডমিন ড্যাশবোর্ড",
+    "branches": "শাখা ব্যবস্থাপনা",
     "notice": "নোটিশ",
     "chairMessage": "চেয়ারম্যানের বার্তা",
+    "chairmanProfile": "চেয়ারম্যান প্রোফাইল",
     "imageGallery": "ছবির গ্যালারি",
     "routine": "রুটিন",
     "studentList": "শিক্ষার্থী তালিকা",
     "teacherList": "শিক্ষক তালিকা",
     "classTeacher": "শ্রেণি শিক্ষক",
+    "classesSections": "শ্রেণি ও শাখা",
     "subject": "বিষয়",
     "results": "ফলাফল",
     "exams": "পরীক্ষা",
     "events": "ইভেন্ট",
+    "attendance": "উপস্থিতি চিহ্নিত করুন",
     "attendanceGrid": "উপস্থিতি গ্রিড",
     "settings": "সেটিংস",
     "logout": "লগ আউট",
     "loggingOut": "লগ আউট হচ্ছে…",
     "applications": "আবেদনসমূহ",
     "news": "সংবাদ ব্যবস্থাপনা",
-    "noticeAnnouncements": "নোটিশ ও ঘোষণা"
+    "noticeAnnouncements": "নোটিশ ও ঘোষণা",
+    "quaker": "কুইকার এডুকেশন"
   },
-
   "latestUpdates": {
     "label": "সর্বশেষ আপডেট",
     "labelMobile": "আপডেট",
     "loadingError": "সর্বশেষ আপডেট লোড করতে ব্যর্থ হয়েছে"
   },
-
   "home": {
     "loading": "লোড হচ্ছে…",
+    "leadershipTitle": "নেতৃত্ব ও আপডেট",
+    "leadershipSubtitle": "সভাপতির বার্তা, আসন্ন ইভেন্ট এবং সর্বশেষ সংবাদ",
     "studentStatistics": "শিক্ষার্থী পরিসংখ্যান",
     "classWiseStudents": "শ্রেণি অনুযায়ী শিক্ষার্থী",
     "loadingClassStats": "শ্রেণি অনুযায়ী শিক্ষার্থী লোড হচ্ছে…",
     "failedClassStats": "শ্রেণি পরিসংখ্যান লোড করতে ব্যর্থ হয়েছে",
     "noClasses": "কোনো শ্রেণি পাওয়া যায়নি"
   },
-
   "quickLinks": {
     "students": "শিক্ষার্থী",
     "teachers": "শিক্ষক",
     "attendance": "উপস্থিতি",
     "result": "ফলাফল",
-    "routine": "রুটিন"
+    "routine": "রুটিন",
+    "quaker": "কুইকার এডুকেশন",
+    "selectClass": "শ্রেণি নির্বাচন করুন",
+    "selectSection": "বিভাগ নির্বাচন করুন",
+    "classLabel": "শ্রেণি",
+    "sectionLabel": "বিভাগ"
   },
-
   "eventNews": {
     "events": "ইভেন্ট",
     "news": "সংবাদ",
     "viewAllEvents": "সকল ইভেন্ট দেখুন →",
     "viewAllNews": "সকল সংবাদ দেখুন →",
     "newsLoading": "সংবাদ লোড হচ্ছে…",
-    "newsError": "সংবাদ লোড করতে ব্যর্থ হয়েছে"
+    "newsError": "সংবাদ লোড করতে ব্যর্থ হয়েছে",
+    "eventsLoading": "ইভেন্ট লোড হচ্ছে…",
+    "eventsError": "ইভেন্ট লোড করতে ব্যর্থ হয়েছে"
   },
-
   "chairmanCard": {
-    "viewFullMessage": "সম্পূর্ণ বার্তা দেখুন"
+    "viewFullMessage": "সম্পূর্ণ বার্তা দেখুন",
+    "chairmanMessage": "চেয়ারম্যানের বার্তা"
   },
-
   "about": {
     "title": "আমাদের সম্পর্কে",
     "subtitle": "স্টার শিক্ষা পরিবার – শিক্ষায় শ্রেষ্ঠত্ব",
@@ -94,7 +100,6 @@
     "phone": "ফোন",
     "emailLabel": "ইমেইল"
   },
-
   "chairman": {
     "pageTitle": "চেয়ারম্যানের বার্তা",
     "loading": "চেয়ারম্যানের বার্তা লোড হচ্ছে…",
@@ -105,7 +110,6 @@
     "backToHome": "← হোমে ফিরে যান",
     "defaultMessage": "আমাদের স্কুলে স্বাগতম! আমরা উৎকৃষ্ট শিক্ষা প্রদানে প্রতিশ্রুতিবদ্ধ।"
   },
-
   "gallery": {
     "title": "গ্যালারি",
     "browseByCategory": "বিভাগ অনুযায়ী দেখুন",
@@ -129,7 +133,6 @@
       "notice": "নোটিশ"
     }
   },
-
   "events": {
     "upcomingEvents": "আসন্ন ইভেন্ট",
     "loadingEvents": "ইভেন্ট লোড হচ্ছে…",
@@ -145,7 +148,6 @@
     "minutes": "মিনিট",
     "seconds": "সেকেন্ড"
   },
-
   "students": {
     "pageTitle": "শিক্ষার্থী অনুসন্ধান",
     "pageSubtitle": "নাম, রোল নম্বর, শ্রেণি এবং বিভাগ দিয়ে অনুসন্ধান করুন",
@@ -176,7 +178,6 @@
     "parentContact": "অভিভাবকের যোগাযোগ",
     "noStudents": "কোনো শিক্ষার্থী পাওয়া যায়নি"
   },
-
   "teachers": {
     "pageTitle": "আমাদের শিক্ষকগণ",
     "searchPlaceholder": "শিক্ষক খুঁজুন…",
@@ -193,7 +194,6 @@
     "noTeachersFound": "কোনো শিক্ষক পাওয়া যায়নি",
     "joined": "যোগদান:"
   },
-
   "results": {
     "pageTitle": "শিক্ষার্থীর ফলাফল",
     "pageSubtitle": "নাম, রোল নম্বর, শ্রেণি, বিভাগ এবং পরীক্ষা দিয়ে অনুসন্ধান করুন",
@@ -220,7 +220,6 @@
     "total": "মোট",
     "grade": "গ্রেড"
   },
-
   "attendance": {
     "pageTitle": "উপস্থিতির রেকর্ড",
     "pageSubtitle": "শ্রেণি এবং বিভাগ দিয়ে উপস্থিতি অনুসন্ধান করুন",
@@ -240,7 +239,6 @@
     "noRecords": "কোনো উপস্থিতির রেকর্ড পাওয়া যায়নি।",
     "failedToFetch": "উপস্থিতি আনতে ব্যর্থ হয়েছে"
   },
-
   "routine": {
     "pageTitle": "স্কুল রুটিন",
     "searchPlaceholder": "রুটিন খুঁজুন…",
@@ -266,7 +264,6 @@
     "added": "যোগ করা হয়েছে:",
     "view": "দেখুন"
   },
-
   "admin": {
     "login": {
       "title": "অ্যাডমিন লগইন",
@@ -279,7 +276,14 @@
       "noAccount": "অ্যাকাউন্ট নেই?",
       "signUp": "নিবন্ধন করুন",
       "loginFailed": "লগইন ব্যর্থ হয়েছে",
-      "somethingWrong": "কিছু একটা ভুল হয়েছে। আবার চেষ্টা করুন।"
+      "somethingWrong": "কিছু একটা ভুল হয়েছে। আবার চেষ্টা করুন।",
+      "selectBranch": "শাখা বেছে নিন",
+      "superAdmin": "সুপার অ্যাডমিন",
+      "branchPlaceholder": "-- শাখা বেছে নিন --",
+      "continueBtn": "পরবর্তী",
+      "backBtn": "পিছনে",
+      "loginAs": "লগইন করছেন",
+      "superAdminLogin": "সুপার অ্যাডমিন লগইন"
     },
     "notices": {
       "title": "নোটিশ পরিচালনা",
@@ -378,21 +382,23 @@
       "operationFailed": "অপারেশন ব্যর্থ হয়েছে"
     },
     "classes": {
-      "title": "শ্রেণি পরিচালনা",
-      "addClass": "শ্রেণি যোগ করুন",
-      "editClass": "শ্রেণি সম্পাদনা",
-      "updateClass": "শ্রেণি আপডেট করুন",
+      "title": "শ্রেণি শিক্ষক ব্যবস্থাপনা",
+      "addClass": "শ্রেণি শিক্ষক নির্ধারণ করুন",
+      "editClass": "নির্ধারণ সম্পাদনা",
+      "updateClass": "নির্ধারণ আপডেট করুন",
       "cancel": "বাতিল",
-      "allClasses": "সব শ্রেণি",
+      "allClasses": "সব শ্রেণির নির্ধারণ",
       "className": "শ্রেণির নাম",
       "section": "বিভাগ",
+      "teacherName": "শ্রেণি শিক্ষক (প্রধান শিক্ষক)",
+      "subject": "বিষয়",
       "name": "নাম",
       "actions": "কার্যক্রম",
       "loading": "লোড হচ্ছে…",
-      "classAdded": "শ্রেণি যোগ হয়েছে!",
-      "classUpdated": "শ্রেণি আপডেট হয়েছে!",
+      "classAdded": "শ্রেণি শিক্ষক নির্ধারিত হয়েছে!",
+      "classUpdated": "নির্ধারণ আপডেট হয়েছে!",
       "deleted": "মুছে ফেলা হয়েছে।",
-      "deleteConfirm": "এই শ্রেণি মুছবেন?",
+      "deleteConfirm": "এই শ্রেণির নির্ধারণ মুছবেন?",
       "operationFailed": "অপারেশন ব্যর্থ হয়েছে"
     },
     "subjects": {
@@ -482,7 +488,12 @@
       "resultAdded": "ফলাফল সফলভাবে যোগ হয়েছে!",
       "failed": "ফলাফল যোগ করতে ব্যর্থ হয়েছে",
       "selectExam": "পরীক্ষা নির্বাচন করুন",
-      "selectSubject": "বিষয় নির্বাচন করুন"
+      "selectSubject": "বিষয় নির্বাচন করুন",
+      "resultUpdated": "ফলাফল সফলভাবে আপডেট হয়েছে!",
+      "deleted": "মুছে ফেলা হয়েছে।",
+      "deleteConfirm": "এই ফলাফল মুছে ফেলবেন?",
+      "studentRequired": "অনুগ্রহ করে প্রথমে একজন শিক্ষার্থী নির্বাচন করুন",
+      "operationFailed": "অপারেশন ব্যর্থ হয়েছে"
     },
     "routine": {
       "title": "রুটিন পরিচালনা",
@@ -583,7 +594,14 @@
       "signIn": "সাইন ইন করুন",
       "passwordMismatch": "পাসওয়ার্ড মিলছে না",
       "registrationSuccess": "নিবন্ধন সফল হয়েছে! অনুগ্রহ করে লগইন করুন।",
-      "registrationFailed": "নিবন্ধন ব্যর্থ হয়েছে"
+      "registrationFailed": "নিবন্ধন ব্যর্থ হয়েছে",
+      "selectBranch": "শাখা বেছে নিন",
+      "branchPlaceholder": "-- শাখা বেছে নিন --",
+      "continueBtn": "পরবর্তী",
+      "backBtn": "পিছনে",
+      "registeringAs": "নিবন্ধন করছেন",
+      "superAdmin": "সুপার অ্যাডমিন",
+      "superAdminRegister": "সুপার অ্যাডমিন নিবন্ধন"
     },
     "news": {
       "title": "সংবাদ ব্যবস্থাপনা",
@@ -662,9 +680,57 @@
       "loading": "লোড হচ্ছে…",
       "noApplications": "কোনো আবেদন পাওয়া যায়নি।",
       "operationFailed": "কার্যক্রম ব্যর্থ হয়েছে"
+    },
+    "branches": {
+      "title": "শাখা ব্যবস্থাপনা",
+      "addBranch": "শাখা যোগ করুন",
+      "editBranch": "শাখা সম্পাদনা",
+      "updateBranch": "শাখা আপডেট করুন",
+      "cancel": "বাতিল",
+      "allBranches": "সকল শাখা",
+      "nameEn": "নাম (ইংরেজি)",
+      "nameBn": "নাম (বাংলা)",
+      "addressEn": "ঠিকানা (ইংরেজি)",
+      "addressBn": "ঠিকানা (বাংলা)",
+      "descriptionEn": "বিবরণ (ইংরেজি)",
+      "descriptionBn": "বিবরণ (বাংলা)",
+      "isProposed": "প্রস্তাবিত শাখা",
+      "establishedDate": "প্রতিষ্ঠার তারিখ",
+      "status": "অবস্থা",
+      "active": "সক্রিয়",
+      "proposed": "প্রস্তাবিত",
+      "actions": "কার্যক্রম",
+      "loading": "লোড হচ্ছে…",
+      "branchAdded": "শাখা যোগ হয়েছে!",
+      "branchUpdated": "শাখা আপডেট হয়েছে!",
+      "deleted": "শাখা মুছে ফেলা হয়েছে।",
+      "deleteConfirm": "এই শাখাটি মুছে ফেলবেন? এটি পূর্বাবস্থায় ফেরানো যাবে না।",
+      "operationFailed": "কার্যক্রম ব্যর্থ হয়েছে",
+      "nameRequired": "কমপক্ষে একটি শাখার নাম প্রয়োজন",
+      "noBranches": "কোনো শাখা পাওয়া যায়নি।",
+      "superAdminOnly": "শাখা ব্যবস্থাপনা শুধুমাত্র সুপার অ্যাডমিনের জন্য।"
+    },
+    "dashboard": {
+      "title": "সুপার অ্যাডমিন ড্যাশবোর্ড",
+      "overview": "শাখার সারসংক্ষেপ",
+      "totalBranches": "মোট শাখা",
+      "totalStudents": "মোট শিক্ষার্থী",
+      "totalTeachers": "মোট শিক্ষক",
+      "totalClasses": "মোট শ্রেণি",
+      "students": "শিক্ষার্থী",
+      "teachers": "শিক্ষক",
+      "classes": "শ্রেণি",
+      "proposed": "প্রস্তাবিত",
+      "active": "সক্রিয়",
+      "established": "প্রতিষ্ঠিত",
+      "loading": "ড্যাশবোর্ড লোড হচ্ছে...",
+      "errorLoading": "ড্যাশবোর্ড ডেটা লোড করতে ব্যর্থ",
+      "noData": "কোনো শাখার তথ্য নেই",
+      "viewBranch": "বিস্তারিত দেখুন",
+      "allBranches": "সব শাখা",
+      "switchTo": "এই শাখায় যান"
     }
   },
-
   "branches": {
     "pageTitle": "আমাদের শাখাসমূহ",
     "pageSubtitle": "আপনার নিকটতম শাখা খুঁজুন",
@@ -677,15 +743,21 @@
     "noProposedBranches": "এখনো কোনো প্রস্তাবিত শাখা নেই",
     "loading": "শাখা লোড হচ্ছে…",
     "failedToLoad": "শাখা লোড করতে ব্যর্থ হয়েছে",
-    "tryAgain": "আবার চেষ্টা করুন"
+    "tryAgain": "আবার চেষ্টা করুন",
+    "students": "শিক্ষার্থী",
+    "teachers": "শিক্ষক",
+    "classes": "শ্রেণি",
+    "description": "বিবরণ",
+    "selected": "নির্বাচিত",
+    "selectBranch": "এই শাখাটি নির্বাচন করতে ক্লিক করুন",
+    "viewing": "দেখছেন",
+    "clearSelection": "নির্বাচন বাতিল করুন"
   },
-
   "notFound": {
     "title": "পৃষ্ঠা পাওয়া যায়নি",
     "subtitle": "দুঃখিত! আপনি যে পৃষ্ঠাটি খুঁজছেন তা বিদ্যমান নেই।",
     "backHome": "হোমে ফিরে যান"
   },
-
   "apply": {
     "pageTitle": "অনলাইন ভর্তি",
     "pageSubtitle": "ভর্তির জন্য নিচের ফর্মটি পূরণ করুন",
@@ -711,7 +783,6 @@
     "requiredFields": "অনুগ্রহ করে সকল প্রয়োজনীয় ক্ষেত্র পূরণ করুন",
     "submitFailed": "জমা দিতে ব্যর্থ হয়েছে। আবার চেষ্টা করুন।"
   },
-
   "common": {
     "loading": "লোড হচ্ছে…",
     "error": "একটি ত্রুটি ঘটেছে",
@@ -726,5 +797,10 @@
     "close": "বন্ধ করুন",
     "back": "পিছনে",
     "na": "প্রযোজ্য নয়"
+  },
+  "branchSelector": {
+    "allBranches": "সকল শাখা",
+    "switchBranch": "শাখা পরিবর্তন করুন",
+    "selectBranch": "একটি শাখা নির্বাচন করুন"
   }
 }

@@ -1,34 +1,9 @@
 import db from "../config/db.config.js";
+import { branchFilter } from "../utils/branchFilter.js";
 
-// Get one attendance by ID
-export const getAttendanceByID = async (id) => {
-  try {
-    const [rows] = await db.query(
-      `SELECT 
-        a.AttendanceID,
-        a.StudentID,
-        a.ClassID,
-        a.ClassDate,
-        a.Status,
-        s.FirstName,
-        s.LastName,
-        s.RollNumber,
-        c.ClassName,
-        c.Section
-      FROM Attendance a
-      JOIN Students s ON a.StudentID = s.StudentID
-      JOIN Classes c ON a.ClassID = c.ClassID
-      WHERE a.AttendanceID = ?`,
-      [id],
-    );
-    return rows[0] || null; // Return the first row or null if not found
-  } catch (error) {
-    throw new Error("Error fetching attendance by ID: " + error.message);
-  }
-};
-
-// Get attendance by student ID
-export const getAttendanceByStudentId = async (studentID) => {
+// Get one attendance by ID (branch-scoped via student join)
+export const getAttendanceByID = async (id, branchId = null) => {
+  const { clause, params: branchParams } = branchFilter(branchId, "s");
   try {
     const [rows] = await db.query(
       `SELECT
@@ -42,26 +17,24 @@ export const getAttendanceByStudentId = async (studentID) => {
         s.RollNumber,
         c.ClassName,
         c.Section
-      FROM Attendance a 
-      JOIN Students s ON a.StudentID = s.StudentID 
-      JOIN Classes c ON a.ClassID = c.ClassID 
-      WHERE s.StudentID = ?
-      ORDER BY a.ClassDate DESC`,
-      [studentID],
+      FROM Attendance a
+      JOIN Students s ON a.StudentID = s.StudentID
+      JOIN Classes c ON a.ClassID = c.ClassID
+      WHERE a.AttendanceID = ? ${clause}`,
+      [id, ...branchParams],
     );
-    return rows; // Return all matching rows
+    return rows[0] || null;
   } catch (error) {
-    throw new Error(
-      "Error fetching attendance by Student ID: " + error.message,
-    );
+    throw new Error("Error fetching attendance by ID: " + error.message);
   }
 };
 
-// Get all attendance with student & class info
-export const getAllAttendance = async () => {
+// Get attendance by student ID (branch-scoped)
+export const getAttendanceByStudentId = async (studentID, branchId = null) => {
+  const { clause, params: branchParams } = branchFilter(branchId, "s");
   try {
-    const [rows] = await db.query(`
-      SELECT 
+    const [rows] = await db.query(
+      `SELECT
         a.AttendanceID,
         a.StudentID,
         a.ClassID,
@@ -75,25 +48,61 @@ export const getAllAttendance = async () => {
       FROM Attendance a
       JOIN Students s ON a.StudentID = s.StudentID
       JOIN Classes c ON a.ClassID = c.ClassID
+      WHERE s.StudentID = ? ${clause}
+      ORDER BY a.ClassDate DESC`,
+      [studentID, ...branchParams],
+    );
+    return rows;
+  } catch (error) {
+    throw new Error(
+      "Error fetching attendance by Student ID: " + error.message,
+    );
+  }
+};
+
+// Get all attendance with student & class info (branch-scoped)
+export const getAllAttendance = async (branchId = null) => {
+  const { clause, params: branchParams } = branchFilter(branchId, "s");
+  try {
+    const [rows] = await db.query(`
+      SELECT
+        a.AttendanceID,
+        a.StudentID,
+        a.ClassID,
+        a.ClassDate,
+        a.Status,
+        s.FirstName,
+        s.LastName,
+        s.RollNumber,
+        c.ClassName,
+        c.Section
+      FROM Attendance a
+      JOIN Students s ON a.StudentID = s.StudentID
+      JOIN Classes c ON a.ClassID = c.ClassID
+      WHERE 1=1 ${clause}
       ORDER BY a.ClassDate DESC, s.FirstName ASC
-    `);
-    return rows; // Return all attendance records
+    `, branchParams);
+    return rows;
   } catch (error) {
     throw new Error("Error fetching all attendance: " + error.message);
   }
 };
 
 // Create a new attendance record
-export const createAttendance = async (attendanceData) => {
+export const createAttendance = async (attendanceData, branchId = null) => {
   const { studentID, classID, classDate, status } = attendanceData;
 
   try {
-    const [result] = await db.query(
-      `INSERT INTO Attendance (StudentID, ClassID, ClassDate, Status) 
-       VALUES (?, ?, ?, ?)`,
-      [studentID, classID, classDate, status],
-    );
-    return result.insertId; // Return the ID of the newly created record
+    let sql, values;
+    if (branchId != null) {
+      sql = `INSERT INTO Attendance (StudentID, ClassID, ClassDate, Status, branch_id) VALUES (?, ?, ?, ?, ?)`;
+      values = [studentID, classID, classDate, status, branchId];
+    } else {
+      sql = `INSERT INTO Attendance (StudentID, ClassID, ClassDate, Status) VALUES (?, ?, ?, ?)`;
+      values = [studentID, classID, classDate, status];
+    }
+    const [result] = await db.query(sql, values);
+    return result.insertId;
   } catch (error) {
     throw new Error("Error creating attendance record: " + error.message);
   }
@@ -110,7 +119,7 @@ export const updateAttendance = async (id, attendanceData) => {
        WHERE AttendanceID = ?`,
       [status, id],
     );
-    return result.affectedRows; // Return the number of affected rows
+    return result.affectedRows;
   } catch (error) {
     throw new Error("Error updating attendance: " + error.message);
   }
@@ -123,17 +132,18 @@ export const deleteAttendance = async (id) => {
       `DELETE FROM Attendance WHERE AttendanceID = ?`,
       [id],
     );
-    return result.affectedRows; // Return number of deleted rows
+    return result.affectedRows;
   } catch (error) {
     throw new Error("Error deleting attendance: " + error.message);
   }
 };
 
-// Get attendance by class ID
-export const getAttendanceByClassID = async (classID) => {
+// Get attendance by class ID (branch-scoped)
+export const getAttendanceByClassID = async (classID, branchId = null) => {
+  const { clause, params: branchParams } = branchFilter(branchId, "s");
   try {
     const [rows] = await db.query(
-      `SELECT 
+      `SELECT
         a.AttendanceID,
         a.StudentID,
         a.ClassID,
@@ -146,10 +156,10 @@ export const getAttendanceByClassID = async (classID) => {
         c.Section
       FROM Attendance a
       JOIN Classes c ON a.ClassID = c.ClassID
-      JOIN Students s ON a.StudentID = s.StudentID 
-      WHERE a.ClassID = ?
+      JOIN Students s ON a.StudentID = s.StudentID
+      WHERE a.ClassID = ? ${clause}
       ORDER BY a.ClassDate DESC, s.FirstName ASC`,
-      [classID],
+      [classID, ...branchParams],
     );
     return rows;
   } catch (error) {
@@ -157,11 +167,12 @@ export const getAttendanceByClassID = async (classID) => {
   }
 };
 
-// Get attendance by date
-export const getAttendanceByDate = async (date) => {
+// Get attendance by date (branch-scoped)
+export const getAttendanceByDate = async (date, branchId = null) => {
+  const { clause, params: branchParams } = branchFilter(branchId, "s");
   try {
     const [rows] = await db.query(
-      `SELECT 
+      `SELECT
         a.AttendanceID,
         a.StudentID,
         a.ClassID,
@@ -174,10 +185,10 @@ export const getAttendanceByDate = async (date) => {
         c.Section
       FROM Attendance a
       JOIN Classes c ON a.ClassID = c.ClassID
-      JOIN Students s ON a.StudentID = s.StudentID 
-      WHERE a.ClassDate = ?
+      JOIN Students s ON a.StudentID = s.StudentID
+      WHERE a.ClassDate = ? ${clause}
       ORDER BY c.ClassName ASC, c.Section ASC, s.FirstName ASC`,
-      [date],
+      [date, ...branchParams],
     );
     return rows;
   } catch (error) {
@@ -185,8 +196,9 @@ export const getAttendanceByDate = async (date) => {
   }
 };
 
-// Get attendance summary by student
-export const getAttendanceSummaryByStudent = async (studentID) => {
+// Get attendance summary by student (branch-scoped)
+export const getAttendanceSummaryByStudent = async (studentID, branchId = null) => {
+  const { clause, params: branchParams } = branchFilter(branchId, "s");
   try {
     const [result] = await db.query(
       `SELECT
@@ -203,11 +215,11 @@ export const getAttendanceSummaryByStudent = async (studentID) => {
       FROM Attendance a
       JOIN Students s ON a.StudentID = s.StudentID
       JOIN Classes c ON a.ClassID = c.ClassID
-      WHERE a.StudentID = ?
+      WHERE a.StudentID = ? ${clause}
       GROUP BY s.StudentID, s.FirstName, s.LastName, s.RollNumber, c.ClassName, c.Section`,
-      [studentID],
+      [studentID, ...branchParams],
     );
-    return result[0] || null; // Return the summary object for the student
+    return result[0] || null;
   } catch (error) {
     throw new Error(
       "Error getting attendance summary by student: " + error.message,
@@ -222,9 +234,9 @@ export const getClassAttendanceSummaryByClassAndDate = async (
 ) => {
   try {
     const [rows] = await db.query(
-      `SELECT 
-        a.Status, 
-        COUNT(*) as Count 
+      `SELECT
+        a.Status,
+        COUNT(*) as Count
        FROM Attendance a
        WHERE a.ClassID = ? AND a.ClassDate = ?
        GROUP BY a.Status`,
@@ -236,11 +248,12 @@ export const getClassAttendanceSummaryByClassAndDate = async (
   }
 };
 
-// Get attendance by class and section
-export const getAttendanceByClassAndSection = async (className, section) => {
+// Get attendance by class and section (branch-scoped)
+export const getAttendanceByClassAndSection = async (className, section, branchId = null) => {
+  const { clause, params: branchParams } = branchFilter(branchId, "s");
   try {
     const [rows] = await db.query(
-      `SELECT 
+      `SELECT
         a.AttendanceID,
         a.StudentID,
         a.ClassID,
@@ -253,10 +266,10 @@ export const getAttendanceByClassAndSection = async (className, section) => {
         c.Section
       FROM Attendance a
       JOIN Classes c ON a.ClassID = c.ClassID
-      JOIN Students s ON a.StudentID = s.StudentID 
-      WHERE c.ClassName = ? AND c.Section = ?
+      JOIN Students s ON a.StudentID = s.StudentID
+      WHERE c.ClassName = ? AND c.Section = ? ${clause}
       ORDER BY a.ClassDate DESC, s.FirstName ASC`,
-      [className, section],
+      [className, section, ...branchParams],
     );
     return rows;
   } catch (error) {
@@ -266,16 +279,18 @@ export const getAttendanceByClassAndSection = async (className, section) => {
   }
 };
 
-// Get attendance by name, roll, class, and section
+// Get attendance by name, roll, class, and section (branch-scoped)
 export const getAttendanceByNameRollClassSection = async (
   firstName,
   roll,
   className,
   section,
+  branchId = null,
 ) => {
+  const { clause, params: branchParams } = branchFilter(branchId, "s");
   try {
     const [rows] = await db.query(
-      `SELECT 
+      `SELECT
         a.AttendanceID,
         a.StudentID,
         a.ClassID,
@@ -288,10 +303,10 @@ export const getAttendanceByNameRollClassSection = async (
         c.Section
       FROM Attendance a
       JOIN Classes c ON a.ClassID = c.ClassID
-      JOIN Students s ON a.StudentID = s.StudentID 
-      WHERE s.FirstName LIKE ? AND s.RollNumber LIKE ? AND c.ClassName = ? AND c.Section = ?
+      JOIN Students s ON a.StudentID = s.StudentID
+      WHERE s.FirstName LIKE ? AND s.RollNumber LIKE ? AND c.ClassName = ? AND c.Section = ? ${clause}
       ORDER BY a.ClassDate DESC`,
-      [`%${firstName}%`, `%${roll}%`, className, section],
+      [`%${firstName}%`, `%${roll}%`, className, section, ...branchParams],
     );
     return rows;
   } catch (error) {
@@ -302,11 +317,12 @@ export const getAttendanceByNameRollClassSection = async (
   }
 };
 
-// Get attendance by date range
-export const getAttendanceByDateRange = async (startDate, endDate) => {
+// Get attendance by date range (branch-scoped)
+export const getAttendanceByDateRange = async (startDate, endDate, branchId = null) => {
+  const { clause, params: branchParams } = branchFilter(branchId, "s");
   try {
     const [rows] = await db.query(
-      `SELECT 
+      `SELECT
         a.AttendanceID,
         a.StudentID,
         a.ClassID,
@@ -319,10 +335,10 @@ export const getAttendanceByDateRange = async (startDate, endDate) => {
         c.Section
       FROM Attendance a
       JOIN Classes c ON a.ClassID = c.ClassID
-      JOIN Students s ON a.StudentID = s.StudentID 
-      WHERE a.ClassDate BETWEEN ? AND ?
+      JOIN Students s ON a.StudentID = s.StudentID
+      WHERE a.ClassDate BETWEEN ? AND ? ${clause}
       ORDER BY a.ClassDate DESC, c.ClassName ASC, c.Section ASC, s.FirstName ASC`,
-      [startDate, endDate],
+      [startDate, endDate, ...branchParams],
     );
     return rows;
   } catch (error) {
@@ -330,10 +346,17 @@ export const getAttendanceByDateRange = async (startDate, endDate) => {
   }
 };
 
-// Get attendance count
-export const getAttendanceCount = async () => {
+// Get attendance count (branch-scoped)
+export const getAttendanceCount = async (branchId = null) => {
+  const { clause, params: branchParams } = branchFilter(branchId, "s");
   try {
-    const [result] = await db.query(`SELECT COUNT(*) as count FROM Attendance`);
+    const [result] = await db.query(
+      `SELECT COUNT(*) as count
+       FROM Attendance a
+       JOIN Students s ON a.StudentID = s.StudentID
+       WHERE 1=1 ${clause}`,
+      branchParams,
+    );
     return result[0].count;
   } catch (error) {
     throw new Error("Error getting attendance count: " + error.message);
@@ -341,20 +364,35 @@ export const getAttendanceCount = async () => {
 };
 
 // Bulk create attendance records
-export const bulkCreateAttendance = async (attendanceRecords) => {
+export const bulkCreateAttendance = async (attendanceRecords, branchId = null) => {
   try {
-    const values = attendanceRecords.map((record) => [
-      record.studentID,
-      record.classID,
-      record.classDate,
-      record.status,
-    ]);
-
-    const [result] = await db.query(
-      `INSERT INTO Attendance (StudentID, ClassID, ClassDate, Status) VALUES ?`,
-      [values],
-    );
-    return result.affectedRows;
+    let values;
+    if (branchId != null) {
+      values = attendanceRecords.map((record) => [
+        record.studentID,
+        record.classID,
+        record.classDate,
+        record.status,
+        branchId,
+      ]);
+      const [result] = await db.query(
+        `INSERT INTO Attendance (StudentID, ClassID, ClassDate, Status, branch_id) VALUES ?`,
+        [values],
+      );
+      return result.affectedRows;
+    } else {
+      values = attendanceRecords.map((record) => [
+        record.studentID,
+        record.classID,
+        record.classDate,
+        record.status,
+      ]);
+      const [result] = await db.query(
+        `INSERT INTO Attendance (StudentID, ClassID, ClassDate, Status) VALUES ?`,
+        [values],
+      );
+      return result.affectedRows;
+    }
   } catch (error) {
     throw new Error("Error bulk creating attendance records: " + error.message);
   }
@@ -364,26 +402,88 @@ export const bulkCreateAttendance = async (attendanceRecords) => {
 export const checkAttendanceExists = async (studentID, classID, classDate) => {
   try {
     const [rows] = await db.query(
-      `SELECT AttendanceID, Status FROM Attendance 
+      `SELECT AttendanceID, Status FROM Attendance
        WHERE StudentID = ? AND ClassID = ? AND ClassDate = ?`,
       [studentID, classID, classDate],
     );
-    return rows; // Return the actual rows, not just a boolean
+    return rows;
   } catch (error) {
     throw new Error("Error checking attendance existence: " + error.message);
   }
 };
 
-// Get attendance statistics
-export const getAttendanceStatistics = async () => {
+// Get attendance grid data: all records for a class+section within a date range (branch-scoped)
+// Returns rows: { StudentID, FirstName, LastName, RollNumber, ClassDate, Status }
+export const getAttendanceGrid = async (className, section, startDate, endDate, branchId = null) => {
+  const { clause, params: branchParams } = branchFilter(branchId, "s");
   try {
     const [rows] = await db.query(
-      `SELECT 
+      `SELECT
+        s.StudentID,
+        s.FirstName,
+        s.LastName,
+        s.RollNumber,
+        a.ClassDate,
+        a.Status
+      FROM Students s
+      JOIN Classes c ON s.ClassID = c.ClassID
+      LEFT JOIN Attendance a ON a.StudentID = s.StudentID
+        AND a.ClassID = c.ClassID
+        AND a.ClassDate BETWEEN ? AND ?
+      WHERE c.ClassName = ? AND c.Section = ? ${clause}
+      ORDER BY s.RollNumber ASC, a.ClassDate ASC`,
+      [startDate, endDate, className, section, ...branchParams],
+    );
+    return rows;
+  } catch (error) {
+    throw new Error("Error fetching attendance grid: " + error.message);
+  }
+};
+
+// Upsert (create or update) a single attendance cell
+export const upsertAttendance = async (studentID, classID, classDate, status, branchId = null) => {
+  try {
+    const [existing] = await db.query(
+      `SELECT AttendanceID FROM Attendance WHERE StudentID = ? AND ClassID = ? AND ClassDate = ?`,
+      [studentID, classID, classDate],
+    );
+    if (existing.length > 0) {
+      await db.query(
+        `UPDATE Attendance SET Status = ? WHERE AttendanceID = ?`,
+        [status, existing[0].AttendanceID],
+      );
+      return { action: "updated", attendanceID: existing[0].AttendanceID };
+    } else {
+      let sql, values;
+      if (branchId != null) {
+        sql = `INSERT INTO Attendance (StudentID, ClassID, ClassDate, Status, branch_id) VALUES (?, ?, ?, ?, ?)`;
+        values = [studentID, classID, classDate, status, branchId];
+      } else {
+        sql = `INSERT INTO Attendance (StudentID, ClassID, ClassDate, Status) VALUES (?, ?, ?, ?)`;
+        values = [studentID, classID, classDate, status];
+      }
+      const [result] = await db.query(sql, values);
+      return { action: "created", attendanceID: result.insertId };
+    }
+  } catch (error) {
+    throw new Error("Error upserting attendance: " + error.message);
+  }
+};
+
+// Get attendance statistics (branch-scoped)
+export const getAttendanceStatistics = async (branchId = null) => {
+  const { clause, params: branchParams } = branchFilter(branchId, "s");
+  try {
+    const [rows] = await db.query(
+      `SELECT
         COUNT(*) as TotalRecords,
-        SUM(CASE WHEN Status = 'Present' THEN 1 ELSE 0 END) as TotalPresent,
-        SUM(CASE WHEN Status = 'Absent' THEN 1 ELSE 0 END) as TotalAbsent,
-        ROUND((SUM(CASE WHEN Status = 'Present' THEN 1 ELSE 0 END) / COUNT(*)) * 100, 2) as OverallAttendancePercentage
-      FROM Attendance`,
+        SUM(CASE WHEN a.Status = 'Present' THEN 1 ELSE 0 END) as TotalPresent,
+        SUM(CASE WHEN a.Status = 'Absent' THEN 1 ELSE 0 END) as TotalAbsent,
+        ROUND((SUM(CASE WHEN a.Status = 'Present' THEN 1 ELSE 0 END) / COUNT(*)) * 100, 2) as OverallAttendancePercentage
+      FROM Attendance a
+      JOIN Students s ON a.StudentID = s.StudentID
+      WHERE 1=1 ${clause}`,
+      branchParams,
     );
     return rows[0];
   } catch (error) {

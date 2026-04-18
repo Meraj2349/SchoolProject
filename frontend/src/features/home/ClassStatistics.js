@@ -4,8 +4,8 @@ import { useClasses } from "@/hooks/useClasses";
 import { useQueries } from "@tanstack/react-query";
 import { classesService } from "@/services/classes.service";
 import { queryKeys } from "@/lib/queryKeys";
+import { useBranchStore } from "@/store/branchStore";
 import { useTranslations } from "@/store/languageStore";
-import "@/styles/ClassStatistics.css";
 
 const NUM_TO_TEXT_EN = {
   1: "One",
@@ -49,8 +49,24 @@ function fmtClass(name, lang) {
   );
 }
 
+function SectionHeader({ t }) {
+  return (
+    <div className="mb-[52px]">
+      <div className="inline-flex items-center gap-[14px] mb-4">
+        <span className="block w-14 h-px bg-gradient-to-r from-transparent to-[rgba(201,168,76,0.6)]" />
+        <span className="text-[0.75rem] text-[#c9a84c]">★</span>
+        <span className="block w-14 h-px bg-gradient-to-l from-transparent to-[rgba(201,168,76,0.6)]" />
+      </div>
+      <h2 className="text-[clamp(1.5rem,4vw,2.2rem)] font-extrabold text-[#e2c07a] mb-[10px] tracking-tight leading-[1.2]">
+        {t("studentStatistics")}
+      </h2>
+    </div>
+  );
+}
+
 export default function ClassStatistics() {
   const { data: classes = [], isLoading, isError } = useClasses();
+  const { currentBranchId: branchId, currentBranchName } = useBranchStore();
   const t = useTranslations("home");
   const lang =
     typeof window !== "undefined"
@@ -68,31 +84,14 @@ export default function ClassStatistics() {
     ...new Set(classes.map((c) => c.className || c.ClassName || c.name || c)),
   ];
 
+  // Pass branchId in the query key so switching branches invalidates these counts
   const countQueries = useQueries({
     queries: uniqueNames.map((name) => ({
-      queryKey: queryKeys.classes.studentCount(name),
+      queryKey: queryKeys.classes.studentCount(name, branchId),
       queryFn: () => classesService.getStudentCount(name),
       enabled: uniqueNames.length > 0,
     })),
   });
-
-  if (isLoading) {
-    return (
-      <div className="class-statistics-container">
-        <h2>{t("studentStatistics")}</h2>
-        <p className="loading">{t("loadingClassStats")}</p>
-      </div>
-    );
-  }
-
-  if (isError) {
-    return (
-      <div className="class-statistics-container">
-        <h2>{t("studentStatistics")}</h2>
-        <p className="error">{t("failedClassStats")}</p>
-      </div>
-    );
-  }
 
   const classData = uniqueNames
     .map((name, i) => {
@@ -115,23 +114,123 @@ export default function ClassStatistics() {
       return a.displayName.localeCompare(b.displayName);
     });
 
+  if (isLoading) {
+    return (
+      <div className="relative w-full box-border py-[72px] px-6 pb-20 bg-[#0d1f3c] text-center overflow-hidden">
+        {/* Diagonal texture */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            backgroundImage:
+              "repeating-linear-gradient(45deg,rgba(255,255,255,.025) 0,rgba(255,255,255,.025) 1px,transparent 1px,transparent 10px)",
+          }}
+        />
+        {/* Top gold strip */}
+        <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-transparent via-[#c9a84c] via-[#e2c07a] via-[#c9a84c] to-transparent" />
+        {/* Bottom gold strip */}
+        <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-gradient-to-r from-transparent via-[#c9a84c] via-[#e2c07a] via-[#c9a84c] to-transparent" />
+        <div className="relative z-[1]">
+          <SectionHeader t={t} />
+          <p className="text-[rgba(201,168,76,0.7)] text-[0.95rem]">
+            {t("loadingClassStats")}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="relative w-full box-border py-[72px] px-6 pb-20 bg-[#0d1f3c] text-center overflow-hidden">
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            backgroundImage:
+              "repeating-linear-gradient(45deg,rgba(255,255,255,.025) 0,rgba(255,255,255,.025) 1px,transparent 1px,transparent 10px)",
+          }}
+        />
+        <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-transparent via-[#c9a84c] via-[#e2c07a] via-[#c9a84c] to-transparent" />
+        <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-gradient-to-r from-transparent via-[#c9a84c] via-[#e2c07a] via-[#c9a84c] to-transparent" />
+        <div className="relative z-[1]">
+          <SectionHeader t={t} />
+          <p className="text-[rgba(201,168,76,0.7)] text-[0.95rem]">
+            {t("failedClassStats")}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="class-statistics-container">
-      <h2>{t("studentStatistics")}</h2>
-      <p className="subtitle">{t("classWiseStudents")}</p>
-      <div className="class-statistics">
-        {classData.length > 0 ? (
-          classData.map((d, i) => (
-            <div key={i} className="class-statistics-item">
-              <div className="circle">
-                <span className="count">{d.count}</span>
-                <span className="class-name">{d.displayName}</span>
-              </div>
+    <div className="relative w-full box-border py-[72px] px-6 pb-20 bg-[#0d1f3c] text-center overflow-hidden">
+      {/* Diagonal texture overlay */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          backgroundImage:
+            "repeating-linear-gradient(45deg,rgba(255,255,255,.025) 0,rgba(255,255,255,.025) 1px,transparent 1px,transparent 10px)",
+        }}
+      />
+      {/* Top gold strip */}
+      <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-transparent via-[#c9a84c] via-[#e2c07a] via-[#c9a84c] to-transparent" />
+      {/* Bottom gold strip */}
+      <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-gradient-to-r from-transparent via-[#c9a84c] via-[#e2c07a] via-[#c9a84c] to-transparent" />
+
+      <div className="relative z-[1]">
+        {/* Header */}
+        <div className="mb-[52px]">
+          {/* Star rule */}
+          <div className="inline-flex items-center gap-[14px] mb-4">
+            <span className="block w-14 h-px bg-gradient-to-r from-transparent to-[rgba(201,168,76,0.6)]" />
+            <span className="text-[0.75rem] text-[#c9a84c]">★</span>
+            <span className="block w-14 h-px bg-gradient-to-l from-transparent to-[rgba(201,168,76,0.6)]" />
+          </div>
+          <h2 className="text-[clamp(1.5rem,4vw,2.2rem)] font-extrabold text-[#e2c07a] mb-[10px] tracking-tight leading-[1.2]">
+            {t("studentStatistics")}
+          </h2>
+          <p className="text-[0.95rem] text-[rgba(226,192,122,0.7)] mx-auto mb-6 max-w-[440px] leading-[1.6]">
+            {t("classWiseStudents")}
+          </p>
+
+          {/* Branch badge */}
+          {branchId != null && (
+            <div className="inline-flex items-center gap-[6px] mx-auto mt-2 px-[14px] py-[4px] bg-[rgba(201,168,76,0.12)] border border-[rgba(201,168,76,0.55)] rounded-[20px] text-xs text-[#e2c07a] font-semibold tracking-[0.04em]">
+              <span>🏫</span>
+              <span>{currentBranchName}</span>
             </div>
-          ))
-        ) : (
-          <p className="no-data">{t("noClasses")}</p>
-        )}
+          )}
+
+          {/* Diamond divider */}
+          <div className="inline-flex items-center gap-[10px] mt-3">
+            <span className="block w-10 h-px bg-gradient-to-r from-transparent to-[rgba(201,168,76,0.5)]" />
+            <span className="text-[0.5rem] text-[#c9a84c]">◆</span>
+            <span className="block w-10 h-px bg-gradient-to-l from-transparent to-[rgba(201,168,76,0.5)]" />
+          </div>
+        </div>
+
+        {/* Stats grid */}
+        <div className="flex justify-center items-stretch gap-5 flex-wrap max-w-[1200px] mx-auto">
+          {classData.length > 0 ? (
+            classData.map((d, i) => (
+              <div key={i} className="flex flex-col items-center">
+                <div className="group relative w-[110px] h-[110px] rounded-full border-2 border-[rgba(201,168,76,0.45)] flex flex-col justify-center items-center bg-[rgba(255,255,255,0.05)] shadow-[0_0_0_6px_rgba(201,168,76,0.07),0_4px_18px_rgba(0,0,0,0.25)] transition-all duration-[280ms] hover:-translate-y-[7px] hover:scale-105 hover:shadow-[0_0_0_8px_rgba(201,168,76,0.12),0_12px_32px_rgba(0,0,0,0.35)] hover:border-[#c9a84c] hover:bg-[rgba(201,168,76,0.08)] cursor-default">
+                  {/* Inner ring */}
+                  <div className="absolute inset-[5px] rounded-full border border-[rgba(201,168,76,0.18)] pointer-events-none" />
+                  <span className="text-[2rem] font-extrabold text-[#e2c07a] leading-none mb-1 [text-shadow:0_2px_8px_rgba(0,0,0,0.3)]">
+                    {d.count}
+                  </span>
+                  <span className="text-[0.72rem] font-bold capitalize text-[rgba(253,248,240,0.7)] tracking-[0.04em]">
+                    {d.displayName}
+                  </span>
+                </div>
+              </div>
+            ))
+          ) : (
+            <p className="text-[rgba(201,168,76,0.7)] text-[0.95rem]">
+              {t("noClasses")}
+            </p>
+          )}
+        </div>
       </div>
     </div>
   );

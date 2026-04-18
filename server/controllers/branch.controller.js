@@ -5,6 +5,7 @@ import {
   deleteBranch,
   getAllBranches,
   getBranchById,
+  getBranchStats,
   updateBranch,
 } from "../models/branch.model.js";
 import {
@@ -283,6 +284,22 @@ export const deleteBranchController = async (req, res) => {
         .json({ success: false, message: t("branch_not_found", lang) });
     }
 
+    res.status(500).json({
+      success: false,
+      message: t("internal_server_error", lang),
+      error: error.message,
+    });
+  }
+};
+
+// Get per-branch stats (super_admin only)
+export const getBranchStatsController = async (req, res) => {
+  const lang = req.language;
+  try {
+    const stats = await getBranchStats();
+    res.status(200).json({ success: true, data: stats });
+  } catch (error) {
+    console.error("Error in getBranchStatsController:", error);
     res.status(500).json({
       success: false,
       message: t("internal_server_error", lang),

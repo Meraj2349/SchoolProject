@@ -1,5 +1,7 @@
 import jwt from "jsonwebtoken";
 
+// Primary auth middleware — sets req.adminId, req.role, req.branchId
+// req.branchId is null for super_admin (sees all data) and a number for branch_admin
 const authMiddleware = (req, res, next) => {
   const authHeader = req.headers.authorization;
 
@@ -15,7 +17,19 @@ const authMiddleware = (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
-    req.adminId = decoded.adminID; // Attach admin ID to the request object
+    req.adminId = decoded.adminID;
+    req.role = decoded.role || "branch_admin";
+
+    if (req.role === "super_admin") {
+      // super_admin: respect ?branch_id=X query param for scoped reads,
+      // otherwise null = no filter (see all branches)
+      const qb = req.query?.branch_id;
+      req.branchId = qb != null && qb !== "" ? parseInt(qb, 10) : null;
+    } else {
+      // branch_admin: always locked to their own branch from JWT
+      req.branchId = decoded.branch_id ?? null;
+    }
+
     next();
   } catch (error) {
     return res.status(403).json({ error: "Invalid token" });
@@ -24,6 +38,7 @@ const authMiddleware = (req, res, next) => {
 
 export default authMiddleware;
 
+// protect — same as authMiddleware but also populates req.user for authorize()
 export const protect = (req, res, next) => {
   const authHeader = req.headers.authorization;
 
@@ -39,23 +54,84 @@ export const protect = (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
-    req.user = { id: decoded.adminID, role: decoded.role }; // Store both ID and role
+    req.adminId = decoded.adminID;
+    req.role = decoded.role || "branch_admin";
+
+    if (req.role === "super_admin") {
+      const qb = req.query?.branch_id;
+      req.branchId = qb != null && qb !== "" ? parseInt(qb, 10) : null;
+    } else {
+      req.branchId = decoded.branch_id ?? null;
+    }
+
+    req.user = { id: decoded.adminID, role: req.role };
     next();
   } catch (error) {
     return res.status(403).json({ error: "Invalid token" });
   }
 };
 
-// Role-based authorization middleware
+/**
+ * optionalAuthMiddleware — allows unauthenticated requests through.
+ *
+ * Behaviour:
+ * - No token → req.branchId = parseInt(req.query.branch_id) if provided, else null
+ *   (public visitor; null = no branch filter = show all)
+ * - Valid token → same as authMiddleware (branch_admin locked; super_admin uses ?branch_id)
+ * - Invalid/expired token → 403 (explicit bad token is still rejected)
+ *
+ * Use this for read-only public endpoints (GET /students, GET /teachers, etc.)
+ * so that public visitors can filter by branch via ?branch_id without needing auth.
+ */
+export const optionalAuth = (req, res, next) => {
+  const authHeader = req.headers.authorization;
+
+  // No token at all — treat as unauthenticated public request
+  if (!authHeader) {
+    const qb = req.query?.branch_id;
+    req.branchId = qb != null && qb !== "" ? parseInt(qb, 10) : null;
+    req.role = "public";
+    return next();
+  }
+
+  const token = authHeader.split(" ")[1];
+  if (!token) {
+    const qb = req.query?.branch_id;
+    req.branchId = qb != null && qb !== "" ? parseInt(qb, 10) : null;
+    req.role = "public";
+    return next();
+  }
+
+  // Token provided — validate it
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
+    req.adminId = decoded.adminID;
+    req.role = decoded.role || "branch_admin";
+
+    if (req.role === "super_admin") {
+      const qb = req.query?.branch_id;
+      req.branchId = qb != null && qb !== "" ? parseInt(qb, 10) : null;
+    } else {
+      req.branchId = decoded.branch_id ?? null;
+    }
+
+    next();
+  } catch (error) {
+    return res.status(403).json({ error: "Invalid token" });
+  }
+};
+
+// Role-based authorization middleware — use after protect or authMiddleware
 export const authorize = (...allowedRoles) => {
   return (req, res, next) => {
-    if (!req.user?.role) {
+    const role = req.role || req.user?.role;
+    if (!role) {
       return res.status(403).json({ error: "Role information missing" });
     }
 
-    if (!allowedRoles.includes(req.user.role)) {
+    if (!allowedRoles.includes(role)) {
       return res.status(403).json({
-        error: `Role ${req.user.role} is not authorized to access this resource`,
+        error: `Role ${role} is not authorized to access this resource`,
       });
     }
 

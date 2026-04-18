@@ -15,6 +15,10 @@ import {
 
 // Utility function for validation
 const validateStudentData = (data) => {
+  // Frontend sends "ClassName"; backend model uses "Class" — accept both.
+  const normalised = { ...data };
+  if (!normalised.Class && normalised.ClassName) normalised.Class = normalised.ClassName;
+
   const requiredFields = [
     "FirstName",
     "LastName",
@@ -24,7 +28,7 @@ const validateStudentData = (data) => {
     "Section",
     "RollNumber",
   ];
-  const missingFields = requiredFields.filter((field) => !data[field]);
+  const missingFields = requiredFields.filter((field) => !normalised[field]);
 
   if (missingFields.length > 0) {
     return `Missing required fields: ${missingFields.join(", ")}`;
@@ -41,17 +45,14 @@ const validateStudentData = (data) => {
   return null;
 };
 
-// Get all students
+// Get all students (branch-scoped)
 const getAllStudentsController = async (req, res) => {
   const lang = req.language;
+  const branchId = req.branchId ?? null;
   try {
-    const students = await getAllStudents();
+    const students = await getAllStudents(branchId);
     res.status(200).json({
       success: true,
-      message: t("student_fetch_failed", lang).replace(
-        "Failed to fetch",
-        "Fetched",
-      ),
       data: students,
       count: students.length,
     });
@@ -64,7 +65,9 @@ const getAllStudentsController = async (req, res) => {
 const addStudentController = async (req, res) => {
   const lang = req.language;
   try {
-    const studentData = req.body;
+    const studentData = { ...req.body };
+    // Normalise ClassName → Class for the model layer
+    if (!studentData.Class && studentData.ClassName) studentData.Class = studentData.ClassName;
 
     const validationError = validateStudentData(studentData);
     if (validationError) {
@@ -74,7 +77,8 @@ const addStudentController = async (req, res) => {
     studentData.AdmissionDate =
       studentData.AdmissionDate || new Date().toISOString().split("T")[0];
 
-    const result = await addStudent(studentData);
+    const branchId = req.branchId ?? null;
+    const result = await addStudent(studentData, branchId);
 
     res.status(201).json({
       success: true,
@@ -117,7 +121,9 @@ const updateStudentController = async (req, res) => {
   const lang = req.language;
   try {
     const { id } = req.params;
-    const studentData = req.body;
+    const studentData = { ...req.body };
+    // Normalise ClassName → Class for the model layer
+    if (!studentData.Class && studentData.ClassName) studentData.Class = studentData.ClassName;
 
     if (!id || isNaN(id)) {
       return res
@@ -130,7 +136,8 @@ const updateStudentController = async (req, res) => {
       return res.status(400).json({ success: false, message: validationError });
     }
 
-    const result = await updateStudent(parseInt(id), studentData);
+    const branchId = req.branchId ?? null;
+    const result = await updateStudent(parseInt(id), studentData, branchId);
 
     if (!result) {
       return res
@@ -158,7 +165,8 @@ const deleteStudentController = async (req, res) => {
         .json({ success: false, message: t("student_required_fields", lang) });
     }
 
-    const result = await deleteStudent(parseInt(id));
+    const branchId = req.branchId ?? null;
+    const result = await deleteStudent(parseInt(id), branchId);
 
     if (!result) {
       return res
@@ -187,7 +195,8 @@ const searchStudentsController = async (req, res) => {
       });
     }
 
-    const students = await searchStudents(filters);
+    const branchId = req.branchId ?? null;
+    const students = await searchStudents(filters, branchId);
 
     res.status(200).json({
       success: true,
@@ -199,10 +208,11 @@ const searchStudentsController = async (req, res) => {
   }
 };
 
-// Get student count
+// Get student count (branch-scoped)
 const getStudentCountController = async (req, res) => {
+  const branchId = req.branchId ?? null;
   try {
-    const count = await getStudentCount();
+    const count = await getStudentCount(branchId);
     res.status(200).json({ success: true, data: count });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -221,7 +231,8 @@ const getStudentsByClassController = async (req, res) => {
         .json({ success: false, message: t("class_name_required", lang) });
     }
 
-    const students = await getStudentsByClass(className);
+    const branchId = req.branchId ?? null;
+    const students = await getStudentsByClass(className, branchId);
 
     res
       .status(200)
@@ -246,7 +257,8 @@ const getStudentsByClassAndSectionController = async (req, res) => {
         });
     }
 
-    const students = await getStudentsByClassAndSection(className, sectionName);
+    const branchId = req.branchId ?? null;
+    const students = await getStudentsByClassAndSection(className, sectionName, branchId);
 
     res
       .status(200)

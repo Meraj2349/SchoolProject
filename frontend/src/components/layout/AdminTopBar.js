@@ -4,18 +4,22 @@ import { usePathname } from "next/navigation";
 import { FiBell, FiMenu, FiUser } from "react-icons/fi";
 import { useState } from "react";
 import { useAuthStore } from "@/store/authStore";
+import { useBranchStore } from "@/store/branchStore";
 import { authService } from "@/services/auth.service";
 import { useRouter } from "next/navigation";
 import LanguageSwitcher from "@/components/ui/LanguageSwitcher";
+import BranchSelector from "@/components/ui/BranchSelector";
 
 const ROUTE_LABELS = {
+  "/admin/dashboard": "Dashboard",
   "/admin/notices": "Notices",
   "/admin/messages": "Chairman Messages",
   "/admin/gallery": "Image Gallery",
   "/admin/routine": "Class Routine",
   "/admin/studentList": "Students",
   "/admin/teacherList": "Teachers",
-  "/admin/class": "Classes",
+  "/admin/classes-sections": "Class & Section",
+  "/admin/class": "Class Teacher",
   "/admin/subject": "Subjects",
   "/admin/results": "Results",
   "/admin/exams": "Exams",
@@ -32,6 +36,8 @@ export default function AdminTopBar({ onMenuToggle }) {
   const pathname = usePathname();
   const router = useRouter();
   const clearAuth = useAuthStore((s) => s.clearAuth);
+  const role = useAuthStore((s) => s.role);
+  const { currentBranchName } = useBranchStore();
   const [profileOpen, setProfileOpen] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
 
@@ -65,8 +71,11 @@ export default function AdminTopBar({ onMenuToggle }) {
         </div>
       </div>
 
-      {/* Right: language switcher + bell + avatar */}
+      {/* Right: branch selector + language switcher + bell + avatar */}
       <div className="flex items-center gap-2">
+        <div className="hidden sm:block">
+          <BranchSelector />
+        </div>
         <div className="hidden sm:block">
           <LanguageSwitcher />
         </div>
@@ -96,8 +105,12 @@ export default function AdminTopBar({ onMenuToggle }) {
               />
               <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-lg border border-slate-200 py-1 z-50">
                 <div className="px-4 py-3 border-b border-slate-100">
-                  <p className="text-sm font-semibold text-slate-800">Administrator</p>
-                  <p className="text-xs text-slate-500 mt-0.5">School Admin</p>
+                  <p className="text-sm font-semibold text-slate-800">
+                    {role === "super_admin" ? "Super Admin" : "Branch Admin"}
+                  </p>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    {role === "branch_admin" ? currentBranchName : "All Branches"}
+                  </p>
                 </div>
                 <button
                   onClick={handleLogout}

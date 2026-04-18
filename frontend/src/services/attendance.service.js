@@ -27,4 +27,18 @@ export const attendanceService = {
     httpClient
       .post("/attendance/bulk", { attendanceRecords: records })
       .then((r) => r.data),
+
+  // Grid: fetch students vs dates matrix for a class+section within a date range
+  getGrid: (className, section, startDate, endDate) =>
+    httpClient
+      .get("/attendance/grid", {
+        params: { className, section, startDate, endDate },
+      })
+      .then((r) => r.data),
+
+  // Upsert a single attendance cell in the grid
+  upsertCell: (studentId, classDate, status) =>
+    httpClient
+      .post("/attendance/cell", { studentId, classDate, status })
+      .then((r) => r.data),
 };

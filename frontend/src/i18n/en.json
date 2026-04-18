@@ -2,7 +2,6 @@
   "schoolName": "Star Shikkha Poribar",
   "establishedYear": "135479",
   "location": "Natiapara, Delduar, Tangail",
-
   "nav": {
     "home": "HOME",
     "about": "ABOUT",
@@ -13,7 +12,6 @@
     "onlineApply": "Online Apply",
     "quakerEducation": "A Quaker Education"
   },
-
   "footer": {
     "contact": "Contact",
     "email": "Email",
@@ -22,65 +20,73 @@
     "developedBy": "Developed By: Md.Meraj Mridha",
     "helpline": "Helpline: +88 019 97588476"
   },
-
   "sidebar": {
     "adminDashboard": "Admin Dashboard",
+    "branches": "Branch Management",
     "notice": "Notice",
     "chairMessage": "Chair Message",
+    "chairmanProfile": "Chairman Profile",
     "imageGallery": "Image Gallery",
     "routine": "Routine",
     "studentList": "Student List",
     "teacherList": "Teacher List",
     "classTeacher": "Class Teacher",
+    "classesSections": "Class & Section",
     "subject": "Subject",
     "results": "Results",
     "exams": "Exams",
     "events": "Events",
+    "attendance": "Mark Attendance",
     "attendanceGrid": "Attendance Grid",
     "settings": "Settings",
     "logout": "Log Out",
     "loggingOut": "Logging out…",
     "applications": "Applications",
     "noticeAnnouncements": "Notice & Announcement",
-    "news": "News"
+    "news": "News",
+    "quaker": "A Quaker Education"
   },
-
   "latestUpdates": {
     "label": "Latest Updates",
     "labelMobile": "Updates",
     "loadingError": "Failed to load latest updates"
   },
-
   "home": {
     "loading": "Loading…",
+    "leadershipTitle": "Leadership & Updates",
+    "leadershipSubtitle": "From our chairman, upcoming events, and latest news",
     "studentStatistics": "Student Statistics",
     "classWiseStudents": "Class wise Students",
     "loadingClassStats": "Loading class wise students…",
     "failedClassStats": "Failed to load class statistics",
     "noClasses": "No classes found"
   },
-
   "quickLinks": {
     "students": "Students",
     "teachers": "Teachers",
     "attendance": "Attendance",
     "result": "Result",
-    "routine": "Routine"
+    "routine": "Routine",
+    "quaker": "Quaker Education",
+    "selectClass": "Select Class",
+    "selectSection": "Select Section",
+    "classLabel": "Class",
+    "sectionLabel": "Section"
   },
-
   "eventNews": {
     "events": "EVENTS",
     "news": "NEWS",
     "viewAllEvents": "View All Events →",
     "viewAllNews": "View All News →",
     "newsLoading": "Loading news…",
-    "newsError": "Failed to load news"
+    "newsError": "Failed to load news",
+    "eventsLoading": "Loading events…",
+    "eventsError": "Failed to load events"
   },
-
   "chairmanCard": {
-    "viewFullMessage": "View Full Message"
+    "viewFullMessage": "View Full Message",
+    "chairmanMessage": "Chairman's Message"
   },
-
   "about": {
     "title": "About Us",
     "subtitle": "Star Shikkha Poribar – Excellence in Education",
@@ -94,7 +100,6 @@
     "phone": "Phone",
     "emailLabel": "Email"
   },
-
   "chairman": {
     "pageTitle": "Chairman's Message",
     "loading": "Loading chairman message…",
@@ -105,7 +110,6 @@
     "backToHome": "← Back to Home",
     "defaultMessage": "Welcome to our school! We are committed to providing excellent education."
   },
-
   "gallery": {
     "title": "Gallery",
     "browseByCategory": "Browse by Category",
@@ -129,7 +133,6 @@
       "notice": "Notices"
     }
   },
-
   "events": {
     "upcomingEvents": "Upcoming Events",
     "loadingEvents": "Loading events…",
@@ -145,7 +148,6 @@
     "minutes": "Minutes",
     "seconds": "Seconds"
   },
-
   "students": {
     "pageTitle": "Student Search",
     "pageSubtitle": "Search by name, roll number, class, and section",
@@ -176,7 +178,6 @@
     "parentContact": "Parent Contact",
     "noStudents": "No students found"
   },
-
   "teachers": {
     "pageTitle": "Our Teachers",
     "searchPlaceholder": "Search teachers…",
@@ -193,7 +194,6 @@
     "noTeachersFound": "No teachers found",
     "joined": "Joined:"
   },
-
   "results": {
     "pageTitle": "Student Results",
     "pageSubtitle": "Search by name, roll number, class, section, and exam",
@@ -220,7 +220,6 @@
     "total": "Total",
     "grade": "Grade"
   },
-
   "attendance": {
     "pageTitle": "Attendance Records",
     "pageSubtitle": "Search attendance by class and section",
@@ -240,7 +239,6 @@
     "noRecords": "No attendance records found.",
     "failedToFetch": "Failed to fetch attendance"
   },
-
   "routine": {
     "pageTitle": "School Routines",
     "searchPlaceholder": "Search routines…",
@@ -266,7 +264,6 @@
     "added": "Added:",
     "view": "View"
   },
-
   "admin": {
     "login": {
       "title": "Admin Login",
@@ -279,7 +276,14 @@
       "noAccount": "Don't have an account?",
       "signUp": "Sign up",
       "loginFailed": "Login failed",
-      "somethingWrong": "Something went wrong. Please try again."
+      "somethingWrong": "Something went wrong. Please try again.",
+      "selectBranch": "Select Branch",
+      "superAdmin": "Super Admin",
+      "branchPlaceholder": "-- Choose a branch --",
+      "continueBtn": "Continue",
+      "backBtn": "Back",
+      "loginAs": "Logging in as",
+      "superAdminLogin": "Super Admin Login"
     },
     "notices": {
       "title": "Manage Notices",
@@ -378,21 +382,23 @@
       "operationFailed": "Operation failed"
     },
     "classes": {
-      "title": "Class Management",
-      "addClass": "Add Class",
-      "editClass": "Edit Class",
-      "updateClass": "Update Class",
+      "title": "Class Teacher Management",
+      "addClass": "Assign Class Teacher",
+      "editClass": "Edit Assignment",
+      "updateClass": "Update Assignment",
       "cancel": "Cancel",
-      "allClasses": "All Classes",
+      "allClasses": "All Class Assignments",
       "className": "Class Name",
       "section": "Section",
+      "teacherName": "Class Teacher (Head of Class)",
+      "subject": "Subject",
       "name": "Name",
       "actions": "Actions",
       "loading": "Loading…",
-      "classAdded": "Class added!",
-      "classUpdated": "Class updated!",
+      "classAdded": "Class teacher assigned!",
+      "classUpdated": "Assignment updated!",
       "deleted": "Deleted.",
-      "deleteConfirm": "Delete this class?",
+      "deleteConfirm": "Delete this class assignment?",
       "operationFailed": "Operation failed"
     },
     "subjects": {
@@ -482,7 +488,12 @@
       "resultAdded": "Result added successfully!",
       "failed": "Failed to add result",
       "selectExam": "Select exam",
-      "selectSubject": "Select subject"
+      "selectSubject": "Select subject",
+      "resultUpdated": "Result updated successfully!",
+      "deleted": "Result deleted.",
+      "deleteConfirm": "Delete this result?",
+      "studentRequired": "Please select a student first",
+      "operationFailed": "Operation failed"
     },
     "routine": {
       "title": "Routine Management",
@@ -583,7 +594,14 @@
       "signIn": "Sign in",
       "passwordMismatch": "Passwords do not match",
       "registrationSuccess": "Registration successful! Please log in.",
-      "registrationFailed": "Registration failed"
+      "registrationFailed": "Registration failed",
+      "selectBranch": "Select Branch",
+      "branchPlaceholder": "-- Choose a branch --",
+      "continueBtn": "Continue",
+      "backBtn": "Back",
+      "registeringAs": "Registering for",
+      "superAdmin": "Super Admin",
+      "superAdminRegister": "Super Admin Registration"
     },
     "news": {
       "title": "News Management",
@@ -662,9 +680,57 @@
       "loading": "Loading…",
       "noApplications": "No applications found.",
       "operationFailed": "Operation failed"
+    },
+    "branches": {
+      "title": "Branch Management",
+      "addBranch": "Add Branch",
+      "editBranch": "Edit Branch",
+      "updateBranch": "Update Branch",
+      "cancel": "Cancel",
+      "allBranches": "All Branches",
+      "nameEn": "Name (English)",
+      "nameBn": "Name (Bangla)",
+      "addressEn": "Address (English)",
+      "addressBn": "Address (Bangla)",
+      "descriptionEn": "Description (English)",
+      "descriptionBn": "Description (Bangla)",
+      "isProposed": "Proposed Branch",
+      "establishedDate": "Established Date",
+      "status": "Status",
+      "active": "Active",
+      "proposed": "Proposed",
+      "actions": "Actions",
+      "loading": "Loading…",
+      "branchAdded": "Branch added!",
+      "branchUpdated": "Branch updated!",
+      "deleted": "Branch deleted.",
+      "deleteConfirm": "Delete this branch? This cannot be undone.",
+      "operationFailed": "Operation failed",
+      "nameRequired": "At least one branch name is required",
+      "noBranches": "No branches found. Add one above.",
+      "superAdminOnly": "Branch management is only available to super admins."
+    },
+    "dashboard": {
+      "title": "Super Admin Dashboard",
+      "overview": "Branch Overview",
+      "totalBranches": "Total Branches",
+      "totalStudents": "Total Students",
+      "totalTeachers": "Total Teachers",
+      "totalClasses": "Total Classes",
+      "students": "Students",
+      "teachers": "Teachers",
+      "classes": "Classes",
+      "proposed": "Proposed",
+      "active": "Active",
+      "established": "Est.",
+      "loading": "Loading dashboard...",
+      "errorLoading": "Failed to load dashboard data",
+      "noData": "No branch data available",
+      "viewBranch": "View Details",
+      "allBranches": "All Branches",
+      "switchTo": "Switch to this branch"
     }
   },
-
   "branches": {
     "pageTitle": "Our Branches",
     "pageSubtitle": "Find a branch near you",
@@ -677,15 +743,21 @@
     "noProposedBranches": "No proposed branches yet",
     "loading": "Loading branches…",
     "failedToLoad": "Failed to load branches",
-    "tryAgain": "Try Again"
+    "tryAgain": "Try Again",
+    "students": "Students",
+    "teachers": "Teachers",
+    "classes": "Classes",
+    "description": "Description",
+    "selected": "Selected",
+    "selectBranch": "Click to select this branch",
+    "viewing": "Viewing",
+    "clearSelection": "Clear selection"
   },
-
   "notFound": {
     "title": "Page Not Found",
     "subtitle": "Oops! The page you are looking for does not exist.",
     "backHome": "Back to Home"
   },
-
   "apply": {
     "pageTitle": "Online Admission",
     "pageSubtitle": "Fill in the form below to apply for admission",
@@ -711,7 +783,6 @@
     "requiredFields": "Please fill in all required fields",
     "submitFailed": "Submission failed. Please try again."
   },
-
   "common": {
     "loading": "Loading…",
     "error": "An error occurred",
@@ -726,5 +797,10 @@
     "close": "Close",
     "back": "Back",
     "na": "N/A"
+  },
+  "branchSelector": {
+    "allBranches": "All Branches",
+    "switchBranch": "Switch Branch",
+    "selectBranch": "Select a branch"
   }
 }

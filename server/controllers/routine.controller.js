@@ -23,14 +23,15 @@ export const createRoutine = async (req, res) => {
         .json({ message: t("routine_file_required", lang) });
     }
 
+    const branchId = req.branchId ?? null;
+
     // Validate class exists (Classes table থেকে ClassName এবং Section পাওয়ার জন্য)
-    const classInfo = await RoutineModel.validateClassId(ClassID);
+    const classInfo = await RoutineModel.validateClassId(ClassID, branchId);
     if (!classInfo) {
       return res.status(400).json({
         message: `Invalid ClassID: ${ClassID}. Class does not exist.`,
       });
     }
-
     let routineData = {
       RoutineTitle,
       ClassID: parseInt(ClassID),
@@ -126,7 +127,7 @@ export const createRoutine = async (req, res) => {
       }
     }
 
-    const routine = await RoutineModel.createRoutine(routineData);
+    const routine = await RoutineModel.createRoutine(routineData, branchId);
     res.status(201).json({
       message: t("routine_created", req.language),
       routine,
@@ -152,8 +153,9 @@ export const createRoutine = async (req, res) => {
 // Get all routines with class names and sections
 export const getAllRoutines = async (req, res) => {
   const lang = req.language;
+  const branchId = req.branchId ?? null;
   try {
-    const routines = await RoutineModel.getAllRoutines();
+    const routines = await RoutineModel.getAllRoutines(branchId);
     res.status(200).json({ count: routines.length, routines });
   } catch (error) {
     console.error("Get all routines error:", error);
@@ -194,9 +196,11 @@ export const getRoutinesByClassSection = async (req, res) => {
   try {
     const { className, section } = req.query;
 
+    const branchId = req.branchId ?? null;
     const routines = await RoutineModel.getRoutinesByClassSection(
       className,
       section,
+      branchId,
     );
 
     res.status(200).json({
@@ -223,7 +227,8 @@ export const getRoutinesByClassId = async (req, res) => {
       return res.status(400).json({ message: "Valid ClassID is required" });
     }
 
-    const routines = await RoutineModel.getRoutinesByClassId(classId);
+    const branchId = req.branchId ?? null;
+    const routines = await RoutineModel.getRoutinesByClassId(classId, branchId);
 
     res.status(200).json({
       message: "Routines retrieved successfully",
@@ -393,7 +398,8 @@ export const searchRoutines = async (req, res) => {
         .json({ message: "Search term must be at least 2 characters" });
     }
 
-    const routines = await RoutineModel.searchRoutines(q.trim());
+    const branchId = req.branchId ?? null;
+    const routines = await RoutineModel.searchRoutines(q.trim(), branchId);
 
     res.status(200).json({
       message: "Search completed successfully",
@@ -413,7 +419,8 @@ export const searchRoutines = async (req, res) => {
 // Get all available classes (Classes table থেকে dropdown এর জন্য)
 export const getAllClasses = async (req, res) => {
   try {
-    const classes = await RoutineModel.getAllClasses();
+    const branchId = req.branchId ?? null;
+    const classes = await RoutineModel.getAllClasses(branchId);
 
     res.status(200).json({
       message: "Classes retrieved successfully",
@@ -432,8 +439,9 @@ export const getAllClasses = async (req, res) => {
 // Get filter options (Classes table থেকে distinct ClassName এবং Section)
 export const getFilterOptions = async (req, res) => {
   try {
-    const classes = await RoutineModel.getDistinctClasses();
-    const sections = await RoutineModel.getDistinctSections();
+    const branchId = req.branchId ?? null;
+    const classes = await RoutineModel.getDistinctClasses(branchId);
+    const sections = await RoutineModel.getDistinctSections(branchId);
 
     res.status(200).json({
       message: "Filter options retrieved successfully",
@@ -460,7 +468,8 @@ export const getSectionsByClassName = async (req, res) => {
       return res.status(400).json({ message: "ClassName is required" });
     }
 
-    const sections = await RoutineModel.getSectionsByClassName(className);
+    const branchId = req.branchId ?? null;
+    const sections = await RoutineModel.getSectionsByClassName(className, branchId);
 
     res.status(200).json({
       message: "Sections retrieved successfully",

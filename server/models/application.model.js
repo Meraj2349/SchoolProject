@@ -72,6 +72,67 @@ const updateApplicationStatus = async (id, status) => {
       [status, id],
     );
     if (result.affectedRows === 0) throw new Error("Application not found");
+
+    // When accepted, auto-create the student record
+    if (status === "accepted") {
+      // Fetch the application data
+      const [rows] = await db.query("SELECT * FROM Applications WHERE id = ?", [id]);
+      if (rows.length === 0) throw new Error("Application not found");
+      const app = rows[0];
+
+      // Split full name into first/last
+      const nameParts = (app.applicant_name || "").trim().split(/\s+/);
+      const firstName = nameParts[0] || app.applicant_name;
+      const lastName = nameParts.slice(1).join(" ") || "-";
+
+      // Capitalize gender to match Students ENUM('Male','Female')
+      const gender =
+        app.gender === "male" ? "Male" :
+        app.gender === "female" ? "Female" : "Male";
+
+      // Find or create the class (default section 'A')
+      const className = app.applying_for_class;
+      const section = "A";
+      const [existingClass] = await db.query(
+        "SELECT ClassID FROM Classes WHERE ClassName = ? AND Section = ?",
+        [className, section],
+      );
+      let classId;
+      if (existingClass.length > 0) {
+        classId = existingClass[0].ClassID;
+      } else {
+        const [newClass] = await db.query(
+          "INSERT INTO Classes (ClassName, Section) VALUES (?, ?)",
+          [className, section],
+        );
+        classId = newClass.insertId;
+      }
+
+      // Generate a unique roll number: max existing + 1 for this class
+      const [maxRoll] = await db.query(
+        "SELECT MAX(CAST(RollNumber AS UNSIGNED)) AS maxRoll FROM Students WHERE ClassID = ?",
+        [classId],
+      );
+      const nextRoll = ((maxRoll[0].maxRoll || 0) + 1).toString();
+
+      // Insert into Students
+      await db.query(
+        `INSERT INTO Students
+          (FirstName, LastName, DateOfBirth, Gender, ClassID, AdmissionDate, Address, ParentContact, RollNumber)
+         VALUES (?, ?, ?, ?, ?, CURDATE(), ?, ?, ?)`,
+        [
+          firstName,
+          lastName,
+          app.date_of_birth,
+          gender,
+          classId,
+          app.address || null,
+          app.parent_contact,
+          nextRoll,
+        ],
+      );
+    }
+
     return { id, status };
   } catch (err) {
     throw new Error("Error updating application status: " + err.message);

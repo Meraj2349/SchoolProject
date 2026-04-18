@@ -1,5 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  output: 'standalone',
   // Allow images from the backend server
   images: {
     remotePatterns: [
@@ -21,12 +22,13 @@ const nextConfig = {
       },
     ],
   },
-  // Proxy API calls to backend during development
+  // Proxy API calls to backend (uses BACKEND_URL env var in Docker, falls back to localhost for dev)
   async rewrites() {
+    const backendUrl = process.env.BACKEND_URL || 'http://localhost:3000';
     return [
       {
         source: '/api/:path*',
-        destination: 'http://localhost:3000/api/:path*',
+        destination: `${backendUrl}/api/:path*`,
       },
     ];
   },

@@ -1,125 +1,120 @@
 import db from "../config/db.config.js";
+import { branchFilter } from "../utils/branchFilter.js";
 
-// Helper function to find or create a class (using only className)
-const findOrCreateClass = async (className) => {
+// Add a new subject (classId is the integer ClassID from the Classes table)
+export const addSubject = async ({ subjectName, classId }, branchId = null) => {
   try {
-    // First, try to find any class with this className
-    const [existingClass] = await db.query(
-      "SELECT ClassID FROM Classes WHERE ClassName = ? LIMIT 1",
-      [className],
-    );
-
-    if (existingClass.length > 0) {
-      return existingClass[0].ClassID;
+    let sql, values;
+    if (branchId != null) {
+      sql = "INSERT INTO Subjects (SubjectName, ClassID, branch_id) VALUES (?, ?, ?)";
+      values = [subjectName, classId, branchId];
+    } else {
+      sql = "INSERT INTO Subjects (SubjectName, ClassID) VALUES (?, ?)";
+      values = [subjectName, classId];
     }
-
-    // If not found, create a new class with default section 'A'
-    const [result] = await db.query(
-      "INSERT INTO Classes (ClassName, Section) VALUES (?, 'A')",
-      [className],
-    );
-    return result.insertId;
-  } catch (error) {
-    throw new Error("Error finding or creating class: " + error.message);
-  }
-};
-
-// Add a new subject
-export const addSubject = async ({ subjectName, className }) => {
-  try {
-    // Get or create ClassID
-    const classId = await findOrCreateClass(className);
-
-    const sql = `
-      INSERT INTO Subjects (SubjectName, ClassID)
-      VALUES (?, ?)
-    `;
-
-    console.log("Inserting into database:", {
-      subjectName,
-      className,
-      classId,
-    }); // Debugging log
-    const [result] = await db.query(sql, [subjectName, classId]);
+    const [result] = await db.query(sql, values);
     return { SubjectID: result.insertId };
   } catch (error) {
-    console.error("Error adding subject to database:", error); // Log the error
-    throw error;
+    throw new Error("Error adding subject: " + error.message);
   }
 };
 
-// Delete a subject by ID
-export const deleteSubject = async (subjectId) => {
-  const sql = `
-    DELETE FROM Subjects WHERE SubjectID = ?
-  `;
+// Delete a subject by ID (branch-scoped)
+export const deleteSubject = async (subjectId, branchId = null) => {
+  const { clause, params: branchParams } = branchFilter(branchId);
   try {
-    const [result] = await db.query(sql, [subjectId]);
-    if (result.affectedRows === 0) {
-      throw new Error("No subject found with that ID");
-    }
-    return { success: true };
-  } catch (error) {
-    console.error("Error deleting subject:", error);
-    throw error;
-  }
-};
-
-// Get all subjects with unique class names
-export const getSubjects = async () => {
-  const sql = `
-    SELECT s.SubjectID, s.SubjectName, s.ClassID, c.ClassName
-    FROM Subjects s
-    LEFT JOIN Classes c ON s.ClassID = c.ClassID
-    GROUP BY s.SubjectID, s.SubjectName, c.ClassName
-    ORDER BY c.ClassName, s.SubjectName
-  `;
-  try {
-    const [rows] = await db.query(sql);
-    return rows;
-  } catch (error) {
-    console.error("Error fetching subjects:", error);
-    throw error;
-  }
-};
-
-// Edit a subject by ID
-export const editSubject = async (subjectId, { subjectName, className }) => {
-  try {
-    // Get or create ClassID
-    const classId = await findOrCreateClass(className);
-
-    const sql = `
-      UPDATE Subjects
-      SET SubjectName = ?, ClassID = ?
-      WHERE SubjectID = ?
-    `;
-
-    console.log("Updating subject in database:", {
-      subjectId,
-      subjectName,
-      className,
-      classId,
-    }); // Debugging log
-    const [result] = await db.query(sql, [subjectName, classId, subjectId]);
-    if (result.affectedRows === 0) {
-      throw new Error("No subject found with that ID");
-    }
-    return { success: true };
-  } catch (error) {
-    console.error("Error updating subject in database:", error); // Log the error
-    throw error;
-  }
-};
-
-// Get all classes (unique class names)
-export const getAllClasses = async () => {
-  try {
-    const [rows] = await db.query(
-      "SELECT DISTINCT ClassName FROM Classes ORDER BY ClassName",
+    const [result] = await db.query(
+      `DELETE FROM Subjects WHERE SubjectID = ? ${clause}`,
+      [subjectId, ...branchParams],
     );
+    if (result.affectedRows === 0) {
+      throw new Error("No subject found with that ID");
+    }
+    return { success: true };
+  } catch (error) {
+    throw new Error("Error deleting subject: " + error.message);
+  }
+};
+
+// Get all subjects with class name and section (branch-scoped via Classes join)
+export const getSubjects = async (branchId = null) => {
+  const { clause, params: branchParams } = branchFilter(branchId, "c");
+  try {
+    const [rows] = await db.query(`
+      SELECT
+        s.SubjectID,
+        s.SubjectName,
+        s.ClassID,
+        c.ClassName,
+        c.Section
+      FROM Subjects s
+      LEFT JOIN Classes c ON s.ClassID = c.ClassID
+      WHERE 1=1 ${clause}
+      ORDER BY c.ClassName, c.Section, s.SubjectName
+    `, branchParams);
     return rows;
-  } catch (err) {
-    throw new Error("Error fetching classes: " + err.message);
+  } catch (error) {
+    throw new Error("Error fetching subjects: " + error.message);
+  }
+};
+
+// Get subjects by ClassID (branch-scoped)
+export const getSubjectsByClassId = async (classId, branchId = null) => {
+  const { clause, params: branchParams } = branchFilter(branchId, "c");
+  try {
+    const [rows] = await db.query(`
+      SELECT
+        s.SubjectID,
+        s.SubjectName,
+        s.ClassID,
+        c.ClassName,
+        c.Section
+      FROM Subjects s
+      LEFT JOIN Classes c ON s.ClassID = c.ClassID
+      WHERE s.ClassID = ? ${clause}
+      ORDER BY s.SubjectName
+    `, [classId, ...branchParams]);
+    return rows;
+  } catch (error) {
+    throw new Error("Error fetching subjects by class: " + error.message);
+  }
+};
+
+// Get subjects by ClassName (branch-scoped via Classes join)
+export const getSubjectsByClassName = async (className, branchId = null) => {
+  const { clause, params: branchParams } = branchFilter(branchId, "c");
+  try {
+    const [rows] = await db.query(`
+      SELECT
+        s.SubjectID,
+        s.SubjectName,
+        s.ClassID,
+        c.ClassName,
+        c.Section
+      FROM Subjects s
+      LEFT JOIN Classes c ON s.ClassID = c.ClassID
+      WHERE c.ClassName = ? ${clause}
+      ORDER BY c.Section, s.SubjectName
+    `, [className, ...branchParams]);
+    return rows;
+  } catch (error) {
+    throw new Error("Error fetching subjects by class name: " + error.message);
+  }
+};
+
+// Edit a subject by ID (branch-scoped)
+export const editSubject = async (subjectId, { subjectName, classId }, branchId = null) => {
+  const { clause, params: branchParams } = branchFilter(branchId);
+  try {
+    const [result] = await db.query(
+      `UPDATE Subjects SET SubjectName = ?, ClassID = ? WHERE SubjectID = ? ${clause}`,
+      [subjectName, classId, subjectId, ...branchParams],
+    );
+    if (result.affectedRows === 0) {
+      throw new Error("No subject found with that ID");
+    }
+    return { success: true };
+  } catch (error) {
+    throw new Error("Error updating subject: " + error.message);
   }
 };
