@@ -57,22 +57,34 @@ export const verifyStudentController = async (req, res) => {
 };
 
 // Start a new quiz: return N questions (without correct answers).
+// Progressively relaxes filters (difficulty → grade → subject) so a student
+// never hits a dead end when their exact combination has no questions.
 export const startController = async (req, res) => {
   try {
     const { subject, grade, difficulty, numQuestions } = req.body;
     const limit = Math.min(Math.max(parseInt(numQuestions, 10) || 10, 1), 50);
 
-    const questions = await pickRandomQuestions({
-      subject,
-      grade,
-      difficulty,
-      limit,
-    });
+    const attempts = [
+      { subject, grade, difficulty, relaxed: null },
+      { subject, grade, difficulty: "all", relaxed: "difficulty" },
+      { subject, grade: "all", difficulty: "all", relaxed: "grade+difficulty" },
+      { subject: "all", grade: "all", difficulty: "all", relaxed: "all" },
+    ];
+
+    let questions = [];
+    let relaxed = null;
+    for (const filters of attempts) {
+      questions = await pickRandomQuestions({ ...filters, limit });
+      if (questions.length > 0) {
+        relaxed = filters.relaxed;
+        break;
+      }
+    }
 
     if (questions.length === 0) {
       return res
         .status(404)
-        .json({ error: "No questions match the selected filters" });
+        .json({ error: "No quiz questions available in the database yet" });
     }
 
     const safeQuestions = questions.map((q) => ({
@@ -89,6 +101,7 @@ export const startController = async (req, res) => {
       totalQuestions: safeQuestions.length,
       subject: subject || "all",
       grade: grade || "all",
+      relaxed,
       startedAt: new Date().toISOString(),
     });
   } catch (err) {

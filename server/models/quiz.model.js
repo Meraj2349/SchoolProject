@@ -1,6 +1,6 @@
 import db from "../config/db.config.js";
 
-// Distinct subjects + grades (for dropdown choices)
+// Distinct subjects + grades + difficulties (for dropdown choices)
 export const getQuizMeta = async () => {
   const [subjects] = await db.query(
     `SELECT DISTINCT Subject FROM QuizQuestions WHERE Subject IS NOT NULL ORDER BY Subject`,
@@ -8,9 +8,13 @@ export const getQuizMeta = async () => {
   const [grades] = await db.query(
     `SELECT DISTINCT Grade FROM QuizQuestions WHERE Grade IS NOT NULL ORDER BY Grade`,
   );
+  const [difficulties] = await db.query(
+    `SELECT DISTINCT Difficulty FROM QuizQuestions WHERE Difficulty IS NOT NULL ORDER BY FIELD(Difficulty,'easy','medium','hard')`,
+  );
   return {
     subjects: subjects.map((r) => r.Subject),
     grades: grades.map((r) => r.Grade),
+    difficulties: difficulties.map((r) => r.Difficulty),
   };
 };
 

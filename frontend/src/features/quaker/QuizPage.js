@@ -5,8 +5,32 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { quizService, quizTokenHolder } from "@/services/quiz.service";
 import { useQuizSessionStore } from "@/store/quizSessionStore";
+import MathText from "./MathText";
 
-const DIFFICULTIES = ["all", "easy", "medium", "hard"];
+/**
+ * Normalize question.options to an array of { letter, text }.
+ * DB stores `{"A":"...","B":"...","C":"...","D":"..."}` but occasionally
+ * an array slips through; handle both.
+ */
+function normalizeOptions(opts) {
+  if (!opts) return [];
+  if (Array.isArray(opts)) {
+    return opts.map((text, i) => ({
+      letter: String.fromCharCode(65 + i),
+      text: String(text ?? ""),
+    }));
+  }
+  if (typeof opts === "object") {
+    return Object.keys(opts)
+      .sort((a, b) => a.toUpperCase().localeCompare(b.toUpperCase()))
+      .map((key) => ({
+        letter: String(key).toUpperCase(),
+        text: String(opts[key] ?? ""),
+      }));
+  }
+  return [];
+}
+
 const QUESTION_COUNTS = [5, 10, 15, 20];
 
 /* Difficulty pill colours — borrowed from QuickLinks card palette */
@@ -38,13 +62,14 @@ export default function QuizPage() {
   const { student, quizToken, hydrateFromStorage } = useQuizSessionStore();
 
   const [phase, setPhase] = useState("setup"); // setup | playing | results
-  const [meta, setMeta] = useState({ subjects: [], grades: [] });
+  const [meta, setMeta] = useState({ subjects: [], grades: [], difficulties: [] });
   const [subject, setSubject] = useState("all");
   const [grade, setGrade] = useState("all");
   const [difficulty, setDifficulty] = useState("all");
   const [numQuestions, setNumQuestions] = useState(10);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [relaxedNote, setRelaxedNote] = useState("");
 
   const [questions, setQuestions] = useState([]);
   const [current, setCurrent] = useState(0);
@@ -66,13 +91,20 @@ export default function QuizPage() {
   useEffect(() => {
     quizService
       .getMeta()
-      .then(setMeta)
-      .catch(() => setMeta({ subjects: [], grades: [] }));
+      .then((m) =>
+        setMeta({
+          subjects: m.subjects || [],
+          grades: m.grades || [],
+          difficulties: m.difficulties || [],
+        }),
+      )
+      .catch(() => setMeta({ subjects: [], grades: [], difficulties: [] }));
   }, []);
 
   const handleStart = async () => {
     setLoading(true);
     setError("");
+    setRelaxedNote("");
     try {
       const data = await quizService.start({
         subject,
@@ -81,9 +113,17 @@ export default function QuizPage() {
         numQuestions,
       });
       if (!data.questions?.length) {
-        setError("No questions match those filters. Try different options.");
+        setError("No quiz questions available. Try again later.");
         setLoading(false);
         return;
+      }
+      if (data.relaxed) {
+        const msg = {
+          difficulty: `No ${difficulty} questions for that subject+grade — showing mixed difficulty.`,
+          "grade+difficulty": `No questions for that exact grade — showing all grades.`,
+          all: `No questions for those filters — showing a random mix.`,
+        }[data.relaxed];
+        setRelaxedNote(msg || "Filters relaxed to find questions.");
       }
       setQuestions(data.questions);
       setCurrent(0);
@@ -283,9 +323,9 @@ export default function QuizPage() {
                   Difficulty
                 </label>
                 <div className="grid grid-cols-4 gap-2">
-                  {DIFFICULTIES.map((d) => {
+                  {["all", ...(meta.difficulties || [])].map((d) => {
                     const isActive = difficulty === d;
-                    const colors = DIFF_COLORS[d];
+                    const colors = DIFF_COLORS[d] || DIFF_COLORS.all;
                     return (
                       <button
                         key={d}
@@ -386,41 +426,72 @@ export default function QuizPage() {
   /* ── PLAYING PHASE ── */
   if (phase === "playing") {
     const q = questions[current];
-    const options = Array.isArray(q.options) ? q.options : [];
+    const options = normalizeOptions(q.options);
     const selected = answers[q.id];
     const answeredCount = Object.keys(answers).length;
     const progressPct = ((current + 1) / questions.length) * 100;
 
     return (
-      <div className="bg-gradient-to-b from-[#fdf8f0] to-[#f5ede0] min-h-screen py-8">
-        <div className="max-w-3xl mx-auto px-5">
-          {/* Progress header */}
-          <div className="flex items-center justify-between mb-3">
-            <p className="text-sm font-semibold text-[#5a6072]">
-              Question {current + 1} of {questions.length}
-            </p>
-            <p
-              className="text-sm font-bold px-3 py-1 rounded-full"
+      <div className="bg-[#f7f4ec] min-h-screen pb-16">
+        {/* Sticky top bar — progress, counter, answered chip */}
+        <div
+          className="sticky top-0 z-20 bg-white/90 backdrop-blur-md border-b border-[rgba(201,168,76,0.3)]"
+          style={{ boxShadow: "0 1px 0 rgba(13,31,60,0.04)" }}
+        >
+          <div className="max-w-4xl mx-auto px-5 py-4">
+            <div className="flex items-center justify-between mb-2.5">
+              <div className="flex items-center gap-3">
+                <span className="text-xs font-bold tracking-[0.15em] uppercase text-[#7a5c1e]">
+                  Question
+                </span>
+                <span className="text-lg font-extrabold text-[#0d1f3c] tabular-nums">
+                  {String(current + 1).padStart(2, "0")}
+                  <span className="text-[#9ca3af] font-medium mx-1">/</span>
+                  <span className="text-[#5a6072] font-semibold">
+                    {String(questions.length).padStart(2, "0")}
+                  </span>
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span
+                  className="text-xs font-semibold px-2.5 py-1 rounded-full tabular-nums"
+                  style={{
+                    background: "rgba(16,185,129,0.1)",
+                    color: "#047857",
+                    border: "1px solid rgba(16,185,129,0.3)",
+                  }}
+                >
+                  {answeredCount}/{questions.length} answered
+                </span>
+              </div>
+            </div>
+            <div className="h-1.5 bg-[rgba(201,168,76,0.15)] rounded-full overflow-hidden">
+              <div
+                className="h-full rounded-full transition-[width] duration-500 ease-out"
+                style={{
+                  width: `${progressPct}%`,
+                  background:
+                    "linear-gradient(90deg, #10b981 0%, #059669 50%, #047857 100%)",
+                  boxShadow: "0 0 8px rgba(16,185,129,0.4)",
+                }}
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="max-w-4xl mx-auto px-5 pt-8">
+          {relaxedNote && (
+            <div
+              className="mb-5 px-4 py-3 rounded-xl text-sm"
               style={{
                 background: "rgba(201,168,76,0.12)",
                 color: "#7a5c1e",
                 border: "1px solid rgba(201,168,76,0.35)",
               }}
             >
-              {answeredCount} answered
-            </p>
-          </div>
-
-          {/* Progress bar */}
-          <div className="h-2 bg-gray-200 rounded-full overflow-hidden mb-8">
-            <div
-              className="h-full rounded-full transition-all"
-              style={{
-                width: `${progressPct}%`,
-                background: "linear-gradient(90deg, #10b981, #059669)",
-              }}
-            />
-          </div>
+              <span className="font-semibold">Heads up:</span> {relaxedNote}
+            </div>
+          )}
 
           {error && (
             <div className="bg-red-500/10 border border-red-400/30 text-red-700 px-4 py-2.5 rounded-lg mb-4 text-sm">
@@ -429,7 +500,13 @@ export default function QuizPage() {
           )}
 
           {/* Question card */}
-          <div className="bg-white rounded-2xl border border-[rgba(201,168,76,0.25)] shadow-[0_2px_6px_rgba(13,31,60,0.07),0_8px_24px_rgba(13,31,60,0.06)] overflow-hidden mb-5">
+          <div
+            className="bg-white rounded-2xl border border-[rgba(201,168,76,0.25)] overflow-hidden mb-6"
+            style={{
+              boxShadow:
+                "0 1px 2px rgba(13,31,60,0.04), 0 12px 32px rgba(13,31,60,0.08)",
+            }}
+          >
             <div
               className="h-[3px]"
               style={{
@@ -437,12 +514,12 @@ export default function QuizPage() {
                   "linear-gradient(90deg, transparent 0%, #c9a84c 30%, #e2c07a 50%, #c9a84c 70%, transparent 100%)",
               }}
             />
-            <div className="p-6 sm:p-8">
+            <div className="px-6 py-8 sm:px-10 sm:py-10">
               {/* Tag chips */}
-              <div className="flex gap-2 flex-wrap mb-5">
+              <div className="flex gap-2 flex-wrap mb-6">
                 {q.subject && (
                   <span
-                    className="px-2.5 py-1 rounded-md text-xs font-bold"
+                    className="px-2.5 py-1 rounded-md text-[11px] font-bold tracking-wide uppercase"
                     style={{
                       background: "rgba(16,185,129,0.12)",
                       color: "#047857",
@@ -454,19 +531,19 @@ export default function QuizPage() {
                 )}
                 {q.grade && (
                   <span
-                    className="px-2.5 py-1 rounded-md text-xs font-semibold"
+                    className="px-2.5 py-1 rounded-md text-[11px] font-semibold tracking-wide uppercase"
                     style={{
                       background: "rgba(201,168,76,0.12)",
                       color: "#7a5c1e",
                       border: "1px solid rgba(201,168,76,0.3)",
                     }}
                   >
-                    {q.grade}
+                    Class {q.grade}
                   </span>
                 )}
                 {q.difficulty && (
                   <span
-                    className="px-2.5 py-1 rounded-md text-xs font-semibold capitalize"
+                    className="px-2.5 py-1 rounded-md text-[11px] font-semibold tracking-wide uppercase"
                     style={{
                       background: "rgba(75,46,131,0.1)",
                       color: "#4b2e83",
@@ -478,75 +555,101 @@ export default function QuizPage() {
                 )}
               </div>
 
-              <h2 className="text-xl sm:text-2xl font-bold text-[#0d1f3c] leading-relaxed mb-6 whitespace-pre-wrap">
+              {/* Question prompt — serif display face for gravitas + MathText */}
+              <MathText
+                as="div"
+                className="text-[1.35rem] sm:text-[1.55rem] font-semibold text-[#0d1f3c] leading-[1.55] mb-8 quiz-prompt whitespace-pre-wrap"
+              >
                 {q.question}
-              </h2>
+              </MathText>
 
-              <div className="space-y-3">
-                {options.map((opt, idx) => {
-                  const letter = String.fromCharCode(65 + idx);
+              {/* Options — 2-col on desktop, 1-col mobile */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {options.map(({ letter, text }) => {
                   const isSelected = selected === letter;
                   return (
                     <button
-                      key={idx}
+                      key={letter}
                       type="button"
                       onClick={() => pickAnswer(q.id, letter)}
-                      className="w-full text-left px-5 py-4 rounded-xl border-2 transition-all"
+                      className="group text-left px-5 py-4 rounded-xl border-2 transition-all flex items-start gap-3.5 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
                       style={
                         isSelected
                           ? {
-                              background: "rgba(16,185,129,0.08)",
+                              background:
+                                "linear-gradient(135deg, rgba(16,185,129,0.1) 0%, rgba(5,150,105,0.06) 100%)",
                               borderColor: "#10b981",
-                              boxShadow: "0 4px 16px rgba(16,185,129,0.2)",
+                              boxShadow:
+                                "0 4px 16px rgba(16,185,129,0.22), inset 0 1px 0 rgba(255,255,255,0.6)",
                             }
                           : {
-                              background: "#fafafa",
-                              borderColor: "rgba(201,168,76,0.2)",
+                              background: "#fcfbf7",
+                              borderColor: "rgba(201,168,76,0.25)",
                             }
                       }
                       onMouseEnter={(e) => {
                         if (!isSelected) {
                           e.currentTarget.style.background = "#f0fdf4";
                           e.currentTarget.style.borderColor =
-                            "rgba(16,185,129,0.4)";
+                            "rgba(16,185,129,0.5)";
+                          e.currentTarget.style.transform = "translateY(-1px)";
                         }
                       }}
                       onMouseLeave={(e) => {
                         if (!isSelected) {
-                          e.currentTarget.style.background = "#fafafa";
+                          e.currentTarget.style.background = "#fcfbf7";
                           e.currentTarget.style.borderColor =
-                            "rgba(201,168,76,0.2)";
+                            "rgba(201,168,76,0.25)";
+                          e.currentTarget.style.transform = "translateY(0)";
                         }
                       }}
                     >
                       <span
-                        className="inline-flex items-center justify-center w-8 h-8 rounded-lg font-bold mr-3 text-sm transition-all"
+                        className="shrink-0 inline-flex items-center justify-center w-9 h-9 rounded-lg font-extrabold text-sm transition-all"
                         style={
                           isSelected
                             ? {
                                 background:
                                   "linear-gradient(135deg, #10b981 0%, #059669 100%)",
                                 color: "#fff",
+                                boxShadow: "0 4px 10px rgba(16,185,129,0.4)",
                               }
                             : {
                                 background: "rgba(201,168,76,0.15)",
                                 color: "#7a5c1e",
+                                border: "1px solid rgba(201,168,76,0.3)",
                               }
                         }
                       >
                         {letter}
                       </span>
-                      <span className="text-base text-[#0d1f3c] font-medium">
-                        {opt}
-                      </span>
+                      <MathText
+                        as="span"
+                        className="text-[1rem] sm:text-[1.05rem] text-[#0d1f3c] leading-relaxed pt-1 min-w-0 break-words"
+                      >
+                        {text}
+                      </MathText>
+                      {isSelected && (
+                        <span
+                          className="shrink-0 ml-auto self-center text-emerald-600 text-lg"
+                          aria-hidden
+                        >
+                          ✓
+                        </span>
+                      )}
                     </button>
                   );
                 })}
               </div>
+
+              {/* Keyboard hint */}
+              <p className="mt-6 text-xs text-[#9ca3af] text-center">
+                Tip: click an option or tap it on mobile to select
+              </p>
             </div>
           </div>
 
-          {/* Navigation buttons */}
+          {/* Navigation */}
           <div className="flex gap-3">
             <button
               type="button"
@@ -735,6 +838,11 @@ export default function QuizPage() {
             <div className="p-4 space-y-3">
               {details.map((d, idx) => {
                 const q = questions.find((x) => x.id === d.questionId);
+                const reviewOptions = normalizeOptions(q?.options);
+                const findOptText = (letter) =>
+                  reviewOptions.find((o) => o.letter === letter)?.text || "";
+                const userText = findOptText(d.userAnswer);
+                const correctText = findOptText(d.correctAnswer);
                 return (
                   <div
                     key={d.questionId}
@@ -752,9 +860,16 @@ export default function QuizPage() {
                     }
                   >
                     <div className="flex items-start justify-between gap-3 mb-3">
-                      <p className="text-sm font-semibold text-[#0d1f3c] leading-snug">
-                        {idx + 1}. {q?.question || `Question ${d.questionId}`}
-                      </p>
+                      <div className="min-w-0 flex-1">
+                        <div className="text-sm font-semibold text-[#0d1f3c] leading-snug flex gap-2">
+                          <span className="tabular-nums text-[#7a5c1e]">
+                            {idx + 1}.
+                          </span>
+                          <MathText as="span" className="break-words">
+                            {q?.question || `Question ${d.questionId}`}
+                          </MathText>
+                        </div>
+                      </div>
                       <span
                         className="px-2.5 py-0.5 rounded-full text-xs font-bold whitespace-nowrap flex-shrink-0"
                         style={
@@ -772,23 +887,41 @@ export default function QuizPage() {
                         {d.isCorrect ? "✓ Correct" : "✗ Wrong"}
                       </span>
                     </div>
-                    <div className="text-xs space-y-1">
-                      <p className="text-[#5a6072]">
-                        Your answer:{" "}
+                    <div className="text-sm space-y-2">
+                      <div className="text-[#5a6072] flex flex-wrap gap-x-2 items-baseline">
+                        <span className="shrink-0">Your answer:</span>
                         <span
                           className="font-bold"
-                          style={{ color: d.isCorrect ? "#047857" : "#be123c" }}
+                          style={{
+                            color: d.isCorrect ? "#047857" : "#be123c",
+                          }}
                         >
                           {d.userAnswer || "—"}
                         </span>
-                      </p>
+                        {userText && (
+                          <MathText
+                            as="span"
+                            className="text-[#0d1f3c] break-words min-w-0"
+                          >
+                            {userText}
+                          </MathText>
+                        )}
+                      </div>
                       {!d.isCorrect && (
-                        <p className="text-[#5a6072]">
-                          Correct:{" "}
+                        <div className="text-[#5a6072] flex flex-wrap gap-x-2 items-baseline">
+                          <span className="shrink-0">Correct:</span>
                           <span className="font-bold text-[#047857]">
                             {d.correctAnswer}
                           </span>
-                        </p>
+                          {correctText && (
+                            <MathText
+                              as="span"
+                              className="text-[#0d1f3c] break-words min-w-0"
+                            >
+                              {correctText}
+                            </MathText>
+                          )}
+                        </div>
                       )}
                     </div>
                   </div>
