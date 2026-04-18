@@ -5,11 +5,10 @@ import HeroSection from "./HeroSection";
 import LeadershipSection from "./LeadershipSection";
 import AchievementsSection from "./AchievementsSection";
 import ClassStatistics from "./ClassStatistics";
-import "@/styles/Homepage.css";
 
 export default function HomePage() {
   return (
-    <div className="school-website">
+    <div className="font-sans text-gray-900 min-h-screen scroll-smooth">
       <Navbar />
       <LatestUpdatesNotice />
       <main>

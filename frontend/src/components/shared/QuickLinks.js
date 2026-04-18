@@ -43,7 +43,7 @@ function QuickLinkItem({ link }) {
   );
 }
 
-export default function QuickLinks({ links }) {
+export default function QuickLinks({ links, hideHeader = false }) {
   const t = useTranslations("quickLinks");
   const { currentBranchId, currentBranchName } = useBranchStore();
 
@@ -53,12 +53,14 @@ export default function QuickLinks({ links }) {
 
   return (
     <div className="ql-wrap">
-      {/* Section label */}
-      <div className="ql-header">
-        <span className="ql-header__line" />
-        <span className="ql-header__text">Quick Links</span>
-        <span className="ql-header__line" />
-      </div>
+      {/* Section label — hidden when parent wrapper already shows a header */}
+      {!hideHeader && (
+        <div className="ql-header">
+          <span className="ql-header__line" />
+          <span className="ql-header__text">Quick Links</span>
+          <span className="ql-header__line" />
+        </div>
+      )}
 
       {/* Active branch context badge */}
       {currentBranchId != null && (
@@ -69,13 +71,14 @@ export default function QuickLinks({ links }) {
             justifyContent: "center",
             gap: 5,
             marginBottom: 10,
-            padding: "4px 10px",
-            background: "linear-gradient(135deg,rgba(16,185,129,0.12) 0%,rgba(5,150,105,0.08) 100%)",
-            border: "1px solid rgba(16,185,129,0.35)",
+            padding: "4px 12px",
+            background: "rgba(201,168,76,0.1)",
+            border: "1px solid rgba(201,168,76,0.4)",
             borderRadius: 12,
             fontSize: 11,
-            color: "#065f46",
+            color: "#7a5c1e",
             fontWeight: 600,
+            letterSpacing: "0.03em",
           }}
         >
           <span style={{ fontSize: 10 }}>🏫</span>

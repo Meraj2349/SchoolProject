@@ -51,6 +51,8 @@
   },
   "home": {
     "loading": "লোড হচ্ছে…",
+    "leadershipTitle": "নেতৃত্ব ও আপডেট",
+    "leadershipSubtitle": "সভাপতির বার্তা, আসন্ন ইভেন্ট এবং সর্বশেষ সংবাদ",
     "studentStatistics": "শিক্ষার্থী পরিসংখ্যান",
     "classWiseStudents": "শ্রেণি অনুযায়ী শিক্ষার্থী",
     "loadingClassStats": "শ্রেণি অনুযায়ী শিক্ষার্থী লোড হচ্ছে…",
@@ -74,7 +76,9 @@
     "viewAllEvents": "সকল ইভেন্ট দেখুন →",
     "viewAllNews": "সকল সংবাদ দেখুন →",
     "newsLoading": "সংবাদ লোড হচ্ছে…",
-    "newsError": "সংবাদ লোড করতে ব্যর্থ হয়েছে"
+    "newsError": "সংবাদ লোড করতে ব্যর্থ হয়েছে",
+    "eventsLoading": "ইভেন্ট লোড হচ্ছে…",
+    "eventsError": "ইভেন্ট লোড করতে ব্যর্থ হয়েছে"
   },
   "chairmanCard": {
     "viewFullMessage": "সম্পূর্ণ বার্তা দেখুন",

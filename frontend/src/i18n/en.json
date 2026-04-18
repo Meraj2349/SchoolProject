@@ -51,6 +51,8 @@
   },
   "home": {
     "loading": "Loading…",
+    "leadershipTitle": "Leadership & Updates",
+    "leadershipSubtitle": "From our chairman, upcoming events, and latest news",
     "studentStatistics": "Student Statistics",
     "classWiseStudents": "Class wise Students",
     "loadingClassStats": "Loading class wise students…",
@@ -74,7 +76,9 @@
     "viewAllEvents": "View All Events →",
     "viewAllNews": "View All News →",
     "newsLoading": "Loading news…",
-    "newsError": "Failed to load news"
+    "newsError": "Failed to load news",
+    "eventsLoading": "Loading events…",
+    "eventsError": "Failed to load events"
   },
   "chairmanCard": {
     "viewFullMessage": "View Full Message",
