@@ -34,7 +34,7 @@ export default function IdentityFormPage() {
 
   /* Exact same input class as LoginPage / RegisterPage */
   const inputClass =
-    "w-full px-4 py-3 rounded-xl border border-white/20 bg-white/10 text-white placeholder-white/50 backdrop-blur-sm transition-all focus:outline-none focus:border-amber-300 focus:bg-white/15 focus:ring-2 focus:ring-amber-300/40";
+    "w-full px-4 py-3 rounded-xl border border-white/20 bg-white/10 text-white placeholder-white/50 backdrop-blur-sm transition-all focus:outline-none focus:border-emerald-300 focus:bg-white/15 focus:ring-2 focus:ring-emerald-300/40";
   const labelClass = "block text-sm font-medium text-white/80 mb-2";
 
   const handleSubmit = async (e) => {
@@ -76,7 +76,7 @@ export default function IdentityFormPage() {
 
   return (
     /* Full-page dark grid — same structure as LoginPage */
-    <div className="min-h-screen grid lg:grid-cols-2 bg-[#0a1628]">
+    <div className="min-h-screen grid lg:grid-cols-2 bg-[#022c22]">
       {/* ── LEFT HERO PANEL ── */}
       <div className="relative hidden lg:block overflow-hidden">
         <Image
@@ -87,11 +87,11 @@ export default function IdentityFormPage() {
           sizes="50vw"
           className="object-cover"
         />
-        <div className="absolute inset-0 bg-linear-to-br from-[#0a1628]/90 via-[#0a1628]/60 to-transparent" />
+        <div className="absolute inset-0 bg-linear-to-br from-[#022c22]/90 via-[#022c22]/60 to-transparent" />
         <div className="relative z-10 h-full flex flex-col justify-between p-12 text-white">
           {/* Logo mark */}
           <div className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-xl bg-amber-400 flex items-center justify-center font-bold text-[#0a1628] text-lg shadow-lg">
+            <div className="w-11 h-11 rounded-xl bg-emerald-400 flex items-center justify-center font-bold text-[#022c22] text-lg shadow-lg">
               🧠
             </div>
             <span className="text-lg font-semibold tracking-tight">
@@ -103,7 +103,7 @@ export default function IdentityFormPage() {
             <h1 className="text-5xl font-bold leading-tight mb-4">
               Prove who you are.
               <br />
-              <span className="text-amber-300">Start learning.</span>
+              <span className="text-emerald-300">Start learning.</span>
             </h1>
             <p className="text-white/70 text-lg max-w-md">
               No account, no password. Your identity is verified directly
@@ -129,7 +129,7 @@ export default function IdentityFormPage() {
             sizes="100vw"
             className="object-cover"
           />
-          <div className="absolute inset-0 bg-[#0a1628]/85" />
+          <div className="absolute inset-0 bg-[#022c22]/85" />
         </div>
 
         <div className="relative w-full max-w-md">
@@ -137,7 +137,7 @@ export default function IdentityFormPage() {
           <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-8 shadow-2xl">
             {/* Header */}
             <div className="mb-6">
-              <p className="text-center text-xs font-bold tracking-[0.14em] uppercase text-amber-300 mb-2">
+              <p className="text-center text-xs font-bold tracking-[0.14em] uppercase text-emerald-300 mb-2">
                 Verify Identity
               </p>
               <h2 className="text-center text-3xl font-bold text-white mb-1">
@@ -167,9 +167,18 @@ export default function IdentityFormPage() {
                   style={{ colorScheme: "dark" }}
                   required
                 >
-                  <option value="">— Select your branch —</option>
+                  <option
+                    value=""
+                    style={{ background: "#022c22", color: "#ffffff" }}
+                  >
+                    — Select your branch —
+                  </option>
                   {branches.map((b) => (
-                    <option key={b.id} value={b.id}>
+                    <option
+                      key={b.id}
+                      value={b.id}
+                      style={{ background: "#022c22", color: "#ffffff" }}
+                    >
                       {b.name_en || b.name_bn || `Branch ${b.id}`}
                     </option>
                   ))}
@@ -245,7 +254,7 @@ export default function IdentityFormPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-3.5 bg-amber-400 text-[#0a1628] font-bold text-base rounded-xl cursor-pointer transition-all mt-2 disabled:opacity-60 disabled:cursor-not-allowed hover:bg-amber-300 hover:shadow-lg hover:shadow-amber-400/30"
+                className="w-full py-3.5 bg-emerald-400 text-[#022c22] font-bold text-base rounded-xl cursor-pointer transition-all mt-2 disabled:opacity-60 disabled:cursor-not-allowed hover:bg-emerald-300 hover:shadow-lg hover:shadow-emerald-400/30"
               >
                 {loading ? "Verifying…" : "Verify & Start Quiz →"}
               </button>

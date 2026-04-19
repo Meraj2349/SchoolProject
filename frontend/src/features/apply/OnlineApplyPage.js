@@ -31,7 +31,7 @@ const REQUIRED = [
 ];
 
 const inputCls = (hasError) =>
-  `w-full px-3.5 py-2.5 border-[1.5px] rounded-[7px] text-[0.95rem] text-gray-900 bg-white transition-all duration-200 box-border focus:outline-none focus:border-blue-500 focus:shadow-[0_0_0_3px_rgba(59,130,246,0.15)] ${
+  `w-full px-3.5 py-2.5 border-[1.5px] rounded-[7px] text-[0.95rem] text-gray-900 bg-white transition-all duration-200 box-border focus:outline-none focus:border-emerald-500 focus:shadow-[0_0_0_3px_rgba(16,185,129,0.18)] ${
     hasError ? "border-red-500" : "border-gray-300"
   }`;
 
@@ -95,7 +95,8 @@ export default function OnlineApplyPage() {
       <div
         className="text-white text-center px-4 py-12"
         style={{
-          background: "linear-gradient(135deg, #1e40af 0%, #3b82f6 100%)",
+          background: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
+          boxShadow: "0 4px 16px rgba(16,185,129,0.25)",
         }}
       >
         <h1 className="text-3xl font-bold m-0 mb-2">{t("pageTitle")}</h1>
@@ -105,14 +106,14 @@ export default function OnlineApplyPage() {
       {success ? (
         <div className="max-w-[540px] mx-auto my-12 bg-white rounded-xl shadow-lg p-12 text-center">
           <div className="text-[3.5rem] mb-4">✅</div>
-          <h2 className="text-[1.6rem] font-bold text-green-800 m-0 mb-3">
+          <h2 className="text-[1.6rem] font-bold text-emerald-700 m-0 mb-3">
             {t("successTitle")}
           </h2>
           <p className="text-gray-600 text-base m-0 mb-6 leading-relaxed">
             {t("successMessage")}
           </p>
           <button
-            className="bg-blue-800 text-white border-none px-7 py-3 rounded-lg text-base font-semibold cursor-pointer hover:bg-blue-700 transition-colors"
+            className="bg-emerald-600 text-white border-none px-7 py-3 rounded-lg text-base font-semibold cursor-pointer hover:bg-emerald-700 transition-colors"
             onClick={handleReset}
           >
             {t("submitAnother")}
@@ -311,7 +312,7 @@ export default function OnlineApplyPage() {
                 <textarea
                   id="address"
                   name="address"
-                  className="w-full px-3.5 py-2.5 border-[1.5px] border-gray-300 rounded-[7px] text-[0.95rem] text-gray-900 bg-white resize-y min-h-[90px] focus:outline-none focus:border-blue-500 focus:shadow-[0_0_0_3px_rgba(59,130,246,0.15)] transition-all duration-200"
+                  className="w-full px-3.5 py-2.5 border-[1.5px] border-gray-300 rounded-[7px] text-[0.95rem] text-gray-900 bg-white resize-y min-h-[90px] focus:outline-none focus:border-emerald-500 focus:shadow-[0_0_0_3px_rgba(16,185,129,0.18)] transition-all duration-200"
                   value={form.address}
                   onChange={handleChange}
                 />
@@ -328,7 +329,7 @@ export default function OnlineApplyPage() {
                 <textarea
                   id="additional_info"
                   name="additional_info"
-                  className="w-full px-3.5 py-2.5 border-[1.5px] border-gray-300 rounded-[7px] text-[0.95rem] text-gray-900 bg-white resize-y min-h-[90px] focus:outline-none focus:border-blue-500 focus:shadow-[0_0_0_3px_rgba(59,130,246,0.15)] transition-all duration-200"
+                  className="w-full px-3.5 py-2.5 border-[1.5px] border-gray-300 rounded-[7px] text-[0.95rem] text-gray-900 bg-white resize-y min-h-[90px] focus:outline-none focus:border-emerald-500 focus:shadow-[0_0_0_3px_rgba(16,185,129,0.18)] transition-all duration-200"
                   value={form.additional_info}
                   onChange={handleChange}
                 />
@@ -345,7 +346,12 @@ export default function OnlineApplyPage() {
               <button
                 type="submit"
                 disabled={submitting}
-                className="bg-blue-800 text-white border-none px-9 py-3 rounded-lg text-base font-semibold cursor-pointer transition-all duration-200 hover:bg-blue-700 disabled:opacity-65 disabled:cursor-not-allowed"
+                className="text-white border-none px-9 py-3 rounded-lg text-base font-semibold cursor-pointer transition-all duration-200 hover:brightness-110 disabled:opacity-65 disabled:cursor-not-allowed"
+                style={{
+                  background:
+                    "linear-gradient(135deg, #10b981 0%, #059669 100%)",
+                  boxShadow: "0 4px 12px rgba(16,185,129,0.3)",
+                }}
               >
                 {submitting ? t("submitting") : t("submitBtn")}
               </button>

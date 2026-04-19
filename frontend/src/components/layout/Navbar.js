@@ -35,6 +35,8 @@ export default function Navbar() {
     { key: "nav.events", path: "/events" },
     { key: "nav.branches", path: "/branches" },
     { key: "nav.students", path: "/students" },
+    { key: "nav.teachers", path: "/teachers" },
+    { key: "nav.results", path: "/result" },
     { key: "nav.quakerEducation", path: "/quaker" },
   ];
 

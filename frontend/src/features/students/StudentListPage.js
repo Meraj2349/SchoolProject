@@ -11,25 +11,29 @@ import { useTranslations } from "@/store/languageStore";
 import { useClassNames, useStandardSections } from "@/hooks/useClasses";
 import Image from "next/image";
 
-const NAVY = "#1a2744";
-const NAVY_DARK = "#111b33";
-const NAVY_MID = "#243156";
-const GOLD = "#c9a84c";
-const GOLD_LIGHT = "#e8c97a";
+const EMERALD = "#059669";
+const EMERALD_DARK = "#047857";
+const EMERALD_MID = "#10b981";
+const EMERALD_LIGHT = "#a7f3d0";
+const TEXT_DARK = "#064e3b";
 
 function StudentAvatar({ studentId, firstName, lastName }) {
   const [url, setUrl] = useState(null);
 
-  useState(() => {
+  useEffect(() => {
     if (!studentId) return;
+    let cancelled = false;
     imagesService
       .getByStudent(studentId)
       .then((res) => {
         const imgs = Array.isArray(res) ? res : [];
-        if (imgs.length > 0) setUrl(imgs[0].ImagePath);
+        if (!cancelled && imgs.length > 0) setUrl(imgs[0].ImagePath);
       })
       .catch(() => {});
-  });
+    return () => {
+      cancelled = true;
+    };
+  }, [studentId]);
 
   return url ? (
     <Image
@@ -48,10 +52,10 @@ function StudentAvatar({ studentId, firstName, lastName }) {
     <div
       className="w-[60px] h-[60px] rounded-full flex items-center justify-center text-[1.2rem] font-bold"
       style={{
-        background: `linear-gradient(135deg, ${NAVY} 0%, ${NAVY_MID} 100%)`,
-        color: GOLD_LIGHT,
-        border: `3px solid ${GOLD}`,
-        boxShadow: "0 4px 12px rgba(26,39,68,0.25)",
+        background: `linear-gradient(135deg, ${EMERALD_MID} 0%, ${EMERALD} 100%)`,
+        color: "#ffffff",
+        border: `3px solid ${EMERALD_DARK}`,
+        boxShadow: "0 4px 12px rgba(5,150,105,0.25)",
       }}
     >
       {firstName?.charAt(0)}
@@ -62,8 +66,8 @@ function StudentAvatar({ studentId, firstName, lastName }) {
 
 const EMPTY = { firstName: "", rollNumber: "", className: "", section: "" };
 
-const inputCls =
-  "w-full px-3.5 py-[11px] border-[1.5px] border-gray-200 rounded-lg text-[0.95rem] bg-gray-50 transition-all duration-200 focus:outline-none focus:bg-white placeholder:text-gray-400 placeholder:italic";
+const fieldCls =
+  "w-full px-3.5 py-[11px] border-[1.5px] border-gray-200 rounded-lg text-[0.95rem] bg-gray-50 transition-all duration-200 focus:outline-none focus:bg-white focus:border-emerald-500 focus:shadow-[0_0_0_3px_rgba(16,185,129,0.18)] placeholder:text-gray-400";
 
 export default function StudentListPage() {
   const [filters, setFilters] = useState(EMPTY);
@@ -153,20 +157,11 @@ export default function StudentListPage() {
   };
   const fmtDate = (d) => (d ? new Date(d).toLocaleDateString() : "N/A");
 
-  const selectStyle = {
-    width: "100%",
-    padding: "10px 14px",
-    borderRadius: 8,
-    border: "1.5px solid #e2e6f0",
-    fontSize: 14,
-    background: "#f8f9fc",
-    color: NAVY,
-    cursor: "pointer",
-    outline: "none",
-  };
+  const labelCls =
+    "text-xs font-bold uppercase tracking-[0.06em] mb-1.5 text-emerald-800";
 
   return (
-    <div className="font-sans bg-[#f0f2f8] min-h-screen">
+    <div className="font-sans bg-[#f0fdf4] min-h-screen">
       <Navbar />
       <LatestUpdatesNotice />
 
@@ -174,20 +169,20 @@ export default function StudentListPage() {
       <div
         className="text-center px-6 py-14 relative overflow-hidden"
         style={{
-          background: `linear-gradient(135deg, ${NAVY_DARK} 0%, ${NAVY} 50%, ${NAVY_MID} 100%)`,
+          background: `linear-gradient(135deg, ${EMERALD_DARK} 0%, ${EMERALD} 50%, ${EMERALD_MID} 100%)`,
         }}
       >
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
-            background: `radial-gradient(ellipse 60% 50% at 20% 50%, rgba(201,168,76,0.15) 0%, transparent 70%),
-                       radial-gradient(ellipse 40% 60% at 80% 20%, rgba(201,168,76,0.1) 0%, transparent 60%)`,
+            background: `radial-gradient(ellipse 60% 50% at 20% 50%, rgba(255,255,255,0.15) 0%, transparent 70%),
+                       radial-gradient(ellipse 40% 60% at 80% 20%, rgba(255,255,255,0.1) 0%, transparent 60%)`,
           }}
         />
         <div
           className="absolute bottom-0 left-0 right-0 h-[4px]"
           style={{
-            background: `linear-gradient(90deg, transparent, ${GOLD}, ${GOLD_LIGHT}, ${GOLD}, transparent)`,
+            background: `linear-gradient(90deg, transparent, ${EMERALD_LIGHT}, #ffffff, ${EMERALD_LIGHT}, transparent)`,
           }}
         />
         <h1
@@ -199,16 +194,16 @@ export default function StudentListPage() {
         >
           {t("pageTitle")}
         </h1>
-        <p className="relative z-[1] m-0 text-slate-300 opacity-85 font-normal text-[1.05rem]">
+        <p className="relative z-[1] m-0 text-emerald-50 opacity-90 font-normal text-[1.05rem]">
           {t("pageSubtitle")}
         </p>
         {currentBranchId != null && (
           <div
             className="relative z-[1] inline-flex items-center gap-1.5 mt-3.5 px-4 py-1.5 rounded-full text-xs font-semibold"
             style={{
-              background: "rgba(201,168,76,0.18)",
-              border: "1.5px solid rgba(201,168,76,0.5)",
-              color: GOLD_LIGHT,
+              background: "rgba(255,255,255,0.2)",
+              border: "1.5px solid rgba(255,255,255,0.5)",
+              color: "#ffffff",
             }}
           >
             <span>🏫</span>
@@ -217,153 +212,123 @@ export default function StudentListPage() {
         )}
       </div>
 
-      {/* Filter bar */}
+      {/* Search form — all fields on one line */}
       <div
-        className="max-w-[740px] mx-auto -mt-px grid grid-cols-1 sm:grid-cols-2 gap-5 px-7 py-6 bg-white rounded-b-2xl"
+        className="max-w-[1100px] mx-auto -mt-px bg-white rounded-b-2xl px-6 py-6 border border-gray-200"
         style={{
-          borderTop: `3px solid ${GOLD}`,
-          boxShadow: "0 6px 24px rgba(26,39,68,0.12)",
+          borderTop: `3px solid ${EMERALD_MID}`,
+          boxShadow: "0 6px 24px rgba(5,150,105,0.12)",
         }}
       >
-        {[
-          {
-            label: `${t("className") || "Class"} *`,
-            value: filters.className,
-            onChange: handleClassDropdown,
-            disabled: false,
-            options: classNames,
-            placeholder: t("selectClass") || "Select Class",
-          },
-          {
-            label: `${t("section") || "Section"} *`,
-            value: filters.section,
-            onChange: handleSectionDropdown,
-            disabled: !filters.className,
-            options: sections,
-            placeholder: t("selectSection") || "Select Section",
-          },
-        ].map((f, i) => (
-          <div key={i} className="flex flex-col gap-1.5">
-            <label
-              className="text-xs font-bold uppercase tracking-[0.06em]"
-              style={{ color: NAVY }}
-            >
-              {f.label}
-            </label>
-            <select
-              value={f.value}
-              onChange={f.onChange}
-              disabled={f.disabled}
-              style={{
-                ...selectStyle,
-                opacity: f.disabled ? 0.5 : 1,
-                cursor: f.disabled ? "not-allowed" : "pointer",
-              }}
-              onFocus={(e) => {
-                e.target.style.borderColor = GOLD;
-                e.target.style.boxShadow = "0 0 0 3px rgba(201,168,76,0.15)";
-              }}
-              onBlur={(e) => {
-                e.target.style.borderColor = "#e2e6f0";
-                e.target.style.boxShadow = "";
-              }}
-            >
-              <option value="">{f.placeholder}</option>
-              {f.options.map((o) => (
-                <option key={o} value={o}>
-                  {o}
-                </option>
-              ))}
-            </select>
-          </div>
-        ))}
-      </div>
-
-      {/* Search form */}
-      <div
-        className="max-w-[740px] mx-auto my-7 bg-white rounded-2xl px-8 py-8 border border-gray-200"
-        style={{ boxShadow: "0 6px 24px rgba(26,39,68,0.12)" }}
-      >
         <form onSubmit={handleSearch}>
-          <div className="bg-[#fdf6e3] border-l-4 border-[#c9a84c] rounded-lg px-4 py-3 mb-6 text-[#7a5c10] text-sm leading-relaxed">
+          <div className="bg-emerald-50 border-l-4 border-emerald-500 rounded-lg px-4 py-3 mb-5 text-emerald-800 text-sm leading-relaxed">
             <p className="m-0 font-medium">{t("allFieldsRequired")}</p>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-6">
-            {[
-              {
-                id: "firstName",
-                label: `${t("firstName")} *`,
-                placeholder: t("firstNamePlaceholder"),
-              },
-              {
-                id: "rollNumber",
-                label: `${t("rollNumber")} *`,
-                placeholder: t("rollNumberPlaceholder"),
-              },
-            ].map((f) => (
-              <div key={f.id} className="flex flex-col">
-                <label
-                  htmlFor={f.id}
-                  className="text-xs font-bold uppercase tracking-[0.06em] mb-1.5"
-                  style={{ color: NAVY }}
-                >
-                  {f.label}
-                </label>
-                <input
-                  type="text"
-                  id={f.id}
-                  name={f.id}
-                  value={filters[f.id]}
-                  onChange={handleChange}
-                  placeholder={f.placeholder}
-                  className={inputCls}
-                  style={{ color: NAVY }}
-                  onFocus={(e) => {
-                    e.target.style.borderColor = GOLD;
-                    e.target.style.boxShadow =
-                      "0 0 0 3px rgba(201,168,76,0.15)";
-                    e.target.style.transform = "translateY(-1px)";
-                  }}
-                  onBlur={(e) => {
-                    e.target.style.borderColor = "";
-                    e.target.style.boxShadow = "";
-                    e.target.style.transform = "";
-                  }}
-                  required
-                />
-              </div>
-            ))}
-          </div>
-          <div className="flex gap-3 justify-center flex-wrap max-sm:flex-col">
-            <button
-              type="submit"
-              disabled={loading}
-              className="px-8 py-3 border-none rounded-full text-white font-bold text-[0.95rem] cursor-pointer transition-all duration-[250ms] hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60 max-sm:w-full"
-              style={{
-                background: NAVY,
-                boxShadow: "0 4px 14px rgba(26,39,68,0.3)",
-              }}
-            >
-              {loading ? t("searching") : t("searchBtn")}
-            </button>
-            <button
-              type="button"
-              onClick={handleReset}
-              className="px-8 py-3 bg-transparent border-2 border-gray-200 rounded-full font-bold text-[0.95rem] cursor-pointer transition-all duration-[250ms] hover:-translate-y-0.5 max-sm:w-full"
-              style={{ color: NAVY }}
-              onMouseEnter={(e) => {
-                e.target.style.borderColor = GOLD;
-                e.target.style.color = GOLD;
-              }}
-              onMouseLeave={(e) => {
-                e.target.style.borderColor = "#e5e7eb";
-                e.target.style.color = NAVY;
-              }}
-            >
-              {t("resetBtn")}
-            </button>
+
+          <div className="flex flex-wrap items-end gap-3">
+            {/* Class */}
+            <div className="flex flex-col flex-1 min-w-[150px]">
+              <label className={labelCls}>{t("className") || "Class"} *</label>
+              <select
+                value={filters.className}
+                onChange={handleClassDropdown}
+                className={fieldCls}
+                style={{ color: TEXT_DARK, cursor: "pointer" }}
+              >
+                <option value="">{t("selectClass") || "Select Class"}</option>
+                {classNames.map((o) => (
+                  <option key={o} value={o}>
+                    {o}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Section */}
+            <div className="flex flex-col flex-1 min-w-[150px]">
+              <label className={labelCls}>{t("section") || "Section"} *</label>
+              <select
+                value={filters.section}
+                onChange={handleSectionDropdown}
+                disabled={!filters.className}
+                className={fieldCls}
+                style={{
+                  color: TEXT_DARK,
+                  cursor: !filters.className ? "not-allowed" : "pointer",
+                  opacity: !filters.className ? 0.5 : 1,
+                }}
+              >
+                <option value="">
+                  {t("selectSection") || "Select Section"}
+                </option>
+                {sections.map((o) => (
+                  <option key={o} value={o}>
+                    {o}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* First name */}
+            <div className="flex flex-col flex-1 min-w-[170px]">
+              <label htmlFor="firstName" className={labelCls}>
+                {t("firstName")} *
+              </label>
+              <input
+                id="firstName"
+                name="firstName"
+                type="text"
+                value={filters.firstName}
+                onChange={handleChange}
+                placeholder={t("firstNamePlaceholder")}
+                className={fieldCls}
+                style={{ color: TEXT_DARK }}
+                required
+              />
+            </div>
+
+            {/* Roll number */}
+            <div className="flex flex-col flex-1 min-w-[140px]">
+              <label htmlFor="rollNumber" className={labelCls}>
+                {t("rollNumber")} *
+              </label>
+              <input
+                id="rollNumber"
+                name="rollNumber"
+                type="text"
+                value={filters.rollNumber}
+                onChange={handleChange}
+                placeholder={t("rollNumberPlaceholder")}
+                className={fieldCls}
+                style={{ color: TEXT_DARK }}
+                required
+              />
+            </div>
+
+            {/* Buttons */}
+            <div className="flex gap-2 items-end">
+              <button
+                type="submit"
+                disabled={loading}
+                className="px-6 py-[11px] border-none rounded-lg text-white font-bold text-[0.9rem] cursor-pointer transition-all duration-200 hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60 whitespace-nowrap"
+                style={{
+                  background: `linear-gradient(135deg, ${EMERALD_MID} 0%, ${EMERALD} 100%)`,
+                  boxShadow: "0 4px 12px rgba(16,185,129,0.3)",
+                }}
+              >
+                {loading ? t("searching") : t("searchBtn")}
+              </button>
+              <button
+                type="button"
+                onClick={handleReset}
+                className="px-5 py-[11px] bg-white border-[1.5px] border-emerald-200 rounded-lg font-bold text-[0.9rem] cursor-pointer transition-all duration-200 hover:border-emerald-500 hover:text-emerald-700 text-emerald-800 whitespace-nowrap"
+              >
+                {t("resetBtn")}
+              </button>
+            </div>
           </div>
         </form>
+
         {error && (
           <div className="mt-4 px-4 py-3 bg-red-50 border-[1.5px] border-red-300 text-red-700 rounded-lg flex items-center gap-2.5 font-medium">
             <span className="text-[1.1rem] flex-shrink-0">⚠</span> {error}
@@ -374,16 +339,21 @@ export default function StudentListPage() {
       {/* Results */}
       {searched && (
         <div
-          className="max-w-[740px] mx-auto mb-10 bg-white rounded-2xl px-8 py-7 border border-gray-200"
-          style={{ boxShadow: "0 6px 24px rgba(26,39,68,0.12)" }}
+          className="max-w-[1100px] mx-auto my-7 mb-10 bg-white rounded-2xl px-8 py-7 border border-gray-200"
+          style={{ boxShadow: "0 6px 24px rgba(5,150,105,0.12)" }}
         >
           <div className="flex justify-between items-center mb-6 pb-4 border-b-2 border-gray-200 max-sm:flex-col max-sm:gap-3 max-sm:text-center">
-            <h2 className="text-[1.4rem] font-bold m-0" style={{ color: NAVY }}>
+            <h2
+              className="text-[1.4rem] font-bold m-0"
+              style={{ color: TEXT_DARK }}
+            >
               {t("searchResults")}
             </h2>
             <span
-              className="text-[0.85rem] font-bold px-4 py-1.5 rounded-full"
-              style={{ background: NAVY, color: GOLD_LIGHT }}
+              className="text-[0.85rem] font-bold px-4 py-1.5 rounded-full text-white"
+              style={{
+                background: `linear-gradient(135deg, ${EMERALD_MID} 0%, ${EMERALD} 100%)`,
+              }}
             >
               {students.length}{" "}
               {students.length !== 1 ? t("studentsFound") : t("studentFound")}
@@ -395,19 +365,13 @@ export default function StudentListPage() {
               {students.map((s) => (
                 <div
                   key={s.StudentID}
-                  className="w-full max-w-[700px] mx-auto mb-5 bg-white border border-gray-200 rounded-2xl p-7 relative overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-xl max-sm:p-4"
-                  style={{ boxShadow: "0 2px 8px rgba(26,39,68,0.08)" }}
-                  onMouseEnter={(e) =>
-                    (e.currentTarget.style.borderColor = GOLD)
-                  }
-                  onMouseLeave={(e) =>
-                    (e.currentTarget.style.borderColor = "#e2e6f0")
-                  }
+                  className="w-full max-w-[700px] mx-auto mb-5 bg-white border border-gray-200 rounded-2xl p-7 relative overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:border-emerald-400 max-sm:p-4"
+                  style={{ boxShadow: "0 2px 8px rgba(5,150,105,0.08)" }}
                 >
                   <div
                     className="absolute top-0 left-0 right-0 h-[4px]"
                     style={{
-                      background: `linear-gradient(90deg, ${NAVY}, ${GOLD})`,
+                      background: `linear-gradient(90deg, ${EMERALD_MID}, ${EMERALD_DARK})`,
                     }}
                   />
                   <div
@@ -424,13 +388,13 @@ export default function StudentListPage() {
                     <div className="flex-1">
                       <h3
                         className="text-[1.3rem] font-bold m-0 mb-1.5"
-                        style={{ color: NAVY }}
+                        style={{ color: TEXT_DARK }}
                       >
                         {s.FirstName} {s.LastName}
                       </h3>
                       <p
                         className="font-semibold text-[0.95rem] m-0 mb-1"
-                        style={{ color: GOLD }}
+                        style={{ color: EMERALD }}
                       >
                         {t("class")} {s.ClassName} – {t("section")} {s.Section}
                       </p>
@@ -462,18 +426,18 @@ export default function StudentListPage() {
                       .map((item, i) => (
                         <div
                           key={i}
-                          className="flex items-center gap-2.5 px-3.5 py-3 bg-gray-50 border border-gray-200 rounded-lg"
+                          className="flex items-center gap-2.5 px-3.5 py-3 bg-emerald-50/40 border border-emerald-100 rounded-lg"
                         >
                           <span className="text-[18px] flex-shrink-0">
                             {item.icon}
                           </span>
                           <div className="flex flex-col gap-0.5 flex-1">
-                            <span className="text-[0.72rem] text-gray-400 font-bold uppercase tracking-[0.04em]">
+                            <span className="text-[0.72rem] text-gray-500 font-bold uppercase tracking-[0.04em]">
                               {item.label}
                             </span>
                             <span
                               className="font-semibold text-[0.9rem]"
-                              style={{ color: NAVY }}
+                              style={{ color: TEXT_DARK }}
                             >
                               {item.value}
                             </span>
@@ -489,7 +453,7 @@ export default function StudentListPage() {
               <div className="text-[3.5rem] mb-3 opacity-60">🔍</div>
               <h3
                 className="font-semibold text-[1.2rem] m-0"
-                style={{ color: NAVY }}
+                style={{ color: TEXT_DARK }}
               >
                 {t("noStudents")}
               </h3>

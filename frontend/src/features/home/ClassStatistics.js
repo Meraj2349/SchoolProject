@@ -53,11 +53,11 @@ function SectionHeader({ t }) {
   return (
     <div className="mb-[52px]">
       <div className="inline-flex items-center gap-[14px] mb-4">
-        <span className="block w-14 h-px bg-gradient-to-r from-transparent to-[rgba(201,168,76,0.6)]" />
-        <span className="text-[0.75rem] text-[#c9a84c]">★</span>
-        <span className="block w-14 h-px bg-gradient-to-l from-transparent to-[rgba(201,168,76,0.6)]" />
+        <span className="block w-14 h-px bg-gradient-to-r from-transparent to-[rgba(16,185,129,0.6)]" />
+        <span className="text-[0.75rem] text-[#10b981]">★</span>
+        <span className="block w-14 h-px bg-gradient-to-l from-transparent to-[rgba(16,185,129,0.6)]" />
       </div>
-      <h2 className="text-[clamp(1.5rem,4vw,2.2rem)] font-extrabold text-[#e2c07a] mb-[10px] tracking-tight leading-[1.2]">
+      <h2 className="text-[clamp(1.5rem,4vw,2.2rem)] font-extrabold text-[#a7f3d0] mb-[10px] tracking-tight leading-[1.2]">
         {t("studentStatistics")}
       </h2>
     </div>
@@ -116,7 +116,7 @@ export default function ClassStatistics() {
 
   if (isLoading) {
     return (
-      <div className="relative w-full box-border py-[72px] px-6 pb-20 bg-[#0d1f3c] text-center overflow-hidden">
+      <div className="relative w-full box-border py-[72px] px-6 pb-20 bg-[#064e3b] text-center overflow-hidden">
         {/* Diagonal texture */}
         <div
           className="absolute inset-0 pointer-events-none"
@@ -126,12 +126,12 @@ export default function ClassStatistics() {
           }}
         />
         {/* Top gold strip */}
-        <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-transparent via-[#c9a84c] via-[#e2c07a] via-[#c9a84c] to-transparent" />
+        <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-transparent via-[#10b981] via-[#a7f3d0] via-[#10b981] to-transparent" />
         {/* Bottom gold strip */}
-        <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-gradient-to-r from-transparent via-[#c9a84c] via-[#e2c07a] via-[#c9a84c] to-transparent" />
+        <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-gradient-to-r from-transparent via-[#10b981] via-[#a7f3d0] via-[#10b981] to-transparent" />
         <div className="relative z-[1]">
           <SectionHeader t={t} />
-          <p className="text-[rgba(201,168,76,0.7)] text-[0.95rem]">
+          <p className="text-[rgba(16,185,129,0.7)] text-[0.95rem]">
             {t("loadingClassStats")}
           </p>
         </div>
@@ -141,7 +141,7 @@ export default function ClassStatistics() {
 
   if (isError) {
     return (
-      <div className="relative w-full box-border py-[72px] px-6 pb-20 bg-[#0d1f3c] text-center overflow-hidden">
+      <div className="relative w-full box-border py-[72px] px-6 pb-20 bg-[#064e3b] text-center overflow-hidden">
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
@@ -149,11 +149,11 @@ export default function ClassStatistics() {
               "repeating-linear-gradient(45deg,rgba(255,255,255,.025) 0,rgba(255,255,255,.025) 1px,transparent 1px,transparent 10px)",
           }}
         />
-        <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-transparent via-[#c9a84c] via-[#e2c07a] via-[#c9a84c] to-transparent" />
-        <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-gradient-to-r from-transparent via-[#c9a84c] via-[#e2c07a] via-[#c9a84c] to-transparent" />
+        <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-transparent via-[#10b981] via-[#a7f3d0] via-[#10b981] to-transparent" />
+        <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-gradient-to-r from-transparent via-[#10b981] via-[#a7f3d0] via-[#10b981] to-transparent" />
         <div className="relative z-[1]">
           <SectionHeader t={t} />
-          <p className="text-[rgba(201,168,76,0.7)] text-[0.95rem]">
+          <p className="text-[rgba(16,185,129,0.7)] text-[0.95rem]">
             {t("failedClassStats")}
           </p>
         </div>
@@ -162,7 +162,7 @@ export default function ClassStatistics() {
   }
 
   return (
-    <div className="relative w-full box-border py-[72px] px-6 pb-20 bg-[#0d1f3c] text-center overflow-hidden">
+    <div className="relative w-full box-border py-[72px] px-6 pb-20 bg-[#064e3b] text-center overflow-hidden">
       {/* Diagonal texture overlay */}
       <div
         className="absolute inset-0 pointer-events-none"
@@ -172,29 +172,29 @@ export default function ClassStatistics() {
         }}
       />
       {/* Top gold strip */}
-      <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-transparent via-[#c9a84c] via-[#e2c07a] via-[#c9a84c] to-transparent" />
+      <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-transparent via-[#10b981] via-[#a7f3d0] via-[#10b981] to-transparent" />
       {/* Bottom gold strip */}
-      <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-gradient-to-r from-transparent via-[#c9a84c] via-[#e2c07a] via-[#c9a84c] to-transparent" />
+      <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-gradient-to-r from-transparent via-[#10b981] via-[#a7f3d0] via-[#10b981] to-transparent" />
 
       <div className="relative z-[1]">
         {/* Header */}
         <div className="mb-[52px]">
           {/* Star rule */}
           <div className="inline-flex items-center gap-[14px] mb-4">
-            <span className="block w-14 h-px bg-gradient-to-r from-transparent to-[rgba(201,168,76,0.6)]" />
-            <span className="text-[0.75rem] text-[#c9a84c]">★</span>
-            <span className="block w-14 h-px bg-gradient-to-l from-transparent to-[rgba(201,168,76,0.6)]" />
+            <span className="block w-14 h-px bg-gradient-to-r from-transparent to-[rgba(16,185,129,0.6)]" />
+            <span className="text-[0.75rem] text-[#10b981]">★</span>
+            <span className="block w-14 h-px bg-gradient-to-l from-transparent to-[rgba(16,185,129,0.6)]" />
           </div>
-          <h2 className="text-[clamp(1.5rem,4vw,2.2rem)] font-extrabold text-[#e2c07a] mb-[10px] tracking-tight leading-[1.2]">
+          <h2 className="text-[clamp(1.5rem,4vw,2.2rem)] font-extrabold text-[#a7f3d0] mb-[10px] tracking-tight leading-[1.2]">
             {t("studentStatistics")}
           </h2>
-          <p className="text-[0.95rem] text-[rgba(226,192,122,0.7)] mx-auto mb-6 max-w-[440px] leading-[1.6]">
+          <p className="text-[0.95rem] text-[rgba(167,243,208,0.7)] mx-auto mb-6 max-w-[440px] leading-[1.6]">
             {t("classWiseStudents")}
           </p>
 
           {/* Branch badge */}
           {branchId != null && (
-            <div className="inline-flex items-center gap-[6px] mx-auto mt-2 px-[14px] py-[4px] bg-[rgba(201,168,76,0.12)] border border-[rgba(201,168,76,0.55)] rounded-[20px] text-xs text-[#e2c07a] font-semibold tracking-[0.04em]">
+            <div className="inline-flex items-center gap-[6px] mx-auto mt-2 px-[14px] py-[4px] bg-[rgba(16,185,129,0.12)] border border-[rgba(16,185,129,0.55)] rounded-[20px] text-xs text-[#a7f3d0] font-semibold tracking-[0.04em]">
               <span>🏫</span>
               <span>{currentBranchName}</span>
             </div>
@@ -202,9 +202,9 @@ export default function ClassStatistics() {
 
           {/* Diamond divider */}
           <div className="inline-flex items-center gap-[10px] mt-3">
-            <span className="block w-10 h-px bg-gradient-to-r from-transparent to-[rgba(201,168,76,0.5)]" />
-            <span className="text-[0.5rem] text-[#c9a84c]">◆</span>
-            <span className="block w-10 h-px bg-gradient-to-l from-transparent to-[rgba(201,168,76,0.5)]" />
+            <span className="block w-10 h-px bg-gradient-to-r from-transparent to-[rgba(16,185,129,0.5)]" />
+            <span className="text-[0.5rem] text-[#10b981]">◆</span>
+            <span className="block w-10 h-px bg-gradient-to-l from-transparent to-[rgba(16,185,129,0.5)]" />
           </div>
         </div>
 
@@ -213,10 +213,10 @@ export default function ClassStatistics() {
           {classData.length > 0 ? (
             classData.map((d, i) => (
               <div key={i} className="flex flex-col items-center">
-                <div className="group relative w-[110px] h-[110px] rounded-full border-2 border-[rgba(201,168,76,0.45)] flex flex-col justify-center items-center bg-[rgba(255,255,255,0.05)] shadow-[0_0_0_6px_rgba(201,168,76,0.07),0_4px_18px_rgba(0,0,0,0.25)] transition-all duration-[280ms] hover:-translate-y-[7px] hover:scale-105 hover:shadow-[0_0_0_8px_rgba(201,168,76,0.12),0_12px_32px_rgba(0,0,0,0.35)] hover:border-[#c9a84c] hover:bg-[rgba(201,168,76,0.08)] cursor-default">
+                <div className="group relative w-[110px] h-[110px] rounded-full border-2 border-[rgba(16,185,129,0.45)] flex flex-col justify-center items-center bg-[rgba(255,255,255,0.05)] shadow-[0_0_0_6px_rgba(16,185,129,0.07),0_4px_18px_rgba(0,0,0,0.25)] transition-all duration-[280ms] hover:-translate-y-[7px] hover:scale-105 hover:shadow-[0_0_0_8px_rgba(16,185,129,0.12),0_12px_32px_rgba(0,0,0,0.35)] hover:border-[#10b981] hover:bg-[rgba(16,185,129,0.08)] cursor-default">
                   {/* Inner ring */}
-                  <div className="absolute inset-[5px] rounded-full border border-[rgba(201,168,76,0.18)] pointer-events-none" />
-                  <span className="text-[2rem] font-extrabold text-[#e2c07a] leading-none mb-1 [text-shadow:0_2px_8px_rgba(0,0,0,0.3)]">
+                  <div className="absolute inset-[5px] rounded-full border border-[rgba(16,185,129,0.18)] pointer-events-none" />
+                  <span className="text-[2rem] font-extrabold text-[#a7f3d0] leading-none mb-1 [text-shadow:0_2px_8px_rgba(0,0,0,0.3)]">
                     {d.count}
                   </span>
                   <span className="text-[0.72rem] font-bold capitalize text-[rgba(253,248,240,0.7)] tracking-[0.04em]">
@@ -226,7 +226,7 @@ export default function ClassStatistics() {
               </div>
             ))
           ) : (
-            <p className="text-[rgba(201,168,76,0.7)] text-[0.95rem]">
+            <p className="text-[rgba(16,185,129,0.7)] text-[0.95rem]">
               {t("noClasses")}
             </p>
           )}

@@ -12,10 +12,10 @@ import { useTranslations } from "@/store/languageStore";
 import { useBranchStore } from "@/store/branchStore";
 import { useClassNames, useStandardSections } from "@/hooks/useClasses";
 
-const NAVY = "#1a2744";
-const NAVY_DARK = "#111b33";
-const GOLD = "#c9a84c";
-const GOLD_LIGHT = "#e8c97a";
+const NAVY = "#059669";
+const NAVY_DARK = "#047857";
+const GOLD = "#10b981";
+const GOLD_LIGHT = "#a7f3d0";
 
 const GRADES = [
   { min: 90, grade: "A+" },
@@ -116,7 +116,7 @@ export default function ResultsPage() {
 
   const focusGold = (e) => {
     e.target.style.borderColor = GOLD;
-    e.target.style.boxShadow = "0 0 0 3px rgba(201,168,76,0.15)";
+    e.target.style.boxShadow = "0 0 0 3px rgba(16,185,129,0.15)";
     e.target.style.backgroundColor = "white";
   };
   const blurReset = (e) => {
@@ -126,7 +126,7 @@ export default function ResultsPage() {
   };
 
   return (
-    <div className="min-h-screen pb-12 bg-[#f0f2f8] font-sans">
+    <div className="min-h-screen pb-12 bg-[#f0fdf4] font-sans">
       <Navbar />
       <LatestUpdatesNotice />
 
@@ -134,14 +134,14 @@ export default function ResultsPage() {
       <div
         className="text-center px-6 py-14 relative overflow-hidden"
         style={{
-          background: `linear-gradient(135deg, ${NAVY_DARK} 0%, ${NAVY} 50%, #243156 100%)`,
+          background: `linear-gradient(135deg, ${NAVY_DARK} 0%, ${NAVY} 50%, ${GOLD} 100%)`,
         }}
       >
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
-            background: `radial-gradient(ellipse 60% 50% at 20% 50%, rgba(201,168,76,0.15) 0%, transparent 70%),
-                       radial-gradient(ellipse 40% 60% at 80% 20%, rgba(201,168,76,0.1) 0%, transparent 60%)`,
+            background: `radial-gradient(ellipse 60% 50% at 20% 50%, rgba(16,185,129,0.15) 0%, transparent 70%),
+                       radial-gradient(ellipse 40% 60% at 80% 20%, rgba(16,185,129,0.1) 0%, transparent 60%)`,
           }}
         />
         <div
@@ -166,9 +166,9 @@ export default function ResultsPage() {
           <div
             className="relative z-[1] inline-flex items-center gap-1.5 mt-3.5 px-4 py-1.5 rounded-full text-xs font-semibold"
             style={{
-              background: "rgba(201,168,76,0.18)",
-              border: "1.5px solid rgba(201,168,76,0.5)",
-              color: "#e8c97a",
+              background: "rgba(16,185,129,0.18)",
+              border: "1.5px solid rgba(16,185,129,0.5)",
+              color: "#a7f3d0",
             }}
           >
             <span>🏫</span>
@@ -365,15 +365,15 @@ export default function ResultsPage() {
               className="inline-flex items-center justify-center min-w-[150px] px-8 py-3 border-none rounded-full text-white text-[0.95rem] font-bold tracking-wide cursor-pointer transition-all duration-[250ms] hover:-translate-y-0.5 max-sm:flex-1"
               style={{
                 background: NAVY,
-                boxShadow: "0 4px 14px rgba(26,39,68,0.3)",
+                boxShadow: "0 4px 14px rgba(5,150,105,0.3)",
               }}
               onMouseEnter={(e) => {
                 e.target.style.background = NAVY_DARK;
-                e.target.style.boxShadow = "0 8px 24px rgba(26,39,68,0.35)";
+                e.target.style.boxShadow = "0 8px 24px rgba(5,150,105,0.35)";
               }}
               onMouseLeave={(e) => {
                 e.target.style.background = NAVY;
-                e.target.style.boxShadow = "0 4px 14px rgba(26,39,68,0.3)";
+                e.target.style.boxShadow = "0 4px 14px rgba(5,150,105,0.3)";
               }}
             >
               {t("searchBtn")}
@@ -384,7 +384,7 @@ export default function ResultsPage() {
               className="inline-flex items-center justify-center min-w-[120px] px-7 py-3 border-[1.5px] rounded-full text-[0.95rem] font-bold tracking-wide cursor-pointer transition-all duration-[250ms] hover:-translate-y-0.5 max-sm:flex-1"
               style={{ borderColor: GOLD, color: NAVY, background: "white" }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.background = "#fdf8ee";
+                e.currentTarget.style.background = "#ecfdf5";
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.background = "white";
@@ -471,9 +471,9 @@ export default function ResultsPage() {
                       return (
                         <tr
                           key={i}
-                          className="border-b border-gray-200 last:border-0 transition-colors duration-150 hover:bg-[#eef1f8]"
+                          className="border-b border-gray-200 last:border-0 transition-colors duration-150 hover:bg-emerald-50"
                           style={{
-                            background: i % 2 === 1 ? "#f8f9fc" : "white",
+                            background: i % 2 === 1 ? "#f0fdf4" : "white",
                           }}
                         >
                           <td

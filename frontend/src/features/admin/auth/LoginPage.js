@@ -114,10 +114,10 @@ export default function LoginPage() {
   };
 
   const inputClass =
-    "w-full px-4 py-3 rounded-xl border border-white/20 bg-white/10 text-white placeholder-white/50 backdrop-blur-sm transition-all focus:outline-none focus:border-amber-300 focus:bg-white/15 focus:ring-2 focus:ring-amber-300/40";
+    "w-full px-4 py-3 rounded-xl border border-white/20 bg-white/10 text-white placeholder-white/50 backdrop-blur-sm transition-all focus:outline-none focus:border-emerald-300 focus:bg-white/15 focus:ring-2 focus:ring-emerald-300/40";
 
   return (
-    <div className="min-h-screen grid lg:grid-cols-2 bg-[#0a1628]">
+    <div className="min-h-screen grid lg:grid-cols-2 bg-[#022c22]">
       {/* ── HERO ── */}
       <div className="relative hidden lg:block overflow-hidden">
         <Image
@@ -128,10 +128,10 @@ export default function LoginPage() {
           sizes="50vw"
           className="object-cover"
         />
-        <div className="absolute inset-0 bg-linear-to-br from-[#0a1628]/90 via-[#0a1628]/60 to-transparent" />
+        <div className="absolute inset-0 bg-linear-to-br from-[#022c22]/90 via-[#022c22]/60 to-transparent" />
         <div className="relative z-10 h-full flex flex-col justify-between p-12 text-white">
           <div className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-xl bg-amber-400 flex items-center justify-center font-bold text-[#0a1628] text-lg shadow-lg">
+            <div className="w-11 h-11 rounded-xl bg-emerald-400 flex items-center justify-center font-bold text-[#022c22] text-lg shadow-lg">
               S
             </div>
             <span className="text-lg font-semibold tracking-tight">
@@ -142,7 +142,7 @@ export default function LoginPage() {
             <h1 className="text-5xl font-bold leading-tight mb-4">
               Welcome back,
               <br />
-              <span className="text-amber-300">Administrator.</span>
+              <span className="text-emerald-300">Administrator.</span>
             </h1>
             <p className="text-white/70 text-lg max-w-md">
               Manage branches, students, teachers, and academic operations from
@@ -167,22 +167,22 @@ export default function LoginPage() {
             sizes="100vw"
             className="object-cover"
           />
-          <div className="absolute inset-0 bg-[#0a1628]/85" />
+          <div className="absolute inset-0 bg-[#022c22]/85" />
         </div>
 
         <div className="relative w-full max-w-md">
           <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-8 shadow-2xl">
             <div className="flex items-center justify-center gap-2 mb-6">
               <div
-                className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all ${step >= 1 ? "bg-amber-400 text-[#0a1628]" : "bg-white/10 text-white/50"}`}
+                className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all ${step >= 1 ? "bg-emerald-400 text-[#022c22]" : "bg-white/10 text-white/50"}`}
               >
                 1
               </div>
               <div
-                className={`h-0.5 w-12 transition-all ${step >= 2 ? "bg-amber-400" : "bg-white/10"}`}
+                className={`h-0.5 w-12 transition-all ${step >= 2 ? "bg-emerald-400" : "bg-white/10"}`}
               />
               <div
-                className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all ${step >= 2 ? "bg-amber-400 text-[#0a1628]" : "bg-white/10 text-white/50"}`}
+                className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all ${step >= 2 ? "bg-emerald-400 text-[#022c22]" : "bg-white/10 text-white/50"}`}
               >
                 2
               </div>
@@ -223,15 +223,26 @@ export default function LoginPage() {
                       className={inputClass + " cursor-pointer appearance-none"}
                       style={{ colorScheme: "dark" }}
                     >
-                      <option value="" disabled>
+                      <option
+                        value=""
+                        disabled
+                        style={{ background: "#022c22", color: "#ffffff" }}
+                      >
                         {t("branchPlaceholder")}
                       </option>
                       {branches.map((b) => (
-                        <option key={b.id} value={String(b.id)}>
+                        <option
+                          key={b.id}
+                          value={String(b.id)}
+                          style={{ background: "#022c22", color: "#ffffff" }}
+                        >
                           {b.name_en || b.name_bn}
                         </option>
                       ))}
-                      <option value={SUPER_ADMIN_VALUE}>
+                      <option
+                        value={SUPER_ADMIN_VALUE}
+                        style={{ background: "#022c22", color: "#ffffff" }}
+                      >
                         ⚡ {t("superAdmin")}
                       </option>
                     </select>
@@ -245,15 +256,15 @@ export default function LoginPage() {
                       (br) => String(br.id) === selectedBranchId,
                     );
                     return b ? (
-                      <div className="mb-5 p-3 bg-amber-400/10 border border-amber-300/30 rounded-lg text-sm">
-                        <p className="font-semibold text-amber-200">
+                      <div className="mb-5 p-3 bg-emerald-400/10 border border-emerald-300/30 rounded-lg text-sm">
+                        <p className="font-semibold text-emerald-200">
                           {b.name_en}
                         </p>
                         {b.name_bn && (
-                          <p className="text-amber-200/80 mt-0.5">{b.name_bn}</p>
+                          <p className="text-emerald-200/80 mt-0.5">{b.name_bn}</p>
                         )}
                         {(b.address_en || b.address_bn) && (
-                          <p className="text-amber-200/60 mt-1 text-xs">
+                          <p className="text-emerald-200/60 mt-1 text-xs">
                             ◆ {b.address_en || b.address_bn}
                           </p>
                         )}
@@ -262,11 +273,11 @@ export default function LoginPage() {
                   })()}
 
                 {isSuperAdmin && (
-                  <div className="mb-5 p-3 bg-amber-400/10 border border-amber-300/30 rounded-lg text-sm">
-                    <p className="font-semibold text-amber-200">
+                  <div className="mb-5 p-3 bg-emerald-400/10 border border-emerald-300/30 rounded-lg text-sm">
+                    <p className="font-semibold text-emerald-200">
                       ⚡ {t("superAdmin")}
                     </p>
-                    <p className="text-amber-200/70 mt-0.5 text-xs">
+                    <p className="text-emerald-200/70 mt-0.5 text-xs">
                       Full access to all branches
                     </p>
                   </div>
@@ -275,7 +286,7 @@ export default function LoginPage() {
                 <button
                   type="submit"
                   disabled={!selectedBranchId}
-                  className="w-full py-3.5 bg-amber-400 text-[#0a1628] font-bold text-base rounded-xl cursor-pointer transition-all mt-2 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-amber-300 hover:shadow-lg hover:shadow-amber-400/30"
+                  className="w-full py-3.5 bg-emerald-400 text-[#022c22] font-bold text-base rounded-xl cursor-pointer transition-all mt-2 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-emerald-300 hover:shadow-lg hover:shadow-emerald-400/30"
                 >
                   {t("continueBtn")} →
                 </button>
@@ -323,7 +334,7 @@ export default function LoginPage() {
                   <button
                     type="submit"
                     disabled={loading}
-                    className="grow py-3.5 bg-amber-400 text-[#0a1628] font-bold text-base rounded-xl cursor-pointer transition-all disabled:opacity-60 disabled:cursor-not-allowed hover:bg-amber-300 hover:shadow-lg hover:shadow-amber-400/30"
+                    className="grow py-3.5 bg-emerald-400 text-[#022c22] font-bold text-base rounded-xl cursor-pointer transition-all disabled:opacity-60 disabled:cursor-not-allowed hover:bg-emerald-300 hover:shadow-lg hover:shadow-emerald-400/30"
                   >
                     {loading ? t("loggingIn") : t("loginBtn")}
                   </button>
@@ -336,7 +347,7 @@ export default function LoginPage() {
                 {t("noAccount")}{" "}
                 <Link
                   href="/admin/register"
-                  className="text-amber-300 no-underline font-semibold hover:text-amber-200 hover:underline transition-colors"
+                  className="text-emerald-300 no-underline font-semibold hover:text-emerald-200 hover:underline transition-colors"
                 >
                   {t("signUp")}
                 </Link>

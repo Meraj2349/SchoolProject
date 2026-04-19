@@ -12,11 +12,11 @@ import { useTranslations } from "@/store/languageStore";
 import Image from "next/image";
 import { useClassNames, useStandardSections } from "@/hooks/useClasses";
 
-const NAVY = "#1a2744";
-const NAVY_DARK = "#111b33";
-const NAVY_MID = "#243156";
-const GOLD = "#c9a84c";
-const GOLD_LIGHT = "#e8c97a";
+const NAVY = "#059669";
+const NAVY_DARK = "#047857";
+const NAVY_MID = "#10b981";
+const GOLD = "#10b981";
+const GOLD_LIGHT = "#a7f3d0";
 
 const COLORS = [
   "#FF6B6B",
@@ -48,7 +48,7 @@ function TeacherCard({ teacher }) {
   return (
     <div
       className="bg-white rounded-[18px] overflow-hidden border border-gray-200 transition-all duration-[350ms] hover:-translate-y-2 hover:shadow-2xl relative"
-      style={{ boxShadow: "0 4px 20px rgba(26,39,68,0.1)" }}
+      style={{ boxShadow: "0 4px 20px rgba(5,150,105,0.1)" }}
       onMouseEnter={(e) => (e.currentTarget.style.borderColor = GOLD)}
       onMouseLeave={(e) => (e.currentTarget.style.borderColor = "#e2e6f0")}
     >
@@ -64,7 +64,7 @@ function TeacherCard({ teacher }) {
           className="absolute inset-0 pointer-events-none"
           style={{
             background:
-              "radial-gradient(ellipse 80% 60% at 50% 0%, rgba(201,168,76,0.12) 0%, transparent 70%)",
+              "radial-gradient(ellipse 80% 60% at 50% 0%, rgba(16,185,129,0.12) 0%, transparent 70%)",
           }}
         />
         <div className="relative w-[88px] h-[88px] mx-auto z-[1]">
@@ -123,7 +123,7 @@ function TeacherCard({ teacher }) {
             item.value ? (
               <div
                 key={i}
-                className="flex items-center gap-2.5 px-3 py-2 bg-gray-50 rounded-lg border border-gray-200 transition-colors hover:bg-[#eef0f8]"
+                className="flex items-center gap-2.5 px-3 py-2 bg-gray-50 rounded-lg border border-gray-200 transition-colors hover:bg-emerald-50"
               >
                 <span className={item.cls} style={item.style}>
                   {item.value}
@@ -150,8 +150,8 @@ const NavyHeader = ({ children }) => (
     <div
       className="absolute inset-0 pointer-events-none"
       style={{
-        background: `radial-gradient(ellipse 60% 50% at 20% 50%, rgba(201,168,76,0.15) 0%, transparent 70%),
-                   radial-gradient(ellipse 40% 60% at 80% 20%, rgba(201,168,76,0.1) 0%, transparent 60%)`,
+        background: `radial-gradient(ellipse 60% 50% at 20% 50%, rgba(16,185,129,0.15) 0%, transparent 70%),
+                   radial-gradient(ellipse 40% 60% at 80% 20%, rgba(16,185,129,0.1) 0%, transparent 60%)`,
       }}
     />
     <div
@@ -210,7 +210,7 @@ export default function TeacherListPage() {
 
   if (isLoading)
     return (
-      <div className="min-h-screen bg-[#f0f2f8] font-sans">
+      <div className="min-h-screen bg-[#f0fdf4] font-sans">
         <Navbar />
         <div className="flex justify-center items-center min-h-[60vh]">
           <LottieLoader size="medium" text={t("loadingTeachers")} />
@@ -221,7 +221,7 @@ export default function TeacherListPage() {
 
   if (isError)
     return (
-      <div className="min-h-screen bg-[#f0f2f8] font-sans">
+      <div className="min-h-screen bg-[#f0fdf4] font-sans">
         <Navbar />
         <div className="text-center px-6 py-12 bg-white rounded-2xl shadow-lg max-w-[500px] mx-auto mt-10 border border-gray-200">
           <p className="text-red-700 text-[1.1rem] mb-5">
@@ -240,7 +240,7 @@ export default function TeacherListPage() {
     );
 
   return (
-    <div className="min-h-screen bg-[#f0f2f8] font-sans">
+    <div className="min-h-screen bg-[#f0fdf4] font-sans">
       <Navbar />
       <LatestUpdatesNotice />
 
@@ -258,8 +258,8 @@ export default function TeacherListPage() {
           <div
             className="relative z-[1] inline-flex items-center gap-1.5 mt-3.5 px-4 py-1.5 rounded-full text-xs font-semibold"
             style={{
-              background: "rgba(201,168,76,0.18)",
-              border: "1.5px solid rgba(201,168,76,0.5)",
+              background: "rgba(16,185,129,0.18)",
+              border: "1.5px solid rgba(16,185,129,0.5)",
               color: GOLD_LIGHT,
             }}
           >
@@ -275,7 +275,7 @@ export default function TeacherListPage() {
         style={{
           padding: "22px 28px",
           borderTop: `3px solid ${GOLD}`,
-          boxShadow: "0 6px 24px rgba(26,39,68,0.12)",
+          boxShadow: "0 6px 24px rgba(5,150,105,0.12)",
         }}
       >
         {[
@@ -314,7 +314,7 @@ export default function TeacherListPage() {
               }}
               onFocus={(e) => {
                 e.target.style.borderColor = GOLD;
-                e.target.style.boxShadow = "0 0 0 3px rgba(201,168,76,0.15)";
+                e.target.style.boxShadow = "0 0 0 3px rgba(16,185,129,0.15)";
               }}
               onBlur={(e) => {
                 e.target.style.borderColor = "#e2e6f0";
@@ -335,7 +335,7 @@ export default function TeacherListPage() {
       {/* Search section */}
       <div
         className="max-w-[920px] mx-auto my-7 bg-white px-7 py-6 rounded-2xl border border-gray-200"
-        style={{ boxShadow: "0 6px 24px rgba(26,39,68,0.1)" }}
+        style={{ boxShadow: "0 6px 24px rgba(5,150,105,0.1)" }}
       >
         <div className="flex gap-3 items-center flex-wrap mb-3.5 max-sm:flex-col max-sm:items-stretch">
           <div className="relative flex-1 min-w-[220px]">
@@ -348,7 +348,7 @@ export default function TeacherListPage() {
               style={{ color: NAVY }}
               onFocus={(e) => {
                 e.target.style.borderColor = GOLD;
-                e.target.style.boxShadow = "0 0 0 3px rgba(201,168,76,0.15)";
+                e.target.style.boxShadow = "0 0 0 3px rgba(16,185,129,0.15)";
               }}
               onBlur={(e) => {
                 e.target.style.borderColor = "#e2e6f0";
