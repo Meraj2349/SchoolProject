@@ -61,7 +61,9 @@
     "classWiseStudents": "শ্রেণি অনুযায়ী শিক্ষার্থী",
     "loadingClassStats": "শ্রেণি অনুযায়ী শিক্ষার্থী লোড হচ্ছে…",
     "failedClassStats": "শ্রেণি পরিসংখ্যান লোড করতে ব্যর্থ হয়েছে",
-    "noClasses": "কোনো শ্রেণি পাওয়া যায়নি"
+    "noClasses": "কোনো শ্রেণি পাওয়া যায়নি",
+    "totalStudentsLabel": "মোট শিক্ষার্থী",
+    "acrossAllBranches": "সকল শাখায়"
   },
   "quickLinks": {
     "students": "শিক্ষার্থী",

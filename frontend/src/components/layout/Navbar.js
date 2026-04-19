@@ -3,9 +3,10 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import LanguageSwitcher from "@/components/ui/LanguageSwitcher";
 import PublicBranchSelector from "@/components/ui/PublicBranchSelector";
+import BranchBadge from "@/components/ui/BranchBadge";
 import { useTranslations } from "@/store/languageStore";
 
 export default function Navbar() {
@@ -20,8 +21,15 @@ export default function Navbar() {
     setMobileMenuOpen(false);
   }
 
+  const scrolledRef = useRef(false);
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 12);
+    const onScroll = () => {
+      const next = window.scrollY > 12;
+      if (next !== scrolledRef.current) {
+        scrolledRef.current = next;
+        setScrolled(next);
+      }
+    };
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
@@ -186,7 +194,8 @@ export default function Navbar() {
               </li>
             ))}
           </ul>
-          <div className="flex items-center py-1.5">
+          <div className="flex items-center gap-2 py-1.5">
+            <BranchBadge />
             <PublicBranchSelector />
           </div>
         </div>
@@ -278,6 +287,7 @@ export default function Navbar() {
           </ul>
 
           <div className="px-4 pb-5 flex flex-col gap-2.5">
+            <BranchBadge className="self-start" />
             <PublicBranchSelector />
             <LanguageSwitcher />
           </div>

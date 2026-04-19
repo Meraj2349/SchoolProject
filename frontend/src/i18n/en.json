@@ -61,7 +61,9 @@
     "classWiseStudents": "Class wise Students",
     "loadingClassStats": "Loading class wise students…",
     "failedClassStats": "Failed to load class statistics",
-    "noClasses": "No classes found"
+    "noClasses": "No classes found",
+    "totalStudentsLabel": "Total Students",
+    "acrossAllBranches": "Across all branches"
   },
   "quickLinks": {
     "students": "Students",

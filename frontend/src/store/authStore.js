@@ -31,6 +31,11 @@ export const useAuthStore = create(
       clearAuth: () => {
         Cookies.remove("token");
         set({ token: null, isAuthenticated: false, role: null, branchId: null });
+        // Release any sticky branch_admin lock so public visitor on a shared
+        // browser sees the neutral "All Branches" pill, not the previous user's branch.
+        import("@/store/branchStore").then(({ useBranchStore }) => {
+          useBranchStore.getState().resetBranch();
+        });
       },
     }),
     {

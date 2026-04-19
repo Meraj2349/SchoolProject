@@ -27,7 +27,8 @@ export default function ClassesSectionsAdminPage() {
   const branchId = useBranchStore((s) => s.currentBranchId);
   const role = useAuthStore((s) => s.role);
   const isSuperAdmin = role === "super_admin";
-  const needsBranch = isSuperAdmin && branchId == null;
+  // Classes are GLOBAL — no branch gate. Super_admin only page.
+  const needsBranch = false;
 
   const [form, setForm] = useState(EMPTY_FORM);
   const [editId, setEditId] = useState(null);
@@ -58,7 +59,6 @@ export default function ClassesSectionsAdminPage() {
     const payload = {
       className: form.className.trim(),
       section: form.section.trim(),
-      teacherId: editTeacherId || null,
     };
     try {
       if (editId) {
@@ -101,22 +101,25 @@ export default function ClassesSectionsAdminPage() {
 
   const isBusy = create.isPending || update.isPending;
 
+  if (!isSuperAdmin) {
+    return (
+      <div className="rounded-xl border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-800">
+        <strong className="font-semibold">Super admin only.</strong> Classes are
+        shared across all branches and can only be created by the super admin.
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-slate-900">Class & Section</h1>
         <p className="text-sm text-slate-500 mt-1">
-          Add class name and section. Teacher assignment happens separately on
-          the Class Teacher page.
+          Classes are shared across all branches. Edits here apply everywhere.
+          Teacher assignment happens separately on the Class Teacher page
+          (per-branch).
         </p>
       </div>
-
-      {needsBranch && (
-        <div className="rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-          <strong className="font-semibold">Select a branch</strong> from the
-          top bar before adding classes.
-        </div>
-      )}
 
       <div
         ref={formRef}

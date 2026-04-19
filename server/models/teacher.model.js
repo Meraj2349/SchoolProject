@@ -82,16 +82,21 @@ const searchTeachers = async (query, className = "", branchId = null) => {
   const { clause, params: branchParams } = branchFilter(branchId, "t");
   const like = `%${query}%`;
   if (className) {
+    // Teacher assignments live per-branch in ClassTeacherAssignments.
+    const ctaBranchClause = branchId != null ? "AND cta.branch_id = ?" : "";
+    const ctaBranchParam = branchId != null ? [branchId] : [];
     const sql = `
       SELECT DISTINCT t.TeacherID, t.FirstName, t.LastName, t.Subject, t.Email,
-             (c.ClassID IS NOT NULL) AS assignedToClass
+             (cta.ClassID IS NOT NULL) AS assignedToClass
       FROM Teachers t
-      LEFT JOIN Classes c ON c.TeacherID = t.TeacherID AND c.ClassName = ?
+      LEFT JOIN ClassTeacherAssignments cta
+        ON cta.TeacherID = t.TeacherID ${ctaBranchClause}
+      LEFT JOIN Classes c ON c.ClassID = cta.ClassID AND c.ClassName = ?
       WHERE (t.FirstName LIKE ? OR t.LastName LIKE ? OR CONCAT(t.FirstName, ' ', t.LastName) LIKE ?) ${clause}
       ORDER BY assignedToClass DESC, t.FirstName, t.LastName
       LIMIT 10
     `;
-    const [rows] = await db.query(sql, [className, like, like, like, ...branchParams]);
+    const [rows] = await db.query(sql, [...ctaBranchParam, className, like, like, like, ...branchParams]);
     return rows;
   }
   const sql = `

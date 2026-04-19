@@ -4,15 +4,8 @@ import { branchFilter } from "../utils/branchFilter.js";
 /**
  * Simple Exam Model for School Management System
  *
- * Database Schema:
- * CREATE TABLE Exams (
- *     ExamID INT PRIMARY KEY AUTO_INCREMENT NOT NULL,
- *     ExamType ENUM('Monthly', 'Quarterly', 'Half-Yearly', 'Annual', 'Final') NOT NULL,
- *     ExamName VARCHAR(50) NOT NULL,
- *     ClassID INT NOT NULL,
- *     ExamDate DATE NOT NULL,
- *     FOREIGN KEY (ClassID) REFERENCES Classes (ClassID)
- * );
+ * Classes are GLOBAL (no branch_id). Exams are branch-scoped via
+ * Exams.branch_id. Scope reads/writes with e.branch_id.
  */
 
 // Valid exam types from database schema
@@ -24,9 +17,9 @@ const VALID_EXAM_TYPES = [
   "Final",
 ];
 
-// Get all exams (branch-scoped via Classes join)
+// Get all exams (branch-scoped via Exams.branch_id)
 const getAllExams = async (branchId = null) => {
-  const { clause, params: branchParams } = branchFilter(branchId, "c");
+  const { clause, params: branchParams } = branchFilter(branchId, "e");
   try {
     const [rows] = await db.query(`
       SELECT
@@ -50,7 +43,7 @@ const getAllExams = async (branchId = null) => {
 
 // Get exam by ID (branch-scoped)
 const getExamById = async (examId, branchId = null) => {
-  const { clause, params: branchParams } = branchFilter(branchId, "c");
+  const { clause, params: branchParams } = branchFilter(branchId, "e");
   try {
     if (!examId) {
       throw new Error("Exam ID is required");
@@ -79,7 +72,7 @@ const getExamById = async (examId, branchId = null) => {
 
 // Get exams by class (branch-scoped)
 const getExamsByClass = async (classId, branchId = null) => {
-  const { clause, params: branchParams } = branchFilter(branchId, "c");
+  const { clause, params: branchParams } = branchFilter(branchId, "e");
   try {
     const [rows] = await db.query(
       `SELECT
@@ -119,12 +112,10 @@ const addExamByClassDetails = async (examData, branchId = null) => {
       );
     }
 
-    // Get class ID by class name and section (branch-scoped)
-    const branchClause = branchId != null ? "AND branch_id = ?" : "";
-    const branchParam = branchId != null ? [branchId] : [];
+    // Classes are GLOBAL — lookup without branch filter.
     const [classRows] = await db.query(
-      `SELECT ClassID, ClassName, Section FROM Classes WHERE ClassName = ? AND Section = ? ${branchClause}`,
-      [className, sectionName, ...branchParam],
+      `SELECT ClassID, ClassName, Section FROM Classes WHERE ClassName = ? AND Section = ?`,
+      [className, sectionName],
     );
 
     if (classRows.length === 0) {
@@ -145,10 +136,15 @@ const addExamByClassDetails = async (examData, branchId = null) => {
       throw new Error("examDate cannot be in the past");
     }
 
-    const [result] = await db.query(
-      `INSERT INTO Exams (ExamType, ExamName, ClassID, ExamDate) VALUES (?, ?, ?, ?)`,
-      [examType, examName, classInfo.ClassID, examDate],
-    );
+    let sql, values;
+    if (branchId != null) {
+      sql = `INSERT INTO Exams (ExamType, ExamName, ClassID, ExamDate, branch_id) VALUES (?, ?, ?, ?, ?)`;
+      values = [examType, examName, classInfo.ClassID, examDate, branchId];
+    } else {
+      sql = `INSERT INTO Exams (ExamType, ExamName, ClassID, ExamDate) VALUES (?, ?, ?, ?)`;
+      values = [examType, examName, classInfo.ClassID, examDate];
+    }
+    const [result] = await db.query(sql, values);
 
     return {
       success: true,
@@ -191,11 +187,10 @@ const createExamByClassNameAndSection = async (
       );
     }
 
-    const branchClause = branchId != null ? "AND branch_id = ?" : "";
-    const branchParam = branchId != null ? [branchId] : [];
+    // Classes are GLOBAL — no branch filter.
     const [classRows] = await db.query(
-      `SELECT ClassID, ClassName, Section FROM Classes WHERE ClassName = ? AND Section = ? ${branchClause}`,
-      [className, sectionName, ...branchParam],
+      `SELECT ClassID, ClassName, Section FROM Classes WHERE ClassName = ? AND Section = ?`,
+      [className, sectionName],
     );
 
     if (classRows.length === 0) {
@@ -216,10 +211,15 @@ const createExamByClassNameAndSection = async (
       throw new Error("examDate cannot be in the past");
     }
 
-    const [result] = await db.query(
-      `INSERT INTO Exams (ExamType, ExamName, ClassID, ExamDate) VALUES (?, ?, ?, ?)`,
-      [examType, examName, classInfo.ClassID, examDate],
-    );
+    let sql, values;
+    if (branchId != null) {
+      sql = `INSERT INTO Exams (ExamType, ExamName, ClassID, ExamDate, branch_id) VALUES (?, ?, ?, ?, ?)`;
+      values = [examType, examName, classInfo.ClassID, examDate, branchId];
+    } else {
+      sql = `INSERT INTO Exams (ExamType, ExamName, ClassID, ExamDate) VALUES (?, ?, ?, ?)`;
+      values = [examType, examName, classInfo.ClassID, examDate];
+    }
+    const [result] = await db.query(sql, values);
 
     return {
       success: true,
@@ -242,9 +242,8 @@ const createExamByClassNameAndSection = async (
   }
 };
 
-// Update exam (branch-scoped)
+// Update exam (branch-scoped via Exams.branch_id)
 const updateExam = async (examId, examData, branchId = null) => {
-  const { clause: branchClause2, params: branchParams2 } = branchFilter(branchId, "c");
   try {
     if (!examId) throw new Error("Exam ID is required");
 
@@ -258,11 +257,10 @@ const updateExam = async (examId, examData, branchId = null) => {
     if ((ClassName || SectionName) && !ClassID) {
       const cn = ClassName || "";
       const sn = SectionName || "";
-      const branchClause = branchId != null ? "AND branch_id = ?" : "";
-      const branchParam = branchId != null ? [branchId] : [];
+      // Classes are GLOBAL — no branch filter.
       const [classRows] = await db.query(
-        `SELECT ClassID FROM Classes WHERE ClassName = ? AND Section = ? ${branchClause}`,
-        [cn, sn, ...branchParam],
+        `SELECT ClassID FROM Classes WHERE ClassName = ? AND Section = ?`,
+        [cn, sn],
       );
       if (classRows.length === 0)
         throw new Error(`Class '${cn} – ${sn}' not found`);
@@ -289,11 +287,10 @@ const updateExam = async (examId, examData, branchId = null) => {
     }
 
     if (ClassID !== undefined) {
-      const branchClause = branchId != null ? "AND branch_id = ?" : "";
-      const branchParam = branchId != null ? [branchId] : [];
+      // Classes are GLOBAL.
       const [classCheck] = await db.query(
-        `SELECT ClassID FROM Classes WHERE ClassID = ? ${branchClause}`,
-        [ClassID, ...branchParam],
+        `SELECT ClassID FROM Classes WHERE ClassID = ?`,
+        [ClassID],
       );
       if (classCheck.length === 0) throw new Error("Class not found");
       updates.push("ClassID = ?");
@@ -310,9 +307,12 @@ const updateExam = async (examId, examData, branchId = null) => {
 
     if (updates.length === 0) throw new Error("No valid fields to update");
 
-    params.push(examId);
+    // Scope UPDATE by Exams.branch_id when provided.
+    const branchClause = branchId != null ? "AND branch_id = ?" : "";
+    const branchParams = branchId != null ? [branchId] : [];
+    params.push(examId, ...branchParams);
     const [result] = await db.query(
-      `UPDATE Exams SET ${updates.join(", ")} WHERE ExamID = ?`,
+      `UPDATE Exams SET ${updates.join(", ")} WHERE ExamID = ? ${branchClause}`,
       params,
     );
 
@@ -324,7 +324,7 @@ const updateExam = async (examId, examData, branchId = null) => {
   }
 };
 
-// Delete exam (branch-scoped)
+// Delete exam (branch-scoped via Exams.branch_id)
 const deleteExam = async (examId, branchId = null) => {
   try {
     if (!examId) {
@@ -338,9 +338,11 @@ const deleteExam = async (examId, branchId = null) => {
 
     await db.query("DELETE FROM Results WHERE ExamID = ?", [examId]);
 
+    const branchClause = branchId != null ? "AND branch_id = ?" : "";
+    const branchParams = branchId != null ? [branchId] : [];
     const [result] = await db.query(
-      `DELETE FROM Exams WHERE ExamID = ?`,
-      [examId],
+      `DELETE FROM Exams WHERE ExamID = ? ${branchClause}`,
+      [examId, ...branchParams],
     );
 
     if (result.affectedRows === 0) {

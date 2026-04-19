@@ -32,37 +32,22 @@ const getAllStudents = async (branchId = null) => {
   }
 };
 
-// Helper function to find or create a class (branch-aware)
-const findOrCreateClass = async (className, section, branchId = null) => {
+// Classes are global — no branch_id. Look up by (ClassName, Section).
+// Throws if not found; super_admin must create the class first.
+const findClass = async (className, section) => {
   try {
-    const branchClause = branchId != null ? "AND branch_id = ?" : "";
-    const branchParam = branchId != null ? [branchId] : [];
-
-    const [existingClass] = await db.query(
-      `SELECT ClassID FROM Classes WHERE ClassName = ? AND Section = ? ${branchClause}`,
-      [className, section, ...branchParam],
-    );
-
-    if (existingClass.length > 0) {
-      return existingClass[0].ClassID;
-    }
-
-    // If not found, create new class (with branch_id when provided)
-    if (branchId != null) {
-      const [result] = await db.query(
-        "INSERT INTO Classes (ClassName, Section, branch_id) VALUES (?, ?, ?)",
-        [className, section, branchId],
-      );
-      return result.insertId;
-    }
-
-    const [result] = await db.query(
-      "INSERT INTO Classes (ClassName, Section) VALUES (?, ?)",
+    const [rows] = await db.query(
+      `SELECT ClassID FROM Classes WHERE ClassName = ? AND Section = ?`,
       [className, section],
     );
-    return result.insertId;
+    if (rows.length === 0) {
+      throw new Error(
+        `Class "${className} - ${section}" does not exist. Ask super admin to create it first.`,
+      );
+    }
+    return rows[0].ClassID;
   } catch (err) {
-    throw new Error("Error finding or creating class: " + err.message);
+    throw new Error("Error finding class: " + err.message);
   }
 };
 
@@ -81,7 +66,7 @@ const addStudent = async (studentData, branchId = null) => {
   } = studentData;
 
   try {
-    const classId = await findOrCreateClass(Class, Section, branchId);
+    const classId = await findClass(Class, Section);
 
     let sql, values;
     if (branchId != null) {
@@ -143,7 +128,7 @@ const updateStudent = async (studentID, studentData, branchId = null) => {
   } = studentData;
 
   try {
-    const classId = await findOrCreateClass(Class, Section, branchId);
+    const classId = await findClass(Class, Section);
     const { clause, params } = branchFilter(branchId);
 
     const sql = `UPDATE Students SET
@@ -158,7 +143,7 @@ const updateStudent = async (studentID, studentData, branchId = null) => {
       RollNumber = ?
       WHERE StudentID = ? ${clause}`;
 
-    const [result] = await db.query(sql, [
+    await db.query(sql, [
       FirstName,
       LastName,
       DateOfBirth,
@@ -255,14 +240,19 @@ const getStudentsByClass = async (classID, branchId = null) => {
   }
 };
 
-const checkRollNumberExists = async (rollNumber, className, section, excludeStudentID = null, branchId = null) => {
+// Roll-number uniqueness is scoped per (ClassID, branch_id) — same roll can
+// exist for the same class in different branches.
+const checkRollNumberExists = async (
+  rollNumber,
+  className,
+  section,
+  excludeStudentID = null,
+  branchId = null,
+) => {
   try {
-    const branchClause = branchId != null ? "AND c.branch_id = ?" : "";
-    const branchParam = branchId != null ? [branchId] : [];
-
     const [classResult] = await db.query(
-      `SELECT ClassID FROM Classes WHERE ClassName = ? AND Section = ? ${branchClause}`,
-      [className, section, ...branchParam],
+      `SELECT ClassID FROM Classes WHERE ClassName = ? AND Section = ?`,
+      [className, section],
     );
 
     if (classResult.length === 0) return false;
@@ -272,6 +262,10 @@ const checkRollNumberExists = async (rollNumber, className, section, excludeStud
     let sql = "SELECT StudentID FROM Students WHERE RollNumber = ? AND ClassID = ?";
     const paramArr = [rollNumber, classID];
 
+    if (branchId != null) {
+      sql += " AND branch_id = ?";
+      paramArr.push(branchId);
+    }
     if (excludeStudentID) {
       sql += " AND StudentID != ?";
       paramArr.push(excludeStudentID);
@@ -357,13 +351,11 @@ const searchStudents = async (filters, branchId = null) => {
   }
 };
 
-// Get all classes (branch-scoped for dropdowns)
-const getAllClasses = async (branchId = null) => {
-  const { clause, params } = branchFilter(branchId);
+// Classes list (global — no branch filter needed). Returns all rows.
+const getAllClasses = async () => {
   try {
     const [rows] = await db.query(
-      `SELECT * FROM Classes WHERE 1=1 ${clause} ORDER BY ClassName, Section`,
-      params,
+      `SELECT * FROM Classes ORDER BY ClassName, Section`,
     );
     return rows;
   } catch (err) {
@@ -375,7 +367,7 @@ export {
   addStudent,
   checkRollNumberExists,
   deleteStudent,
-  findOrCreateClass,
+  findClass,
   getAllClasses,
   getAllStudents,
   getStudentById,

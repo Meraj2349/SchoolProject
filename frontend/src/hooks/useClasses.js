@@ -11,6 +11,9 @@ export function useClasses() {
     queryKey: queryKeys.classes.all(branchId),
     queryFn: classesService.getAll,
     select: (data) => data?.data ?? data ?? [],
+    staleTime: 30 * 1000,
+    refetchOnMount: "always",
+    refetchOnWindowFocus: true,
   });
 }
 
@@ -79,16 +82,26 @@ export function useUpdateClass() {
   });
 }
 
-export function useDeleteClass() {
+// Per-branch teacher assignment (ClassTeacherAssignments). Branch_admin allowed.
+export function useAssignTeacher() {
   const qc = useQueryClient();
   const branchId = useBranchStore((s) => s.currentBranchId);
   return useMutation({
-    mutationFn: classesService.remove,
+    mutationFn: ({ classId, teacherId }) =>
+      classesService.assignTeacher(classId, teacherId),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: queryKeys.classes.all(branchId) });
-      qc.invalidateQueries({ queryKey: queryKeys.classes.distinct(branchId) });
-      qc.invalidateQueries({ queryKey: ["classes", "names"] });
-      qc.invalidateQueries({ queryKey: ["classes", "standard-sections"] });
+    },
+  });
+}
+
+export function useUnassignTeacher() {
+  const qc = useQueryClient();
+  const branchId = useBranchStore((s) => s.currentBranchId);
+  return useMutation({
+    mutationFn: (classId) => classesService.unassignTeacher(classId),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: queryKeys.classes.all(branchId) });
     },
   });
 }

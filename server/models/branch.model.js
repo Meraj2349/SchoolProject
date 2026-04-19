@@ -254,11 +254,12 @@ export const getBranchStats = async () => {
       GROUP BY branch_id
     `);
 
-    // Class counts per branch
+    // Class counts per branch (post global-classes migration: count distinct
+    // classes that have at least one student in that branch).
     const [classCounts] = await db.query(`
-      SELECT branch_id, COUNT(*) AS total
-      FROM Classes
-      WHERE branch_id IS NOT NULL
+      SELECT branch_id, COUNT(DISTINCT ClassID) AS total
+      FROM Students
+      WHERE branch_id IS NOT NULL AND ClassID IS NOT NULL
       GROUP BY branch_id
     `);
 

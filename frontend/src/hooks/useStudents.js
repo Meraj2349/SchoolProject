@@ -5,6 +5,22 @@ import { queryKeys } from "@/lib/queryKeys";
 import { studentsService } from "@/services/students.service";
 import { useBranchStore } from "@/store/branchStore";
 
+// Total student count for the currently selected branch.
+// Re-keys on branchId so a branch switch triggers a fresh fetch.
+// The httpClient interceptor appends ?branch_id=X so the backend
+// optionalAuth middleware scopes the COUNT query correctly.
+export function useStudentCount() {
+  const branchId = useBranchStore((s) => s.currentBranchId);
+  return useQuery({
+    queryKey: queryKeys.students.count(branchId),
+    queryFn: studentsService.getCount,
+    select: (data) => data?.data?.totalStudents ?? data?.totalStudents ?? 0,
+    staleTime: 30 * 1000,
+    refetchOnMount: "always",
+    refetchOnWindowFocus: true,
+  });
+}
+
 export function useStudentSearch(filters, enabled = false) {
   const branchId = useBranchStore((s) => s.currentBranchId);
   return useQuery({

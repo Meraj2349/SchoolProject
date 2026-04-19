@@ -5,9 +5,9 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import LatestUpdatesNotice from "@/components/shared/LatestUpdatesNotice";
 import LottieLoader from "@/components/ui/LottieLoader";
+import BranchBadge from "@/components/ui/BranchBadge";
 import { useTeachers } from "@/hooks/useTeachers";
 import { useImagesByTeacher } from "@/hooks/useImages";
-import { useBranchStore } from "@/store/branchStore";
 import { useTranslations } from "@/store/languageStore";
 import Image from "next/image";
 import { useClassNames, useStandardSections } from "@/hooks/useClasses";
@@ -171,7 +171,6 @@ export default function TeacherListPage() {
   const [selectedClass, setSelectedClass] = useState("");
   const [selectedSection, setSelectedSection] = useState("");
   const t = useTranslations("teachers");
-  const { currentBranchId, currentBranchName } = useBranchStore();
 
   const { data: classNames = [] } = useClassNames();
   const { data: sections = [] } = useStandardSections();
@@ -254,19 +253,9 @@ export default function TeacherListPage() {
         >
           {t("pageTitle")}
         </h1>
-        {currentBranchId != null && (
-          <div
-            className="relative z-[1] inline-flex items-center gap-1.5 mt-3.5 px-4 py-1.5 rounded-full text-xs font-semibold"
-            style={{
-              background: "rgba(16,185,129,0.18)",
-              border: "1.5px solid rgba(16,185,129,0.5)",
-              color: GOLD_LIGHT,
-            }}
-          >
-            <span>🏫</span>
-            <span>{currentBranchName}</span>
-          </div>
-        )}
+        <div className="relative z-[1] mt-3.5 inline-block">
+          <BranchBadge />
+        </div>
       </NavyHeader>
 
       {/* Class & Section filter bar */}

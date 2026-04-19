@@ -1,9 +1,6 @@
 "use client";
 
 import { useClasses } from "@/hooks/useClasses";
-import { useQueries } from "@tanstack/react-query";
-import { classesService } from "@/services/classes.service";
-import { queryKeys } from "@/lib/queryKeys";
 import { useBranchStore } from "@/store/branchStore";
 import { useTranslations } from "@/store/languageStore";
 
@@ -66,7 +63,7 @@ function SectionHeader({ t }) {
 
 export default function ClassStatistics() {
   const { data: classes = [], isLoading, isError } = useClasses();
-  const { currentBranchId: branchId, currentBranchName } = useBranchStore();
+  const { currentBranchId: branchId } = useBranchStore();
   const t = useTranslations("home");
   const lang =
     typeof window !== "undefined"
@@ -80,39 +77,30 @@ export default function ClassStatistics() {
         })()
       : "bn";
 
-  const uniqueNames = [
-    ...new Set(classes.map((c) => c.className || c.ClassName || c.name || c)),
-  ];
+  // Aggregate StudentCount (already returned per class+section row by /classes,
+  // branch-scoped via the httpClient interceptor) into per-ClassName totals.
+  const totals = new Map();
+  for (const c of classes) {
+    const name = c.ClassName || c.className || c.name;
+    if (!name) continue;
+    const n = Number(c.StudentCount ?? c.studentCount ?? 0) || 0;
+    totals.set(name, (totals.get(name) || 0) + n);
+  }
 
-  // Pass branchId in the query key so switching branches invalidates these counts
-  const countQueries = useQueries({
-    queries: uniqueNames.map((name) => ({
-      queryKey: queryKeys.classes.studentCount(name, branchId),
-      queryFn: () => classesService.getStudentCount(name),
-      enabled: uniqueNames.length > 0,
-    })),
-  });
-
-  const classData = uniqueNames
-    .map((name, i) => {
-      const res = countQueries[i];
-      const count =
-        res?.data?.totalStudents ??
-        res?.data?.data?.totalStudents ??
-        res?.data?.count ??
-        0;
-      return {
-        displayName: fmtClass(name, lang),
-        rawName: name,
-        count: Number(count) || 0,
-      };
-    })
+  const classData = [...totals.entries()]
+    .map(([name, count]) => ({
+      displayName: fmtClass(name, lang),
+      rawName: name,
+      count,
+    }))
     .sort((a, b) => {
       const na = parseInt(a.rawName),
         nb = parseInt(b.rawName);
       if (!isNaN(na) && !isNaN(nb)) return na - nb;
       return a.displayName.localeCompare(b.displayName);
     });
+
+  const totalStudents = classData.reduce((s, d) => s + (d.count || 0), 0);
 
   if (isLoading) {
     return (
@@ -192,13 +180,20 @@ export default function ClassStatistics() {
             {t("classWiseStudents")}
           </p>
 
-          {/* Branch badge */}
-          {branchId != null && (
-            <div className="inline-flex items-center gap-[6px] mx-auto mt-2 px-[14px] py-[4px] bg-[rgba(16,185,129,0.12)] border border-[rgba(16,185,129,0.55)] rounded-[20px] text-xs text-[#a7f3d0] font-semibold tracking-[0.04em]">
-              <span>🏫</span>
-              <span>{currentBranchName}</span>
-            </div>
-          )}
+          {/* Total summary — headline aggregate */}
+          <div className="mt-4 inline-flex flex-col items-center gap-1 px-6 py-3 rounded-2xl bg-[rgba(16,185,129,0.08)] border border-[rgba(16,185,129,0.35)]">
+            <span className="text-[2.4rem] font-extrabold text-[#a7f3d0] leading-none [text-shadow:0_2px_10px_rgba(0,0,0,0.35)]">
+              {totalStudents}
+            </span>
+            <span className="text-[0.7rem] font-semibold uppercase tracking-[0.08em] text-[rgba(167,243,208,0.8)]">
+              {t("totalStudentsLabel")}
+            </span>
+            {branchId == null && (
+              <span className="text-[0.65rem] text-[rgba(167,243,208,0.6)]">
+                {t("acrossAllBranches")}
+              </span>
+            )}
+          </div>
 
           {/* Diamond divider */}
           <div className="inline-flex items-center gap-[10px] mt-3">

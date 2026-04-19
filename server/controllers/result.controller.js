@@ -374,8 +374,9 @@ const updateResultController = async (req, res) => {
   }
 };
 
-// Delete result
+// Delete result (branch-scoped)
 const deleteResultController = async (req, res) => {
+  const branchId = req.branchId ?? null;
   try {
     const { id } = req.params;
 
@@ -386,8 +387,7 @@ const deleteResultController = async (req, res) => {
       });
     }
 
-    // Check if result exists
-    const existingResult = await getResultById(id);
+    const existingResult = await getResultById(id, branchId);
     if (!existingResult) {
       return res.status(404).json({
         success: false,
@@ -395,7 +395,7 @@ const deleteResultController = async (req, res) => {
       });
     }
 
-    const result = await deleteResult(id);
+    const result = await deleteResult(id, branchId);
 
     if (result.affectedRows > 0) {
       res.status(200).json({
@@ -403,9 +403,9 @@ const deleteResultController = async (req, res) => {
         message: "Result deleted successfully",
       });
     } else {
-      res.status(400).json({
+      res.status(404).json({
         success: false,
-        message: "Failed to delete result",
+        message: "Result not found",
       });
     }
   } catch (error) {
@@ -417,8 +417,9 @@ const deleteResultController = async (req, res) => {
   }
 };
 
-// Delete results by exam
+// Delete results by exam (branch-scoped)
 const deleteResultsByExamController = async (req, res) => {
+  const branchId = req.branchId ?? null;
   try {
     const { examId } = req.params;
 
@@ -429,7 +430,7 @@ const deleteResultsByExamController = async (req, res) => {
       });
     }
 
-    const result = await deleteResultsByExam(examId);
+    const result = await deleteResultsByExam(examId, branchId);
 
     res.status(200).json({
       success: true,

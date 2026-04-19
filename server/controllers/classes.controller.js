@@ -1,7 +1,6 @@
 import { t } from "../config/i18n.js";
 import {
   addClass,
-  deleteClass,
   hardDeleteClass,
   getClasses,
   editClass,
@@ -10,54 +9,79 @@ import {
   getDistinctClassNames,
   getDistinctSections,
 } from "../models/classes.model.js";
+import {
+  assignTeacher,
+  unassignTeacher,
+} from "../models/classAssignments.model.js";
 
-// Add a new class
+// ── Class CRUD (super_admin only — classes are global) ─────────────────
+
 export const addClassController = async (req, res) => {
   const lang = req.language;
-  const branchId = req.branchId ?? null;
-  const { className, section, teacherId } = req.body;
+  const { className, section } = req.body;
 
   if (!className || !section) {
     return res.status(400).json({ error: t("class_name_required", lang) });
   }
 
   try {
-    const result = await addClass(
-      { className, section, teacherId: teacherId || null },
-      branchId,
-    );
-    res
-      .status(201)
-      .json({ message: t("class_added", lang), ClassID: result.ClassID });
+    const result = await addClass({ className, section });
+    res.status(201).json({ message: t("class_added", lang), ClassID: result.ClassID });
   } catch (error) {
     console.error("Error adding class:", error);
     if (error?.code === "ER_DUP_ENTRY") {
       return res.status(409).json({
-        error: `${className} - ${section} already exists in this branch`,
+        error: `${className} - ${section} already exists`,
       });
     }
     res.status(500).json({ error: t("class_add_failed", lang) });
   }
 };
 
-// Delete a class by ID
-export const deleteClassController = async (req, res) => {
+export const editClassController = async (req, res) => {
   const lang = req.language;
-  const branchId = req.branchId ?? null;
+  const { id } = req.params;
+  const { className, section } = req.body;
+
+  if (!className || !section) {
+    return res.status(400).json({ error: t("class_name_required", lang) });
+  }
+
+  try {
+    const result = await editClass(id, { className, section });
+    res.status(200).json({ message: t("class_updated", lang), success: result.success });
+  } catch (error) {
+    console.error("Error editing class:", error);
+    if (error?.code === "ER_DUP_ENTRY") {
+      return res.status(409).json({
+        error: `${className} - ${section} already exists`,
+      });
+    }
+    res.status(500).json({ error: t("class_update_failed", lang) });
+  }
+};
+
+export const hardDeleteClassController = async (req, res) => {
+  const lang = req.language;
   const { id } = req.params;
 
   try {
-    const result = await deleteClass(id, branchId);
-    res
-      .status(200)
-      .json({ message: t("class_deleted", lang), success: result.success });
+    const result = await hardDeleteClass(id);
+    res.status(200).json({ message: t("class_deleted", lang), success: result.success });
   } catch (error) {
-    console.error("Error deleting class:", error);
+    console.error("Error hard-deleting class:", error);
+    // FK RESTRICT from Students → tell the caller why
+    if (error?.code === "ER_ROW_IS_REFERENCED_2") {
+      return res.status(409).json({
+        error: "Cannot delete: students still assigned to this class",
+      });
+    }
     res.status(500).json({ error: t("class_delete_failed", lang) });
   }
 };
 
-// Get all classes
+// ── Read ──────────────────────────────────────────────────────────────
+
 export const getClassesController = async (req, res) => {
   const lang = req.language;
   const branchId = req.branchId ?? null;
@@ -70,43 +94,10 @@ export const getClassesController = async (req, res) => {
   }
 };
 
-// Edit a class by ID
-export const editClassController = async (req, res) => {
-  const lang = req.language;
-  const branchId = req.branchId ?? null;
-  const { id } = req.params;
-  const { className, section, teacherId } = req.body;
-
-  if (!className || !section) {
-    return res.status(400).json({ error: t("class_name_required", lang) });
-  }
-
-  try {
-    const result = await editClass(
-      id,
-      { className, section, teacherId: teacherId || null },
-      branchId,
-    );
-    res
-      .status(200)
-      .json({ message: t("class_updated", lang), success: result.success });
-  } catch (error) {
-    console.error("Error editing class:", error);
-    if (error?.code === "ER_DUP_ENTRY") {
-      return res.status(409).json({
-        error: `${className} - ${section} already exists in this branch`,
-      });
-    }
-    res.status(500).json({ error: t("class_update_failed", lang) });
-  }
-};
-
-// Get distinct class names with their sections
 export const getDistinctClassesWithSectionsController = async (req, res) => {
   const lang = req.language;
-  const branchId = req.branchId ?? null;
   try {
-    const rows = await getDistinctClassesWithSections(branchId);
+    const rows = await getDistinctClassesWithSections();
     res.status(200).json(rows);
   } catch (error) {
     console.error("Error fetching distinct classes:", error);
@@ -114,13 +105,10 @@ export const getDistinctClassesWithSectionsController = async (req, res) => {
   }
 };
 
-// Get distinct class names actually present in Classes — branch-scoped so the
-// public Class dropdown reflects what each branch really has.
 export const getDistinctClassNamesController = async (req, res) => {
   const lang = req.language;
-  const branchId = req.branchId ?? null;
   try {
-    const names = await getDistinctClassNames(branchId);
+    const names = await getDistinctClassNames();
     res.status(200).json(names);
   } catch (error) {
     console.error("Error fetching distinct class names:", error);
@@ -128,12 +116,9 @@ export const getDistinctClassNamesController = async (req, res) => {
   }
 };
 
-// Distinct sections — pulled live from Classes (branch-scoped). Falls back to
-// the legacy Better/Good/General list if a branch has no classes yet.
 export const getStandardSectionsController = async (req, res) => {
-  const branchId = req.branchId ?? null;
   try {
-    const sections = await getDistinctSections(branchId);
+    const sections = await getDistinctSections();
     res.status(200).json(sections);
   } catch (error) {
     console.error("Error fetching sections:", error);
@@ -141,23 +126,6 @@ export const getStandardSectionsController = async (req, res) => {
   }
 };
 
-// Hard-delete a class row entirely — super_admin only
-export const hardDeleteClassController = async (req, res) => {
-  const lang = req.language;
-  const { id } = req.params;
-
-  try {
-    const result = await hardDeleteClass(id);
-    res
-      .status(200)
-      .json({ message: t("class_deleted", lang), success: result.success });
-  } catch (error) {
-    console.error("Error hard-deleting class:", error);
-    res.status(500).json({ error: t("class_delete_failed", lang) });
-  }
-};
-
-// Get total students in a class by class name
 export const getTotalStudentsInClassByNameController = async (req, res) => {
   const lang = req.language;
   const branchId = req.branchId ?? null;
@@ -173,5 +141,51 @@ export const getTotalStudentsInClassByNameController = async (req, res) => {
   } catch (error) {
     console.error("Error fetching student count:", error);
     res.status(500).json({ error: t("student_count_fetch_failed", lang) });
+  }
+};
+
+// ── Teacher assignment (branch-scoped; branch_admin + super_admin) ─────
+
+export const assignTeacherController = async (req, res) => {
+  const lang = req.language;
+  const { id } = req.params;
+  const branchId = req.branchId;
+  const teacherId = req.body.teacherId ?? req.body.TeacherID;
+
+  if (branchId == null) {
+    return res.status(400).json({
+      error: "branch_id required (super admin must select a branch)",
+    });
+  }
+  if (!teacherId) {
+    return res.status(400).json({ error: "teacherId required" });
+  }
+
+  try {
+    const result = await assignTeacher(id, branchId, teacherId);
+    res.status(200).json({ message: t("class_updated", lang), ...result });
+  } catch (error) {
+    console.error("Error assigning teacher:", error);
+    res.status(500).json({ error: t("class_update_failed", lang) });
+  }
+};
+
+export const unassignTeacherController = async (req, res) => {
+  const lang = req.language;
+  const { id } = req.params;
+  const branchId = req.branchId;
+
+  if (branchId == null) {
+    return res.status(400).json({
+      error: "branch_id required (super admin must select a branch)",
+    });
+  }
+
+  try {
+    const result = await unassignTeacher(id, branchId);
+    res.status(200).json({ message: t("class_deleted", lang), ...result });
+  } catch (error) {
+    console.error("Error unassigning teacher:", error);
+    res.status(500).json({ error: t("class_delete_failed", lang) });
   }
 };

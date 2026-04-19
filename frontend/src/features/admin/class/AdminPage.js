@@ -4,8 +4,8 @@ import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
   useClasses,
-  useUpdateClass,
-  useDeleteClass,
+  useAssignTeacher,
+  useUnassignTeacher,
 } from "@/hooks/useClasses";
 import { teachersService } from "@/services/teachers.service";
 import { queryKeys } from "@/lib/queryKeys";
@@ -151,8 +151,8 @@ const EMPTY_FORM = {
 
 export default function AdminPage() {
   const { data: classes = [], isLoading } = useClasses();
-  const update = useUpdateClass();
-  const remove = useDeleteClass();
+  const assign = useAssignTeacher();
+  const unassign = useUnassignTeacher();
   const t = useTranslations("admin.classes");
   const branchId = useBranchStore((s) => s.currentBranchId);
   const role = useAuthStore((s) => s.role);
@@ -248,10 +248,11 @@ export default function AdminPage() {
       return;
     }
 
-    const payload = { className: cls, section: sec, teacherId: form.teacherId };
-
     try {
-      await update.mutateAsync({ id: targetId, data: payload });
+      await assign.mutateAsync({
+        classId: targetId,
+        teacherId: form.teacherId,
+      });
       toast.success(
         editId ? "Class teacher updated" : "Class teacher assigned",
       );
@@ -288,7 +289,7 @@ export default function AdminPage() {
   };
 
   const confirmDelete = (classId) => {
-    remove.mutate(classId, {
+    unassign.mutate(classId, {
       onSuccess: () => {
         toast.success("Teacher unassigned successfully");
         setConfirmDeleteId(null);
@@ -313,7 +314,7 @@ export default function AdminPage() {
     t("actions"),
   ];
 
-  const isBusy = update.isPending;
+  const isBusy = assign.isPending;
 
   return (
     <div className="space-y-6">
@@ -586,7 +587,7 @@ export default function AdminPage() {
                           <div className="flex items-center gap-1">
                             <button
                               onClick={() => confirmDelete(c.ClassID)}
-                              disabled={remove.isPending}
+                              disabled={unassign.isPending}
                               className="text-xs px-2 py-1 rounded bg-amber-500 text-white hover:bg-amber-600 disabled:opacity-50"
                             >
                               Confirm

@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import LatestUpdatesNotice from "@/components/shared/LatestUpdatesNotice";
+import BranchBadge from "@/components/ui/BranchBadge";
 import { studentsService } from "@/services/students.service";
 import { imagesService } from "@/services/images.service";
 import { useBranchStore } from "@/store/branchStore";
@@ -349,15 +350,18 @@ export default function StudentListPage() {
             >
               {t("searchResults")}
             </h2>
-            <span
-              className="text-[0.85rem] font-bold px-4 py-1.5 rounded-full text-white"
-              style={{
-                background: `linear-gradient(135deg, ${EMERALD_MID} 0%, ${EMERALD} 100%)`,
-              }}
-            >
-              {students.length}{" "}
-              {students.length !== 1 ? t("studentsFound") : t("studentFound")}
-            </span>
+            <div className="flex items-center gap-2 flex-wrap justify-end">
+              <BranchBadge />
+              <span
+                className="text-[0.85rem] font-bold px-4 py-1.5 rounded-full text-white"
+                style={{
+                  background: `linear-gradient(135deg, ${EMERALD_MID} 0%, ${EMERALD} 100%)`,
+                }}
+              >
+                {students.length}{" "}
+                {students.length !== 1 ? t("studentsFound") : t("studentFound")}
+              </span>
+            </div>
           </div>
 
           {students.length > 0 ? (

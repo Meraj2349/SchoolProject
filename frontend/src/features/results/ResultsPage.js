@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import LatestUpdatesNotice from "@/components/shared/LatestUpdatesNotice";
+import BranchBadge from "@/components/ui/BranchBadge";
 import { resultsService } from "@/services/results.service";
 import { queryKeys } from "@/lib/queryKeys";
 import httpClient from "@/lib/httpClient";
@@ -49,7 +50,7 @@ export default function ResultsPage() {
   const [filters, setFilters] = useState(EMPTY);
   const [submitted, setSubmitted] = useState(null);
   const t = useTranslations("results");
-  const { currentBranchId: branchId, currentBranchName } = useBranchStore();
+  const { currentBranchId: branchId } = useBranchStore();
 
   const { data: classNames = [] } = useClassNames();
   const { data: sections = [] } = useStandardSections();
@@ -162,19 +163,9 @@ export default function ResultsPage() {
         <p className="relative z-[1] max-w-[680px] mx-auto text-slate-300 text-[1.02rem] leading-relaxed m-0">
           {t("pageSubtitle")}
         </p>
-        {branchId != null && (
-          <div
-            className="relative z-[1] inline-flex items-center gap-1.5 mt-3.5 px-4 py-1.5 rounded-full text-xs font-semibold"
-            style={{
-              background: "rgba(16,185,129,0.18)",
-              border: "1.5px solid rgba(16,185,129,0.5)",
-              color: "#a7f3d0",
-            }}
-          >
-            <span>🏫</span>
-            <span>{currentBranchName}</span>
-          </div>
-        )}
+        <div className="relative z-[1] mt-3.5 inline-block">
+          <BranchBadge />
+        </div>
       </div>
 
       {/* Class & Section filter bar */}

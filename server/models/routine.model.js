@@ -1,6 +1,10 @@
 import db from "../config/db.config.js";
 import { branchFilter } from "../utils/branchFilter.js";
 
+// Classes are GLOBAL (no branch_id). Teacher assignment lives in
+// ClassTeacherAssignments keyed by (ClassID, branch_id). Routines stay
+// branch-scoped via Routines.branch_id.
+
 // Create new routine with ClassID (following Classes table structure)
 export const createRoutine = async (routineData, branchId = null) => {
   let sql, values;
@@ -38,10 +42,10 @@ export const createRoutine = async (routineData, branchId = null) => {
   return getRoutineById(result.insertId);
 };
 
-// Get routine by ID with class details (ClassName এবং Section সহ)
+// Get routine by ID with class details
 export const getRoutineById = async (id) => {
   const [rows] = await db.execute(
-    `SELECT r.*, c.ClassName, c.Section, c.TeacherID,
+    `SELECT r.*, c.ClassName, c.Section,
      CONCAT(c.ClassName, ' - Section ', c.Section) as ClassSectionName
      FROM Routines r
      LEFT JOIN Classes c ON r.ClassID = c.ClassID
@@ -55,7 +59,7 @@ export const getRoutineById = async (id) => {
 export const getAllRoutines = async (branchId = null) => {
   const { clause, params } = branchFilter(branchId, "r");
   const [rows] = await db.execute(
-    `SELECT r.*, c.ClassName, c.Section, c.TeacherID,
+    `SELECT r.*, c.ClassName, c.Section,
      CONCAT(c.ClassName, ' - Section ', c.Section) as ClassSectionName
      FROM Routines r
      LEFT JOIN Classes c ON r.ClassID = c.ClassID
@@ -70,7 +74,7 @@ export const getAllRoutines = async (branchId = null) => {
 export const getRoutinesByClassId = async (classId, branchId = null) => {
   const { clause, params } = branchFilter(branchId, "r");
   const [rows] = await db.execute(
-    `SELECT r.*, c.ClassName, c.Section, c.TeacherID,
+    `SELECT r.*, c.ClassName, c.Section,
      CONCAT(c.ClassName, ' - Section ', c.Section) as ClassSectionName
      FROM Routines r
      LEFT JOIN Classes c ON r.ClassID = c.ClassID
@@ -84,7 +88,7 @@ export const getRoutinesByClassId = async (classId, branchId = null) => {
 // Get routines by class name and section (branch-scoped)
 export const getRoutinesByClassSection = async (className, section, branchId = null) => {
   const { clause: branchClause, params: branchParams } = branchFilter(branchId, "r");
-  let query = `SELECT r.*, c.ClassName, c.Section, c.TeacherID,
+  let query = `SELECT r.*, c.ClassName, c.Section,
                CONCAT(c.ClassName, ' - Section ', c.Section) as ClassSectionName
                FROM Routines r
                LEFT JOIN Classes c ON r.ClassID = c.ClassID
@@ -168,7 +172,7 @@ export const deleteRoutine = async (id) => {
 export const searchRoutines = async (searchTerm, branchId = null) => {
   const { clause, params: branchParams } = branchFilter(branchId, "r");
   const [rows] = await db.execute(
-    `SELECT r.*, c.ClassName, c.Section, c.TeacherID,
+    `SELECT r.*, c.ClassName, c.Section,
      CONCAT(c.ClassName, ' - Section ', c.Section) as ClassSectionName
      FROM Routines r
      LEFT JOIN Classes c ON r.ClassID = c.ClassID
@@ -186,59 +190,49 @@ export const searchRoutines = async (searchTerm, branchId = null) => {
   return rows;
 };
 
-// ========== Helper Functions for Classes (following Classes table structure) ==========
+// ========== Helper Functions for Classes (GLOBAL — no branch filter) ==========
 
-// Get all available classes for dropdown (branch-scoped)
-export const getAllClasses = async (branchId = null) => {
-  const { clause, params } = branchFilter(branchId);
+// Get all available classes for dropdown
+export const getAllClasses = async () => {
   const [rows] = await db.execute(
     `SELECT ClassID, ClassName, Section,
-     CONCAT(ClassName, ' - Section ', Section) as ClassSectionName,
-     TeacherID
+     CONCAT(ClassName, ' - Section ', Section) as ClassSectionName
      FROM Classes
-     WHERE 1=1 ${clause}
      ORDER BY ClassName, Section`,
-    params,
   );
   return rows;
 };
 
-// Get distinct class names for filter dropdown (branch-scoped)
-export const getDistinctClasses = async (branchId = null) => {
-  const { clause, params } = branchFilter(branchId);
+// Get distinct class names for filter dropdown
+export const getDistinctClasses = async () => {
   const [rows] = await db.execute(
-    `SELECT DISTINCT c.ClassName FROM Classes c WHERE 1=1 ${clause} ORDER BY c.ClassName`,
-    params,
+    `SELECT DISTINCT ClassName FROM Classes ORDER BY ClassName`,
   );
   return rows.map((row) => row.ClassName);
 };
 
-// Get distinct sections for filter dropdown (branch-scoped)
-export const getDistinctSections = async (branchId = null) => {
-  const { clause, params } = branchFilter(branchId);
+// Get distinct sections for filter dropdown
+export const getDistinctSections = async () => {
   const [rows] = await db.execute(
-    `SELECT DISTINCT c.Section FROM Classes c WHERE 1=1 ${clause} ORDER BY c.Section`,
-    params,
+    `SELECT DISTINCT Section FROM Classes ORDER BY Section`,
   );
   return rows.map((row) => row.Section);
 };
 
-// Get sections by class name (dynamic section loading, branch-scoped)
-export const getSectionsByClassName = async (className, branchId = null) => {
-  const { clause, params: branchParams } = branchFilter(branchId);
+// Get sections by class name (dynamic section loading)
+export const getSectionsByClassName = async (className) => {
   const [rows] = await db.execute(
-    `SELECT ClassID, Section FROM Classes WHERE ClassName = ? ${clause} ORDER BY Section`,
-    [className, ...branchParams],
+    `SELECT ClassID, Section FROM Classes WHERE ClassName = ? ORDER BY Section`,
+    [className],
   );
   return rows;
 };
 
-// Validate if class exists (before creating/updating routine, branch-scoped)
-export const validateClassId = async (classId, branchId = null) => {
-  const { clause, params: branchParams } = branchFilter(branchId);
+// Validate if class exists
+export const validateClassId = async (classId) => {
   const [rows] = await db.execute(
-    `SELECT ClassID, ClassName, Section FROM Classes WHERE ClassID = ? ${clause}`,
-    [classId, ...branchParams],
+    `SELECT ClassID, ClassName, Section FROM Classes WHERE ClassID = ?`,
+    [classId],
   );
   return rows[0];
 };

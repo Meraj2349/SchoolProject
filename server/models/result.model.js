@@ -377,16 +377,17 @@ const addResultByStudentDetails = async (resultData, branchId = null) => {
     const student = studentRows[0];
     const studentId = student.StudentID;
 
-    const branchClassClause = branchId != null ? "AND c.branch_id = ?" : "";
-    const branchClassParam = branchId != null ? [branchId] : [];
+    // Exams are branch-scoped; filter by e.branch_id.
+    const branchExamClause = branchId != null ? "AND e.branch_id = ?" : "";
+    const branchExamParam = branchId != null ? [branchId] : [];
 
-    // Get exam ID by exam name and class
+    // Get exam ID by exam name and class (exam is per-branch)
     const [examRows] = await db.query(
       `SELECT e.ExamID, e.ExamName, e.ExamType, c.ClassName, c.Section
       FROM Exams e
       LEFT JOIN Classes c ON e.ClassID = c.ClassID
-      WHERE e.ExamName = ? AND c.ClassName = ? AND c.Section = ? ${branchClassClause}`,
-      [examName, className, section, ...branchClassParam],
+      WHERE e.ExamName = ? AND c.ClassName = ? AND c.Section = ? ${branchExamClause}`,
+      [examName, className, section, ...branchExamParam],
     );
 
     if (examRows.length === 0) {
@@ -398,13 +399,13 @@ const addResultByStudentDetails = async (resultData, branchId = null) => {
     const exam = examRows[0];
     const examId = exam.ExamID;
 
-    // Get subject ID by subject name and class
+    // Subjects are GLOBAL — no branch filter.
     const [subjectRows] = await db.query(
       `SELECT sub.SubjectID, sub.SubjectName, c.ClassName, c.Section
       FROM Subjects sub
       LEFT JOIN Classes c ON sub.ClassID = c.ClassID
-      WHERE sub.SubjectName = ? AND c.ClassName = ? AND c.Section = ? ${branchClassClause}`,
-      [subjectName, className, section, ...branchClassParam],
+      WHERE sub.SubjectName = ? AND c.ClassName = ? AND c.Section = ?`,
+      [subjectName, className, section],
     );
 
     if (subjectRows.length === 0) {
@@ -416,10 +417,10 @@ const addResultByStudentDetails = async (resultData, branchId = null) => {
     const subject = subjectRows[0];
     const subjectId = subject.SubjectID;
 
-    // Get class ID
+    // Classes are GLOBAL — no branch filter.
     const [classRows] = await db.query(
-      `SELECT ClassID FROM Classes WHERE ClassName = ? AND Section = ? ${branchClassClause}`,
-      [className, section, ...branchClassParam],
+      `SELECT ClassID FROM Classes WHERE ClassName = ? AND Section = ?`,
+      [className, section],
     );
 
     if (classRows.length === 0) {
@@ -712,9 +713,18 @@ const updateResult = async (resultId, resultData, branchId = null) => {
   }
 };
 
-// Delete result
-const deleteResult = async (resultId) => {
+// Delete result (branch-scoped via Students join)
+const deleteResult = async (resultId, branchId = null) => {
   try {
+    if (branchId != null) {
+      const [result] = await db.query(
+        `DELETE r FROM Results r
+         JOIN Students s ON r.StudentID = s.StudentID
+         WHERE r.ResultID = ? AND s.branch_id = ?`,
+        [resultId, branchId],
+      );
+      return result;
+    }
     const [result] = await db.query(
       `DELETE FROM Results WHERE ResultID = ?`,
       [resultId],
@@ -725,9 +735,18 @@ const deleteResult = async (resultId) => {
   }
 };
 
-// Delete results by exam
-const deleteResultsByExam = async (examId) => {
+// Delete results by exam (branch-scoped via Students join)
+const deleteResultsByExam = async (examId, branchId = null) => {
   try {
+    if (branchId != null) {
+      const [result] = await db.query(
+        `DELETE r FROM Results r
+         JOIN Students s ON r.StudentID = s.StudentID
+         WHERE r.ExamID = ? AND s.branch_id = ?`,
+        [examId, branchId],
+      );
+      return result;
+    }
     const [result] = await db.query(
       `DELETE FROM Results WHERE ExamID = ?`,
       [examId],

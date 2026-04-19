@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import LatestUpdatesNotice from "@/components/shared/LatestUpdatesNotice";
+import BranchBadge from "@/components/ui/BranchBadge";
 import { useEvents } from "@/hooks/useEvents";
 import { useTranslations } from "@/store/languageStore";
 
@@ -171,6 +172,9 @@ export default function EventsPage() {
       <Navbar />
       <LatestUpdatesNotice />
       <div className="max-w-[1200px] mx-auto px-5 py-14 pb-20">
+        <div className="mb-6">
+          <BranchBadge />
+        </div>
         {isLoading ? (
           <div className="flex flex-col items-center justify-center py-20 gap-4 min-h-[40vh]">
             <div className="w-11 h-11 border-[3px] border-gray-200 border-t-emerald-500 rounded-full animate-spin" />

@@ -25,8 +25,8 @@ export const createRoutine = async (req, res) => {
 
     const branchId = req.branchId ?? null;
 
-    // Validate class exists (Classes table থেকে ClassName এবং Section পাওয়ার জন্য)
-    const classInfo = await RoutineModel.validateClassId(ClassID, branchId);
+    // Validate class exists (Classes are GLOBAL).
+    const classInfo = await RoutineModel.validateClassId(ClassID);
     if (!classInfo) {
       return res.status(400).json({
         message: `Invalid ClassID: ${ClassID}. Class does not exist.`,
@@ -419,8 +419,7 @@ export const searchRoutines = async (req, res) => {
 // Get all available classes (Classes table থেকে dropdown এর জন্য)
 export const getAllClasses = async (req, res) => {
   try {
-    const branchId = req.branchId ?? null;
-    const classes = await RoutineModel.getAllClasses(branchId);
+    const classes = await RoutineModel.getAllClasses();
 
     res.status(200).json({
       message: "Classes retrieved successfully",
@@ -439,9 +438,8 @@ export const getAllClasses = async (req, res) => {
 // Get filter options (Classes table থেকে distinct ClassName এবং Section)
 export const getFilterOptions = async (req, res) => {
   try {
-    const branchId = req.branchId ?? null;
-    const classes = await RoutineModel.getDistinctClasses(branchId);
-    const sections = await RoutineModel.getDistinctSections(branchId);
+    const classes = await RoutineModel.getDistinctClasses();
+    const sections = await RoutineModel.getDistinctSections();
 
     res.status(200).json({
       message: "Filter options retrieved successfully",
@@ -468,8 +466,7 @@ export const getSectionsByClassName = async (req, res) => {
       return res.status(400).json({ message: "ClassName is required" });
     }
 
-    const branchId = req.branchId ?? null;
-    const sections = await RoutineModel.getSectionsByClassName(className, branchId);
+    const sections = await RoutineModel.getSectionsByClassName(className);
 
     res.status(200).json({
       message: "Sections retrieved successfully",

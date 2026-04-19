@@ -18,9 +18,6 @@ export const classesService = {
   update: (id, data) =>
     httpClient.put(`/classes/edit/${id}`, data).then((r) => r.data),
 
-  remove: (id) =>
-    httpClient.delete(`/classes/delete/${id}`).then((r) => r.data),
-
   hardRemove: (id) =>
     httpClient.delete(`/classes/hard-delete/${id}`).then((r) => r.data),
 
@@ -28,4 +25,13 @@ export const classesService = {
     httpClient
       .get(`/classes/totalstudents/${encodeURIComponent(className)}`)
       .then((r) => r.data),
+
+  // Per-branch teacher assignment (ClassTeacherAssignments).
+  assignTeacher: (classId, teacherId) =>
+    httpClient
+      .put(`/classes/${classId}/teacher`, { TeacherID: teacherId })
+      .then((r) => r.data),
+
+  unassignTeacher: (classId) =>
+    httpClient.delete(`/classes/${classId}/teacher`).then((r) => r.data),
 };

@@ -72,13 +72,19 @@ export default function Sidebar({ open, onClose }) {
       path: "/admin/classes-sections",
       icon: <FiGrid />,
       key: "sidebar.classesSections",
+      superAdminOnly: true,
     },
     {
       path: "/admin/class",
       icon: <FaPeopleGroup />,
       key: "sidebar.classTeacher",
     },
-    { path: "/admin/subject", icon: <FaEnvelope />, key: "sidebar.subject" },
+    {
+      path: "/admin/subject",
+      icon: <FaEnvelope />,
+      key: "sidebar.subject",
+      superAdminOnly: true,
+    },
     {
       path: "/admin/results",
       icon: <FaClipboardList />,
