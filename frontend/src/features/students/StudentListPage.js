@@ -121,7 +121,7 @@ export default function StudentListPage() {
       const res = await studentsService.search({
         FirstName: filters.firstName.trim(),
         RollNumber: filters.rollNumber.trim(),
-        ClassName: filters.className.trim(),
+        Class: filters.className.trim(),
         Section: filters.section.trim(),
       });
       if (res.success) {

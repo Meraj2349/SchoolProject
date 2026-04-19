@@ -8,7 +8,7 @@ import {
   getTotalStudentsInClassByName,
   getDistinctClassesWithSections,
   getDistinctClassNames,
-  STANDARD_SECTIONS,
+  getDistinctSections,
 } from "../models/classes.model.js";
 
 // Add a new class
@@ -114,11 +114,13 @@ export const getDistinctClassesWithSectionsController = async (req, res) => {
   }
 };
 
-// Get all distinct class names (global — not branch-scoped)
+// Get distinct class names actually present in Classes — branch-scoped so the
+// public Class dropdown reflects what each branch really has.
 export const getDistinctClassNamesController = async (req, res) => {
   const lang = req.language;
+  const branchId = req.branchId ?? null;
   try {
-    const names = await getDistinctClassNames();
+    const names = await getDistinctClassNames(branchId);
     res.status(200).json(names);
   } catch (error) {
     console.error("Error fetching distinct class names:", error);
@@ -126,9 +128,17 @@ export const getDistinctClassNamesController = async (req, res) => {
   }
 };
 
-// Get the fixed list of standard sections (Better, Good, General) — no DB lookup
-export const getStandardSectionsController = (req, res) => {
-  res.status(200).json(STANDARD_SECTIONS);
+// Distinct sections — pulled live from Classes (branch-scoped). Falls back to
+// the legacy Better/Good/General list if a branch has no classes yet.
+export const getStandardSectionsController = async (req, res) => {
+  const branchId = req.branchId ?? null;
+  try {
+    const sections = await getDistinctSections(branchId);
+    res.status(200).json(sections);
+  } catch (error) {
+    console.error("Error fetching sections:", error);
+    res.status(500).json({ error: "Failed to fetch sections" });
+  }
 };
 
 // Hard-delete a class row entirely — super_admin only

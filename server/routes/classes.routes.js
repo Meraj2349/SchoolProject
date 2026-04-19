@@ -18,8 +18,8 @@ const router = express.Router();
 router.get("/", optionalAuth, getClassesController);
 // Class names are global (no branch scoping needed), still optional auth is fine
 router.get("/names", optionalAuth, getDistinctClassNamesController);
-// Standard fixed sections — returns ["Better","Good","General"] for all branches
-router.get("/standard-sections", getStandardSectionsController);
+// Sections in use — branch-scoped distinct from Classes (legacy fallback if empty)
+router.get("/standard-sections", optionalAuth, getStandardSectionsController);
 router.get("/distinct", optionalAuth, getDistinctClassesWithSectionsController);
 router.get(
   "/totalstudents/:className",

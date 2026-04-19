@@ -5,12 +5,6 @@ import { queryKeys } from "@/lib/queryKeys";
 import { classesService } from "@/services/classes.service";
 import { useBranchStore } from "@/store/branchStore";
 
-// Standard fallback values used while queries are loading
-const FALLBACK_CLASS_NAMES = [
-  "Nursery", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10",
-];
-const FALLBACK_SECTIONS = ["Better", "Good", "General"];
-
 export function useClasses() {
   const branchId = useBranchStore((s) => s.currentBranchId);
   return useQuery({
@@ -20,27 +14,31 @@ export function useClasses() {
   });
 }
 
-// Returns the 11 standard class names (Nursery, 1-10) from ClassNames table
+// Distinct class names live from the Classes table — branch-scoped via httpClient.
+// Re-key on branchId so switching branches forces a fetch; refetch on mount/focus
+// so admin-added classes show up without waiting for the user to refresh.
 export function useClassNames() {
+  const branchId = useBranchStore((s) => s.currentBranchId);
   return useQuery({
-    queryKey: queryKeys.classes.names(),
+    queryKey: queryKeys.classes.names(branchId),
     queryFn: classesService.getNames,
-    select: (data) =>
-      Array.isArray(data) && data.length > 0 ? data : FALLBACK_CLASS_NAMES,
-    placeholderData: FALLBACK_CLASS_NAMES,
-    staleTime: 10 * 60 * 1000, // 10 minutes — these rarely change
+    select: (data) => (Array.isArray(data) ? data : []),
+    staleTime: 30 * 1000,
+    refetchOnMount: "always",
+    refetchOnWindowFocus: true,
   });
 }
 
-// Returns the 3 fixed sections: ["Better", "Good", "General"]
+// Distinct sections live from the Classes table — branch-scoped.
 export function useStandardSections() {
+  const branchId = useBranchStore((s) => s.currentBranchId);
   return useQuery({
-    queryKey: queryKeys.classes.standardSections(),
+    queryKey: queryKeys.classes.standardSections(branchId),
     queryFn: classesService.getStandardSections,
-    select: (data) =>
-      Array.isArray(data) && data.length > 0 ? data : FALLBACK_SECTIONS,
-    placeholderData: FALLBACK_SECTIONS,
-    staleTime: Infinity, // sections never change at runtime
+    select: (data) => (Array.isArray(data) ? data : []),
+    staleTime: 30 * 1000,
+    refetchOnMount: "always",
+    refetchOnWindowFocus: true,
   });
 }
 
@@ -61,6 +59,8 @@ export function useCreateClass() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: queryKeys.classes.all(branchId) });
       qc.invalidateQueries({ queryKey: queryKeys.classes.distinct(branchId) });
+      qc.invalidateQueries({ queryKey: ["classes", "names"] });
+      qc.invalidateQueries({ queryKey: ["classes", "standard-sections"] });
     },
   });
 }
@@ -73,6 +73,8 @@ export function useUpdateClass() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: queryKeys.classes.all(branchId) });
       qc.invalidateQueries({ queryKey: queryKeys.classes.distinct(branchId) });
+      qc.invalidateQueries({ queryKey: ["classes", "names"] });
+      qc.invalidateQueries({ queryKey: ["classes", "standard-sections"] });
     },
   });
 }
@@ -85,6 +87,8 @@ export function useDeleteClass() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: queryKeys.classes.all(branchId) });
       qc.invalidateQueries({ queryKey: queryKeys.classes.distinct(branchId) });
+      qc.invalidateQueries({ queryKey: ["classes", "names"] });
+      qc.invalidateQueries({ queryKey: ["classes", "standard-sections"] });
     },
   });
 }
@@ -97,6 +101,8 @@ export function useHardDeleteClass() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: queryKeys.classes.all(branchId) });
       qc.invalidateQueries({ queryKey: queryKeys.classes.distinct(branchId) });
+      qc.invalidateQueries({ queryKey: ["classes", "names"] });
+      qc.invalidateQueries({ queryKey: ["classes", "standard-sections"] });
     },
   });
 }

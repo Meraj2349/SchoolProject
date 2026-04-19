@@ -121,20 +121,53 @@ export const hardDeleteClass = async (classId) => {
   }
 };
 
-// Get all standard class names from the ClassNames reference table (global — not branch-scoped)
-export const getDistinctClassNames = async () => {
-  const sql = `SELECT name FROM ClassNames ORDER BY sort_order, name`;
+// Distinct class names actually in use — pulls from the live Classes table so
+// any class an admin adds shows up immediately in public dropdowns.
+// Branch-scoped: visitor on a branch sees only that branch's class names.
+export const getDistinctClassNames = async (branchId = null) => {
+  const { clause, params } = branchFilter(branchId);
+  const sql = `
+    SELECT DISTINCT ClassName
+    FROM Classes
+    WHERE ClassName IS NOT NULL AND ClassName <> '' ${clause}
+    ORDER BY
+      CASE WHEN ClassName REGEXP '^[0-9]+$' THEN 0 ELSE 1 END,
+      CASE WHEN ClassName REGEXP '^[0-9]+$' THEN CAST(ClassName AS UNSIGNED) ELSE 0 END,
+      ClassName
+  `;
   try {
-    const [rows] = await db.query(sql);
-    return rows.map((r) => r.name);
+    const [rows] = await db.query(sql, params);
+    return rows.map((r) => r.ClassName);
   } catch (error) {
     console.error("Error fetching distinct class names:", error);
     throw error;
   }
 };
 
-// Standard fixed sections — same for every branch, no DB lookup needed
-export const STANDARD_SECTIONS = ["Better", "Good", "General"];
+// Distinct section names actually in use — branch-scoped, live from Classes.
+// Fallback to the three legacy sections if the branch has nothing yet so
+// dropdowns are never empty for a brand-new branch.
+const LEGACY_SECTIONS = ["Better", "Good", "General"];
+export const getDistinctSections = async (branchId = null) => {
+  const { clause, params } = branchFilter(branchId);
+  const sql = `
+    SELECT DISTINCT Section
+    FROM Classes
+    WHERE Section IS NOT NULL AND Section <> '' ${clause}
+    ORDER BY Section
+  `;
+  try {
+    const [rows] = await db.query(sql, params);
+    const sections = rows.map((r) => r.Section);
+    return sections.length > 0 ? sections : LEGACY_SECTIONS;
+  } catch (error) {
+    console.error("Error fetching distinct sections:", error);
+    throw error;
+  }
+};
+
+// Kept as the legacy default; new code should call getDistinctSections.
+export const STANDARD_SECTIONS = LEGACY_SECTIONS;
 
 // Get distinct class names with their sections (branch-scoped for dropdowns)
 export const getDistinctClassesWithSections = async (branchId = null) => {

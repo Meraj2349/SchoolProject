@@ -31,10 +31,10 @@ export const queryKeys = {
   },
   classes: {
     all: (branchId = null) => ["classes", { branchId }],
-    // Global — class names are the same across all branches, no branchId needed
-    names: () => ["classes", "names"],
-    // Fixed standard sections — same for all branches: Better, Good, General
-    standardSections: () => ["classes", "standard-sections"],
+    // Branch-scoped: pulls distinct ClassName from the live Classes table.
+    names: (branchId = null) => ["classes", "names", { branchId }],
+    // Branch-scoped: pulls distinct Section from the live Classes table.
+    standardSections: (branchId = null) => ["classes", "standard-sections", { branchId }],
     distinct: (branchId = null) => ["classes", "distinct", { branchId }],
     studentCount: (name, branchId = null) => ["classes", "count", name, { branchId }],
   },
