@@ -102,7 +102,10 @@ export const optionalAuth = (req, res, next) => {
     return next();
   }
 
-  // Token provided — validate it
+  // Token provided — validate it.
+  // An invalid/expired token on an optional-auth route is treated as anonymous,
+  // not rejected. This prevents stale admin cookies from breaking public pages
+  // (e.g. ClassStatistics on the homepage) that don't require authentication.
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
     req.adminId = decoded.adminID;
@@ -117,7 +120,13 @@ export const optionalAuth = (req, res, next) => {
 
     next();
   } catch (error) {
-    return res.status(403).json({ error: "Invalid token" });
+    // Token is invalid or expired — fall through as an unauthenticated public
+    // request rather than returning 403. The "optional" contract means the
+    // caller never required a token; a bad one shouldn't block the response.
+    const qb = req.query?.branch_id;
+    req.branchId = qb != null && qb !== "" ? parseInt(qb, 10) : null;
+    req.role = "public";
+    next();
   }
 };
 

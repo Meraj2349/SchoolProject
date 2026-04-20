@@ -1,5 +1,6 @@
 import axios from "axios";
 import Cookies from "js-cookie";
+import { useBranchStore } from "@/store/branchStore";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api";
 
@@ -27,23 +28,17 @@ httpClient.interceptors.request.use((config) => {
     config.headers["Accept-Language"] = "bn";
   }
 
-  // Append branch_id from the branch store so all API calls are branch-scoped.
-  // The backend auth middleware uses the JWT branch_id for write operations;
-  // this query param is used by the frontend to scope read queries for super_admin.
+  // Read branch_id direct from Zustand store (in-memory) — not localStorage.
+  // Persist middleware writes to localStorage async, so reading storage can
+  // return stale branch_id while React Query already refetched with new key.
   try {
-    const stored =
-      typeof window !== "undefined"
-        ? localStorage.getItem("branch-store")
-        : null;
-    const parsed = stored ? JSON.parse(stored) : null;
-    const branchId = parsed?.state?.currentBranchId ?? null;
+    const branchId = useBranchStore.getState().currentBranchId ?? null;
     if (branchId != null) {
-      // Append to query string without overwriting existing params
       const separator = config.url && config.url.includes("?") ? "&" : "?";
       config.url = `${config.url}${separator}branch_id=${branchId}`;
     }
   } catch {
-    // Ignore storage errors — branch_id is optional
+    // Ignore — branch_id optional
   }
 
   return config;

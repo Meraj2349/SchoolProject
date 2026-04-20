@@ -1,11 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useAuthStore } from "@/store/authStore";
 import { useBranchStore } from "@/store/branchStore";
 import { branchService } from "@/services/branch.service";
 import { useTranslations } from "@/store/languageStore";
-import { FiGitBranch, FiChevronDown, FiLock } from "react-icons/fi";
+import { FiGitBranch, FiChevronDown } from "react-icons/fi";
 
 /**
  * PublicBranchSelector — lets any public visitor narrow the view to a specific
@@ -16,11 +15,7 @@ import { FiGitBranch, FiChevronDown, FiLock } from "react-icons/fi";
  * Renders as a compact pill in the Navbar's main navigation bar.
  */
 export default function PublicBranchSelector() {
-  const { currentBranchId, currentBranchName, setBranch, lockBranch } =
-    useBranchStore();
-  const role = useAuthStore((s) => s.role);
-  const authBranchId = useAuthStore((s) => s.branchId);
-  const isBranchAdmin = role === "branch_admin";
+  const { currentBranchId, currentBranchName, setBranch } = useBranchStore();
   const [branches, setBranches] = useState([]);
   const [open, setOpen] = useState(false);
   const t = useTranslations("branchSelector");
@@ -34,20 +29,11 @@ export default function PublicBranchSelector() {
           (b) => !b.is_proposed && b.is_proposed !== 1,
         );
         setBranches(active);
-        // branch_admin: force store to their own branch (JWT is authoritative)
-        if (isBranchAdmin && authBranchId != null) {
-          const found = list.find((b) => b.id === authBranchId);
-          const name = found
-            ? found.name_en || found.name_bn || `Branch ${authBranchId}`
-            : `Branch ${authBranchId}`;
-          if (currentBranchId !== authBranchId) lockBranch(authBranchId, name);
-        }
       })
       .catch(() => setBranches([]));
-  }, [isBranchAdmin, authBranchId]);
+  }, []);
 
   const handleSelect = (branchId, branchName) => {
-    if (isBranchAdmin) return;
     setBranch(branchId, branchName);
     setOpen(false);
   };
@@ -65,42 +51,6 @@ export default function PublicBranchSelector() {
   }, [open]);
 
   const displayName = currentBranchId ? currentBranchName : t("allBranches");
-
-  // branch_admin: render read-only locked badge (no dropdown, no All Branches option).
-  if (isBranchAdmin) {
-    return (
-      <div
-        style={{
-          display: "inline-flex",
-          alignItems: "center",
-          gap: 6,
-          padding: "6px 12px",
-          borderRadius: 20,
-          border: "1.5px solid #10b981",
-          background: "linear-gradient(135deg,#ecfdf5 0%,#d1fae5 100%)",
-          color: "#065f46",
-          fontSize: 13,
-          fontWeight: 600,
-          whiteSpace: "nowrap",
-          maxWidth: 180,
-          overflow: "hidden",
-        }}
-        title="Locked to your branch"
-      >
-        <FiLock style={{ flexShrink: 0, fontSize: 12 }} />
-        <span
-          style={{
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            whiteSpace: "nowrap",
-            maxWidth: 140,
-          }}
-        >
-          {currentBranchName}
-        </span>
-      </div>
-    );
-  }
 
   return (
     <div
