@@ -38,15 +38,16 @@ export const createRoutine = async (routineData, branchId = null) => {
   return getRoutineById(result.insertId);
 };
 
-// Get routine by ID with class details (ClassName এবং Section সহ)
-export const getRoutineById = async (id) => {
+// Get routine by ID with class details (ClassName এবং Section সহ), branch-scoped
+export const getRoutineById = async (id, branchId = null) => {
+  const { clause, params } = branchFilter(branchId, "r");
   const [rows] = await db.execute(
     `SELECT r.*, c.ClassName, c.Section, c.TeacherID,
      CONCAT(c.ClassName, ' - Section ', c.Section) as ClassSectionName
      FROM Routines r
      LEFT JOIN Classes c ON r.ClassID = c.ClassID
-     WHERE r.RoutineID = ? AND r.IsActive = TRUE`,
-    [id],
+     WHERE r.RoutineID = ? AND r.IsActive = TRUE ${clause}`,
+    [id, ...params],
   );
   return rows[0];
 };

@@ -25,7 +25,8 @@ For a **bug**: first write a test that reproduces it (red), then fix it.
 
 | Where | Run once | Watch mode | Coverage |
 |---|---|---|---|
-| `server/` | `npm test` | `npm run test:watch` | `npm run test:coverage` |
+| `server/` unit | `npm test` | `npm run test:watch` | `npm run test:coverage` |
+| `server/` integration | `npm run test:integration` | — | — |
 | `frontend/` | `npm test` | `npm run test:watch` | `npx vitest run --coverage` |
 
 Run a single file: `npm test -- path/to/file.test.js`.
@@ -51,7 +52,13 @@ Characterisation tests for legacy code outside `server/src` go in
 | `domain/` | Pure unit tests, input → output / thrown `ValidationError` | none |
 | `application/` (use cases) | Unit tests with **in-memory fake** repositories and storage | hand-written fakes (see `branch.usecases.test.js`) |
 | `interface/` (controllers) | Supertest against a tiny Express app wrapping the controller | fake use cases |
-| `infrastructure/` | Integration tests against a real MySQL (only when a DB is available) | none |
+| `infrastructure/`, legacy `models/` + routes | Integration tests in `server/tests/integration`: real MySQL, real app via Supertest | Cloudinary via `jest.unstable_mockModule` (see `uploads.test.js`) |
+
+Integration test helpers (`tests/integration/helpers.js`): `resetDb()` gives
+each test two clean branches, `seedStudent()`, `insert()`, `count()`, and
+`superAdminToken()` / `branchAdminToken(id)` / `quizStudentToken()` for auth.
+For any branch-owned endpoint, test that a branch admin **cannot** read or
+change another branch's rows (see `branchIsolation.test.js`).
 
 Prefer hand-written fakes over `jest.fn()` mocks: they test behaviour (state),
 not call order, and survive refactors. In ESM test files import Jest APIs

@@ -49,11 +49,22 @@ httpClient.interceptors.request.use((config) => {
   return config;
 });
 
+/**
+ * A 401 on a request that carried a token means the admin session expired.
+ * A 401 without a token (e.g. a wrong password on the login form) is a normal
+ * error the page must show — redirecting would reload the page and hide it.
+ */
+export const isExpiredSession = (error) => {
+  if (error?.response?.status !== 401) return false;
+  const headers = error.config?.headers;
+  return Boolean(headers?.Authorization ?? headers?.get?.("Authorization"));
+};
+
 // Global response error handling
 httpClient.interceptors.response.use(
   (res) => res,
   (error) => {
-    if (error.response?.status === 401) {
+    if (isExpiredSession(error)) {
       Cookies.remove("token");
       if (typeof window !== "undefined") {
         window.location.href = "/admin/login";

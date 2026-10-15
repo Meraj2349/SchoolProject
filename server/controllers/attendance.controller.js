@@ -198,6 +198,14 @@ export const updateAttendanceController = async (req, res) => {
       });
     }
 
+    const existing = await getAttendanceByID(parseInt(id), req.branchId ?? null);
+    if (!existing) {
+      return res.status(404).json({
+        success: false,
+        message: "Attendance record not found",
+      });
+    }
+
     const attendanceData = { studentID, classID, classDate, status };
     const affectedRows = await updateAttendance(parseInt(id), attendanceData);
 
@@ -229,6 +237,14 @@ export const deleteAttendanceController = async (req, res) => {
       return res.status(400).json({
         success: false,
         message: "Valid attendance ID is required",
+      });
+    }
+
+    const existing = await getAttendanceByID(parseInt(id), req.branchId ?? null);
+    if (!existing) {
+      return res.status(404).json({
+        success: false,
+        message: "Attendance record not found",
       });
     }
 
@@ -750,7 +766,10 @@ export const markAttendanceController = async (req, res) => {
       };
 
       console.log("Creating attendance with data:", attendanceData);
-      const attendanceID = await createAttendance(attendanceData, branchId);
+      const attendanceID = await createAttendance(
+        attendanceData,
+        student.branch_id ?? branchId,
+      );
 
       if (attendanceID) {
         console.log(
@@ -1045,7 +1064,7 @@ export const upsertAttendanceCellController = async (req, res) => {
       student.ClassID,
       classDate,
       status,
-      branchId,
+      student.branch_id ?? branchId,
     );
 
     res.status(200).json({

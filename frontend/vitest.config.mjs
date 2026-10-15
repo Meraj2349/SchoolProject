@@ -11,6 +11,8 @@ export default defineConfig({
   },
   test: {
     environment: "jsdom",
+    // Run in the school's timezone so date bugs (UTC vs local day) show up.
+    env: { TZ: "Asia/Dhaka" },
     globals: true,
     setupFiles: ["./test/setup.js"],
     include: ["src/**/*.test.{js,jsx}"],

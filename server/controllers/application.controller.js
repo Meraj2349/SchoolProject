@@ -110,7 +110,7 @@ const updateApplicationStatusController = async (req, res) => {
       });
     }
 
-    const result = await updateApplicationStatus(parseInt(id), status);
+    const result = await updateApplicationStatus(parseInt(id), status, req.branchId ?? null);
 
     res.status(200).json({
       success: true,

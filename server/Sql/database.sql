@@ -17,6 +17,7 @@ CREATE TABLE
         CreatedBy INT, -- Admin user ID (Foreign key to Users/Admin table)
         CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         UpdatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        branch_id INT NOT NULL DEFAULT 1,
         FOREIGN KEY (ClassID) REFERENCES Classes (ClassID) ON DELETE CASCADE,
         INDEX idx_class_id (ClassID),
         INDEX idx_routine_date (RoutineDate),
@@ -36,6 +37,7 @@ CREATE TABLE
         AdmissionDate DATE NOT NULL,
         Address TEXT,
         ParentContact VARCHAR(15),
+        branch_id INT NOT NULL DEFAULT 1,
         -- ON DELETE RESTRICT: students must not silently lose their class
         CONSTRAINT fk_students_class FOREIGN KEY (ClassID) REFERENCES Classes (ClassID) ON DELETE RESTRICT
     );
@@ -50,7 +52,8 @@ CREATE TABLE
         ContactNumber VARCHAR(15),
         Email VARCHAR(100),
         JoiningDate DATE,
-        Address TEXT
+        Address TEXT,
+        branch_id INT NOT NULL DEFAULT 1
     );
 
 -- Classes Table
@@ -62,7 +65,9 @@ CREATE TABLE
         ClassName VARCHAR(20),
         Section VARCHAR(10),
         TeacherID INT,
-        FOREIGN KEY (TeacherID) REFERENCES Teachers (TeacherID)
+        branch_id INT NOT NULL DEFAULT 1,
+        FOREIGN KEY (TeacherID) REFERENCES Teachers (TeacherID),
+        CONSTRAINT uq_class_section_branch UNIQUE (ClassName, Section, branch_id)
     );
 
 -- Subjects Table
@@ -71,6 +76,7 @@ CREATE TABLE
         SubjectID INT PRIMARY KEY AUTO_INCREMENT,
         SubjectName VARCHAR(50),
         ClassID INT,
+        branch_id INT NOT NULL DEFAULT 1,
         CONSTRAINT fk_subjects_class FOREIGN KEY (ClassID) REFERENCES Classes (ClassID) ON DELETE SET NULL
     );
 
@@ -81,6 +87,7 @@ CREATE TABLE
         ClassID INT NULL, -- nullable so ON DELETE SET NULL works
         ClassDate DATE NOT NULL,
         Status ENUM ('Present', 'Absent', 'Late') NOT NULL,
+        branch_id INT NOT NULL DEFAULT 1,
         FOREIGN KEY (StudentID) REFERENCES Students (StudentID),
         CONSTRAINT fk_attendance_class FOREIGN KEY (ClassID) REFERENCES Classes (ClassID) ON DELETE SET NULL,
         UNIQUE (StudentID, ClassID, ClassDate) -- prevent duplicate entries
@@ -100,6 +107,7 @@ CREATE TABLE
         ExamName VARCHAR(50) NOT NULL,
         ClassID INT NULL, -- nullable so ON DELETE SET NULL works
         ExamDate DATE NOT NULL,
+        branch_id INT NOT NULL DEFAULT 1,
         CONSTRAINT fk_exams_class FOREIGN KEY (ClassID) REFERENCES Classes (ClassID) ON DELETE SET NULL
     );
 
@@ -112,6 +120,7 @@ CREATE TABLE
         SubjectID INT NOT NULL,
         ClassID INT NULL, -- nullable so ON DELETE SET NULL works
         MarksObtained INT NOT NULL,
+        branch_id INT NOT NULL DEFAULT 1,
         FOREIGN KEY (StudentID) REFERENCES Students (StudentID),
         FOREIGN KEY (ExamID) REFERENCES Exams (ExamID),
         FOREIGN KEY (SubjectID) REFERENCES Subjects (SubjectID),
@@ -125,7 +134,9 @@ CREATE TABLE
         Username VARCHAR(50),
         Email VARCHAR(100),
         Password VARCHAR(255),
-        Language VARCHAR(2) NOT NULL DEFAULT 'bn' COMMENT 'UI language preference: bn (default) or en'
+        Language VARCHAR(2) NOT NULL DEFAULT 'bn' COMMENT 'UI language preference: bn (default) or en',
+        role ENUM ('super_admin', 'branch_admin') NOT NULL DEFAULT 'branch_admin',
+        branch_id INT NULL COMMENT 'NULL for super_admin'
     );
 
 CREATE TABLE
@@ -241,6 +252,7 @@ CREATE TABLE
         EndDate DATE NOT NULL,
         Venue VARCHAR(100),
         Description TEXT,
+        branch_id INT NULL COMMENT 'NULL = school-wide event shown in every branch',
         CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         UpdatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
     );
@@ -399,6 +411,7 @@ CREATE TABLE
         address TEXT,
         additional_info TEXT,
         status ENUM ('pending', 'reviewed', 'accepted', 'rejected') DEFAULT 'pending',
+        student_id INT NULL COMMENT 'Student created when the application was accepted',
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
     );
@@ -434,6 +447,7 @@ CREATE TABLE
         CorrectAnswers INT NOT NULL,
         ScorePercentage DECIMAL(5, 2) NOT NULL,
         TimeTakenSeconds INT NOT NULL,
+        branch_id INT DEFAULT NULL,
         StartedAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
         CompletedAt DATETIME DEFAULT NULL,
         INDEX idx_quiz_session_user (UserID),
@@ -475,3 +489,35 @@ CREATE TABLE
 -- Seed the single row (only if the table is empty)
 INSERT IGNORE INTO ChairmanProfile (id, name_en, name_bn, title_en, title_bn, institution_en, institution_bn)
 VALUES (1, 'Md. Rashedul Islam', 'মোঃ রাশেদুল ইসলাম', 'Chairman', 'চেয়ারম্যান', 'Star Shikkha Poribar', 'স্টার শিক্ষা পরিবার');
+
+-- ============================================================
+-- Shared class names (same for every branch; sections differ per branch).
+-- Kept in sync with class_names.sql.
+-- ============================================================
+CREATE TABLE
+    IF NOT EXISTS ClassNames (
+        id INT PRIMARY KEY AUTO_INCREMENT,
+        name VARCHAR(50) NOT NULL UNIQUE,
+        sort_order INT NOT NULL DEFAULT 0
+    );
+
+INSERT IGNORE INTO ClassNames (name, sort_order) VALUES
+    ('Play', 1), ('Nursery', 2), ('KG', 3),
+    ('Class 1', 4), ('Class 2', 5), ('Class 3', 6), ('Class 4', 7),
+    ('Class 5', 8), ('Class 6', 9), ('Class 7', 10), ('Class 8', 11),
+    ('Class 9', 12), ('Class 10', 13);
+
+-- ============================================================
+-- Branch foreign keys. Added last because Branches is created above.
+-- Existing databases get the same result from add_branch_id_migration.sql.
+-- ============================================================
+ALTER TABLE Admin ADD CONSTRAINT fk_admins_branch FOREIGN KEY (branch_id) REFERENCES Branches (id) ON DELETE SET NULL;
+ALTER TABLE Students ADD CONSTRAINT fk_students_branch FOREIGN KEY (branch_id) REFERENCES Branches (id);
+ALTER TABLE Teachers ADD CONSTRAINT fk_teachers_branch FOREIGN KEY (branch_id) REFERENCES Branches (id);
+ALTER TABLE Classes ADD CONSTRAINT fk_classes_branch FOREIGN KEY (branch_id) REFERENCES Branches (id);
+ALTER TABLE Subjects ADD CONSTRAINT fk_subjects_branch FOREIGN KEY (branch_id) REFERENCES Branches (id);
+ALTER TABLE Attendance ADD CONSTRAINT fk_attendance_branch FOREIGN KEY (branch_id) REFERENCES Branches (id);
+ALTER TABLE Exams ADD CONSTRAINT fk_exams_branch FOREIGN KEY (branch_id) REFERENCES Branches (id);
+ALTER TABLE Results ADD CONSTRAINT fk_results_branch FOREIGN KEY (branch_id) REFERENCES Branches (id);
+ALTER TABLE Events ADD CONSTRAINT fk_events_branch FOREIGN KEY (branch_id) REFERENCES Branches (id);
+ALTER TABLE Routines ADD CONSTRAINT fk_routines_branch FOREIGN KEY (branch_id) REFERENCES Branches (id);

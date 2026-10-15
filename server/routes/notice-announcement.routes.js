@@ -1,4 +1,5 @@
 import express from "express";
+import fs from "fs";
 import multer from "multer";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -15,10 +16,14 @@ import {
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Multer storage for notice announcement images
+// Multer storage for notice announcement images (directory is git-ignored,
+// so create it — multer will not).
+const UPLOAD_DIR = path.join(__dirname, "../public/uploads/notice-announcements");
+fs.mkdirSync(UPLOAD_DIR, { recursive: true });
+
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, path.join(__dirname, "../public/uploads/notice-announcements"));
+    cb(null, UPLOAD_DIR);
   },
   filename: (req, file, cb) => {
     const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);

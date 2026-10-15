@@ -1,127 +1,89 @@
 import jwt from "jsonwebtoken";
 
-// Primary auth middleware — sets req.adminId, req.role, req.branchId
-// req.branchId is null for super_admin (sees all data) and a number for branch_admin
+const bearerToken = (req) => {
+  const [scheme, token] = (req.headers.authorization || "").split(" ");
+  return scheme === "Bearer" && token ? token : null;
+};
+
+const queryBranchId = (req) => {
+  const qb = req.query?.branch_id;
+  return qb != null && qb !== "" ? parseInt(qb, 10) : null;
+};
+
+/**
+ * Verifies an admin JWT. Returns the decoded payload, or null when the token
+ * is missing its admin claims — e.g. a quiz student's token, which is signed
+ * with the same secret but must never grant admin access.
+ * Throws when the token is malformed, tampered with or expired.
+ */
+const verifyAdminToken = (token) => {
+  const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
+  if (decoded.userType === "quiz" || decoded.adminID == null) return null;
+  return decoded;
+};
+
+// Sets req.adminId, req.role and req.branchId from a verified admin token.
+// req.branchId is null for super_admin (sees all data, or ?branch_id=X for
+// scoped reads) and the admin's own branch for branch_admin.
+const attachAdmin = (req, decoded) => {
+  req.adminId = decoded.adminID;
+  req.role = decoded.role || "branch_admin";
+  req.branchId = req.role === "super_admin" ? queryBranchId(req) : decoded.branch_id ?? null;
+  req.user = { id: decoded.adminID, role: req.role };
+};
+
+const rejectUnauthenticated = (res) =>
+  res.status(401).json({ error: "Access denied, please log in again" });
+
+// Primary auth middleware for admin-only routes.
 const authMiddleware = (req, res, next) => {
-  const authHeader = req.headers.authorization;
-
-  if (!authHeader) {
-    return res.status(401).json({ error: "Access denied, token missing" });
-  }
-
-  const token = authHeader.split(" ")[1];
-
-  if (!token) {
-    return res.status(401).json({ error: "Access denied, token missing" });
-  }
+  const token = bearerToken(req);
+  if (!token) return rejectUnauthenticated(res);
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
-    req.adminId = decoded.adminID;
-    req.role = decoded.role || "branch_admin";
-
-    if (req.role === "super_admin") {
-      // super_admin: respect ?branch_id=X query param for scoped reads,
-      // otherwise null = no filter (see all branches)
-      const qb = req.query?.branch_id;
-      req.branchId = qb != null && qb !== "" ? parseInt(qb, 10) : null;
-    } else {
-      // branch_admin: always locked to their own branch from JWT
-      req.branchId = decoded.branch_id ?? null;
-    }
-
+    const decoded = verifyAdminToken(token);
+    if (!decoded) return rejectUnauthenticated(res);
+    attachAdmin(req, decoded);
     next();
-  } catch (error) {
-    return res.status(403).json({ error: "Invalid token" });
+  } catch {
+    // 401 (not 403) so the frontend clears the stale token and redirects to login.
+    return rejectUnauthenticated(res);
   }
 };
 
 export default authMiddleware;
 
-// protect — same as authMiddleware but also populates req.user for authorize()
-export const protect = (req, res, next) => {
-  const authHeader = req.headers.authorization;
-
-  if (!authHeader) {
-    return res.status(401).json({ error: "Access denied, token missing" });
-  }
-
-  const token = authHeader.split(" ")[1];
-
-  if (!token) {
-    return res.status(401).json({ error: "Access denied, token missing" });
-  }
-
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
-    req.adminId = decoded.adminID;
-    req.role = decoded.role || "branch_admin";
-
-    if (req.role === "super_admin") {
-      const qb = req.query?.branch_id;
-      req.branchId = qb != null && qb !== "" ? parseInt(qb, 10) : null;
-    } else {
-      req.branchId = decoded.branch_id ?? null;
-    }
-
-    req.user = { id: decoded.adminID, role: req.role };
-    next();
-  } catch (error) {
-    return res.status(403).json({ error: "Invalid token" });
-  }
-};
+// Kept as an alias for routes that import `protect`.
+export const protect = authMiddleware;
 
 /**
- * optionalAuthMiddleware — allows unauthenticated requests through.
+ * optionalAuth — for read-only public endpoints (GET /students, /teachers…).
  *
- * Behaviour:
- * - No token → req.branchId = parseInt(req.query.branch_id) if provided, else null
- *   (public visitor; null = no branch filter = show all)
- * - Valid token → same as authMiddleware (branch_admin locked; super_admin uses ?branch_id)
- * - Invalid/expired token → 403 (explicit bad token is still rejected)
- *
- * Use this for read-only public endpoints (GET /students, GET /teachers, etc.)
- * so that public visitors can filter by branch via ?branch_id without needing auth.
+ * - Valid admin token → same as authMiddleware (branch_admin locked to own branch)
+ * - No token, or a stale/invalid one → public visitor; req.branchId comes from
+ *   ?branch_id (null = all branches). A visitor whose browser still holds an
+ *   expired admin cookie must still be able to browse the public site.
  */
 export const optionalAuth = (req, res, next) => {
-  const authHeader = req.headers.authorization;
-
-  // No token at all — treat as unauthenticated public request
-  if (!authHeader) {
-    const qb = req.query?.branch_id;
-    req.branchId = qb != null && qb !== "" ? parseInt(qb, 10) : null;
-    req.role = "public";
-    return next();
-  }
-
-  const token = authHeader.split(" ")[1];
-  if (!token) {
-    const qb = req.query?.branch_id;
-    req.branchId = qb != null && qb !== "" ? parseInt(qb, 10) : null;
-    req.role = "public";
-    return next();
-  }
-
-  // Token provided — validate it
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
-    req.adminId = decoded.adminID;
-    req.role = decoded.role || "branch_admin";
-
-    if (req.role === "super_admin") {
-      const qb = req.query?.branch_id;
-      req.branchId = qb != null && qb !== "" ? parseInt(qb, 10) : null;
-    } else {
-      req.branchId = decoded.branch_id ?? null;
+  const token = bearerToken(req);
+  if (token) {
+    try {
+      const decoded = verifyAdminToken(token);
+      if (decoded) {
+        attachAdmin(req, decoded);
+        return next();
+      }
+    } catch {
+      // fall through to public access
     }
-
-    next();
-  } catch (error) {
-    return res.status(403).json({ error: "Invalid token" });
   }
+
+  req.role = "public";
+  req.branchId = queryBranchId(req);
+  next();
 };
 
-// Role-based authorization middleware — use after protect or authMiddleware
+// Role-based authorization middleware — use after authMiddleware
 export const authorize = (...allowedRoles) => {
   return (req, res, next) => {
     const role = req.role || req.user?.role;

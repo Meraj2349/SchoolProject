@@ -102,7 +102,7 @@ const getStudentByIdController = async (req, res) => {
         .json({ success: false, message: t("student_required_fields", lang) });
     }
 
-    const student = await getStudentById(parseInt(id));
+    const student = await getStudentById(parseInt(id), req.branchId ?? null);
 
     if (!student) {
       return res
@@ -287,6 +287,7 @@ const checkRollNumberController = async (req, res) => {
       className,
       section,
       excludeStudentID ? parseInt(excludeStudentID) : null,
+      req.branchId ?? null,
     );
 
     res.status(200).json({ success: true, data: { exists } });

@@ -25,7 +25,6 @@ export const getChairmanProfileController = async (req, res) => {
 
 // PUT /api/chairman  — protected (auth middleware applied in route)
 export const updateChairmanProfileController = async (req, res) => {
-  let uploadedPublicId = null;
   try {
     const {
       name_en, name_bn,
@@ -41,17 +40,10 @@ export const updateChairmanProfileController = async (req, res) => {
     if (institution_en !== undefined) fields.institution_en = institution_en;
     if (institution_bn !== undefined) fields.institution_bn = institution_bn;
 
-    // Handle image upload
+    // Handle image upload. Upload first: if it fails, the current photo stays.
+    const oldPublicId = req.file ? await getChairmanImagePublicId() : null;
     if (req.file) {
-      // Delete old Cloudinary image if one exists
-      const oldPublicId = await getChairmanImagePublicId();
-      if (oldPublicId) {
-        await deleteFromCloudinary(oldPublicId).catch(() => {});
-      }
-
-      // Upload new image
       const result = await uploadToCloudinary(req.file.path, "chairman");
-      uploadedPublicId = result.public_id;
       fields.image_url = result.secure_url;
       fields.image_public_id = result.public_id;
 
@@ -60,6 +52,11 @@ export const updateChairmanProfileController = async (req, res) => {
     }
 
     await updateChairmanProfile(fields);
+
+    // The profile now points at the new photo; remove the old one.
+    if (oldPublicId && fields.image_public_id) {
+      await deleteFromCloudinary(oldPublicId).catch(() => {});
+    }
 
     const updated = await getChairmanProfile();
     res.status(200).json({

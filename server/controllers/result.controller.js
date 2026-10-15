@@ -19,6 +19,8 @@ import {
   searchResults,
   updateResult,
 } from "../models/result.model.js";
+import { getExamById } from "../models/exam.model.js";
+import { ValidationError } from "../src/shared/errors/index.js";
 
 // Utility function for validation
 const validateResultData = (data) => {
@@ -254,7 +256,6 @@ const addResultController = async (req, res) => {
     }
 
     const result = await addResult(resultData, branchId);
-    console.log("🔍 Database result:", result);
 
     if (result && result.affectedRows > 0) {
       console.log("✅ Result added successfully, ID:", result.insertId);
@@ -271,6 +272,9 @@ const addResultController = async (req, res) => {
       });
     }
   } catch (error) {
+    if (error instanceof ValidationError) {
+      return res.status(400).json({ success: false, message: error.message });
+    }
     res.status(500).json({
       success: false,
       message: "Error adding result",
@@ -305,11 +309,11 @@ const addMultipleResultsController = async (req, res) => {
 
     const result = await addMultipleResults(results, branchId);
 
-    if (result.affectedRows > 0) {
+    if (result.insertedCount > 0) {
       res.status(201).json({
         success: true,
-        message: `${result.affectedRows} results added successfully`,
-        data: { affectedRows: result.affectedRows },
+        message: `${result.insertedCount} results added successfully`,
+        data: { affectedRows: result.insertedCount },
       });
     } else {
       res.status(400).json({
@@ -376,6 +380,7 @@ const updateResultController = async (req, res) => {
 
 // Delete result
 const deleteResultController = async (req, res) => {
+  const branchId = req.branchId ?? null;
   try {
     const { id } = req.params;
 
@@ -386,8 +391,8 @@ const deleteResultController = async (req, res) => {
       });
     }
 
-    // Check if result exists
-    const existingResult = await getResultById(id);
+    // Check if result exists in the caller's branch
+    const existingResult = await getResultById(id, branchId);
     if (!existingResult) {
       return res.status(404).json({
         success: false,
@@ -419,6 +424,7 @@ const deleteResultController = async (req, res) => {
 
 // Delete results by exam
 const deleteResultsByExamController = async (req, res) => {
+  const branchId = req.branchId ?? null;
   try {
     const { examId } = req.params;
 
@@ -427,6 +433,12 @@ const deleteResultsByExamController = async (req, res) => {
         success: false,
         message: "Valid exam ID is required",
       });
+    }
+
+    // The exam must belong to the caller's branch
+    const exam = await getExamById(examId, branchId);
+    if (!exam) {
+      return res.status(404).json({ success: false, message: "Exam not found" });
     }
 
     const result = await deleteResultsByExam(examId);
@@ -715,7 +727,7 @@ const advancedSearchResultsController = async (req, res) => {
       studentName,
       rollNumber,
       className,
-      sectionName,
+      section: sectionName,
       examName,
       subjectName,
       minMarks: minMarks ? parseInt(minMarks) : undefined,

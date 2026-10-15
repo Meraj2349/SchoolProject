@@ -22,15 +22,15 @@ router.get("/count", optionalAuth, getStudentCountController);
 router.get("/search/filter", optionalAuth, searchStudentsController);
 router.get("/classes", optionalAuth, getAllClassesController);
 router.get("/class/:className", optionalAuth, getStudentsByClassController);
+// Check roll — used during student creation in admin (branch-scoped).
+// Must be registered before "/:id", otherwise "check-roll" is taken as an id.
+router.get("/check-roll", optionalAuth, checkRollNumberController);
 router.get("/:id", optionalAuth, getStudentByIdController);
 router.get(
   "/class/:className/section/:sectionName",
   optionalAuth,
   getStudentsByClassAndSectionController,
 );
-
-// ── Check roll — used during student creation in admin, keep optional (branch-scoped) ──
-router.get("/check-roll", optionalAuth, checkRollNumberController);
 
 // ── Write routes — require a valid JWT (admin only) ──
 router.post("/", authMiddleware, addStudentController);

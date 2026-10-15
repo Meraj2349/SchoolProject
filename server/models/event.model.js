@@ -33,6 +33,13 @@ const eventBranchClause = (branchId) => {
   return { clause: "AND (branch_id = ? OR branch_id IS NULL)", params: [branchId] };
 };
 
+// Writes are stricter than reads: a branch admin sees school-wide events but
+// may only change its own branch's events. super_admin (null) changes any.
+const eventWriteClause = (branchId) => {
+  if (branchId == null) return { clause: "", params: [] };
+  return { clause: "AND branch_id = ?", params: [branchId] };
+};
+
 // Get all events (branch-scoped with global fallback)
 const getAllEvents = async (branchId = null) => {
   const { clause, params } = eventBranchClause(branchId);
@@ -175,7 +182,7 @@ const addEvent = async (eventData, branchId = null) => {
 
 // Update event (branch-scoped)
 const updateEvent = async (eventId, eventData, branchId = null) => {
-  const { clause: branchScope, params: branchParams } = eventBranchClause(branchId);
+  const { clause: branchScope, params: branchParams } = eventWriteClause(branchId);
   try {
     if (!eventId) {
       throw new Error("Event ID is required");
@@ -279,13 +286,16 @@ const updateEvent = async (eventId, eventData, branchId = null) => {
 
 // Delete event (branch-scoped)
 const deleteEvent = async (eventId, branchId = null) => {
-  const { clause: branchScope, params: branchParams } = eventBranchClause(branchId);
+  const { clause: branchScope, params: branchParams } = eventWriteClause(branchId);
   try {
     if (!eventId) {
       throw new Error("Event ID is required");
     }
 
-    const eventInfo = await getEventById(eventId, branchId);
+    const [[eventInfo]] = await db.query(
+      `SELECT * FROM Events WHERE EventID = ? ${branchScope}`,
+      [eventId, ...branchParams],
+    );
     if (!eventInfo) {
       throw new Error("Event not found");
     }

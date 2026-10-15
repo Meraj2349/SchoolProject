@@ -35,6 +35,12 @@ const updateTeacherController = async (req, res) => {
   const branchId = req.branchId ?? null;
   try {
     const result = await updateTeacher(req.params.id, req.body, branchId);
+    if (result.noFields) {
+      return res.status(400).json({ error: t("all_fields_required", lang) });
+    }
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: t("teacher_not_found", lang) });
+    }
     res.json(result);
   } catch (error) {
     res.status(500).json({ error: t("internal_server_error", lang) });
@@ -46,6 +52,9 @@ const deleteTeacherController = async (req, res) => {
   const branchId = req.branchId ?? null;
   try {
     const result = await deleteTeacher(req.params.id, branchId);
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: t("teacher_not_found", lang) });
+    }
     res.json(result);
   } catch (error) {
     res.status(500).json({ error: t("internal_server_error", lang) });

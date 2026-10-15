@@ -1,11 +1,12 @@
 import express from "express";
 import upload from "../config/multer.config.js";
+import authMiddleware from "../middlewares/auth.middleware.js";
 import * as ImageController from "../controllers/image.controller.js";
 
 const router = express.Router();
 
 // Create
-router.post("/", upload.single("image"), ImageController.uploadImage);
+router.post("/", authMiddleware, upload.single("image"), ImageController.uploadImage);
 
 // Read
 router.get("/", ImageController.getAllImagesWithDetails); // List all images
@@ -16,14 +17,15 @@ router.get("/teacher/:teacherId", ImageController.getImagesByTeacher); // Get im
 router.get("/:id", ImageController.getImage);
 
 // Update
-router.put("/:id", ImageController.updateImage); // Update metadata only
+router.put("/:id", authMiddleware, ImageController.updateImage); // Update metadata only
 router.put(
   "/:id/image",
+  authMiddleware,
   upload.single("image"),
   ImageController.replaceImageFile,
 ); // Replace image file
 
 // Delete
-router.delete("/:id", ImageController.deleteImage);
+router.delete("/:id", authMiddleware, ImageController.deleteImage);
 
 export default router;

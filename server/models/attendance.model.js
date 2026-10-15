@@ -304,9 +304,10 @@ export const getAttendanceByNameRollClassSection = async (
       FROM Attendance a
       JOIN Classes c ON a.ClassID = c.ClassID
       JOIN Students s ON a.StudentID = s.StudentID
-      WHERE s.FirstName LIKE ? AND s.RollNumber LIKE ? AND c.ClassName = ? AND c.Section = ? ${clause}
+      WHERE s.FirstName LIKE ? AND s.RollNumber = ? AND c.ClassName = ? AND c.Section = ? ${clause}
       ORDER BY a.ClassDate DESC`,
-      [`%${firstName}%`, `%${roll}%`, className, section, ...branchParams],
+      // Exact roll: LIKE '%1%' would also show rolls 10, 11, 21… (other students)
+      [`%${firstName}%`, roll, className, section, ...branchParams],
     );
     return rows;
   } catch (error) {

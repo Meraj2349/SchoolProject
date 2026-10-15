@@ -30,7 +30,6 @@ export const updateChairmanProfile = async (fields) => {
     }
   }
   if (setClauses.length === 0) return { success: true };
-  values.push(1); // WHERE id = 1
   await db.query(
     `UPDATE ChairmanProfile SET ${setClauses.join(", ")} WHERE id = 1`,
     values,

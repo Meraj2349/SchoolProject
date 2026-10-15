@@ -1,4 +1,5 @@
 import db from "../config/db.config.js";
+import { ValidationError } from "../src/shared/errors/index.js";
 import { branchFilter } from "../utils/branchFilter.js";
 
 /**
@@ -235,8 +236,8 @@ const addResult = async (resultData, branchId = null) => {
       );
     }
 
-    if (MarksObtained < 0) {
-      throw new Error("Marks obtained cannot be negative");
+    if (MarksObtained < 0 || MarksObtained > 100) {
+      throw new ValidationError("result_invalid", "Marks obtained must be between 0 and 100");
     }
 
     // Branch-scoped student validation
@@ -251,27 +252,30 @@ const addResult = async (resultData, branchId = null) => {
     );
 
     if (studentCheck.length === 0) {
-      throw new Error(
+      throw new ValidationError(
+        "result_invalid",
         "Student not found or does not belong to the specified class",
       );
     }
 
+    // The exam and subject must be the student's class (same section too),
+    // otherwise a result can be filed under another section's exam.
     const [examCheck] = await db.query(
-      `SELECT ExamID, ExamName, ExamType, ClassID FROM Exams WHERE ExamID = ?`,
-      [ExamID],
+      `SELECT ExamID, ExamName, ExamType, ClassID FROM Exams WHERE ExamID = ? AND ClassID = ?`,
+      [ExamID, ClassID],
     );
 
     if (examCheck.length === 0) {
-      throw new Error("Exam not found");
+      throw new ValidationError("result_invalid", "Exam not found for this class");
     }
 
     const [subjectCheck] = await db.query(
-      `SELECT SubjectID, SubjectName, ClassID FROM Subjects WHERE SubjectID = ?`,
-      [SubjectID],
+      `SELECT SubjectID, SubjectName, ClassID FROM Subjects WHERE SubjectID = ? AND ClassID = ?`,
+      [SubjectID, ClassID],
     );
 
     if (subjectCheck.length === 0) {
-      throw new Error("Subject not found");
+      throw new ValidationError("result_invalid", "Subject not found for this class");
     }
 
     const exists = await checkResultExists(StudentID, ExamID, SubjectID);
@@ -279,7 +283,8 @@ const addResult = async (resultData, branchId = null) => {
       const student = studentCheck[0];
       const exam = examCheck[0];
       const subject = subjectCheck[0];
-      throw new Error(
+      throw new ValidationError(
+        "result_invalid",
         `Result already exists for ${student.FirstName} ${student.LastName} (Roll: ${student.RollNumber}) in ${subject.SubjectName} for ${exam.ExamName} exam`,
       );
     }
@@ -307,6 +312,7 @@ const addResult = async (resultData, branchId = null) => {
       },
     };
   } catch (err) {
+    if (err instanceof ValidationError) throw err;
     throw new Error("Error adding result: " + err.message);
   }
 };
@@ -324,8 +330,9 @@ const addResultByStudentDetails = async (resultData, branchId = null) => {
       marksObtained,
     } = resultData;
 
-    if (!marksObtained || marksObtained < 0) {
-      throw new Error("Invalid marks obtained. Must be a positive number.");
+    const marks = Number(marksObtained);
+    if (marksObtained === "" || marksObtained == null || Number.isNaN(marks) || marks < 0) {
+      throw new Error("Invalid marks obtained. Must be a number from 0 to 100.");
     }
 
     const branchStudentClause = branchId != null ? "AND s.branch_id = ?" : "";
@@ -418,7 +425,7 @@ const addResultByStudentDetails = async (resultData, branchId = null) => {
 
     // Get class ID
     const [classRows] = await db.query(
-      `SELECT ClassID FROM Classes WHERE ClassName = ? AND Section = ? ${branchClassClause}`,
+      `SELECT c.ClassID FROM Classes c WHERE c.ClassName = ? AND c.Section = ? ${branchClassClause}`,
       [className, section, ...branchClassParam],
     );
 
@@ -860,19 +867,21 @@ const searchResults = async (filters, branchId = null) => {
       params.push(namePattern, namePattern, namePattern);
     }
 
+    // Exact matches: a LIKE '%Class 1%' would also return Class 10, and
+    // roll '%1%' would return rolls 10, 11, 21… — other students' results.
     if (filters.rollNumber) {
-      query += ` AND s.RollNumber LIKE ?`;
-      params.push(`%${filters.rollNumber}%`);
+      query += ` AND s.RollNumber = ?`;
+      params.push(filters.rollNumber);
     }
 
     if (filters.className) {
-      query += ` AND c.ClassName LIKE ?`;
-      params.push(`%${filters.className}%`);
+      query += ` AND c.ClassName = ?`;
+      params.push(filters.className);
     }
 
     if (filters.section) {
-      query += ` AND c.Section LIKE ?`;
-      params.push(`%${filters.section}%`);
+      query += ` AND c.Section = ?`;
+      params.push(filters.section);
     }
 
     if (filters.examName) {

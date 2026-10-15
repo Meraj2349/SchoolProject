@@ -37,15 +37,11 @@ export const replaceImage = async (id, file) => {
     `school/${existingImage.ImageType}s`,
   );
 
-  // Update database
-  const updatedImage = await ImageModel.updateImage(id, {
+  // Point the record at the new file (updateImage only touches metadata,
+  // so the record used to keep the old, about-to-be-deleted file).
+  const updatedImage = await ImageModel.updateImageFile(id, {
     ImagePath: result.secure_url,
     PublicID: result.public_id,
-    Description: existingImage.Description,
-    ImageType: existingImage.ImageType,
-    StudentID: existingImage.StudentID,
-    TeacherID: existingImage.TeacherID,
-    AssociatedID: existingImage.AssociatedID,
   });
 
   // Delete old image from Cloudinary

@@ -19,6 +19,7 @@ import {
   FiTrash2,
   FiSave,
 } from "react-icons/fi";
+import { optionsForClass } from "./resultFormOptions";
 
 const RESULT_FILTER_EMPTY = { className: "", section: "", search: "" };
 
@@ -157,18 +158,9 @@ export default function AdminPage() {
     [classes],
   );
 
-  /* ── exam / subject options filtered by class ── */
-  const filteredExams = form.className
-    ? exams.filter(
-        (ex) => ex.ClassName?.toLowerCase() === form.className.toLowerCase(),
-      )
-    : exams;
-
-  const filteredSubjects = form.className
-    ? subjects.filter(
-        (s) => s.ClassName?.toLowerCase() === form.className.toLowerCase(),
-      )
-    : subjects;
+  /* ── exam / subject options filtered by class and section ── */
+  const filteredExams = optionsForClass(exams, form);
+  const filteredSubjects = optionsForClass(subjects, form);
 
   /* ── add form submit ── */
   const handleSubmit = async (e) => {
@@ -313,6 +305,8 @@ export default function AdminPage() {
                     ...p,
                     section: sec,
                     classId: classRow ? String(classRow.ClassID) : "",
+                    examId: "",
+                    subjectId: "",
                     studentId: "",
                     firstName: "",
                     rollNumber: "",
