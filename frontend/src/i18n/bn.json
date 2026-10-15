@@ -44,7 +44,16 @@
     "applications": "আবেদনসমূহ",
     "news": "সংবাদ ব্যবস্থাপনা",
     "noticeAnnouncements": "নোটিশ ও ঘোষণা",
-    "quaker": "কুইকার এডুকেশন"
+    "quaker": "কুইকার এডুকেশন",
+    "groups": {
+      "academics": "শিক্ষা কার্যক্রম",
+      "examsResults": "পরীক্ষা ও ফলাফল",
+      "attendance": "উপস্থিতি",
+      "admissions": "ভর্তি",
+      "website": "ওয়েবসাইট",
+      "quiz": "কুইজ",
+      "administration": "প্রশাসন"
+    }
   },
   "latestUpdates": {
     "label": "সর্বশেষ আপডেট",
@@ -729,6 +738,31 @@
       "viewBranch": "বিস্তারিত দেখুন",
       "allBranches": "সব শাখা",
       "switchTo": "এই শাখায় যান"
+    },
+    "shell": {
+      "home": "অ্যাডমিন",
+      "menu": "মেনু",
+      "toggleMenu": "মেনু খুলুন/বন্ধ করুন",
+      "collapseSidebar": "সাইডবার ছোট করুন",
+      "expandSidebar": "সাইডবার বড় করুন",
+      "panelTitle": "স্কুল অ্যাডমিন",
+      "panelSubtitle": "ব্যবস্থাপনা প্যানেল",
+      "superAdmin": "সুপার অ্যাডমিন",
+      "branchAdmin": "শাখা অ্যাডমিন",
+      "allBranches": "সকল শাখা",
+      "signOut": "সাইন আউট",
+      "signingOut": "সাইন আউট হচ্ছে…",
+      "search": "খুঁজুন…",
+      "loading": "লোড হচ্ছে…",
+      "noData": "কোনো তথ্য নেই",
+      "showing": "{total}টির মধ্যে {from}–{to} দেখানো হচ্ছে",
+      "previous": "আগের",
+      "next": "পরের",
+      "close": "বন্ধ করুন",
+      "cancel": "বাতিল",
+      "confirm": "নিশ্চিত করুন",
+      "save": "সংরক্ষণ করুন",
+      "saving": "সংরক্ষণ হচ্ছে…"
     }
   },
   "branches": {

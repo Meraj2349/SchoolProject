@@ -264,3 +264,90 @@ body {
     @apply text-sm text-slate-500 mb-6;
   }
 }
+
+/* ── Classic admin panel (AdminLTE-style) ───────────────────────────────
+   Tokens + shared classes used by components/admin. Scoped to .admin-shell
+   so the public site is unaffected. */
+.admin-shell {
+  --admin-sidebar-bg: #222d32;
+  --admin-sidebar-hover: #1e282c;
+  --admin-sidebar-text: #b8c7ce;
+  --admin-sidebar-heading: #4b646f;
+  --admin-sidebar-active: #3c8dbc;
+  --admin-primary: #3c8dbc;
+  --admin-primary-dark: #367fa9;
+  --admin-success: #00a65a;
+  --admin-warning: #f39c12;
+  --admin-danger: #dd4b39;
+  --admin-info: #00c0ef;
+  --admin-content-bg: #ecf0f5;
+  --admin-border: #d2d6de;
+  background: var(--admin-content-bg);
+}
+
+@layer components {
+  /* Boxes (cards) */
+  .admin-box {
+    @apply bg-white rounded-sm shadow-sm border-t-[3px] border-slate-300;
+  }
+  .admin-box-primary { border-top-color: var(--admin-primary); }
+  .admin-box-success { border-top-color: var(--admin-success); }
+  .admin-box-warning { border-top-color: var(--admin-warning); }
+  .admin-box-danger { border-top-color: var(--admin-danger); }
+  .admin-box-header {
+    @apply flex flex-wrap items-center justify-between gap-2 px-4 py-3 border-b border-slate-200;
+  }
+  .admin-box-title {
+    @apply text-base font-semibold text-slate-800 m-0;
+  }
+  .admin-box-body { @apply p-4; }
+  .admin-box-footer { @apply px-4 py-3 border-t border-slate-200 bg-slate-50; }
+
+  /* Buttons */
+  .admin-btn {
+    @apply inline-flex items-center justify-center gap-1.5 px-3 py-2 text-sm font-medium rounded-sm
+           border cursor-pointer transition-colors
+           disabled:opacity-60 disabled:cursor-not-allowed;
+  }
+  .admin-btn-sm { @apply px-2.5 py-1 text-xs; }
+  .admin-btn-default { @apply bg-slate-50 text-slate-700 border-slate-300 hover:bg-slate-200; }
+  .admin-btn-primary { background: var(--admin-primary); border-color: var(--admin-primary-dark); @apply text-white; }
+  .admin-btn-primary:hover:not(:disabled) { background: var(--admin-primary-dark); }
+  .admin-btn-success { background: var(--admin-success); border-color: #008d4c; @apply text-white; }
+  .admin-btn-success:hover:not(:disabled) { background: #008d4c; }
+  .admin-btn-danger { background: var(--admin-danger); border-color: #d73925; @apply text-white; }
+  .admin-btn-danger:hover:not(:disabled) { background: #d73925; }
+  .admin-btn-link { @apply bg-transparent border-transparent px-1; color: var(--admin-primary); }
+
+  /* Form controls */
+  .admin-input {
+    @apply w-full px-3 py-2 text-sm bg-white text-slate-800 border rounded-sm
+           focus:outline-none placeholder-slate-400;
+    border-color: var(--admin-border);
+  }
+  .admin-input:focus { border-color: var(--admin-primary); box-shadow: 0 0 0 2px rgb(60 141 188 / 0.2); }
+  .admin-input[aria-invalid="true"] { border-color: var(--admin-danger); }
+
+  /* Tables */
+  .admin-table th {
+    @apply px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-slate-600 bg-slate-50
+           border-b-2 border-slate-200 whitespace-nowrap;
+  }
+  .admin-table td { @apply px-4 py-2.5 text-slate-700 border-b border-slate-100 align-middle; }
+  .admin-table tbody tr:nth-child(odd) { @apply bg-slate-50/60; }
+  .admin-table tbody tr:hover { @apply bg-sky-50; }
+
+  /* Labels / badges */
+  .admin-badge { @apply inline-flex items-center px-2 py-0.5 text-xs font-semibold rounded-sm text-white; }
+  .admin-badge-default { @apply bg-slate-400; }
+  .admin-badge-primary { background: var(--admin-primary); }
+  .admin-badge-success { background: var(--admin-success); }
+  .admin-badge-warning { background: var(--admin-warning); }
+  .admin-badge-danger { background: var(--admin-danger); }
+  .admin-badge-info { background: var(--admin-info); }
+}
+
+@media print {
+  .admin-no-print { display: none !important; }
+  .admin-shell { background: white; }
+}

@@ -44,7 +44,16 @@
     "applications": "Applications",
     "noticeAnnouncements": "Notice & Announcement",
     "news": "News",
-    "quaker": "A Quaker Education"
+    "quaker": "A Quaker Education",
+    "groups": {
+      "academics": "Academics",
+      "examsResults": "Exams & Results",
+      "attendance": "Attendance",
+      "admissions": "Admissions",
+      "website": "Website",
+      "quiz": "Quiz",
+      "administration": "Administration"
+    }
   },
   "latestUpdates": {
     "label": "Latest Updates",
@@ -729,6 +738,31 @@
       "viewBranch": "View Details",
       "allBranches": "All Branches",
       "switchTo": "Switch to this branch"
+    },
+    "shell": {
+      "home": "Admin",
+      "menu": "Menu",
+      "toggleMenu": "Toggle menu",
+      "collapseSidebar": "Collapse sidebar",
+      "expandSidebar": "Expand sidebar",
+      "panelTitle": "School Admin",
+      "panelSubtitle": "Management Panel",
+      "superAdmin": "Super Admin",
+      "branchAdmin": "Branch Admin",
+      "allBranches": "All Branches",
+      "signOut": "Sign out",
+      "signingOut": "Signing out…",
+      "search": "Search…",
+      "loading": "Loading…",
+      "noData": "No data found",
+      "showing": "Showing {from}–{to} of {total}",
+      "previous": "Previous",
+      "next": "Next",
+      "close": "Close",
+      "cancel": "Cancel",
+      "confirm": "Confirm",
+      "save": "Save",
+      "saving": "Saving…"
     }
   },
   "branches": {
