@@ -55,6 +55,21 @@ describe("achievements", () => {
     expect(fs.existsSync(path.join(PUBLIC_DIR, row.image_url))).toBe(false);
   });
 
+  it.each([
+    ["a file that is not an image", Buffer.from("hello"), "notes.txt", /JPEG, PNG, GIF or WEBP/],
+    ["an image over 5 MB", Buffer.alloc(5 * 1024 * 1024 + 1), "big.png", /too large/],
+  ])("refuses %s with a clear message", async (_label, file, name, message) => {
+    const res = await request(app)
+      .post("/api/achievements")
+      .set({ ...adminA, "Accept-Language": "en" })
+      .field({ title_en: "Fair", title_bn: "মেলা", category: "competition", year: "2025" })
+      .attach("image", file, name);
+
+    expect(res.status).toBe(400);
+    expect(res.body).toEqual({ success: false, message: expect.stringMatching(message) });
+    expect(await count("Achievements")).toBe(0);
+  });
+
   it("lists featured achievements first, then the newest years", async () => {
     const old = await insert("Achievements", { title_en: "Old", title_bn: "পুরনো", category: "award", year: 2019 });
     const recent = await insert("Achievements", { title_en: "Recent", title_bn: "নতুন", category: "award", year: 2025 });

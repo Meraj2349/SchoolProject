@@ -61,6 +61,16 @@ describe("achievement", () => {
     expect(achievement.toChanges({ ...SPORTS, image_url: "/new.png" }, { image_url: "/old.png" }).image_url).toBe("/new.png");
   });
 
+  it("keeps whether it is published and featured when an edit leaves them out", () => {
+    const existing = { image_url: null, is_published: 0, is_featured: 1 };
+
+    expect(achievement.toChanges(SPORTS, existing)).toMatchObject({ is_published: false, is_featured: true });
+    expect(achievement.toChanges({ ...SPORTS, is_published: "true", is_featured: "false" }, existing)).toMatchObject({
+      is_published: true,
+      is_featured: false,
+    });
+  });
+
   it("publishes or unpublishes with a true/false value", () => {
     expect(achievement.toVisibility({ is_published: false })).toEqual({ is_published: false });
     expect(() => achievement.toVisibility({ is_published: "no" })).toThrow(invalid("achievement_invalid_publish"));

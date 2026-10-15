@@ -58,7 +58,13 @@ function achievementFields(input) {
 export const achievement = {
   notFound: "achievement_not_found",
   toNew: (input) => ({ ...achievementFields(input), image_url: input.image_url ?? null }),
-  toChanges: (input, existing) => ({ ...achievementFields(input), image_url: input.image_url ?? existing.image_url }),
+  // Flags left out of an edit keep their current value.
+  toChanges: (input, existing) => ({
+    ...achievementFields(input),
+    ...(input.is_published === undefined && { is_published: Boolean(existing.is_published) }),
+    ...(input.is_featured === undefined && { is_featured: Boolean(existing.is_featured) }),
+    image_url: input.image_url ?? existing.image_url,
+  }),
   toVisibility: (input) => {
     if (typeof input.is_published !== "boolean") throw new ValidationError("achievement_invalid_publish");
     return { is_published: input.is_published };

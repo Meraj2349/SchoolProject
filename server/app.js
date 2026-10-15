@@ -29,6 +29,7 @@ import quizRoutes from "./routes/quiz.routes.js";
 import subjectRoutes from "./routes/subjects.routes.js";
 import teacherRoutes from "./routes/teacher.routes.js";
 import adminsRoutes from "./routes/admins.routes.js";
+import { errorHandler } from "./src/shared/http/errorHandler.js";
 
 dotenv.config();
 
@@ -75,6 +76,9 @@ app.use("/api/achievements", achievementRoutes);
 app.use("/api/quiz", quizRoutes);
 app.use("/api/fees", feeRoutes);
 app.use("/api/dashboard", dashboardRoutes);
+
+// Errors raised outside controllers (e.g. a refused upload) → JSON, translated.
+app.use(errorHandler);
 
 // Handle root URL (Welcome message)
 app.get("/", (req, res) => {

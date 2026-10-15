@@ -18,6 +18,16 @@ const i18n = {
     en: "That record belongs to another branch.",
     bn: "এই তথ্যটি অন্য শাখার।",
   },
+  image_too_large: { en: "The image is too large. The limit is 5 MB.", bn: "ছবিটি অনেক বড়। সর্বোচ্চ ৫ এমবি।" },
+  image_type_not_allowed: {
+    en: "Only JPEG, PNG, GIF or WEBP images are allowed.",
+    bn: "শুধু JPEG, PNG, GIF বা WEBP ছবি দেওয়া যাবে।",
+  },
+  upload_failed: { en: "The file could not be uploaded.", bn: "ফাইলটি আপলোড করা যায়নি।" },
+  news_link_invalid: {
+    en: "The link must be a page of this site (starting with /) or a web address (starting with https://).",
+    bn: "লিংকটি এই সাইটের একটি পাতা (/ দিয়ে শুরু) বা একটি ওয়েব ঠিকানা (https:// দিয়ে শুরু) হতে হবে।",
+  },
   // ── Achievements (honours board) ─────────────────────────────────────────
   achievement_created: { en: "Achievement added.", bn: "অর্জন যোগ করা হয়েছে।" },
   achievement_updated: { en: "Achievement updated.", bn: "অর্জন হালনাগাদ করা হয়েছে।" },

@@ -1,6 +1,7 @@
 import fs from "fs";
 import multer from "multer";
 import path from "path";
+import { ValidationError } from "../src/shared/errors/index.js";
 
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
 const IMAGE_EXTENSIONS = /^\.(jpe?g|png|gif|webp)$/;
@@ -25,7 +26,7 @@ export function makeLocalImageUpload({ dir, prefix }) {
     fileFilter: (_req, file, cb) => {
       const isImage = IMAGE_EXTENSIONS.test(path.extname(file.originalname).toLowerCase()) && IMAGE_TYPES.includes(file.mimetype);
       if (isImage) return cb(null, true);
-      cb(new Error("Only image files (JPEG, JPG, PNG, GIF, WEBP) are allowed"));
+      cb(new ValidationError("image_type_not_allowed"));
     },
   });
 }
