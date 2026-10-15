@@ -4,7 +4,6 @@ import { useAuthStore } from "@/store/authStore";
 import { useBranchStore } from "@/store/branchStore";
 import { useLanguageStore } from "@/store/languageStore";
 import { renderWithQuery } from "@/test-utils";
-import ApplicationsPage from "./applications/AdminPage";
 import AttendancePage from "./attendance/AdminPage";
 import ExamsPage from "./exams/AdminPage";
 import ResultsPage from "./results/AdminPage";
@@ -37,7 +36,6 @@ describe.each([
   ["Exams", ExamsPage],
   ["Results", ResultsPage],
   ["Attendance", AttendancePage],
-  ["Applications", ApplicationsPage],
 ])("%s page", (_name, Page) => {
   beforeEach(() => {
     useLanguageStore.getState().setLanguage("en");

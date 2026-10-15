@@ -10,6 +10,13 @@ import {
   useDeleteNoticeAnnouncement,
 } from "@/hooks/useNoticeAnnouncements";
 import { useTranslations } from "@/store/languageStore";
+import { useContentScope } from "@/hooks/useContentScope";
+import {
+  ContentScopeBadge,
+  NewContentScopeNote,
+  NotYoursMark,
+  errorMessage,
+} from "@/components/admin/ui";
 import { FiEdit2, FiTrash2, FiPlusCircle, FiList } from "react-icons/fi";
 
 const CATEGORIES = ["Admission", "Exam", "Notice", "Event"];
@@ -25,6 +32,8 @@ export default function AdminNoticeAnnouncementsPage() {
   const deleteItem = useDeleteNoticeAnnouncement();
   const t = useTranslations("admin.noticeAnnouncements");
   const tCommon = useTranslations("common");
+  const tShell = useTranslations("admin.shell");
+  const { canManage } = useContentScope();
 
   const [titleBn, setTitleBn] = useState("");
   const [titleEn, setTitleEn] = useState("");
@@ -87,7 +96,7 @@ export default function AdminNoticeAnnouncementsPage() {
       resetForm();
     } catch (err) {
       flash(
-        err?.response?.data?.error || err.message || t("operationFailed"),
+        errorMessage(err, t("operationFailed")),
         true,
       );
     }
@@ -110,7 +119,7 @@ export default function AdminNoticeAnnouncementsPage() {
       flash(t("publishToggled"));
     } catch (err) {
       flash(
-        err?.response?.data?.error || err.message || t("operationFailed"),
+        errorMessage(err, t("operationFailed")),
         true,
       );
     }
@@ -123,7 +132,7 @@ export default function AdminNoticeAnnouncementsPage() {
       flash(t("deleted"));
     } catch (err) {
       flash(
-        err?.response?.data?.error || err.message || t("deleteFailed"),
+        errorMessage(err, t("deleteFailed")),
         true,
       );
     }
@@ -153,6 +162,8 @@ export default function AdminNoticeAnnouncementsPage() {
 
       {error && <div className="error-message">{error}</div>}
       {success && <div className="success-message">{success}</div>}
+
+      <NewContentScopeNote />
 
       {/* Form card */}
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
@@ -293,6 +304,7 @@ export default function AdminNoticeAnnouncementsPage() {
                     t("titleEn"),
                     t("category"),
                     t("date"),
+                    tShell("branch"),
                     t("published"),
                     t("actions"),
                   ].map((h) => (
@@ -343,14 +355,19 @@ export default function AdminNoticeAnnouncementsPage() {
                         {fmtDate(item.date)}
                       </td>
                       <td className="table-cell">
+                        <ContentScopeBadge branchId={item.branch_id} />
+                      </td>
+                      <td className="table-cell">
                         <button
                           onClick={() => handleTogglePublish(item)}
-                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border-none cursor-pointer transition-colors ${published ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-200" : "bg-red-100 text-red-700 hover:bg-red-200"}`}
+                          disabled={!canManage(item)}
+                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border-none cursor-pointer disabled:cursor-not-allowed disabled:opacity-60 transition-colors ${published ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-200" : "bg-red-100 text-red-700 hover:bg-red-200"}`}
                         >
                           {published ? t("published") : t("unpublished")}
                         </button>
                       </td>
                       <td className="table-cell whitespace-nowrap">
+                        {canManage(item) ? (
                         <div className="flex items-center gap-1">
                           <button
                             onClick={() => handleEdit(item)}
@@ -367,6 +384,9 @@ export default function AdminNoticeAnnouncementsPage() {
                             <FiTrash2 />
                           </button>
                         </div>
+                        ) : (
+                          <NotYoursMark />
+                        )}
                       </td>
                     </tr>
                   );

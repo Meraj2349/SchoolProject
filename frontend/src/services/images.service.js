@@ -1,16 +1,16 @@
 import httpClient from "@/lib/httpClient";
 
 export const imagesService = {
-  getAll: () => httpClient.get("/images/details").then((r) => r.data),
+  getAll: () => httpClient.get("/images/details").then((r) => r.data?.data ?? r.data),
 
   getByType: (type) =>
-    httpClient.get(`/images/type/${type}`).then((r) => r.data),
+    httpClient.get(`/images/type/${type}`).then((r) => r.data?.data ?? r.data),
 
   getByStudent: (studentId) =>
-    httpClient.get(`/images/student/${studentId}`).then((r) => r.data),
+    httpClient.get(`/images/student/${studentId}`).then((r) => r.data?.data ?? r.data),
 
   getByTeacher: (teacherId) =>
-    httpClient.get(`/images/teacher/${teacherId}`).then((r) => r.data),
+    httpClient.get(`/images/teacher/${teacherId}`).then((r) => r.data?.data ?? r.data),
 
   upload: (formData) =>
     httpClient

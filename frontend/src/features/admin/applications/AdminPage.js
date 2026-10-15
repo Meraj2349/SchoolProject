@@ -3,8 +3,8 @@
 import { useEffect, useState } from "react";
 import { applicationService } from "@/services/application.service";
 import { useTranslations } from "@/store/languageStore";
-import { ChooseBranchNotice } from "@/components/admin/ui";
-import { useWriteBranch } from "@/hooks/useWriteBranch";
+import { useBranchStore } from "@/store/branchStore";
+import { Badge, ContentScopeBadge, errorMessage } from "@/components/admin/ui";
 import { FiClipboard, FiTrash2 } from "react-icons/fi";
 
 const STATUSES = ["pending", "reviewed", "accepted", "rejected"];
@@ -31,8 +31,10 @@ export default function AdminApplicationsPage() {
   const [loading, setLoading] = useState(true);
   const [flash, setFlash] = useState({ msg: "", error: false });
   const t = useTranslations("admin.applications");
-  const { needsBranch } = useWriteBranch();
+  const tShell = useTranslations("admin.shell");
   const tCommon = useTranslations("common");
+  // Applications are listed per branch: reload when the super admin switches.
+  const branchId = useBranchStore((s) => s.currentBranchId);
 
   const showFlash = (msg, error = false) => {
     setFlash({ msg, error });
@@ -48,10 +50,7 @@ export default function AdminApplicationsPage() {
       })
       .catch((err) => {
         if (!cancelled)
-          showFlash(
-            err?.response?.data?.message || err.message || "Operation failed",
-            true,
-          );
+          showFlash(errorMessage(err, t("operationFailed")), true);
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
@@ -59,7 +58,8 @@ export default function AdminApplicationsPage() {
     return () => {
       cancelled = true;
     };
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- showFlash and t do not affect what is loaded
+  }, [branchId]);
 
   const handleStatusChange = async (id, newStatus) => {
     try {
@@ -71,10 +71,7 @@ export default function AdminApplicationsPage() {
       );
       showFlash(t("statusUpdated"));
     } catch (err) {
-      showFlash(
-        err?.response?.data?.message || err.message || t("operationFailed"),
-        true,
-      );
+      showFlash(errorMessage(err, t("operationFailed")), true);
     }
   };
 
@@ -85,10 +82,7 @@ export default function AdminApplicationsPage() {
       setApplications((prev) => prev.filter((app) => app.id !== id));
       showFlash(t("deleted"));
     } catch (err) {
-      showFlash(
-        err?.response?.data?.message || err.message || t("operationFailed"),
-        true,
-      );
+      showFlash(errorMessage(err, t("operationFailed")), true);
     }
   };
 
@@ -109,9 +103,6 @@ export default function AdminApplicationsPage() {
           Review and manage admission applications
         </p>
       </div>
-
-      {/* Accepting enrols the child in a branch, so a super admin picks one first */}
-      {needsBranch && <ChooseBranchNotice />}
 
       {flash.msg && (
         <div className={flash.error ? "error-message" : "success-message"}>
@@ -152,6 +143,7 @@ export default function AdminApplicationsPage() {
                   <th className="table-header">{t("applicantName")}</th>
                   <th className="table-header">{t("applyingForClass")}</th>
                   <th className="table-header">{t("parentContact")}</th>
+                  <th className="table-header">{tShell("branch")}</th>
                   <th className="table-header">{t("status")}</th>
                   <th className="table-header">{t("date")}</th>
                   <th className="table-header">{t("actions")}</th>
@@ -183,10 +175,17 @@ export default function AdminApplicationsPage() {
                       {app.parent_contact}
                     </td>
                     <td className="table-cell">
+                      {/* Old applications from before branches have none */}
+                      {app.branch_id == null ? (
+                        <Badge tone="warning">{t("noBranch")}</Badge>
+                      ) : (
+                        <ContentScopeBadge branchId={app.branch_id} />
+                      )}
+                    </td>
+                    <td className="table-cell">
                       <select
                         className="status-select"
                         value={app.status}
-                        disabled={needsBranch}
                         onChange={(e) =>
                           handleStatusChange(app.id, e.target.value)
                         }
@@ -204,15 +203,13 @@ export default function AdminApplicationsPage() {
                     <td className="table-cell whitespace-nowrap">
                       <div className="flex items-center gap-2">
                         <StatusBadge status={app.status} t={t} />
-                        {!needsBranch && (
-                          <button
-                            className="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 border-none cursor-pointer transition-all hover:scale-105"
-                            onClick={() => handleDelete(app.id)}
-                            title={tCommon("delete")}
-                          >
-                            <FiTrash2 className="text-xs" />
-                          </button>
-                        )}
+                        <button
+                          className="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 border-none cursor-pointer transition-all hover:scale-105"
+                          onClick={() => handleDelete(app.id)}
+                          title={tCommon("delete")}
+                        >
+                          <FiTrash2 className="text-xs" />
+                        </button>
                       </div>
                     </td>
                   </tr>

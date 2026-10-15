@@ -3,11 +3,11 @@ import httpClient from "@/lib/httpClient";
 export const noticeAnnouncementsService = {
   // Public — fetch only published items
   getPublished: () =>
-    httpClient.get("/notice-announcements").then((r) => r.data),
+    httpClient.get("/notice-announcements").then((r) => r.data?.data ?? r.data),
 
   // Admin — fetch all items (including unpublished)
   getAll: () =>
-    httpClient.get("/notice-announcements/all").then((r) => r.data),
+    httpClient.get("/notice-announcements/all").then((r) => r.data?.data ?? r.data),
 
   // Admin — create (multipart/form-data with image)
   create: (formData) =>

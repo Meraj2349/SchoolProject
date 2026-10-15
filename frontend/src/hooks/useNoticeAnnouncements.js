@@ -2,12 +2,14 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/queryKeys";
+import { useBranchStore } from "@/store/branchStore";
 import { noticeAnnouncementsService } from "@/services/notice-announcements.service";
 
 // Public hook — fetches only published notice announcements
 export function usePublishedNoticeAnnouncements() {
+  const branchId = useBranchStore((s) => s.currentBranchId);
   return useQuery({
-    queryKey: queryKeys.noticeAnnouncements.published,
+    queryKey: [...queryKeys.noticeAnnouncements.published, { branchId }],
     queryFn: noticeAnnouncementsService.getPublished,
     select: (data) => (Array.isArray(data) ? data : (data?.data ?? [])),
   });
@@ -15,8 +17,9 @@ export function usePublishedNoticeAnnouncements() {
 
 // Admin hook — fetches all notice announcements
 export function useAllNoticeAnnouncements() {
+  const branchId = useBranchStore((s) => s.currentBranchId);
   return useQuery({
-    queryKey: queryKeys.noticeAnnouncements.all,
+    queryKey: [...queryKeys.noticeAnnouncements.all, { branchId }],
     queryFn: noticeAnnouncementsService.getAll,
     select: (data) => (Array.isArray(data) ? data : (data?.data ?? [])),
   });

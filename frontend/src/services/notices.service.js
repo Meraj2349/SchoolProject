@@ -1,7 +1,7 @@
 import httpClient from "@/lib/httpClient";
 
 export const noticesService = {
-  getAll: () => httpClient.get("/notices").then((r) => r.data),
+  getAll: () => httpClient.get("/notices").then((r) => r.data?.data ?? r.data),
 
   create: (data) =>
     httpClient

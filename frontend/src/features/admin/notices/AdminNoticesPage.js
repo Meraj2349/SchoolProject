@@ -9,6 +9,13 @@ import {
   useDeleteNotice,
 } from "@/hooks/useNotices";
 import { useTranslations } from "@/store/languageStore";
+import { useContentScope } from "@/hooks/useContentScope";
+import {
+  ContentScopeBadge,
+  NewContentScopeNote,
+  NotYoursMark,
+  errorMessage,
+} from "@/components/admin/ui";
 
 export default function AdminNoticesPage() {
   const { data: notices = [], isLoading } = useNotices();
@@ -16,6 +23,8 @@ export default function AdminNoticesPage() {
   const updateNotice = useUpdateNotice();
   const deleteNotice = useDeleteNotice();
   const t = useTranslations("admin.notices");
+  const tShell = useTranslations("admin.shell");
+  const { canManage } = useContentScope();
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -61,7 +70,7 @@ export default function AdminNoticesPage() {
       setTitle("");
       setDescription("");
     } catch (err) {
-      flash(err.message || t("operationFailed"), true);
+      flash(errorMessage(err, t("operationFailed")), true);
     }
   };
 
@@ -77,7 +86,7 @@ export default function AdminNoticesPage() {
       await deleteNotice.mutateAsync(id);
       flash(t("noticeDeleted"));
     } catch (err) {
-      flash(err.message || t("deleteFailed"), true);
+      flash(errorMessage(err, t("deleteFailed")), true);
     }
   };
 
@@ -88,7 +97,7 @@ export default function AdminNoticesPage() {
         data: { Show: !notice.Show },
       });
     } catch (err) {
-      flash(err.message || t("operationFailed"), true);
+      flash(errorMessage(err, t("operationFailed")), true);
     }
   };
 
@@ -103,6 +112,8 @@ export default function AdminNoticesPage() {
 
       {error && <div className="error-message">{error}</div>}
       {success && <div className="success-message">{success}</div>}
+
+      <NewContentScopeNote />
 
       {/* Form card */}
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
@@ -190,6 +201,7 @@ export default function AdminNoticesPage() {
                 <tr>
                   <th className="table-header">{t("titleLabel")}</th>
                   <th className="table-header">{t("descriptionLabel")}</th>
+                  <th className="table-header">{tShell("branch")}</th>
                   <th className="table-header">{t("show")}</th>
                   <th className="table-header">{t("actions")}</th>
                 </tr>
@@ -207,9 +219,14 @@ export default function AdminNoticesPage() {
                       {n.Description}
                     </td>
                     <td className="table-cell">
+                      <ContentScopeBadge branchId={n.branch_id} />
+                    </td>
+                    <td className="table-cell">
                       <button
                         onClick={() => handleToggleShow(n)}
-                        className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors border-none cursor-pointer ${n.Show === 1 || n.Show === true ? "bg-indigo-600" : "bg-slate-300"}`}
+                        disabled={!canManage(n)}
+                        aria-label={t("show")}
+                        className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors border-none cursor-pointer disabled:cursor-not-allowed disabled:opacity-60 ${n.Show === 1 || n.Show === true ? "bg-indigo-600" : "bg-slate-300"}`}
                       >
                         <span
                           className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow transition-transform ${n.Show === 1 || n.Show === true ? "translate-x-4.5" : "translate-x-0.5"}`}
@@ -217,6 +234,7 @@ export default function AdminNoticesPage() {
                       </button>
                     </td>
                     <td className="table-cell">
+                      {canManage(n) ? (
                       <div className="flex items-center gap-1">
                         <button
                           onClick={() => handleEdit(n)}
@@ -233,6 +251,9 @@ export default function AdminNoticesPage() {
                           <FiTrash2 />
                         </button>
                       </div>
+                      ) : (
+                        <NotYoursMark />
+                      )}
                     </td>
                   </tr>
                 ))}

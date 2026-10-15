@@ -16,6 +16,13 @@ import {
   useDeleteMessage,
 } from "@/hooks/useMessages";
 import { useTranslations } from "@/store/languageStore";
+import { useContentScope } from "@/hooks/useContentScope";
+import {
+  ContentScopeBadge,
+  NewContentScopeNote,
+  NotYoursMark,
+  errorMessage,
+} from "@/components/admin/ui";
 
 export default function AdminPage() {
   const { data: messages = [], isLoading } = useMessages();
@@ -23,6 +30,7 @@ export default function AdminPage() {
   const update = useUpdateMessage();
   const remove = useDeleteMessage();
   const t = useTranslations("admin.messages");
+  const { canManage } = useContentScope();
 
   const [form, setForm] = useState({ Messages: "", Show: true });
   const [editId, setEditId] = useState(null);
@@ -51,7 +59,7 @@ export default function AdminPage() {
       }
       setForm({ Messages: "", Show: true });
     } catch (err) {
-      flash(err.message || t("operationFailed"), true);
+      flash(errorMessage(err, t("operationFailed")), true);
     }
   };
 
@@ -66,7 +74,7 @@ export default function AdminPage() {
       await remove.mutateAsync(id);
       flash(t("deleted"));
     } catch (e) {
-      flash(e.message, true);
+      flash(errorMessage(e, t("operationFailed")), true);
     }
   };
 
@@ -83,6 +91,8 @@ export default function AdminPage() {
       {status.success && (
         <div className="success-message">{status.success}</div>
       )}
+
+      <NewContentScopeNote />
 
       {/* Form card */}
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
@@ -154,7 +164,7 @@ export default function AdminPage() {
         ) : (
           <div className="space-y-3">
             {messages.map((m) => (
-              <div
+              <article
                 key={m.MessageID}
                 className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow"
               >
@@ -173,6 +183,8 @@ export default function AdminPage() {
                     )}
                     {m.Show ? t("visible") : t("hidden")}
                   </span>
+                  <ContentScopeBadge branchId={m.branch_id} />
+                  {canManage(m) ? (
                   <div className="flex items-center gap-1 ml-auto">
                     <button
                       onClick={() => handleEdit(m)}
@@ -189,8 +201,13 @@ export default function AdminPage() {
                       <FiTrash2 />
                     </button>
                   </div>
+                  ) : (
+                    <span className="ml-auto">
+                      <NotYoursMark />
+                    </span>
+                  )}
                 </div>
-              </div>
+              </article>
             ))}
           </div>
         )}
