@@ -23,4 +23,11 @@ describe("achievement helpers", () => {
     expect(resultSummary({ category: "board_result", examinees: 120, passed: 118, gpa5: 42 }, t)).toBe("98.3% pass · 42 GPA-5");
     expect(resultSummary({ category: "sports" }, t)).toBe("");
   });
+
+  it("writes the numbers the reader's way", () => {
+    const t = (key) => ({ passRate: "{rate}% পাস", gpa5: "জিপিএ-৫: {count}" })[key];
+    const bangla = (n) => new Intl.NumberFormat("bn-BD").format(n);
+
+    expect(resultSummary({ category: "board_result", examinees: 120, passed: 118, gpa5: 42 }, t, bangla)).toBe("৯৮.৩% পাস · জিপিএ-৫: ৪২");
+  });
 });

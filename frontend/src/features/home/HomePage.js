@@ -1,21 +1,32 @@
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import LatestUpdatesNotice from "@/components/shared/LatestUpdatesNotice";
-import HeroSection from "./HeroSection";
-import LeadershipSection from "./LeadershipSection";
-import AchievementsSection from "./AchievementsSection";
+import AdmissionBand from "./AdmissionBand";
+import AnnouncementsSection from "./AnnouncementsSection";
+import AtAGlance from "./AtAGlance";
 import ClassStatistics from "./ClassStatistics";
+import EventsNews from "./EventsNews";
+import GalleryStrip from "./GalleryStrip";
+import HeroSection from "./HeroSection";
+import HonoursBoard from "./HonoursBoard";
+import WelcomeSection from "./WelcomeSection";
 
+/** The public home page, laid out like a classic school website. */
 export default function HomePage() {
   return (
-    <div className="font-sans text-gray-900 min-h-screen scroll-smooth">
+    <div className="flex min-h-screen flex-col bg-white">
       <Navbar />
-      <LatestUpdatesNotice />
-      <main>
+      <main id="main" className="flex-1">
         <HeroSection />
-        <LeadershipSection />
-        <AchievementsSection />
+        <LatestUpdatesNotice />
+        <AtAGlance />
+        <HonoursBoard />
+        <WelcomeSection />
+        <EventsNews />
+        <AnnouncementsSection />
+        <GalleryStrip />
         <ClassStatistics />
+        <AdmissionBand />
       </main>
       <Footer />
     </div>

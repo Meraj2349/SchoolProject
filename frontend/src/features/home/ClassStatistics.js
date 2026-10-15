@@ -5,44 +5,31 @@ import { useQueries } from "@tanstack/react-query";
 import { classesService } from "@/services/classes.service";
 import { queryKeys } from "@/lib/queryKeys";
 import { useBranchStore } from "@/store/branchStore";
-import { useTranslations } from "@/store/languageStore";
+import { useLanguageStore, useTranslations } from "@/store/languageStore";
 
-const NUM_TO_TEXT_EN = {
-  1: "One",
-  2: "Two",
-  3: "Three",
-  4: "Four",
-  5: "Five",
-  6: "Six",
-  7: "Seven",
-  8: "Eight",
-  9: "Nine",
-  10: "Ten",
-  11: "Eleven",
-  12: "Twelve",
+// Bangla names of numbered classes ("Class 10" → দশম শ্রেণি).
+const CLASS_NAMES_BN = {
+  1: "প্রথম শ্রেণি",
+  2: "দ্বিতীয় শ্রেণি",
+  3: "তৃতীয় শ্রেণি",
+  4: "চতুর্থ শ্রেণি",
+  5: "পঞ্চম শ্রেণি",
+  6: "ষষ্ঠ শ্রেণি",
+  7: "সপ্তম শ্রেণি",
+  8: "অষ্টম শ্রেণি",
+  9: "নবম শ্রেণি",
+  10: "দশম শ্রেণি",
+  11: "একাদশ শ্রেণি",
+  12: "দ্বাদশ শ্রেণি",
 };
 
-const NUM_TO_TEXT_BN = {
-  1: "এক",
-  2: "দুই",
-  3: "তিন",
-  4: "চার",
-  5: "পাঁচ",
-  6: "ছয়",
-  7: "সাত",
-  8: "আট",
-  9: "নয়",
-  10: "দশ",
-  11: "এগারো",
-  12: "বারো",
-};
-
-function fmtClass(name, lang) {
+/** "Class 10" or "10" → the class's name in the reader's language; other names as they are. */
+export function className(name, lang) {
   if (!name) return "Unknown";
-  const n = parseInt(name);
+  const n = parseInt(String(name).replace(/^class\s*/i, ""), 10);
   if (!isNaN(n)) {
-    if (lang === "bn") return NUM_TO_TEXT_BN[n] ?? name;
-    return NUM_TO_TEXT_EN[n] ?? `Class ${n}`;
+    if (lang === "bn") return CLASS_NAMES_BN[n] ?? name;
+    return `Class ${n}`;
   }
   return (
     String(name).charAt(0).toUpperCase() + String(name).slice(1).toLowerCase()
@@ -68,17 +55,7 @@ export default function ClassStatistics() {
   const { data: classes = [], isLoading, isError } = useClasses();
   const { currentBranchId: branchId, currentBranchName } = useBranchStore();
   const t = useTranslations("home");
-  const lang =
-    typeof window !== "undefined"
-      ? (() => {
-          try {
-            const s = localStorage.getItem("language");
-            return s ? (JSON.parse(s)?.state?.language ?? "bn") : "bn";
-          } catch {
-            return "bn";
-          }
-        })()
-      : "bn";
+  const lang = useLanguageStore((s) => s.language);
 
   const uniqueNames = [
     ...new Set(classes.map((c) => c.className || c.ClassName || c.name || c)),
@@ -102,7 +79,7 @@ export default function ClassStatistics() {
         res?.data?.count ??
         0;
       return {
-        displayName: fmtClass(name, lang),
+        displayName: className(name, lang),
         rawName: name,
         count: Number(count) || 0,
       };
