@@ -23,6 +23,14 @@ Agents in `.claude/agents/`:
 - `tdd-developer` — implements a change test-first.
 - `clean-code-reviewer` — read-only review for architecture, tests, security.
 
+## Setup
+
+```bash
+cp .env.example .env               # secrets for docker compose — fill in real values
+cp server/.env.example server/.env # only for running the server without Docker
+docker compose up
+```
+
 ## Commands
 
 ```bash
