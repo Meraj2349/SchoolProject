@@ -74,3 +74,104 @@ describe("importQuestions", () => {
     expect([...repo.questions.values()][0].prompt).toBe("Edited by a teacher");
   });
 });
+
+const newQuestion = {
+  classKey: "Class 6",
+  subject: "Math",
+  prompt: "What is \\frac{1}{2} of 10?",
+  options: { A: "2", B: "5", C: "10", D: "20" },
+  answer: "b",
+};
+
+describe("managing questions", () => {
+  let repo;
+  let bank;
+
+  beforeEach(() => {
+    repo = makeFakeQuizRepository();
+    bank = makeQuestionBankUseCases({ quizRepository: repo });
+  });
+
+  it("adds a question for a class and records who added it", async () => {
+    const created = await bank.createQuestion({ input: newQuestion, adminId: 3 });
+
+    expect(created).toMatchObject({ classKey: "6", subject: "Math", answer: "B", active: true, promptBn: null });
+    expect(repo.questions.get(created.id)).toMatchObject({ createdBy: 3 });
+  });
+
+  it("rejects an invalid question", async () => {
+    await expect(bank.createQuestion({ input: { ...newQuestion, answer: "E" }, adminId: 3 })).rejects.toMatchObject({
+      code: "quiz_answer_invalid",
+    });
+    expect(repo.questions.size).toBe(0);
+  });
+
+  it("edits a question, keeping what was not sent", async () => {
+    const { id } = await bank.createQuestion({ input: newQuestion, adminId: 3 });
+
+    const updated = await bank.updateQuestion({
+      id,
+      input: { promptBn: "১০ এর অর্ধেক কত?", optionsBn: { A: "২", B: "৫", C: "১০", D: "২০" } },
+      adminId: 4,
+    });
+
+    expect(updated).toMatchObject({ prompt: newQuestion.prompt, promptBn: "১০ এর অর্ধেক কত?", answer: "B" });
+    expect(repo.questions.get(id)).toMatchObject({ updatedBy: 4 });
+  });
+
+  it("hides and shows a question", async () => {
+    const { id } = await bank.createQuestion({ input: newQuestion, adminId: 3 });
+
+    expect(await bank.setActive({ id, active: false, adminId: 3 })).toMatchObject({ active: false });
+    expect(await bank.setActive({ id, active: true, adminId: 3 })).toMatchObject({ active: true });
+  });
+
+  it("needs a clear yes or no to hide or show", async () => {
+    const { id } = await bank.createQuestion({ input: newQuestion, adminId: 3 });
+
+    await expect(bank.setActive({ id, active: "maybe", adminId: 3 })).rejects.toMatchObject({ code: "quiz_active_invalid" });
+  });
+
+  it("says when a question does not exist", async () => {
+    await expect(bank.getQuestion(99)).rejects.toMatchObject({ code: "quiz_question_not_found" });
+    await expect(bank.updateQuestion({ id: 99, input: {}, adminId: 3 })).rejects.toMatchObject({ code: "quiz_question_not_found" });
+    await expect(bank.setActive({ id: 99, active: false, adminId: 3 })).rejects.toMatchObject({ code: "quiz_question_not_found" });
+  });
+
+  describe("listing", () => {
+    beforeEach(async () => {
+      for (let n = 1; n <= 30; n += 1) {
+        await bank.createQuestion({ input: { ...newQuestion, prompt: `Math question ${n}` }, adminId: 3 });
+      }
+      const science = await bank.createQuestion({ input: { ...newQuestion, subject: "Science", prompt: "About plants" }, adminId: 3 });
+      await bank.setActive({ id: science.id, active: false, adminId: 3 });
+      await bank.createQuestion({ input: { ...newQuestion, classKey: "7", prompt: "Class 7 question" }, adminId: 3 });
+    });
+
+    it("pages through a class's active questions", async () => {
+      const page = await bank.listQuestions({ classKey: "Class 6", page: "2", pageSize: "25" });
+
+      expect(page).toMatchObject({ total: 30, page: 2, pageSize: 25 });
+      expect(page.items).toHaveLength(5);
+    });
+
+    it("filters by subject, search text and hidden status", async () => {
+      expect((await bank.listQuestions({ classKey: "6", search: "question 1" })).total).toBe(11);
+      expect((await bank.listQuestions({ classKey: "6", status: "hidden" })).items.map((q) => q.prompt)).toEqual(["About plants"]);
+      expect((await bank.listQuestions({ classKey: "6", status: "all" })).total).toBe(31);
+      expect((await bank.listQuestions({ classKey: "6", subject: "Science", status: "all" })).total).toBe(1);
+    });
+
+    it("needs a valid class", async () => {
+      await expect(bank.listQuestions({ classKey: "Class 99" })).rejects.toMatchObject({ code: "quiz_class_invalid" });
+    });
+
+    it("counts questions per subject for a class, hidden ones included", async () => {
+      expect(await bank.subjectsFor("6")).toEqual([
+        { subject: "Math", count: 30 },
+        { subject: "Science", count: 1 },
+      ]);
+    });
+  });
+});
+
