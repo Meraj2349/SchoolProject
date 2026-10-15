@@ -80,6 +80,10 @@ export const queryKeys = {
     all: ["dashboard"],
     summary: (branchId = null) => ["dashboard", "summary", { branchId }],
   },
+  // Admin accounts across every branch (super admins only, not branch-scoped)
+  admins: {
+    all: ["admins"],
+  },
   branches: {
     all: ["branches"],
     stats: ["branches", "stats"],
