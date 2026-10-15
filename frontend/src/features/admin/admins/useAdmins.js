@@ -13,8 +13,7 @@ export const useAdmins = ({ enabled }) =>
 export const useBranches = ({ enabled }) =>
   useQuery({ queryKey: queryKeys.branches.all, queryFn: branchService.getAll, select: listOf, enabled });
 
-/** A save or remove that refreshes the admin list afterwards. */
-export function useAdminMutation(mutationFn) {
+function useAdminMutation(mutationFn) {
   const qc = useQueryClient();
   return useMutation({
     // Only the variables: React Query also passes its own context as a second argument.
@@ -22,3 +21,10 @@ export function useAdminMutation(mutationFn) {
     onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.admins.all }),
   });
 }
+
+/** Creates (no id) or updates an admin, then refreshes the list. */
+export const useSaveAdmin = () =>
+  useAdminMutation(({ id, data }) => (id ? adminsService.update(id, data) : adminsService.create(data)));
+
+/** Removes an admin, then refreshes the list. */
+export const useRemoveAdmin = () => useAdminMutation((id) => adminsService.remove(id));

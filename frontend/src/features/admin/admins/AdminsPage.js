@@ -3,12 +3,11 @@
 import { useMemo, useState } from "react";
 import { FiAlertTriangle, FiEdit2, FiTrash2, FiUserPlus } from "react-icons/fi";
 import { Badge, Box, Button, ConfirmDialog, DataTable, PageHeader, Select, errorMessage, notify } from "@/components/admin/ui";
-import { adminsService } from "@/services/admins.service";
 import { useAuthStore } from "@/store/authStore";
 import { useLanguageStore, useTranslations } from "@/store/languageStore";
 import AdminFormDrawer from "./AdminFormDrawer";
 import { EMPTY_ADMIN, SUPER_ADMINS, branchesWithoutAdmin, filterAdmins, toAdminPayload, toFormValues } from "./adminForm";
-import { useAdminMutation, useAdmins, useBranches } from "./useAdmins";
+import { useAdmins, useBranches, useRemoveAdmin, useSaveAdmin } from "./useAdmins";
 
 const ROLE_TONES = { super_admin: "primary", branch_admin: "info" };
 
@@ -22,8 +21,8 @@ export default function AdminsPage() {
 
   const { data: admins = [], isLoading } = useAdmins({ enabled: isSuperAdmin });
   const { data: branches = [] } = useBranches({ enabled: isSuperAdmin });
-  const save = useAdminMutation(({ id, data }) => (id ? adminsService.update(id, data) : adminsService.create(data)));
-  const remove = useAdminMutation((id) => adminsService.remove(id));
+  const save = useSaveAdmin();
+  const remove = useRemoveAdmin();
 
   const branchName = (branch) =>
     (language === "bn" ? branch.name_bn || branch.name_en : branch.name_en || branch.name_bn) || `#${branch.id}`;

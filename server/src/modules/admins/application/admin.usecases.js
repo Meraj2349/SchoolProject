@@ -16,7 +16,7 @@ const toPublic = (admin, currentAdminId = null) => ({
  * Managing admin accounts (super admins only — enforced by the route).
  *
  * @param {object} deps
- * @param {{findAll, findById, findByLogin, countSuperAdmins, create, update, remove}} deps.adminRepository
+ * @param {{findAll, findById, findByLogin, countSuperAdmins, create, update, remove, transaction}} deps.adminRepository
  * @param {{findById}} deps.branchRepository
  * @param {{hash(plain): Promise<string>}} deps.passwordHasher
  */
@@ -41,13 +41,18 @@ export function makeAdminUseCases({ adminRepository, branchRepository, passwordH
     }
   }
 
-  async function requireAnotherSuperAdmin(admin) {
-    if (admin.role === "super_admin" && (await adminRepository.countSuperAdmins()) <= 1) {
+  // Call inside adminRepository.transaction, which locks the super admin rows,
+  // so two super admins removing each other cannot both succeed.
+  async function requireAnotherSuperAdmin(repository, admin) {
+    if (admin.role === "super_admin" && (await repository.countSuperAdmins()) <= 1) {
       throw new ConflictError("admin_last_super_admin");
     }
   }
 
   return {
+    // The admin as stored now (role and branch may have changed since login), or null.
+    currentAdmin: (id) => adminRepository.findById(id),
+
     async listAdmins({ currentAdminId }) {
       const admins = await adminRepository.findAll();
       return admins.map((admin) => toPublic(admin, currentAdminId));
@@ -68,23 +73,28 @@ export function makeAdminUseCases({ adminRepository, branchRepository, passwordH
       const existing = await findOrFail(id);
       const changes = toAdminChanges(input, existing);
 
-      if (changes.role !== existing.role) {
-        if (existing.id === Number(currentAdminId)) throw new ConflictError("admin_cannot_change_own_role");
-        await requireAnotherSuperAdmin(existing);
+      const roleChanges = changes.role !== existing.role;
+      if (roleChanges && existing.id === Number(currentAdminId)) {
+        throw new ConflictError("admin_cannot_change_own_role");
       }
       await requireBranch(changes.branchId);
       await requireFreeLogin(changes, existing.id);
-
       if (changes.password) changes.password = await passwordHasher.hash(changes.password);
-      await adminRepository.update(existing.id, changes);
+
+      await adminRepository.transaction(async (repository) => {
+        if (roleChanges) await requireAnotherSuperAdmin(repository, existing);
+        await repository.update(existing.id, changes);
+      });
       return toPublic(await adminRepository.findById(existing.id));
     },
 
     async deleteAdmin({ id, currentAdminId }) {
       const existing = await findOrFail(id);
       if (existing.id === Number(currentAdminId)) throw new ConflictError("admin_cannot_delete_self");
-      await requireAnotherSuperAdmin(existing);
-      await adminRepository.remove(existing.id);
+      await adminRepository.transaction(async (repository) => {
+        await requireAnotherSuperAdmin(repository, existing);
+        await repository.remove(existing.id);
+      });
       return toPublic(existing);
     },
   };

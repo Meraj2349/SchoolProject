@@ -8,8 +8,10 @@ export function makeFakeAdminRepository({ branches = [] } = {}) {
     branchName: branches.find((b) => b.id === admin.branchId)?.name_en ?? null,
   });
 
-  return {
+  const repository = {
     rows,
+    // No real locking in memory; runs the work against this same repository.
+    transaction: (work) => work(repository),
     findAll: async () => [...rows.values()].map(withBranch),
     findById: async (id) => (rows.has(Number(id)) ? withBranch(rows.get(Number(id))) : null),
     findByLogin: async ({ email, role, branchId }) =>
@@ -23,4 +25,5 @@ export function makeFakeAdminRepository({ branches = [] } = {}) {
     update: async (id, data) => rows.set(Number(id), { ...rows.get(Number(id)), ...data }),
     remove: async (id) => rows.delete(Number(id)),
   };
+  return repository;
 }

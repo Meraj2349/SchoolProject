@@ -14,6 +14,7 @@ function buildApp(useCases, { adminId = 7 } = {}) {
     req.adminId = adminId;
     next();
   });
+  app.get("/guarded", controller.requireSuperAdmin, (_req, res) => res.json({ ok: true }));
   app.get("/admins", controller.list);
   app.post("/admins", controller.create);
   app.put("/admins/:id", controller.update);
@@ -85,5 +86,42 @@ describe("admin controller", () => {
     expect(res.status).toBe(500);
     expect(res.body).toEqual({ success: false, message: "Could not load the admins." });
     log.mockRestore();
+  });
+
+  describe("requireSuperAdmin (checks the database, not the login token)", () => {
+    const guarded = (currentAdmin) => request(buildApp({ currentAdmin })).get("/guarded");
+
+    it("lets a current super admin through", async () => {
+      const currentAdmin = jest.fn(async () => ({ id: 7, role: "super_admin" }));
+
+      const res = await guarded(currentAdmin);
+
+      expect(res.body).toEqual({ ok: true });
+      expect(currentAdmin).toHaveBeenCalledWith(7);
+    });
+
+    it("refuses an admin who is no longer a super admin with 403", async () => {
+      const res = await guarded(async () => ({ id: 7, role: "branch_admin" }));
+
+      expect(res.status).toBe(403);
+      expect(res.body).toEqual({ success: false, message: "Access forbidden." });
+    });
+
+    it("answers 401 for a removed admin, so the browser logs them out", async () => {
+      const res = await guarded(async () => null);
+
+      expect(res.status).toBe(401);
+      expect(res.body).toEqual({ success: false, message: "Unauthorized access." });
+    });
+
+    it("hides database errors", async () => {
+      const log = jest.spyOn(console, "error").mockImplementation(() => {});
+
+      const res = await guarded(fail(new Error("ER_CON_COUNT_ERROR")));
+
+      expect(res.status).toBe(500);
+      expect(JSON.stringify(res.body)).not.toContain("ER_");
+      log.mockRestore();
+    });
   });
 });

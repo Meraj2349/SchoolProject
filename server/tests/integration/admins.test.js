@@ -40,7 +40,9 @@ describe("managing admins (/api/admins)", () => {
       ["put", "/api/admins/1"],
       ["delete", "/api/admins/1"],
     ])("refuses a branch admin: %s %s", async (method, url) => {
-      const res = await request(app)[method](url).set(bearer(branchAdminToken(BRANCH_A))).send({});
+      const branchAdmin = await seedAdmin({ email: "karim@school.test", branchId: BRANCH_A });
+
+      const res = await request(app)[method](url).set(bearer(branchAdminToken(BRANCH_A, branchAdmin))).send({});
 
       expect(res.status).toBe(403);
     });
@@ -154,10 +156,61 @@ describe("managing admins (/api/admins)", () => {
 
     expect((await asBoss(request(app).delete(`/api/admins/${otherBoss}`))).status).toBe(200);
 
-    // A stale session of the removed super admin cannot remove the last one.
-    const last = await request(app).delete(`/api/admins/${bossId}`).set(bearer(superAdminToken(otherBoss)));
-    expect(last.status).toBe(409);
     expect(await count("Admin", "role = 'super_admin'")).toBe(1);
+  });
+
+  it("keeps a super admin even when two remove each other at the same moment", async () => {
+    const otherBoss = await seedAdmin({ email: "boss2@school.test", role: "super_admin" });
+
+    await Promise.all([
+      request(app).delete(`/api/admins/${otherBoss}`).set(bearer(superAdminToken(bossId))),
+      request(app).delete(`/api/admins/${bossId}`).set(bearer(superAdminToken(otherBoss))),
+    ]);
+
+    expect(await count("Admin", "role = 'super_admin'")).toBe(1);
+  });
+
+  describe("a change takes effect at once, not when the old login expires", () => {
+    it("a demoted super admin cannot use their old login to make themselves super admin again", async () => {
+      const exBoss = await seedAdmin({ email: "ex@school.test", role: "super_admin" });
+      await asBoss(request(app).put(`/api/admins/${exBoss}`)).send({ role: "branch_admin", branch_id: BRANCH_A });
+
+      const res = await request(app)
+        .put(`/api/admins/${exBoss}`)
+        .set(bearer(superAdminToken(exBoss)))
+        .send({ role: "super_admin" });
+
+      expect(res.status).toBe(403);
+      expect(res.body).toEqual({ success: false, message: expect.any(String) });
+      expect(await count("Admin", "role = 'super_admin'")).toBe(1);
+    });
+
+    it("a removed super admin's old login is refused", async () => {
+      const exBoss = await seedAdmin({ email: "ex@school.test", role: "super_admin" });
+      await asBoss(request(app).delete(`/api/admins/${exBoss}`));
+
+      const res = await request(app).delete(`/api/admins/${bossId}`).set(bearer(superAdminToken(exBoss)));
+
+      expect(res.status).toBe(401);
+      expect(await count("Admin", "AdminID = ?", [bossId])).toBe(1);
+    });
+
+    it("also guards the old /api/admin routes", async () => {
+      const exBoss = await seedAdmin({ email: "ex@school.test", role: "super_admin" });
+      await asBoss(request(app).put(`/api/admins/${exBoss}`)).send({ role: "branch_admin", branch_id: BRANCH_A });
+      const asExBoss = bearer(superAdminToken(exBoss));
+
+      expect((await request(app).delete(`/api/admin/delete/${bossId}`).set(asExBoss)).status).toBe(403);
+      expect((await request(app).put(`/api/admin/update/${bossId}`).set(asExBoss).send({ Password: "takeover1" })).status).toBe(403);
+      expect(
+        (
+          await request(app)
+            .post("/api/admin/createAdmin")
+            .set(asExBoss)
+            .send({ Username: "x", Email: "x@school.test", Password: "secret123", role: "super_admin" })
+        ).status,
+      ).toBe(403);
+    });
   });
 
   it("answers 404 for an unknown admin", async () => {

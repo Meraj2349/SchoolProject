@@ -28,6 +28,13 @@ describe("admin use cases", () => {
     rahim = await repo.create({ username: "rahim", email: "rahim@school.test", password: "x", role: "branch_admin", branchId: 2 });
   });
 
+  describe("currentAdmin", () => {
+    it("returns the admin as stored now, or null once removed", async () => {
+      expect(await useCases.currentAdmin(rahim.id)).toMatchObject({ id: rahim.id, role: "branch_admin" });
+      expect(await useCases.currentAdmin(999)).toBeNull();
+    });
+  });
+
   describe("listAdmins", () => {
     it("lists admins with their branch, marks you, and never includes passwords", async () => {
       const admins = await useCases.listAdmins({ currentAdminId: boss.id });
@@ -148,6 +155,26 @@ describe("admin use cases", () => {
   });
 
   describe("deleteAdmin", () => {
+    it("checks for another super admin and removes inside one locked transaction", async () => {
+      const steps = [];
+      const transaction = repo.transaction;
+      repo.transaction = async (work) => {
+        steps.push("begin");
+        const result = await transaction(work);
+        steps.push("commit");
+        return result;
+      };
+      const countSuperAdmins = repo.countSuperAdmins;
+      repo.countSuperAdmins = async () => (steps.push("count"), countSuperAdmins());
+      const remove = repo.remove;
+      repo.remove = async (id) => (steps.push("remove"), remove(id));
+      await repo.create({ username: "b2", email: "b2@school.test", password: "x", role: "super_admin", branchId: null });
+
+      await useCases.deleteAdmin({ id: boss.id, currentAdminId: rahim.id });
+
+      expect(steps).toEqual(["begin", "count", "remove", "commit"]);
+    });
+
     it("removes an admin", async () => {
       await useCases.deleteAdmin({ id: rahim.id, currentAdminId: boss.id });
 
