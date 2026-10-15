@@ -3,8 +3,8 @@
 import { useId } from "react";
 import { FiX } from "react-icons/fi";
 import { useTranslations } from "@/store/languageStore";
-import useDialogFocus from "./useDialogFocus";
-import useEscapeKey from "./useEscapeKey";
+import useDialogFocus from "@/hooks/useDialogFocus";
+import useEscapeKey from "@/hooks/useEscapeKey";
 
 /** Side panel for forms (add/edit) that slides in from the right. */
 export default function Drawer({ open, title, onClose, footer, width = "max-w-lg", children }) {

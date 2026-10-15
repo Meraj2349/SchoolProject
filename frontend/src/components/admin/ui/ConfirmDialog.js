@@ -3,8 +3,8 @@
 import { useId } from "react";
 import { useTranslations } from "@/store/languageStore";
 import Button from "./Button";
-import useDialogFocus from "./useDialogFocus";
-import useEscapeKey from "./useEscapeKey";
+import useDialogFocus from "@/hooks/useDialogFocus";
+import useEscapeKey from "@/hooks/useEscapeKey";
 
 /** "Are you sure?" dialog for destructive actions. */
 export default function ConfirmDialog({ open, title, children, confirmLabel, tone = "danger", busy = false, onConfirm, onCancel }) {
