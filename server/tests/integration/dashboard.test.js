@@ -4,7 +4,7 @@ import app from "../../app.js";
 import { BRANCH_A, BRANCH_B, bearer, branchAdminToken, db, insert, resetDb, seedStudent, superAdminToken } from "./helpers.js";
 
 const adminA = bearer(branchAdminToken(BRANCH_A));
-const adminB = bearer(branchAdminToken(BRANCH_B, 3));
+const adminB = bearer(branchAdminToken(BRANCH_B));
 
 // The dashboard works on "today" in the school's time zone.
 const TODAY = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Dhaka" }).format(new Date());

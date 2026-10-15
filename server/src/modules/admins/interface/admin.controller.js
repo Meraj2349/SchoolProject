@@ -12,20 +12,10 @@ export function makeAdminController({ useCases }) {
   };
 
   return {
-    /**
-     * Middleware for account management, after authMiddleware. The login token
-     * stays valid for hours, so check the role in the database: a demoted or
-     * removed super admin loses access at once.
-     */
-    requireSuperAdmin: async (req, res, next) => {
-      let admin;
-      try {
-        admin = await useCases.currentAdmin(req.adminId);
-      } catch (error) {
-        return sendError(res, error, req.language);
-      }
-      if (!admin) return res.status(401).json({ success: false, message: t("unauthorized", req.language) });
-      if (admin.role !== "super_admin") {
+    // Middleware for account management, after authMiddleware (which loads the
+    // admin's current role from the database, so a demotion applies at once).
+    requireSuperAdmin: (req, res, next) => {
+      if (req.role !== "super_admin") {
         return res.status(403).json({ success: false, message: t("forbidden", req.language) });
       }
       next();
