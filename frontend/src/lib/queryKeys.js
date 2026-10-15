@@ -80,6 +80,14 @@ export const queryKeys = {
     all: ["dashboard"],
     summary: (branchId = null) => ["dashboard", "summary", { branchId }],
   },
+  // Quiz: the question bank is shared by every branch; results follow the branch.
+  quiz: {
+    all: ["quiz"],
+    questions: (filters) => ["quiz", "questions", filters],
+    subjects: (classKey) => ["quiz", "subjects", classKey],
+    sessions: (filters, branchId = null) => ["quiz", "sessions", filters, { branchId }],
+    leaderboard: (filters, branchId = null) => ["quiz", "leaderboard", filters, { branchId }],
+  },
   // Admin accounts across every branch (super admins only, not branch-scoped)
   admins: {
     all: ["admins"],

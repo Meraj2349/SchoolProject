@@ -1,5 +1,6 @@
 import {
   FiAward,
+  FiBarChart2,
   FiBell,
   FiBook,
   FiBookOpen,
@@ -11,6 +12,7 @@ import {
   FiFileText,
   FiGitBranch,
   FiGrid,
+  FiHelpCircle,
   FiImage,
   FiLayout,
   FiMessageSquare,
@@ -96,7 +98,11 @@ export const NAV_GROUPS = [
   {
     key: "sidebar.groups.quiz",
     icon: FiStar,
-    items: [{ path: "/admin/quaker", key: "sidebar.quaker", icon: FiStar }],
+    items: [
+      { path: "/admin/quiz/questions", key: "sidebar.quizQuestions", icon: FiHelpCircle },
+      { path: "/admin/quiz/results", key: "sidebar.quizResults", icon: FiBarChart2 },
+      { path: "/admin/quiz/leaderboard", key: "sidebar.quizLeaderboard", icon: FiAward },
+    ],
   },
   {
     key: "sidebar.groups.administration",
