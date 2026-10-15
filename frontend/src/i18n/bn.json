@@ -21,7 +21,7 @@
     "helpline": "হেল্পলাইন: +৮৮ ০১৯ ৯৭৫৮৮৪৭৬"
   },
   "sidebar": {
-    "adminDashboard": "অ্যাডমিন ড্যাশবোর্ড",
+    "adminDashboard": "ড্যাশবোর্ড",
     "branches": "শাখা ব্যবস্থাপনা",
     "notice": "নোটিশ",
     "chairMessage": "চেয়ারম্যানের বার্তা",
@@ -720,7 +720,7 @@
       "superAdminOnly": "শাখা ব্যবস্থাপনা শুধুমাত্র সুপার অ্যাডমিনের জন্য।"
     },
     "dashboard": {
-      "title": "সুপার অ্যাডমিন ড্যাশবোর্ড",
+      "title": "ড্যাশবোর্ড",
       "overview": "শাখার সারসংক্ষেপ",
       "totalBranches": "মোট শাখা",
       "totalStudents": "মোট শিক্ষার্থী",
@@ -737,7 +737,29 @@
       "noData": "কোনো শাখার তথ্য নেই",
       "viewBranch": "বিস্তারিত দেখুন",
       "allBranches": "সব শাখা",
-      "switchTo": "এই শাখায় যান"
+      "switchTo": "এই শাখায় যান",
+      "subtitle": "আজকের সংক্ষিপ্ত চিত্র",
+      "attendanceToday": "আজকের উপস্থিতি",
+      "presentOf": "{total} জনের মধ্যে {count} জন উপস্থিত",
+      "notTakenYet": "এখনো নেওয়া হয়নি",
+      "feesCollected": "আদায়কৃত বেতন",
+      "collectedOfBilled": "{billed} এর {rate}% আদায়",
+      "noInvoices": "এই মাসে কোনো ইনভয়েস নেই",
+      "thisMonthFees": "এই মাসের বেতন",
+      "billed": "বিল",
+      "collected": "আদায়",
+      "outstanding": "বকেয়া",
+      "overdueInvoices": "মেয়াদোত্তীর্ণ ইনভয়েস",
+      "recentPayments": "সাম্প্রতিক পেমেন্ট",
+      "noPayments": "এখনো কোনো পেমেন্ট নেই",
+      "upcomingEvents": "আসন্ন ইভেন্ট",
+      "noEvents": "কোনো আসন্ন ইভেন্ট নেই",
+      "receipt": "রসিদ",
+      "student": "শিক্ষার্থী",
+      "amount": "পরিমাণ",
+      "date": "তারিখ",
+      "method": "মাধ্যম",
+      "branch": "শাখা"
     },
     "shell": {
       "home": "অ্যাডমিন",

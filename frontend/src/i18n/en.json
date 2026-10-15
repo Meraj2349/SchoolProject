@@ -21,7 +21,7 @@
     "helpline": "Helpline: +88 019 97588476"
   },
   "sidebar": {
-    "adminDashboard": "Admin Dashboard",
+    "adminDashboard": "Dashboard",
     "branches": "Branch Management",
     "notice": "Notice",
     "chairMessage": "Chair Message",
@@ -720,7 +720,7 @@
       "superAdminOnly": "Branch management is only available to super admins."
     },
     "dashboard": {
-      "title": "Super Admin Dashboard",
+      "title": "Dashboard",
       "overview": "Branch Overview",
       "totalBranches": "Total Branches",
       "totalStudents": "Total Students",
@@ -737,7 +737,29 @@
       "noData": "No branch data available",
       "viewBranch": "View Details",
       "allBranches": "All Branches",
-      "switchTo": "Switch to this branch"
+      "switchTo": "Switch to this branch",
+      "subtitle": "Today at a glance",
+      "attendanceToday": "Attendance today",
+      "presentOf": "{count} of {total} present",
+      "notTakenYet": "Not taken yet",
+      "feesCollected": "Fees collected",
+      "collectedOfBilled": "{rate}% of {billed} billed",
+      "noInvoices": "No invoices this month",
+      "thisMonthFees": "Fees this month",
+      "billed": "Billed",
+      "collected": "Collected",
+      "outstanding": "Outstanding",
+      "overdueInvoices": "Overdue invoices",
+      "recentPayments": "Recent payments",
+      "noPayments": "No payments yet",
+      "upcomingEvents": "Upcoming events",
+      "noEvents": "No upcoming events",
+      "receipt": "Receipt",
+      "student": "Student",
+      "amount": "Amount",
+      "date": "Date",
+      "method": "Method",
+      "branch": "Branch"
     },
     "shell": {
       "home": "Admin",

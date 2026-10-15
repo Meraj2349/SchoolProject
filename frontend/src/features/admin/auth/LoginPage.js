@@ -97,7 +97,7 @@ export default function LoginPage() {
         } else {
           resetBranch();
         }
-        router.replace("/admin/notices");
+        router.replace("/admin/dashboard");
       } else {
         setError(data.message || t("loginFailed"));
       }

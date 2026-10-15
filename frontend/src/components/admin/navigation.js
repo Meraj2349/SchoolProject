@@ -32,7 +32,7 @@ export const ADMIN_HOME = "/admin/dashboard";
  */
 export const NAV_GROUPS = [
   {
-    items: [{ path: ADMIN_HOME, key: "sidebar.adminDashboard", icon: FiLayout, superAdminOnly: true }],
+    items: [{ path: ADMIN_HOME, key: "sidebar.adminDashboard", icon: FiLayout }],
   },
   {
     key: "sidebar.groups.academics",

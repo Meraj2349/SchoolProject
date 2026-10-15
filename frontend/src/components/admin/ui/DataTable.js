@@ -2,11 +2,10 @@
 
 import { useMemo, useState } from "react";
 import { FiChevronDown, FiChevronUp, FiSearch } from "react-icons/fi";
+import { fillTemplate } from "@/lib/template";
 import { useTranslations } from "@/store/languageStore";
 
 const DEFAULT_PAGE_SIZE = 10;
-
-const fill = (template, values) => template.replace(/\{(\w+)\}/g, (_, name) => values[name] ?? "");
 
 const cellValue = (column, row) => (column.sortValue ? column.sortValue(row) : row[column.key]);
 
@@ -140,7 +139,7 @@ export default function DataTable({
 
           <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 border-t border-slate-200 text-sm text-slate-600">
             <span>
-              {fill(t("showing"), { from: start + 1, to: start + pageRows.length, total: visibleRows.length })}
+              {fillTemplate(t("showing"), { from: start + 1, to: start + pageRows.length, total: visibleRows.length })}
             </span>
             <div className="flex gap-1">
               <button

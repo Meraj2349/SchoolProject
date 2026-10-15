@@ -63,7 +63,7 @@ describe("AdminSidebar", () => {
   it("keeps links named for screen readers when collapsed to icons", () => {
     render(<AdminSidebar collapsed />);
 
-    expect(screen.getByRole("link", { name: "Admin Dashboard" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Dashboard" })).toBeInTheDocument();
   });
 
   it("closes the mobile menu when a link is chosen", () => {

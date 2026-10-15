@@ -65,6 +65,9 @@ export const queryKeys = {
   chairman: {
     profile: ["chairman", "profile"],
   },
+  dashboard: {
+    summary: (branchId = null) => ["dashboard", "summary", { branchId }],
+  },
   branches: {
     all: ["branches"],
     stats: ["branches", "stats"],

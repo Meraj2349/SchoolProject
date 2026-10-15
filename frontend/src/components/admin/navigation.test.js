@@ -23,6 +23,7 @@ describe("admin navigation", () => {
     expect(visible).not.toContain("/admin/branches");
     expect(visible).not.toContain("/admin/chairman");
     expect(visible).toContain("/admin/studentList");
+    expect(visible).toContain("/admin/dashboard");
   });
 
   it("drops a group when none of its items are visible", () => {
