@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { applicationService } from "@/services/application.service";
 import { useTranslations } from "@/store/languageStore";
+import { useBranchStore } from "@/store/branchStore";
+import { Badge, ContentScopeBadge, errorMessage } from "@/components/admin/ui";
 import { FiClipboard, FiTrash2 } from "react-icons/fi";
 
 const STATUSES = ["pending", "reviewed", "accepted", "rejected"];
@@ -29,7 +31,10 @@ export default function AdminApplicationsPage() {
   const [loading, setLoading] = useState(true);
   const [flash, setFlash] = useState({ msg: "", error: false });
   const t = useTranslations("admin.applications");
+  const tShell = useTranslations("admin.shell");
   const tCommon = useTranslations("common");
+  // Applications are listed per branch: reload when the super admin switches.
+  const branchId = useBranchStore((s) => s.currentBranchId);
 
   const showFlash = (msg, error = false) => {
     setFlash({ msg, error });
@@ -45,10 +50,7 @@ export default function AdminApplicationsPage() {
       })
       .catch((err) => {
         if (!cancelled)
-          showFlash(
-            err?.response?.data?.message || err.message || "Operation failed",
-            true,
-          );
+          showFlash(errorMessage(err, t("operationFailed")), true);
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
@@ -56,7 +58,8 @@ export default function AdminApplicationsPage() {
     return () => {
       cancelled = true;
     };
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- showFlash and t do not affect what is loaded
+  }, [branchId]);
 
   const handleStatusChange = async (id, newStatus) => {
     try {
@@ -68,10 +71,7 @@ export default function AdminApplicationsPage() {
       );
       showFlash(t("statusUpdated"));
     } catch (err) {
-      showFlash(
-        err?.response?.data?.message || err.message || t("operationFailed"),
-        true,
-      );
+      showFlash(errorMessage(err, t("operationFailed")), true);
     }
   };
 
@@ -82,10 +82,7 @@ export default function AdminApplicationsPage() {
       setApplications((prev) => prev.filter((app) => app.id !== id));
       showFlash(t("deleted"));
     } catch (err) {
-      showFlash(
-        err?.response?.data?.message || err.message || t("operationFailed"),
-        true,
-      );
+      showFlash(errorMessage(err, t("operationFailed")), true);
     }
   };
 
@@ -146,6 +143,7 @@ export default function AdminApplicationsPage() {
                   <th className="table-header">{t("applicantName")}</th>
                   <th className="table-header">{t("applyingForClass")}</th>
                   <th className="table-header">{t("parentContact")}</th>
+                  <th className="table-header">{tShell("branch")}</th>
                   <th className="table-header">{t("status")}</th>
                   <th className="table-header">{t("date")}</th>
                   <th className="table-header">{t("actions")}</th>
@@ -175,6 +173,14 @@ export default function AdminApplicationsPage() {
                     </td>
                     <td className="table-cell text-slate-600">
                       {app.parent_contact}
+                    </td>
+                    <td className="table-cell">
+                      {/* Old applications from before branches have none */}
+                      {app.branch_id == null ? (
+                        <Badge tone="warning">{t("noBranch")}</Badge>
+                      ) : (
+                        <ContentScopeBadge branchId={app.branch_id} />
+                      )}
                     </td>
                     <td className="table-cell">
                       <select

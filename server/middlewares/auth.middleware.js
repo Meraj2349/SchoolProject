@@ -6,9 +6,10 @@ const bearerToken = (req) => {
   return scheme === "Bearer" && token ? token : null;
 };
 
+// ?branch_id as a branch id; anything else (missing, "abc", "0") means none.
 const queryBranchId = (req) => {
-  const qb = req.query?.branch_id;
-  return qb != null && qb !== "" ? parseInt(qb, 10) : null;
+  const id = Number(req.query?.branch_id);
+  return Number.isInteger(id) && id > 0 ? id : null;
 };
 
 /**
@@ -54,7 +55,12 @@ export function makeAuthMiddleware({ findAdmin }) {
     } catch {
       return null; // malformed, tampered with or expired
     }
-    return decoded ? findAdmin(decoded.adminID) : null;
+    if (!decoded) return null;
+    const admin = await findAdmin(decoded.adminID);
+    // A branch admin without a branch (their branch was deleted) must not fall
+    // through to "no branch filter", which would mean every branch.
+    if (admin && admin.role !== "super_admin" && admin.branchId == null) return null;
+    return admin;
   }
 
   const serverError = (res, error) => {

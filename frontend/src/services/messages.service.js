@@ -8,7 +8,7 @@ const normalise = (data) => ({
 });
 
 export const messagesService = {
-  getAll: () => httpClient.get("/messages").then((r) => r.data),
+  getAll: () => httpClient.get("/messages").then((r) => r.data?.data ?? r.data),
 
   create: (data) =>
     httpClient.post("/messages/add", normalise(data)).then((r) => r.data),

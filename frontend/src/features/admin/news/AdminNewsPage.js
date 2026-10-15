@@ -8,6 +8,13 @@ import {
   useDeleteNews,
 } from "@/hooks/useNews";
 import { useTranslations } from "@/store/languageStore";
+import { useContentScope } from "@/hooks/useContentScope";
+import {
+  ContentScopeBadge,
+  NewContentScopeNote,
+  NotYoursMark,
+  errorMessage,
+} from "@/components/admin/ui";
 import { FiEdit2, FiTrash2, FiFileText, FiPlusCircle } from "react-icons/fi";
 
 export default function AdminNewsPage() {
@@ -17,6 +24,8 @@ export default function AdminNewsPage() {
   const deleteNews = useDeleteNews();
   const t = useTranslations("admin.news");
   const tCommon = useTranslations("common");
+  const tShell = useTranslations("admin.shell");
+  const { canManage } = useContentScope();
 
   const [titleBn, setTitleBn] = useState("");
   const [titleEn, setTitleEn] = useState("");
@@ -81,7 +90,7 @@ export default function AdminNewsPage() {
       resetForm();
     } catch (err) {
       flash(
-        err?.response?.data?.error || err.message || t("operationFailed"),
+        errorMessage(err, t("operationFailed")),
         true,
       );
     }
@@ -103,7 +112,7 @@ export default function AdminNewsPage() {
       flash(t("newsDeleted"));
     } catch (err) {
       flash(
-        err?.response?.data?.error || err.message || t("deleteFailed"),
+        errorMessage(err, t("deleteFailed")),
         true,
       );
     }
@@ -134,6 +143,8 @@ export default function AdminNewsPage() {
 
       {error && <div className="error-message">{error}</div>}
       {success && <div className="success-message">{success}</div>}
+
+      <NewContentScopeNote />
 
       {/* Form card */}
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
@@ -255,6 +266,7 @@ export default function AdminNewsPage() {
                   <th className="table-header">{t("titleBn")}</th>
                   <th className="table-header">{t("titleEn")}</th>
                   <th className="table-header">{t("date")}</th>
+                  <th className="table-header">{tShell("branch")}</th>
                   <th className="table-header">{t("status")}</th>
                   <th className="table-header">{t("actions")}</th>
                 </tr>
@@ -278,6 +290,9 @@ export default function AdminNewsPage() {
                       {fmtDate(item.date)}
                     </td>
                     <td className="table-cell">
+                      <ContentScopeBadge branchId={item.branch_id} />
+                    </td>
+                    <td className="table-cell">
                       <span
                         className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${isItemActive(item) ? "bg-emerald-100 text-emerald-700" : "bg-red-100 text-red-700"}`}
                       >
@@ -285,6 +300,7 @@ export default function AdminNewsPage() {
                       </span>
                     </td>
                     <td className="table-cell whitespace-nowrap">
+                      {canManage(item) ? (
                       <div className="flex items-center gap-1">
                         <button
                           onClick={() => handleEdit(item)}
@@ -301,6 +317,9 @@ export default function AdminNewsPage() {
                           <FiTrash2 />
                         </button>
                       </div>
+                      ) : (
+                        <NotYoursMark />
+                      )}
                     </td>
                   </tr>
                 ))}

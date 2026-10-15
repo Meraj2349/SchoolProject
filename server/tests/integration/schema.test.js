@@ -39,6 +39,26 @@ describe("fresh database schema", () => {
     expect(await columnsOf(table)).toContain("branch_id");
   });
 
+  // Website content and applications: NULL means the whole school.
+  it.each(["Notices", "NoticeAnnouncements", "News", "Messages", "Images", "Applications"])(
+    "gives %s an optional branch that must exist",
+    async (table) => {
+      const [[column]] = await db.query(
+        `SELECT IS_NULLABLE AS nullable FROM information_schema.COLUMNS
+          WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? AND COLUMN_NAME = 'branch_id'`,
+        [table],
+      );
+      const [[fk]] = await db.query(
+        `SELECT REFERENCED_TABLE_NAME AS target FROM information_schema.KEY_COLUMN_USAGE
+          WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? AND COLUMN_NAME = 'branch_id'
+            AND REFERENCED_TABLE_NAME IS NOT NULL`,
+        [table],
+      );
+      expect(column?.nullable).toBe("YES");
+      expect(fk?.target).toBe("Branches");
+    },
+  );
+
   it("has the shared ClassNames reference table with the standard classes", async () => {
     const [rows] = await db.query("SELECT name FROM ClassNames ORDER BY sort_order");
     expect(rows.map((r) => r.name)).toEqual(expect.arrayContaining(["Play", "Class 1", "Class 10"]));

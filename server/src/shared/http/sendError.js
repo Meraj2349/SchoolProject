@@ -1,10 +1,11 @@
 import { t } from "../../../config/i18n.js";
-import { ConflictError, NotFoundError, ValidationError } from "../errors/index.js";
+import { ConflictError, ForbiddenError, NotFoundError, ValidationError } from "../errors/index.js";
 
 const STATUS_BY_ERROR = [
   [ValidationError, 400],
   [NotFoundError, 404],
   [ConflictError, 409],
+  [ForbiddenError, 403],
 ];
 
 // Maps domain errors to HTTP responses. Unknown errors are logged and
@@ -12,7 +13,9 @@ const STATUS_BY_ERROR = [
 export function sendError(res, error, lang, fallbackKey = "internal_server_error") {
   const match = STATUS_BY_ERROR.find(([ErrorType]) => error instanceof ErrorType);
   if (match) {
-    return res.status(match[1]).json({ success: false, message: t(error.code, lang) });
+    const body = { success: false, message: t(error.code, lang) };
+    if (error.details !== undefined) body.data = error.details;
+    return res.status(match[1]).json(body);
   }
 
   console.error(error);

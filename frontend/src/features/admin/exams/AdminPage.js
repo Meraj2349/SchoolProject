@@ -7,6 +7,8 @@ import { classesService } from "@/services/classes.service";
 import { queryKeys } from "@/lib/queryKeys";
 import { useTranslations } from "@/store/languageStore";
 import { useBranchStore } from "@/store/branchStore";
+import { ChooseBranchNotice } from "@/components/admin/ui";
+import { useWriteBranch } from "@/hooks/useWriteBranch";
 import { FiEdit2, FiTrash2, FiFileText, FiPlusCircle } from "react-icons/fi";
 
 // Must match DB ENUM exactly
@@ -29,6 +31,7 @@ const EMPTY = {
 export default function AdminPage() {
   const qc = useQueryClient();
   const t = useTranslations("admin.exams");
+  const { needsBranch } = useWriteBranch();
   const branchId = useBranchStore((s) => s.currentBranchId);
 
   const { data: exams = [], isLoading } = useQuery({
@@ -126,128 +129,133 @@ export default function AdminPage() {
         <div className="success-message">{status.success}</div>
       )}
 
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-        <div className="px-6 py-4 border-b border-slate-100 flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center">
-            <FiPlusCircle className="text-indigo-600 text-sm" />
+      {/* Hidden until a super admin picks a branch */}
+      {needsBranch ? (
+        <ChooseBranchNotice />
+      ) : (
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+          <div className="px-6 py-4 border-b border-slate-100 flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center">
+              <FiPlusCircle className="text-indigo-600 text-sm" />
+            </div>
+            <h2 className="text-base font-semibold text-slate-800">
+              {editId ? t("editExam") : t("addExam")}
+            </h2>
           </div>
-          <h2 className="text-base font-semibold text-slate-800">
-            {editId ? t("editExam") : t("addExam")}
-          </h2>
-        </div>
-        <form onSubmit={handleSave} className="p-6">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {/* Exam Type */}
-            <div>
-              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
-                {t("examType")}
-              </label>
-              <select
-                name="ExamType"
-                value={form.ExamType}
-                onChange={handleChange}
-                className="form-input"
-                required
-              >
-                <option value="">{t("selectType")}</option>
-                {EXAM_TYPE_OPTIONS.map((o) => (
-                  <option key={o.value} value={o.value}>
-                    {o.label}
-                  </option>
-                ))}
-              </select>
-            </div>
+          <form onSubmit={handleSave} className="p-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {/* Exam Type */}
+              <div>
+                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
+                  {t("examType")}
+                </label>
+                <select
+                  name="ExamType"
+                  value={form.ExamType}
+                  onChange={handleChange}
+                  className="form-input"
+                  required
+                >
+                  <option value="">{t("selectType")}</option>
+                  {EXAM_TYPE_OPTIONS.map((o) => (
+                    <option key={o.value} value={o.value}>
+                      {o.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-            {/* Exam Name */}
-            <div>
-              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
-                {t("examName")}
-              </label>
-              <input
-                type="text"
-                name="ExamName"
-                value={form.ExamName}
-                onChange={handleChange}
-                className="form-input"
-                required
-              />
-            </div>
+              {/* Exam Name */}
+              <div>
+                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
+                  {t("examName")}
+                </label>
+                <input
+                  type="text"
+                  name="ExamName"
+                  value={form.ExamName}
+                  onChange={handleChange}
+                  className="form-input"
+                  required
+                />
+              </div>
 
-            {/* Class */}
-            <div>
-              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
-                {t("class")}
-              </label>
-              <select
-                name="ClassName"
-                value={form.ClassName}
-                onChange={(e) =>
-                  setForm((p) => ({
-                    ...p,
-                    ClassName: e.target.value,
-                    SectionName: "",
-                  }))
-                }
-                className="form-input"
-                required
-              >
-                <option value="">{t("selectClass")}</option>
-                {uniqueClassNames.map((c) => (
-                  <option key={c} value={c}>
-                    {c}
-                  </option>
-                ))}
-              </select>
-            </div>
+              {/* Class */}
+              <div>
+                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
+                  {t("class")}
+                </label>
+                <select
+                  name="ClassName"
+                  value={form.ClassName}
+                  onChange={(e) =>
+                    setForm((p) => ({
+                      ...p,
+                      ClassName: e.target.value,
+                      SectionName: "",
+                    }))
+                  }
+                  className="form-input"
+                  required
+                >
+                  <option value="">{t("selectClass")}</option>
+                  {uniqueClassNames.map((c) => (
+                    <option key={c} value={c}>
+                      {c}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-            {/* Section */}
-            <div>
-              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
-                {t("section")}
-              </label>
-              <select
-                name="SectionName"
-                value={form.SectionName}
-                onChange={handleChange}
-                className="form-input"
-                required
-              >
-                <option value="">Select section</option>
-                {sectionsForClass.map((s) => (
-                  <option key={s} value={s}>
-                    {s}
-                  </option>
-                ))}
-              </select>
-            </div>
+              {/* Section */}
+              <div>
+                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
+                  {t("section")}
+                </label>
+                <select
+                  name="SectionName"
+                  value={form.SectionName}
+                  onChange={handleChange}
+                  className="form-input"
+                  required
+                >
+                  <option value="">Select section</option>
+                  {sectionsForClass.map((s) => (
+                    <option key={s} value={s}>
+                      {s}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-            {/* Exam Date */}
-            <div>
-              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
-                {t("examDate")}
-              </label>
-              <input
-                type="date"
-                name="ExamDate"
-                value={form.ExamDate}
-                onChange={handleChange}
-                className="form-input"
-                required
-              />
+              {/* Exam Date */}
+              <div>
+                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
+                  {t("examDate")}
+                </label>
+                <input
+                  type="date"
+                  name="ExamDate"
+                  value={form.ExamDate}
+                  onChange={handleChange}
+                  className="form-input"
+                  required
+                />
+              </div>
             </div>
-          </div>
-          <div className="flex gap-3 mt-6 pt-5 border-t border-slate-100">
-            <button type="submit" className="btn-primary">
-              {editId ? t("updateExam") : t("addExam")}
-            </button>
-            {editId && (
-              <button type="button" onClick={reset} className="btn-secondary">
-                {t("cancel")}
+            <div className="flex gap-3 mt-6 pt-5 border-t border-slate-100">
+              <button type="submit" className="btn-primary">
+                {editId ? t("updateExam") : t("addExam")}
               </button>
-            )}
-          </div>
-        </form>
-      </div>
+              {editId && (
+                <button type="button" onClick={reset} className="btn-secondary">
+                  {t("cancel")}
+                </button>
+              )}
+            </div>
+          </form>
+        </div>
+      )}
 
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
         <div className="px-6 py-4 border-b border-slate-100 flex items-center gap-3">
@@ -302,36 +310,38 @@ export default function AdminPage() {
                         : "–"}
                     </td>
                     <td className="table-cell">
-                      <div className="flex items-center gap-1">
-                        <button
-                          onClick={() => {
-                            setEditId(ex.ExamID);
-                            setForm({
-                              ExamType: ex.ExamType || "",
-                              ExamName: ex.ExamName || "",
-                              ClassName: ex.ClassName || "",
-                              SectionName: ex.Section || "",
-                              ExamDate: ex.ExamDate
-                                ? String(ex.ExamDate).split("T")[0]
-                                : "",
-                            });
-                          }}
-                          className="btn-icon edit"
-                          title={t("editExam")}
-                        >
-                          <FiEdit2 />
-                        </button>
-                        <button
-                          onClick={() => {
-                            if (window.confirm(t("deleteConfirm")))
-                              remove.mutate(ex.ExamID);
-                          }}
-                          className="btn-icon delete"
-                          title={t("deleted")}
-                        >
-                          <FiTrash2 />
-                        </button>
-                      </div>
+                      {!needsBranch && (
+                        <div className="flex items-center gap-1">
+                          <button
+                            onClick={() => {
+                              setEditId(ex.ExamID);
+                              setForm({
+                                ExamType: ex.ExamType || "",
+                                ExamName: ex.ExamName || "",
+                                ClassName: ex.ClassName || "",
+                                SectionName: ex.Section || "",
+                                ExamDate: ex.ExamDate
+                                  ? String(ex.ExamDate).split("T")[0]
+                                  : "",
+                              });
+                            }}
+                            className="btn-icon edit"
+                            title={t("editExam")}
+                          >
+                            <FiEdit2 />
+                          </button>
+                          <button
+                            onClick={() => {
+                              if (window.confirm(t("deleteConfirm")))
+                                remove.mutate(ex.ExamID);
+                            }}
+                            className="btn-icon delete"
+                            title={t("deleted")}
+                          >
+                            <FiTrash2 />
+                          </button>
+                        </div>
+                      )}
                     </td>
                   </tr>
                 ))}

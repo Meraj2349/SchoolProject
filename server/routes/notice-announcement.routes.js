@@ -2,23 +2,14 @@ import express from "express";
 import fs from "fs";
 import multer from "multer";
 import path from "path";
-import { fileURLToPath } from "url";
-import authMiddleware from "../middlewares/auth.middleware.js";
+import authMiddleware, { optionalAuth } from "../middlewares/auth.middleware.js";
 import {
-  getPublishedController,
-  getAllController,
-  createController,
-  updateController,
-  togglePublishController,
-  removeController,
-} from "../controllers/notice-announcement.controller.js";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+  announcementsController as announcements,
+  NOTICE_ANNOUNCEMENT_UPLOADS as UPLOAD_DIR,
+} from "../src/modules/content/index.js";
 
 // Multer storage for notice announcement images (directory is git-ignored,
 // so create it — multer will not).
-const UPLOAD_DIR = path.join(__dirname, "../public/uploads/notice-announcements");
 fs.mkdirSync(UPLOAD_DIR, { recursive: true });
 
 const storage = multer.diskStorage({
@@ -59,14 +50,12 @@ const upload = multer({
 
 const router = express.Router();
 
-// Public route
-router.get("/", getPublishedController);
-
-// Admin routes (require auth)
-router.get("/all", authMiddleware, getAllController);
-router.post("/", authMiddleware, upload.single("image"), createController);
-router.put("/:id", authMiddleware, upload.single("image"), updateController);
-router.patch("/:id/publish", authMiddleware, togglePublishController);
-router.delete("/:id", authMiddleware, removeController);
+// Image notices, per branch or for the whole school.
+router.get("/", optionalAuth, announcements.listVisible); // the website: published only
+router.get("/all", authMiddleware, announcements.list);
+router.post("/", authMiddleware, upload.single("image"), announcements.create);
+router.put("/:id", authMiddleware, upload.single("image"), announcements.update);
+router.patch("/:id/publish", authMiddleware, announcements.setVisibility);
+router.delete("/:id", authMiddleware, announcements.remove);
 
 export default router;

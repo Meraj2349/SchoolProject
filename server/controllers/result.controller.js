@@ -322,11 +322,12 @@ const addMultipleResultsController = async (req, res) => {
       });
     }
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Error adding multiple results",
-      error: error.message,
-    });
+    // Row problems are written by the model for the admin; anything else stays private.
+    if (error instanceof ValidationError) {
+      return res.status(400).json({ success: false, message: error.message });
+    }
+    console.error("Error adding multiple results:", error);
+    res.status(500).json({ success: false, message: "Error adding multiple results" });
   }
 };
 

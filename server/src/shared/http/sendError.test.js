@@ -1,5 +1,5 @@
 import { describe, expect, it, jest } from "@jest/globals";
-import { ConflictError, NotFoundError, ValidationError } from "../errors/index.js";
+import { ConflictError, ForbiddenError, NotFoundError, ValidationError } from "../errors/index.js";
 import { sendError } from "./sendError.js";
 
 function fakeRes() {
@@ -14,6 +14,7 @@ describe("sendError", () => {
     [new ValidationError("branch_no_fields"), 400],
     [new NotFoundError("branch_not_found"), 404],
     [new ConflictError("admin_last_super_admin"), 409],
+    [new ForbiddenError("content_not_yours"), 403],
   ])("answers %s with %i and the translated message", (error, status) => {
     const res = fakeRes();
 
@@ -22,6 +23,15 @@ describe("sendError", () => {
     expect(res.statusCode).toBe(status);
     expect(res.body.success).toBe(false);
     expect(res.body.message).not.toBe(error.code);
+  });
+
+  it("passes on an error's details, e.g. what still uses a branch", () => {
+    const res = fakeRes();
+
+    sendError(res, new ConflictError("branch_in_use", "branch_in_use", { details: { students: 3 } }), "en");
+
+    expect(res.statusCode).toBe(409);
+    expect(res.body).toEqual({ success: false, message: expect.any(String), data: { students: 3 } });
   });
 
   it("hides unknown errors behind the fallback message", () => {

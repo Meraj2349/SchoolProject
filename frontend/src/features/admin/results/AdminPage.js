@@ -10,6 +10,8 @@ import { studentsService } from "@/services/students.service";
 import { queryKeys } from "@/lib/queryKeys";
 import { useTranslations } from "@/store/languageStore";
 import { useBranchStore } from "@/store/branchStore";
+import { ChooseBranchNotice } from "@/components/admin/ui";
+import { useWriteBranch } from "@/hooks/useWriteBranch";
 import {
   FiAward,
   FiSearch,
@@ -26,6 +28,7 @@ const RESULT_FILTER_EMPTY = { className: "", section: "", search: "" };
 export default function AdminPage() {
   const qc = useQueryClient();
   const t = useTranslations("admin.results");
+  const { needsBranch } = useWriteBranch();
   const tCommon = useTranslations("common");
   const branchId = useBranchStore((s) => s.currentBranchId);
 
@@ -242,263 +245,268 @@ export default function AdminPage() {
         <div className="success-message">{status.success}</div>
       )}
 
-      {/* ── Add result form ── */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-        <div className="px-6 py-4 border-b border-slate-100 flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center">
-            <FiAward className="text-indigo-600 text-sm" />
+      {/* Hidden until a super admin picks a branch */}
+      {needsBranch ? (
+        <ChooseBranchNotice />
+      ) : (
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+          <div className="px-6 py-4 border-b border-slate-100 flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center">
+              <FiAward className="text-indigo-600 text-sm" />
+            </div>
+            <h2 className="text-base font-semibold text-slate-800">
+              {t("addResult")}
+            </h2>
           </div>
-          <h2 className="text-base font-semibold text-slate-800">
-            {t("addResult")}
-          </h2>
-        </div>
-        <form onSubmit={handleSubmit} className="p-6">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {/* Class */}
-            <div>
-              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
-                {t("className")}
-              </label>
-              <select
-                name="className"
-                value={form.className}
-                onChange={(e) => {
-                  setForm((p) => ({
-                    ...p,
-                    className: e.target.value,
-                    section: "",
-                    classId: "",
-                    examId: "",
-                    subjectId: "",
-                    studentId: "",
-                    firstName: "",
-                    rollNumber: "",
-                  }));
-                }}
-                className="form-input"
-                required
-              >
-                <option value="">Select class</option>
-                {uniqueClassNames.map((cn) => (
-                  <option key={cn} value={cn}>
-                    {cn}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Section */}
-            <div>
-              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
-                {t("section")}
-              </label>
-              <select
-                name="section"
-                value={form.section}
-                onChange={(e) => {
-                  const sec = e.target.value;
-                  // Resolve classId for the chosen class+section pair
-                  const classRow = classes.find(
-                    (c) => c.ClassName === form.className && c.Section === sec,
-                  );
-                  setForm((p) => ({
-                    ...p,
-                    section: sec,
-                    classId: classRow ? String(classRow.ClassID) : "",
-                    examId: "",
-                    subjectId: "",
-                    studentId: "",
-                    firstName: "",
-                    rollNumber: "",
-                  }));
-                }}
-                className="form-input"
-                required
-              >
-                <option value="">Select section</option>
-                {sectionsForClass.map((s) => (
-                  <option key={s} value={s}>
-                    {s}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Student picker — shown once class+section are selected */}
-            {canFetchStudents && (
-              <div className="sm:col-span-2">
+          <form onSubmit={handleSubmit} className="p-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {/* Class */}
+              <div>
                 <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
-                  Student
-                  {studentsLoading && (
-                    <span className="ml-2 text-indigo-400 normal-case font-normal">
-                      loading…
-                    </span>
-                  )}
+                  {t("className")}
                 </label>
                 <select
-                  value={form.studentId}
+                  name="className"
+                  value={form.className}
                   onChange={(e) => {
-                    const sid = e.target.value;
-                    if (!sid) {
-                      setForm((p) => ({
-                        ...p,
-                        studentId: "",
-                        firstName: "",
-                        rollNumber: "",
-                      }));
-                      return;
-                    }
-                    const s = classStudents.find(
-                      (st) => String(st.StudentID) === sid,
-                    );
-                    if (s)
-                      setForm((p) => ({
-                        ...p,
-                        studentId: String(s.StudentID),
-                        firstName: s.FirstName,
-                        rollNumber: s.RollNumber,
-                      }));
+                    setForm((p) => ({
+                      ...p,
+                      className: e.target.value,
+                      section: "",
+                      classId: "",
+                      examId: "",
+                      subjectId: "",
+                      studentId: "",
+                      firstName: "",
+                      rollNumber: "",
+                    }));
                   }}
                   className="form-input"
                   required
                 >
-                  <option value="">
-                    {studentsLoading
-                      ? "Loading students…"
-                      : classStudents.length === 0
-                        ? "No students in this class/section"
-                        : "Select student"}
-                  </option>
-                  {classStudents.map((s) => (
-                    <option key={s.StudentID} value={String(s.StudentID)}>
-                      {s.FirstName} {s.LastName} — Roll {s.RollNumber}
+                  <option value="">Select class</option>
+                  {uniqueClassNames.map((cn) => (
+                    <option key={cn} value={cn}>
+                      {cn}
                     </option>
                   ))}
                 </select>
               </div>
-            )}
 
-            {/* Fallback manual inputs when no class+section selected */}
-            {!canFetchStudents && (
-              <>
-                <div>
+              {/* Section */}
+              <div>
+                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
+                  {t("section")}
+                </label>
+                <select
+                  name="section"
+                  value={form.section}
+                  onChange={(e) => {
+                    const sec = e.target.value;
+                    // Resolve classId for the chosen class+section pair
+                    const classRow = classes.find(
+                      (c) =>
+                        c.ClassName === form.className && c.Section === sec,
+                    );
+                    setForm((p) => ({
+                      ...p,
+                      section: sec,
+                      classId: classRow ? String(classRow.ClassID) : "",
+                      examId: "",
+                      subjectId: "",
+                      studentId: "",
+                      firstName: "",
+                      rollNumber: "",
+                    }));
+                  }}
+                  className="form-input"
+                  required
+                >
+                  <option value="">Select section</option>
+                  {sectionsForClass.map((s) => (
+                    <option key={s} value={s}>
+                      {s}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Student picker — shown once class+section are selected */}
+              {canFetchStudents && (
+                <div className="sm:col-span-2">
                   <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
-                    {t("firstName")}
+                    Student
+                    {studentsLoading && (
+                      <span className="ml-2 text-indigo-400 normal-case font-normal">
+                        loading…
+                      </span>
+                    )}
                   </label>
-                  <input
-                    type="text"
-                    name="firstName"
-                    value={form.firstName}
-                    onChange={handleChange}
+                  <select
+                    value={form.studentId}
+                    onChange={(e) => {
+                      const sid = e.target.value;
+                      if (!sid) {
+                        setForm((p) => ({
+                          ...p,
+                          studentId: "",
+                          firstName: "",
+                          rollNumber: "",
+                        }));
+                        return;
+                      }
+                      const s = classStudents.find(
+                        (st) => String(st.StudentID) === sid,
+                      );
+                      if (s)
+                        setForm((p) => ({
+                          ...p,
+                          studentId: String(s.StudentID),
+                          firstName: s.FirstName,
+                          rollNumber: s.RollNumber,
+                        }));
+                    }}
                     className="form-input"
-                    placeholder="Select class & section first"
-                    disabled
-                  />
+                    required
+                  >
+                    <option value="">
+                      {studentsLoading
+                        ? "Loading students…"
+                        : classStudents.length === 0
+                          ? "No students in this class/section"
+                          : "Select student"}
+                    </option>
+                    {classStudents.map((s) => (
+                      <option key={s.StudentID} value={String(s.StudentID)}>
+                        {s.FirstName} {s.LastName} — Roll {s.RollNumber}
+                      </option>
+                    ))}
+                  </select>
                 </div>
-                <div>
-                  <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
-                    {t("rollNumber")}
-                  </label>
-                  <input
-                    type="text"
-                    name="rollNumber"
-                    value={form.rollNumber}
-                    onChange={handleChange}
-                    className="form-input"
-                    placeholder="Select class & section first"
-                    disabled
-                  />
-                </div>
-              </>
-            )}
+              )}
 
-            {/* Exam */}
-            <div>
-              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
-                {t("exam")}
-              </label>
-              <select
-                name="examId"
-                value={form.examId}
-                onChange={handleChange}
-                className="form-input"
-                required
+              {/* Fallback manual inputs when no class+section selected */}
+              {!canFetchStudents && (
+                <>
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
+                      {t("firstName")}
+                    </label>
+                    <input
+                      type="text"
+                      name="firstName"
+                      value={form.firstName}
+                      onChange={handleChange}
+                      className="form-input"
+                      placeholder="Select class & section first"
+                      disabled
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
+                      {t("rollNumber")}
+                    </label>
+                    <input
+                      type="text"
+                      name="rollNumber"
+                      value={form.rollNumber}
+                      onChange={handleChange}
+                      className="form-input"
+                      placeholder="Select class & section first"
+                      disabled
+                    />
+                  </div>
+                </>
+              )}
+
+              {/* Exam */}
+              <div>
+                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
+                  {t("exam")}
+                </label>
+                <select
+                  name="examId"
+                  value={form.examId}
+                  onChange={handleChange}
+                  className="form-input"
+                  required
+                >
+                  <option value="">{t("selectExam")}</option>
+                  {filteredExams.map((ex) => (
+                    <option key={ex.ExamID} value={ex.ExamID}>
+                      {ex.ExamName} – {ex.ExamType}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Subject */}
+              <div>
+                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
+                  {t("subject")}
+                </label>
+                <select
+                  name="subjectId"
+                  value={form.subjectId}
+                  onChange={handleChange}
+                  className="form-input"
+                  required
+                >
+                  <option value="">{t("selectSubject")}</option>
+                  {filteredSubjects.map((s) => (
+                    <option key={s.SubjectID} value={s.SubjectID}>
+                      {s.SubjectName}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Marks obtained */}
+              <div>
+                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
+                  {t("marksObtained")}
+                </label>
+                <input
+                  type="number"
+                  name="marksObtained"
+                  value={form.marksObtained}
+                  onChange={handleChange}
+                  className="form-input"
+                  min={0}
+                  max={100}
+                  required
+                />
+              </div>
+
+              {/* Total marks */}
+              <div>
+                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
+                  {t("totalMarks")}
+                </label>
+                <input
+                  type="number"
+                  name="totalMarks"
+                  value={form.totalMarks}
+                  onChange={handleChange}
+                  className="form-input"
+                  min={1}
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="mt-6 pt-5 border-t border-slate-100">
+              <button
+                type="submit"
+                className="btn-primary"
+                disabled={add.isPending}
               >
-                <option value="">{t("selectExam")}</option>
-                {filteredExams.map((ex) => (
-                  <option key={ex.ExamID} value={ex.ExamID}>
-                    {ex.ExamName} – {ex.ExamType}
-                  </option>
-                ))}
-              </select>
+                {add.isPending ? t("saving") : t("addResult")}
+              </button>
             </div>
-
-            {/* Subject */}
-            <div>
-              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
-                {t("subject")}
-              </label>
-              <select
-                name="subjectId"
-                value={form.subjectId}
-                onChange={handleChange}
-                className="form-input"
-                required
-              >
-                <option value="">{t("selectSubject")}</option>
-                {filteredSubjects.map((s) => (
-                  <option key={s.SubjectID} value={s.SubjectID}>
-                    {s.SubjectName}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Marks obtained */}
-            <div>
-              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
-                {t("marksObtained")}
-              </label>
-              <input
-                type="number"
-                name="marksObtained"
-                value={form.marksObtained}
-                onChange={handleChange}
-                className="form-input"
-                min={0}
-                max={100}
-                required
-              />
-            </div>
-
-            {/* Total marks */}
-            <div>
-              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
-                {t("totalMarks")}
-              </label>
-              <input
-                type="number"
-                name="totalMarks"
-                value={form.totalMarks}
-                onChange={handleChange}
-                className="form-input"
-                min={1}
-                required
-              />
-            </div>
-          </div>
-
-          <div className="mt-6 pt-5 border-t border-slate-100">
-            <button
-              type="submit"
-              className="btn-primary"
-              disabled={add.isPending}
-            >
-              {add.isPending ? t("saving") : t("addResult")}
-            </button>
-          </div>
-        </form>
-      </div>
+          </form>
+        </div>
+      )}
 
       {/* ── Results viewer ── */}
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
@@ -693,30 +701,33 @@ export default function AdminPage() {
                           </div>
                         </td>
                         <td className="table-cell">
-                          <div className="flex items-center gap-1">
-                            <button
-                              onClick={() => openEdit(r)}
-                              className="btn-icon edit"
-                              title={tCommon("edit")}
-                            >
-                              <FiEdit2 />
-                            </button>
-                            <button
-                              onClick={() => {
-                                if (
-                                  window.confirm(
-                                    t("deleteConfirm") || "Delete this result?",
+                          {!needsBranch && (
+                            <div className="flex items-center gap-1">
+                              <button
+                                onClick={() => openEdit(r)}
+                                className="btn-icon edit"
+                                title={tCommon("edit")}
+                              >
+                                <FiEdit2 />
+                              </button>
+                              <button
+                                onClick={() => {
+                                  if (
+                                    window.confirm(
+                                      t("deleteConfirm") ||
+                                        "Delete this result?",
+                                    )
                                   )
-                                )
-                                  remove.mutate(r.ResultID);
-                              }}
-                              className="btn-icon delete"
-                              title={tCommon("delete")}
-                              disabled={!r.ResultID}
-                            >
-                              <FiTrash2 />
-                            </button>
-                          </div>
+                                    remove.mutate(r.ResultID);
+                                }}
+                                className="btn-icon delete"
+                                title={tCommon("delete")}
+                                disabled={!r.ResultID}
+                              >
+                                <FiTrash2 />
+                              </button>
+                            </div>
+                          )}
                         </td>
                       </tr>
                     );

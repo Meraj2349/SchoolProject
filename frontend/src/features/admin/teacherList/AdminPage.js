@@ -12,6 +12,8 @@ import { subjectsService } from "@/services/subjects.service";
 import { queryKeys } from "@/lib/queryKeys";
 import { useTranslations } from "@/store/languageStore";
 import { useBranchStore } from "@/store/branchStore";
+import { ChooseBranchNotice } from "@/components/admin/ui";
+import { useWriteBranch } from "@/hooks/useWriteBranch";
 import {
   FiEdit2,
   FiTrash2,
@@ -38,6 +40,7 @@ export default function AdminPage() {
   const remove = useDeleteTeacher();
   const t = useTranslations("admin.teachers");
   const branchId = useBranchStore((s) => s.currentBranchId);
+  const { needsBranch } = useWriteBranch();
 
   const [form, setForm] = useState(EMPTY);
   const [editId, setEditId] = useState(null);
@@ -176,58 +179,62 @@ export default function AdminPage() {
         <div className="success-message">{status.success}</div>
       )}
 
-      {/* Form card */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-        <div className="px-6 py-4 border-b border-slate-100 flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center">
-            <FiUserPlus className="text-indigo-600 text-sm" />
+      {/* Form card — a super admin on "All branches" must pick a branch first */}
+      {needsBranch ? (
+        <ChooseBranchNotice />
+      ) : (
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+          <div className="px-6 py-4 border-b border-slate-100 flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center">
+              <FiUserPlus className="text-indigo-600 text-sm" />
+            </div>
+            <h2 className="text-base font-semibold text-slate-800">
+              {editId ? t("editTeacher") : t("addTeacher")}
+            </h2>
           </div>
-          <h2 className="text-base font-semibold text-slate-800">
-            {editId ? t("editTeacher") : t("addTeacher")}
-          </h2>
-        </div>
-        <form onSubmit={handleSave} className="p-6">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {TEXT_FIELDS.map(([name, label, req]) => (
-              <div key={name}>
+          <form onSubmit={handleSave} className="p-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {TEXT_FIELDS.map(([name, label, req]) => (
+                <div key={name}>
+                  <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
+                    {label}
+                  </label>
+                  <input
+                    type="text"
+                    name={name}
+                    value={form[name]}
+                    onChange={handleChange}
+                    className="form-input"
+                    required={req}
+                  />
+                </div>
+              ))}
+              <div>
                 <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
-                  {label}
+                  {t("joiningDate")}
                 </label>
                 <input
-                  type="text"
-                  name={name}
-                  value={form[name]}
+                  type="date"
+                  name="JoiningDate"
+                  value={form.JoiningDate}
                   onChange={handleChange}
                   className="form-input"
-                  required={req}
                 />
               </div>
-            ))}
-            <div>
-              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
-                {t("joiningDate")}
-              </label>
-              <input
-                type="date"
-                name="JoiningDate"
-                value={form.JoiningDate}
-                onChange={handleChange}
-                className="form-input"
-              />
             </div>
-          </div>
-          <div className="flex gap-3 mt-6 pt-5 border-t border-slate-100">
-            <button type="submit" className="btn-primary">
-              {editId ? t("updateTeacher") : t("addTeacher")}
-            </button>
-            {editId && (
-              <button type="button" onClick={reset} className="btn-secondary">
-                {t("cancel")}
+            <div className="flex gap-3 mt-6 pt-5 border-t border-slate-100">
+              <button type="submit" className="btn-primary">
+                {editId ? t("updateTeacher") : t("addTeacher")}
               </button>
-            )}
-          </div>
-        </form>
-      </div>
+              {editId && (
+                <button type="button" onClick={reset} className="btn-secondary">
+                  {t("cancel")}
+                </button>
+              )}
+            </div>
+          </form>
+        </div>
+      )}
 
       {/* Table card */}
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
@@ -385,32 +392,34 @@ export default function AdminPage() {
                       {teacher.ContactNumber}
                     </td>
                     <td className="table-cell">
-                      <div className="flex items-center gap-1">
-                        <button
-                          onClick={() => {
-                            setEditId(teacher.TeacherID);
-                            setForm({
-                              ...teacher,
-                              JoiningDate:
-                                teacher.JoiningDate?.split("T")[0] || "",
-                            });
-                          }}
-                          className="btn-icon edit"
-                          title={t("editTeacher")}
-                        >
-                          <FiEdit2 />
-                        </button>
-                        <button
-                          onClick={() => {
-                            if (window.confirm(t("deleteConfirm")))
-                              remove.mutate(teacher.TeacherID);
-                          }}
-                          className="btn-icon delete"
-                          title={t("deleted")}
-                        >
-                          <FiTrash2 />
-                        </button>
-                      </div>
+                      {!needsBranch && (
+                        <div className="flex items-center gap-1">
+                          <button
+                            onClick={() => {
+                              setEditId(teacher.TeacherID);
+                              setForm({
+                                ...teacher,
+                                JoiningDate:
+                                  teacher.JoiningDate?.split("T")[0] || "",
+                              });
+                            }}
+                            className="btn-icon edit"
+                            title={t("editTeacher")}
+                          >
+                            <FiEdit2 />
+                          </button>
+                          <button
+                            onClick={() => {
+                              if (window.confirm(t("deleteConfirm")))
+                                remove.mutate(teacher.TeacherID);
+                            }}
+                            className="btn-icon delete"
+                            title={t("deleted")}
+                          >
+                            <FiTrash2 />
+                          </button>
+                        </div>
+                      )}
                     </td>
                   </tr>
                 ))}

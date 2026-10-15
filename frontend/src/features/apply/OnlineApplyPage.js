@@ -1,11 +1,13 @@
 "use client";
 
 import { useState } from "react";
+import { useBranches } from "@/hooks/useBranches";
+import { useBranchStore } from "@/store/branchStore";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import LatestUpdatesNotice from "@/components/shared/LatestUpdatesNotice";
 import { applicationService } from "@/services/application.service";
-import { useTranslations } from "@/store/languageStore";
+import { useLanguageStore, useTranslations } from "@/store/languageStore";
 
 const EMPTY = {
   applicant_name: "",
@@ -19,6 +21,7 @@ const EMPTY = {
   parent_email: "",
   address: "",
   additional_info: "",
+  branch_id: "",
 };
 
 const REQUIRED = [
@@ -28,6 +31,7 @@ const REQUIRED = [
   "applying_for_class",
   "parent_name",
   "parent_contact",
+  "branch_id",
 ];
 
 const inputCls = (hasError) =>
@@ -36,7 +40,16 @@ const inputCls = (hasError) =>
   }`;
 
 export default function OnlineApplyPage() {
-  const [form, setForm] = useState(EMPTY);
+  const [chosen, setForm] = useState(EMPTY);
+  // Until the family picks a branch, use the one chosen on the website (the
+  // saved choice can load after the first render).
+  const websiteBranchId = useBranchStore((s) => s.currentBranchId);
+  const form = {
+    ...chosen,
+    branch_id: chosen.branch_id || (websiteBranchId == null ? "" : String(websiteBranchId)),
+  };
+  const { data: branches = [] } = useBranches();
+  const language = useLanguageStore((s) => s.language);
   const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
@@ -68,7 +81,7 @@ export default function OnlineApplyPage() {
     }
     setSubmitting(true);
     try {
-      await applicationService.submit(form);
+      await applicationService.submit({ ...form, branch_id: Number(form.branch_id) });
       setSuccess(true);
     } catch (err) {
       setSubmitError(
@@ -143,6 +156,30 @@ export default function OnlineApplyPage() {
                   value={form.applicant_name}
                   onChange={handleChange}
                 />
+              </div>
+
+              {/* Branch (campus) — the child is enrolled there if accepted */}
+              <div className="sm:col-span-2 flex flex-col gap-1.5">
+                <label
+                  className="text-sm font-semibold text-gray-700"
+                  htmlFor="branch_id"
+                >
+                  {t("branch")} <span className="text-red-500 ml-0.5">*</span>
+                </label>
+                <select
+                  id="branch_id"
+                  name="branch_id"
+                  className={inputCls(errors.branch_id)}
+                  value={form.branch_id}
+                  onChange={handleChange}
+                >
+                  <option value="">—</option>
+                  {branches.map((b) => (
+                    <option key={b.id} value={String(b.id)}>
+                      {(language === "bn" ? b.name_bn : b.name_en) || b.name_en || b.name_bn}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               {/* Date of birth */}

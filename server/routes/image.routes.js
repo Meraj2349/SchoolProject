@@ -1,31 +1,22 @@
 import express from "express";
 import upload from "../config/multer.config.js";
-import authMiddleware from "../middlewares/auth.middleware.js";
-import * as ImageController from "../controllers/image.controller.js";
+import authMiddleware, { optionalAuth } from "../middlewares/auth.middleware.js";
+import { galleryController as images } from "../src/modules/gallery/index.js";
 
+// Gallery images, per branch or for the whole school. Reads show the chosen
+// branch (?branch_id, or a branch admin's own) plus whole-school images.
 const router = express.Router();
 
-// Create
-router.post("/", authMiddleware, upload.single("image"), ImageController.uploadImage);
+router.get("/", optionalAuth, images.list);
+router.get("/details", optionalAuth, images.list);
+router.get("/type/:type", optionalAuth, images.byType);
+router.get("/student/:studentId", optionalAuth, images.byStudent);
+router.get("/teacher/:teacherId", optionalAuth, images.byTeacher);
+router.get("/:id", optionalAuth, images.get);
 
-// Read
-router.get("/", ImageController.getAllImagesWithDetails); // List all images
-router.get("/details", ImageController.getAllImagesWithDetails); // Get all images with student/teacher details
-router.get("/type/:type", ImageController.getImagesByType);
-router.get("/student/:studentId", ImageController.getImagesByStudent); // Get images by student ID
-router.get("/teacher/:teacherId", ImageController.getImagesByTeacher); // Get images by teacher ID
-router.get("/:id", ImageController.getImage);
-
-// Update
-router.put("/:id", authMiddleware, ImageController.updateImage); // Update metadata only
-router.put(
-  "/:id/image",
-  authMiddleware,
-  upload.single("image"),
-  ImageController.replaceImageFile,
-); // Replace image file
-
-// Delete
-router.delete("/:id", authMiddleware, ImageController.deleteImage);
+router.post("/", authMiddleware, upload.single("image"), images.upload);
+router.put("/:id", authMiddleware, images.update); // metadata only
+router.put("/:id/image", authMiddleware, upload.single("image"), images.replaceFile);
+router.delete("/:id", authMiddleware, images.remove);
 
 export default router;

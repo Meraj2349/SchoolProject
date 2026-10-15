@@ -2,12 +2,14 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/queryKeys";
+import { useBranchStore } from "@/store/branchStore";
 import { newsService } from "@/services/news.service";
 
 // Public hook — fetches only active news (for the homepage)
 export function useNews() {
+  const branchId = useBranchStore((s) => s.currentBranchId);
   return useQuery({
-    queryKey: queryKeys.news.all,
+    queryKey: [...queryKeys.news.all, { branchId }],
     queryFn: newsService.getAll,
     select: (data) => (Array.isArray(data) ? data : (data?.data ?? [])),
   });
@@ -15,8 +17,9 @@ export function useNews() {
 
 // Admin hook — fetches all news including inactive
 export function useAllNews() {
+  const branchId = useBranchStore((s) => s.currentBranchId);
   return useQuery({
-    queryKey: queryKeys.news.adminAll,
+    queryKey: [...queryKeys.news.adminAll, { branchId }],
     queryFn: newsService.getAllAdmin,
     select: (data) => (Array.isArray(data) ? data : (data?.data ?? [])),
   });

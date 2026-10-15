@@ -1,13 +1,14 @@
 import httpClient from "@/lib/httpClient";
 
 export const noticesService = {
-  getAll: () => httpClient.get("/notices").then((r) => r.data),
+  getAll: () => httpClient.get("/notices").then((r) => r.data?.data ?? r.data),
 
   create: (data) =>
     httpClient
       .post("/notices/add", {
         title: data.Title,
         description: data.Description,
+        show: Boolean(data.Show),
       })
       .then((r) => r.data),
 

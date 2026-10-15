@@ -4,9 +4,17 @@ import Image from "next/image";
 import { useState, useRef } from "react";
 import { useImages, useUploadImage, useDeleteImage } from "@/hooks/useImages";
 import { useTranslations } from "@/store/languageStore";
+import { useContentScope } from "@/hooks/useContentScope";
+import {
+  ContentScopeBadge,
+  NewContentScopeNote,
+  NotYoursMark,
+  errorMessage,
+} from "@/components/admin/ui";
 import { FiImage, FiUploadCloud, FiTrash2 } from "react-icons/fi";
 
-const TYPES = ["general", "school", "student", "teacher", "event", "notice"];
+// Must match Images.ImageType in the database.
+const TYPES = ["school", "event", "notice", "student", "teacher"];
 
 export default function AdminPage() {
   const { data: images = [], isLoading } = useImages();
@@ -15,10 +23,11 @@ export default function AdminPage() {
   const fileRef = useRef();
   const t = useTranslations("admin.gallery");
   const tCommon = useTranslations("common");
+  const { canManage } = useContentScope();
 
   const [form, setForm] = useState({
     description: "",
-    imageType: "general",
+    imageType: "school",
     studentId: "",
     teacherId: "",
   });
@@ -50,12 +59,12 @@ export default function AdminPage() {
       if (fileRef.current) fileRef.current.value = "";
       setForm({
         description: "",
-        imageType: "general",
+        imageType: "school",
         studentId: "",
         teacherId: "",
       });
     } catch (err) {
-      flash(err.message || t("uploadFailed"), true);
+      flash(errorMessage(err, t("uploadFailed")), true);
     }
   };
 
@@ -65,7 +74,7 @@ export default function AdminPage() {
       await remove.mutateAsync(id);
       flash(t("deleted"));
     } catch (err) {
-      flash(err.message || t("deleteFailed"), true);
+      flash(errorMessage(err, t("deleteFailed")), true);
     }
   };
 
@@ -82,6 +91,8 @@ export default function AdminPage() {
       {status.success && (
         <div className="success-message">{status.success}</div>
       )}
+
+      <NewContentScopeNote />
 
       {/* Upload form card */}
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
@@ -191,7 +202,7 @@ export default function AdminPage() {
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
             {images.map((img) => (
-              <div
+              <article
                 key={img.ImageID}
                 className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow group"
               >
@@ -204,14 +215,18 @@ export default function AdminPage() {
                   />
                 </div>
                 <div className="p-3">
-                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-indigo-50 text-indigo-700">
-                    {img.ImageType}
-                  </span>
+                  <div className="flex flex-wrap items-center gap-1">
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-indigo-50 text-indigo-700">
+                      {img.ImageType}
+                    </span>
+                    <ContentScopeBadge branchId={img.branch_id} />
+                  </div>
                   {img.Description && (
                     <p className="text-xs mt-1.5 text-slate-600 leading-snug line-clamp-2">
                       {img.Description}
                     </p>
                   )}
+                  {canManage(img) ? (
                   <button
                     onClick={() => handleDelete(img.ImageID)}
                     className="mt-2.5 inline-flex items-center gap-1.5 text-red-500 text-xs font-medium hover:text-red-700 bg-transparent border-none cursor-pointer transition-colors"
@@ -219,8 +234,13 @@ export default function AdminPage() {
                     <FiTrash2 className="text-xs" />
                     {tCommon("delete")}
                   </button>
+                  ) : (
+                    <div className="mt-2.5">
+                      <NotYoursMark />
+                    </div>
+                  )}
                 </div>
-              </div>
+              </article>
             ))}
           </div>
         )}

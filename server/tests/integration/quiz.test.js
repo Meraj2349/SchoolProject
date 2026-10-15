@@ -217,7 +217,9 @@ describe("taking a quiz", () => {
 });
 
 describe("question bank (admin)", () => {
-  const asAdmin = (req) => req.set(bearer(branchAdminToken(BRANCH_A)));
+  // Changing the shared bank is for super admins; any admin may read it.
+  const asAdmin = (req) => req.set(bearer(superAdminToken()));
+  const asBranchAdmin = (req) => req.set(bearer(branchAdminToken(BRANCH_A)));
   const newQuestion = {
     classKey: "Class 6",
     subject: "Math",
@@ -244,7 +246,7 @@ describe("question bank (admin)", () => {
     const id = created.body.data.id;
     expect(created.body.data).toMatchObject({ classKey: "6", prompt: newQuestion.prompt, optionsBn: newQuestion.optionsBn, active: true });
     const [[row]] = await db.query("SELECT CreatedBy FROM QuizQuestions WHERE QuestionID = ?", [id]);
-    expect(row.CreatedBy).toBe(9002);
+    expect(row.CreatedBy).toBe(9001);
 
     const edited = await asAdmin(request(app).put(`/api/quiz/admin/questions/${id}`)).send({ answer: "c" });
     expect(edited.body.data).toMatchObject({ answer: "C", promptBn: newQuestion.promptBn });
@@ -261,6 +263,25 @@ describe("question bank (admin)", () => {
     expect((await request(app).post("/api/quiz/start").set(student).send({})).status).toBe(404);
     expect((await asAdmin(request(app).get("/api/quiz/admin/questions?classKey=6"))).body.data.total).toBe(0);
     expect((await asAdmin(request(app).get("/api/quiz/admin/questions?classKey=6&status=hidden"))).body.data.total).toBe(1);
+  });
+
+  it("lets a branch admin read the bank but not change it", async () => {
+    const created = await asAdmin(request(app).post("/api/quiz/admin/questions")).send(newQuestion);
+    const id = created.body.data.id;
+
+    expect((await asBranchAdmin(request(app).get("/api/quiz/admin/questions?classKey=6"))).body.data.total).toBe(1);
+    expect((await asBranchAdmin(request(app).get("/api/quiz/admin/questions/subjects?classKey=6"))).status).toBe(200);
+    expect((await asBranchAdmin(request(app).get(`/api/quiz/admin/questions/${id}`))).status).toBe(200);
+
+    const add = await asBranchAdmin(request(app).post("/api/quiz/admin/questions")).send(newQuestion);
+    const edit = await asBranchAdmin(request(app).put(`/api/quiz/admin/questions/${id}`)).send({ answer: "C" });
+    const hide = await asBranchAdmin(request(app).patch(`/api/quiz/admin/questions/${id}/active`)).send({ active: false });
+
+    expect([add.status, edit.status, hide.status]).toEqual([403, 403, 403]);
+    expect(add.body).toEqual({ success: false, message: expect.any(String) });
+    const [[row]] = await db.query("SELECT CorrectAnswer, Active FROM QuizQuestions WHERE QuestionID = ?", [id]);
+    expect(row).toEqual({ CorrectAnswer: "B", Active: 1 });
+    expect(await count("QuizQuestions")).toBe(1);
   });
 
   it("searches English and Bangla text and counts subjects per class", async () => {

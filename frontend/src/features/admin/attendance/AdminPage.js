@@ -9,10 +9,13 @@ import { localDateString } from "@/lib/dates";
 import { queryKeys } from "@/lib/queryKeys";
 import { useTranslations } from "@/store/languageStore";
 import { useBranchStore } from "@/store/branchStore";
+import { ChooseBranchNotice } from "@/components/admin/ui";
+import { useWriteBranch } from "@/hooks/useWriteBranch";
 import { FiSearch, FiSave, FiUsers } from "react-icons/fi";
 
 export default function AdminPage() {
   const t = useTranslations("admin.attendance");
+  const { needsBranch } = useWriteBranch();
   const branchId = useBranchStore((s) => s.currentBranchId);
 
   const [filter, setFilter] = useState({
@@ -139,6 +142,9 @@ export default function AdminPage() {
         <div className="success-message">{status.success}</div>
       )}
 
+      {/* A super admin on "All branches" can look, but must pick a branch to save */}
+      {needsBranch && <ChooseBranchNotice />}
+
       {/* Filter form card */}
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
         <div className="px-6 py-4 border-b border-slate-100 flex items-center gap-3">
@@ -233,14 +239,16 @@ export default function AdminPage() {
                 </p>
               </div>
             </div>
-            <button
-              onClick={handleSave}
-              className="btn-primary"
-              disabled={saving}
-            >
-              <FiSave className="text-sm" />
-              {saving ? t("saving") : t("saveAttendance")}
-            </button>
+            {!needsBranch && (
+              <button
+                onClick={handleSave}
+                className="btn-primary"
+                disabled={saving}
+              >
+                <FiSave className="text-sm" />
+                {saving ? t("saving") : t("saveAttendance")}
+              </button>
+            )}
           </div>
           <div className="overflow-x-auto">
             <table className="w-full border-collapse">
@@ -278,6 +286,7 @@ export default function AdminPage() {
                               [s.StudentID]: stat,
                             }))
                           }
+                          disabled={needsBranch}
                           className="w-4 h-4 accent-indigo-600 cursor-pointer"
                         />
                       </td>

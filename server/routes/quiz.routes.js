@@ -1,6 +1,7 @@
 import express from "express";
 import authMiddleware from "../middlewares/auth.middleware.js";
 import quizStudentMiddleware from "../middlewares/quizStudent.middleware.js";
+import { requireRole } from "../src/shared/http/requireRole.js";
 import { quizController as quiz } from "../src/modules/quiz/index.js";
 
 const router = express.Router();
@@ -16,15 +17,16 @@ router.get("/my-sessions", quizStudentMiddleware, quiz.mySessions);
 router.get("/my-progress", quizStudentMiddleware, quiz.myProgress);
 
 // Admins: the question bank and results (branch-scoped). The bank is shared by
-// every branch, and any admin may add, edit or hide questions in it.
+// every branch: any admin may read it, only super admins may change it.
+const superAdminOnly = requireRole("super_admin");
 const admin = express.Router();
 admin.use(authMiddleware);
 admin.get("/questions", quiz.listQuestions);
 admin.get("/questions/subjects", quiz.subjects);
 admin.get("/questions/:id", quiz.getQuestion);
-admin.post("/questions", quiz.createQuestion);
-admin.put("/questions/:id", quiz.updateQuestion);
-admin.patch("/questions/:id/active", quiz.setActive);
+admin.post("/questions", superAdminOnly, quiz.createQuestion);
+admin.put("/questions/:id", superAdminOnly, quiz.updateQuestion);
+admin.patch("/questions/:id/active", superAdminOnly, quiz.setActive);
 admin.get("/sessions", quiz.sessions);
 admin.get("/leaderboard", quiz.leaderboard);
 router.use("/admin", admin);

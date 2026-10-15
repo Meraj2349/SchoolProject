@@ -1,5 +1,6 @@
 import express from "express";
 import authMiddleware, { optionalAuth } from "../middlewares/auth.middleware.js";
+import { requireWriteBranch } from "../src/shared/http/requireWriteBranch.js";
 import {
   addStudentController,
   checkRollNumberController,
@@ -33,7 +34,7 @@ router.get(
 );
 
 // ── Write routes — require a valid JWT (admin only) ──
-router.post("/", authMiddleware, addStudentController);
+router.post("/", authMiddleware, requireWriteBranch, addStudentController);
 router.put("/:id", authMiddleware, updateStudentController);
 router.delete("/:id", authMiddleware, deleteStudentController);
 

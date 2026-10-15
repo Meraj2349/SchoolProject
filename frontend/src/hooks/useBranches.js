@@ -19,6 +19,7 @@ export function useCreateBranch() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: queryKeys.branches.all });
       qc.invalidateQueries({ queryKey: queryKeys.branches.stats });
+      qc.invalidateQueries({ queryKey: queryKeys.branches.overview });
     },
   });
 }
@@ -30,6 +31,7 @@ export function useUpdateBranch() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: queryKeys.branches.all });
       qc.invalidateQueries({ queryKey: queryKeys.branches.stats });
+      qc.invalidateQueries({ queryKey: queryKeys.branches.overview });
     },
   });
 }
@@ -41,6 +43,7 @@ export function useDeleteBranch() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: queryKeys.branches.all });
       qc.invalidateQueries({ queryKey: queryKeys.branches.stats });
+      qc.invalidateQueries({ queryKey: queryKeys.branches.overview });
     },
   });
 }

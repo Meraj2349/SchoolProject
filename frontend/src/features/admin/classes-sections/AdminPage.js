@@ -10,6 +10,8 @@ import {
   useHardDeleteClass,
 } from "@/hooks/useClasses";
 import { useBranchStore } from "@/store/branchStore";
+import { ChooseBranchNotice } from "@/components/admin/ui";
+import { useWriteBranch } from "@/hooks/useWriteBranch";
 import { useAuthStore } from "@/store/authStore";
 import { toast } from "react-toastify";
 import { FiEdit2, FiPlusCircle, FiGrid, FiTrash2 } from "react-icons/fi";
@@ -25,9 +27,8 @@ export default function ClassesSectionsAdminPage() {
   const hardRemove = useHardDeleteClass();
 
   const branchId = useBranchStore((s) => s.currentBranchId);
-  const role = useAuthStore((s) => s.role);
-  const isSuperAdmin = role === "super_admin";
-  const needsBranch = isSuperAdmin && branchId == null;
+  const isSuperAdmin = useAuthStore((s) => s.role) === "super_admin";
+  const { needsBranch } = useWriteBranch();
 
   const [form, setForm] = useState(EMPTY_FORM);
   const [editId, setEditId] = useState(null);
@@ -111,12 +112,7 @@ export default function ClassesSectionsAdminPage() {
         </p>
       </div>
 
-      {needsBranch && (
-        <div className="rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-          <strong className="font-semibold">Select a branch</strong> from the
-          top bar before adding classes.
-        </div>
-      )}
+      {needsBranch && <ChooseBranchNotice />}
 
       <div
         ref={formRef}

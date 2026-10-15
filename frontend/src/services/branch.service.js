@@ -2,6 +2,8 @@ import httpClient from "@/lib/httpClient";
 
 export const branchService = {
   getAll: () => httpClient.get("/branches").then((r) => r.data?.data ?? r.data),
+  // Super admins: counts plus this month's fees billed and collected per branch.
+  getOverview: () => httpClient.get("/branches/admin/overview").then((r) => r.data?.data ?? []),
   getStats: () =>
     httpClient.get("/branches/stats/overview").then((r) => r.data?.data ?? r.data),
   create: (data) =>

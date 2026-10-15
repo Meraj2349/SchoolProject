@@ -11,7 +11,8 @@ import { teachersService } from "@/services/teachers.service";
 import { queryKeys } from "@/lib/queryKeys";
 import { useTranslations } from "@/store/languageStore";
 import { useBranchStore } from "@/store/branchStore";
-import { useAuthStore } from "@/store/authStore";
+import { ChooseBranchNotice } from "@/components/admin/ui";
+import { useWriteBranch } from "@/hooks/useWriteBranch";
 import { toast } from "react-toastify";
 import {
   FiEdit2,
@@ -155,9 +156,7 @@ export default function AdminPage() {
   const remove = useDeleteClass();
   const t = useTranslations("admin.classes");
   const branchId = useBranchStore((s) => s.currentBranchId);
-  const role = useAuthStore((s) => s.role);
-  const isSuperAdmin = role === "super_admin";
-  const needsBranch = isSuperAdmin && branchId == null;
+  const { needsBranch } = useWriteBranch();
 
   const [form, setForm] = useState(EMPTY_FORM);
   const [editId, setEditId] = useState(null);
@@ -325,13 +324,7 @@ export default function AdminPage() {
         </p>
       </div>
 
-      {needsBranch && (
-        <div className="rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-          <strong className="font-semibold">Select a branch</strong> from the
-          top bar first. Super admin must scope teacher assignment to a
-          specific branch.
-        </div>
-      )}
+      {needsBranch && <ChooseBranchNotice />}
 
       {!needsBranch && !isLoading && classes.length === 0 && (
         <div className="rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-700">

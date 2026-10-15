@@ -715,7 +715,8 @@
       "statusUpdated": "Status updated!",
       "loading": "Loading…",
       "noApplications": "No applications found.",
-      "operationFailed": "Operation failed"
+      "operationFailed": "Operation failed",
+      "noBranch": "No branch"
     },
     "branches": {
       "title": "Branch Management",
@@ -744,7 +745,20 @@
       "operationFailed": "Operation failed",
       "nameRequired": "At least one branch name is required",
       "noBranches": "No branches found. Add one above.",
-      "superAdminOnly": "Branch management is only available to super admins."
+      "superAdminOnly": "Branch management is only available to super admins.",
+      "students": "Students",
+      "admins": "Admins",
+      "feesThisMonth": "Fees this month (collected / billed)",
+      "usage": {
+        "students": "{count} students",
+        "teachers": "{count} teachers",
+        "classes": "{count} classes",
+        "admins": "{count} admins",
+        "invoices": "{count} fee invoices",
+        "payments": "{count} payments",
+        "applications": "{count} applications",
+        "websiteItems": "{count} website items"
+      }
     },
     "dashboard": {
       "title": "Dashboard",
@@ -786,7 +800,10 @@
       "amount": "Amount",
       "date": "Date",
       "method": "Method",
-      "branch": "Branch"
+      "branch": "Branch",
+      "admins": "Admins",
+      "feesBilledThisMonth": "Billed this month",
+      "feesCollectedThisMonth": "Collected this month"
     },
     "shell": {
       "home": "Admin",
@@ -811,7 +828,13 @@
       "cancel": "Cancel",
       "confirm": "Confirm",
       "save": "Save",
-      "saving": "Saving…"
+      "saving": "Saving…",
+      "chooseBranch": "You are viewing all branches. Choose a branch in the top bar to add or change records.",
+      "wholeSchool": "Whole school",
+      "branch": "Branch",
+      "newContentForSchool": "New items are published for the whole school. Choose a branch in the top bar to publish for one branch only.",
+      "newContentForBranch": "New items are published for {branch}.",
+      "contentNotYours": "Only the super admin can change this."
     },
     "fees": {
       "overviewTitle": "Fees",
@@ -1062,7 +1085,8 @@
       "average": "Average",
       "best": "Best",
       "noLeaderboard": "No results yet",
-      "allSubjectsShort": "Mixed"
+      "allSubjectsShort": "Mixed",
+      "readOnlyNote": "Only super admins can add or change questions."
     }
   },
   "branches": {
@@ -1115,7 +1139,8 @@
     "successMessage": "Your application has been received. We will contact you soon.",
     "submitAnother": "Submit Another Application",
     "requiredFields": "Please fill in all required fields",
-    "submitFailed": "Submission failed. Please try again."
+    "submitFailed": "Submission failed. Please try again.",
+    "branch": "Branch (campus)"
   },
   "common": {
     "loading": "Loading…",

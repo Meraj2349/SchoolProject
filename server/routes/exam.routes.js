@@ -1,5 +1,6 @@
 import express from "express";
 import authMiddleware from "../middlewares/auth.middleware.js";
+import { requireWriteBranch } from "../src/shared/http/requireWriteBranch.js";
 import {
   addExamByClassDetailsController,
   createExamByClassNameAndSectionController,
@@ -22,10 +23,10 @@ router.use(authMiddleware);
 router.get("/", getAllExamsController);
 
 // Route to add an exam using class details (names instead of IDs)
-router.post("/by-class", addExamByClassDetailsController);
+router.post("/by-class", requireWriteBranch, addExamByClassDetailsController);
 
 // Route to create exam by class name and section (alternative endpoint)
-router.post("/create", createExamByClassNameAndSectionController);
+router.post("/create", requireWriteBranch, createExamByClassNameAndSectionController);
 
 // Route to get exams by class
 router.get("/class/:classId", getExamsByClassController);

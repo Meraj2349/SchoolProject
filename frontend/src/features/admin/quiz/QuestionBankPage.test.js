@@ -1,5 +1,6 @@
 import { fireEvent, screen, waitFor, within } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { useAuthStore } from "@/store/authStore";
 import { useLanguageStore } from "@/store/languageStore";
 import { renderWithQuery } from "@/test-utils";
 import QuestionBankPage from "./QuestionBankPage";
@@ -61,6 +62,20 @@ describe("Question bank", () => {
     api.update.mockResolvedValue({ success: true });
     api.setActive.mockResolvedValue({ success: true });
     useLanguageStore.getState().setLanguage("en");
+    useAuthStore.setState({ role: "super_admin" });
+  });
+
+  it("lets a branch admin browse but not change questions", async () => {
+    useAuthStore.setState({ role: "branch_admin" });
+
+    await openClass10();
+
+    expect(screen.getByText("Only super admins can add or change questions.")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Add question" })).not.toBeInTheDocument();
+    const row = rowOf("Which mirror is a rear view mirror?");
+    expect(within(row).queryByRole("button", { name: "Edit" })).not.toBeInTheDocument();
+    expect(within(row).queryByRole("button", { name: "Hide" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("columnheader", { name: "Actions" })).not.toBeInTheDocument();
   });
 
   it("asks for a class first, listing classes in school order", async () => {

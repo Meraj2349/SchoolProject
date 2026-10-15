@@ -7,6 +7,8 @@ import { classesService } from "@/services/classes.service";
 import { queryKeys } from "@/lib/queryKeys";
 import { useTranslations } from "@/store/languageStore";
 import { useBranchStore } from "@/store/branchStore";
+import { ChooseBranchNotice } from "@/components/admin/ui";
+import { useWriteBranch } from "@/hooks/useWriteBranch";
 import { FiEdit2, FiTrash2, FiBook, FiPlusCircle, FiX } from "react-icons/fi";
 
 const EMPTY = { SubjectName: "", ClassID: "" };
@@ -14,6 +16,7 @@ const EMPTY = { SubjectName: "", ClassID: "" };
 export default function AdminPage() {
   const qc = useQueryClient();
   const t = useTranslations("admin.subjects");
+  const { needsBranch } = useWriteBranch();
   const tCommon = useTranslations("common");
   const branchId = useBranchStore((s) => s.currentBranchId);
 
@@ -100,62 +103,66 @@ export default function AdminPage() {
         <div className="success-message">{status.success}</div>
       )}
 
-      {/* Form card */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-        <div className="px-6 py-4 border-b border-slate-100 flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center">
-            <FiPlusCircle className="text-indigo-600 text-sm" />
-          </div>
-          <h2 className="text-base font-semibold text-slate-800">
-            {editId ? t("editSubject") : t("addSubject")}
-          </h2>
-        </div>
-        <form onSubmit={handleSave} className="p-6">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
-                {t("subjectName")}
-              </label>
-              <input
-                type="text"
-                name="SubjectName"
-                value={form.SubjectName}
-                onChange={handleChange}
-                className="form-input"
-                required
-              />
+      {/* Hidden until a super admin picks a branch */}
+      {needsBranch ? (
+        <ChooseBranchNotice />
+      ) : (
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+          <div className="px-6 py-4 border-b border-slate-100 flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center">
+              <FiPlusCircle className="text-indigo-600 text-sm" />
             </div>
-            <div>
-              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
-                {t("className")}
-              </label>
-              <select
-                name="ClassID"
-                value={form.ClassID}
-                onChange={handleChange}
-                className="form-input"
-              >
-                <option value="">{t("selectClass")}</option>
-                {classes.map((c) => (
-                  <option key={c.ClassID} value={c.ClassID}>
-                    {c.ClassName} – {c.Section}
-                  </option>
-                ))}
-              </select>
-            </div>
+            <h2 className="text-base font-semibold text-slate-800">
+              {editId ? t("editSubject") : t("addSubject")}
+            </h2>
           </div>
-          <div className="flex gap-3 mt-6 pt-5 border-t border-slate-100">
-            <button type="submit" className="btn-primary">
-              {editId ? t("updateSubject") : t("addSubject")}
-            </button>
-            {editId && (
-              <button type="button" onClick={reset} className="btn-secondary">
-                {t("cancel")}
+          <form onSubmit={handleSave} className="p-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
+                  {t("subjectName")}
+                </label>
+                <input
+                  type="text"
+                  name="SubjectName"
+                  value={form.SubjectName}
+                  onChange={handleChange}
+                  className="form-input"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
+                  {t("className")}
+                </label>
+                <select
+                  name="ClassID"
+                  value={form.ClassID}
+                  onChange={handleChange}
+                  className="form-input"
+                >
+                  <option value="">{t("selectClass")}</option>
+                  {classes.map((c) => (
+                    <option key={c.ClassID} value={c.ClassID}>
+                      {c.ClassName} – {c.Section}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            <div className="flex gap-3 mt-6 pt-5 border-t border-slate-100">
+              <button type="submit" className="btn-primary">
+                {editId ? t("updateSubject") : t("addSubject")}
               </button>
-            )}
-          </div>
-        </form>
-      </div>
+              {editId && (
+                <button type="button" onClick={reset} className="btn-secondary">
+                  {t("cancel")}
+                </button>
+              )}
+            </div>
+          </form>
+        </div>
+      )}
 
       {/* Table card */}
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
@@ -254,31 +261,33 @@ export default function AdminPage() {
                         </span>
                       </td>
                       <td className="table-cell">
-                        <div className="flex items-center gap-1">
-                          <button
-                            onClick={() => {
-                              setEditId(s.SubjectID);
-                              setForm({
-                                SubjectName: s.SubjectName,
-                                ClassID: s.ClassID || "",
-                              });
-                            }}
-                            className="btn-icon edit"
-                            title={tCommon("edit")}
-                          >
-                            <FiEdit2 />
-                          </button>
-                          <button
-                            onClick={() => {
-                              if (window.confirm(t("deleteConfirm")))
-                                remove.mutate(s.SubjectID);
-                            }}
-                            className="btn-icon delete"
-                            title={tCommon("delete")}
-                          >
-                            <FiTrash2 />
-                          </button>
-                        </div>
+                        {!needsBranch && (
+                          <div className="flex items-center gap-1">
+                            <button
+                              onClick={() => {
+                                setEditId(s.SubjectID);
+                                setForm({
+                                  SubjectName: s.SubjectName,
+                                  ClassID: s.ClassID || "",
+                                });
+                              }}
+                              className="btn-icon edit"
+                              title={tCommon("edit")}
+                            >
+                              <FiEdit2 />
+                            </button>
+                            <button
+                              onClick={() => {
+                                if (window.confirm(t("deleteConfirm")))
+                                  remove.mutate(s.SubjectID);
+                              }}
+                              className="btn-icon delete"
+                              title={tCommon("delete")}
+                            >
+                              <FiTrash2 />
+                            </button>
+                          </div>
+                        )}
                       </td>
                     </tr>
                   ))

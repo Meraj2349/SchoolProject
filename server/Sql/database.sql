@@ -145,6 +145,7 @@ CREATE TABLE
         Title VARCHAR(255) NOT NULL, -- Title of the notice
         Description TEXT NOT NULL, -- Description of the notice
         `Show` BOOLEAN NOT NULL DEFAULT FALSE, -- Whether the notice is visible or not
+        branch_id INT NULL COMMENT 'Owning branch; NULL = whole school',
         CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Timestamp for when the notice was created
         UpdatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP -- Timestamp for when the notice was last updated
     );
@@ -154,6 +155,7 @@ CREATE TABLE
         MessageID INT PRIMARY KEY AUTO_INCREMENT, -- Unique identifier for each message
         Messages TEXT NOT NULL, -- The message content
         `Show` BOOLEAN NOT NULL DEFAULT FALSE, -- Whether the message is visible or not
+        branch_id INT NULL COMMENT 'Owning branch; NULL = whole school',
         CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Timestamp for when the message was created
         UpdatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP -- Timestamp for when the message was last updated
     );
@@ -171,6 +173,7 @@ CREATE TABLE
         StudentID INT NULL COMMENT 'Reference to Students table if image belongs to student',
         TeacherID INT NULL COMMENT 'Reference to Teachers table if image belongs to teacher',
         AssociatedID INT COMMENT 'ID of the associated entity (for other types)',
+        branch_id INT NULL COMMENT 'Owning branch (a student/teacher photo: their branch); NULL = whole school',
         FOREIGN KEY (StudentID) REFERENCES Students (StudentID) ON DELETE CASCADE,
         FOREIGN KEY (TeacherID) REFERENCES Teachers (TeacherID) ON DELETE CASCADE
     );
@@ -315,6 +318,7 @@ CREATE TABLE
         date DATE NOT NULL,
         link VARCHAR(500) NOT NULL DEFAULT '/events',
         is_active BOOLEAN NOT NULL DEFAULT TRUE,
+        branch_id INT NULL COMMENT 'Owning branch; NULL = whole school',
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
     );
@@ -365,6 +369,7 @@ CREATE TABLE
         category ENUM ('Admission', 'Exam', 'Notice', 'Event') NOT NULL,
         date DATE NOT NULL,
         is_published BOOLEAN NOT NULL DEFAULT TRUE,
+        branch_id INT NULL COMMENT 'Owning branch; NULL = whole school',
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
     );
@@ -412,6 +417,7 @@ CREATE TABLE
         additional_info TEXT,
         status ENUM ('pending', 'reviewed', 'accepted', 'rejected') DEFAULT 'pending',
         student_id INT NULL COMMENT 'Student created when the application was accepted',
+        branch_id INT NULL COMMENT 'Branch applied to; the student is enrolled there',
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
     );
@@ -551,6 +557,14 @@ ALTER TABLE Exams ADD CONSTRAINT fk_exams_branch FOREIGN KEY (branch_id) REFEREN
 ALTER TABLE Results ADD CONSTRAINT fk_results_branch FOREIGN KEY (branch_id) REFERENCES Branches (id);
 ALTER TABLE Events ADD CONSTRAINT fk_events_branch FOREIGN KEY (branch_id) REFERENCES Branches (id);
 ALTER TABLE Routines ADD CONSTRAINT fk_routines_branch FOREIGN KEY (branch_id) REFERENCES Branches (id);
+-- Website content and applications (NULL = whole school). Existing databases:
+-- branch_content_migration.sql
+ALTER TABLE Notices ADD CONSTRAINT fk_notices_branch FOREIGN KEY (branch_id) REFERENCES Branches (id);
+ALTER TABLE NoticeAnnouncements ADD CONSTRAINT fk_notice_announcements_branch FOREIGN KEY (branch_id) REFERENCES Branches (id);
+ALTER TABLE News ADD CONSTRAINT fk_news_branch FOREIGN KEY (branch_id) REFERENCES Branches (id);
+ALTER TABLE Messages ADD CONSTRAINT fk_messages_branch FOREIGN KEY (branch_id) REFERENCES Branches (id);
+ALTER TABLE Images ADD CONSTRAINT fk_images_branch FOREIGN KEY (branch_id) REFERENCES Branches (id);
+ALTER TABLE Applications ADD CONSTRAINT fk_applications_branch FOREIGN KEY (branch_id) REFERENCES Branches (id);
 
 -- ============================================================
 -- Fees: monthly tuition + extra fee heads, discounts, invoices,

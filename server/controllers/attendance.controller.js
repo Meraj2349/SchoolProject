@@ -1,4 +1,5 @@
 import { t } from "../config/i18n.js";
+import { allInBranch } from "../utils/branchOwnership.js";
 
 // Month names used by forceSyncController
 const MONTH_NAMES = [
@@ -124,6 +125,11 @@ export const getAllAttendanceController = async (req, res) => {
   }
 };
 
+// Every student and class in the records belongs to the admin's branch.
+const recordsInBranch = async (records, branchId) =>
+  (await allInBranch("Students", records.map((r) => r.studentID), branchId)) &&
+  (await allInBranch("Classes", records.map((r) => r.classID), branchId));
+
 // Create a new attendance record
 export const createAttendanceController = async (req, res) => {
   try {
@@ -153,6 +159,9 @@ export const createAttendanceController = async (req, res) => {
     }
 
     const branchId = req.branchId ?? null;
+    if (!(await recordsInBranch([{ studentID, classID }], branchId))) {
+      return res.status(400).json({ success: false, message: t("branch_mismatch", req.language) });
+    }
     const attendanceData = { studentID, classID, classDate, status };
     const attendanceID = await createAttendance(attendanceData, branchId);
 
@@ -586,6 +595,9 @@ export const bulkCreateAttendanceController = async (req, res) => {
     }
 
     const branchId = req.branchId ?? null;
+    if (!(await recordsInBranch(attendanceRecords, branchId))) {
+      return res.status(400).json({ success: false, message: t("branch_mismatch", req.language) });
+    }
     const affectedRows = await bulkCreateAttendance(attendanceRecords, branchId);
 
     res.status(201).json({
@@ -594,9 +606,10 @@ export const bulkCreateAttendanceController = async (req, res) => {
       data: { recordsCreated: affectedRows },
     });
   } catch (error) {
+    console.error("Error bulk creating attendance records:", error);
     res.status(500).json({
       success: false,
-      message: "Error bulk creating attendance records: " + error.message,
+      message: t("attendance_fetch_failed", req.language),
     });
   }
 };

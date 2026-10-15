@@ -715,7 +715,8 @@
       "statusUpdated": "অবস্থা আপডেট হয়েছে!",
       "loading": "লোড হচ্ছে…",
       "noApplications": "কোনো আবেদন পাওয়া যায়নি।",
-      "operationFailed": "কার্যক্রম ব্যর্থ হয়েছে"
+      "operationFailed": "কার্যক্রম ব্যর্থ হয়েছে",
+      "noBranch": "শাখা নেই"
     },
     "branches": {
       "title": "শাখা ব্যবস্থাপনা",
@@ -744,7 +745,20 @@
       "operationFailed": "কার্যক্রম ব্যর্থ হয়েছে",
       "nameRequired": "কমপক্ষে একটি শাখার নাম প্রয়োজন",
       "noBranches": "কোনো শাখা পাওয়া যায়নি।",
-      "superAdminOnly": "শাখা ব্যবস্থাপনা শুধুমাত্র সুপার অ্যাডমিনের জন্য।"
+      "superAdminOnly": "শাখা ব্যবস্থাপনা শুধুমাত্র সুপার অ্যাডমিনের জন্য।",
+      "students": "শিক্ষার্থী",
+      "admins": "অ্যাডমিন",
+      "feesThisMonth": "এ মাসের ফি (আদায় / ধার্য)",
+      "usage": {
+        "students": "{count} জন শিক্ষার্থী",
+        "teachers": "{count} জন শিক্ষক",
+        "classes": "{count}টি শ্রেণি",
+        "admins": "{count} জন অ্যাডমিন",
+        "invoices": "{count}টি ফি ইনভয়েস",
+        "payments": "{count}টি পেমেন্ট",
+        "applications": "{count}টি আবেদন",
+        "websiteItems": "{count}টি ওয়েবসাইট কনটেন্ট"
+      }
     },
     "dashboard": {
       "title": "ড্যাশবোর্ড",
@@ -786,7 +800,10 @@
       "amount": "পরিমাণ",
       "date": "তারিখ",
       "method": "মাধ্যম",
-      "branch": "শাখা"
+      "branch": "শাখা",
+      "admins": "অ্যাডমিন",
+      "feesBilledThisMonth": "এ মাসে ধার্য",
+      "feesCollectedThisMonth": "এ মাসে আদায়"
     },
     "shell": {
       "home": "অ্যাডমিন",
@@ -811,7 +828,13 @@
       "cancel": "বাতিল",
       "confirm": "নিশ্চিত করুন",
       "save": "সংরক্ষণ করুন",
-      "saving": "সংরক্ষণ হচ্ছে…"
+      "saving": "সংরক্ষণ হচ্ছে…",
+      "chooseBranch": "আপনি সব শাখা দেখছেন। তথ্য যোগ বা পরিবর্তন করতে উপরের বার থেকে একটি শাখা বেছে নিন।",
+      "wholeSchool": "পুরো স্কুল",
+      "branch": "শাখা",
+      "newContentForSchool": "নতুন কনটেন্ট পুরো স্কুলের জন্য প্রকাশিত হবে। শুধু একটি শাখার জন্য প্রকাশ করতে ওপরের বার থেকে শাখা বেছে নিন।",
+      "newContentForBranch": "নতুন কনটেন্ট {branch} শাখার জন্য প্রকাশিত হবে।",
+      "contentNotYours": "এটি শুধু সুপার অ্যাডমিন পরিবর্তন করতে পারেন।"
     },
     "fees": {
       "overviewTitle": "বেতন",
@@ -1062,7 +1085,8 @@
       "average": "গড়",
       "best": "সর্বোচ্চ",
       "noLeaderboard": "এখনো কোনো ফলাফল নেই",
-      "allSubjectsShort": "মিশ্র"
+      "allSubjectsShort": "মিশ্র",
+      "readOnlyNote": "শুধু সুপার অ্যাডমিনরা প্রশ্ন যোগ বা পরিবর্তন করতে পারেন।"
     }
   },
   "branches": {
@@ -1115,7 +1139,8 @@
     "successMessage": "আপনার আবেদন গ্রহণ করা হয়েছে। আমরা শীঘ্রই আপনার সাথে যোগাযোগ করব।",
     "submitAnother": "আরেকটি আবেদন করুন",
     "requiredFields": "অনুগ্রহ করে সকল প্রয়োজনীয় ক্ষেত্র পূরণ করুন",
-    "submitFailed": "জমা দিতে ব্যর্থ হয়েছে। আবার চেষ্টা করুন।"
+    "submitFailed": "জমা দিতে ব্যর্থ হয়েছে। আবার চেষ্টা করুন।",
+    "branch": "শাখা (ক্যাম্পাস)"
   },
   "common": {
     "loading": "লোড হচ্ছে…",

@@ -15,3 +15,14 @@ export function branchFilter(branchId, tableAlias = "") {
   if (branchId == null) return { clause: "", params: [] };
   return { clause: `AND ${col} = ?`, params: [branchId] };
 }
+
+/**
+ * branchOrSchoolFilter — like branchFilter, for rows that belong to one branch
+ * or to the whole school (branch_id NULL), such as website content: a chosen
+ * branch sees its own rows plus the whole-school ones.
+ */
+export function branchOrSchoolFilter(branchId, tableAlias = "") {
+  const col = tableAlias ? `${tableAlias}.branch_id` : "branch_id";
+  if (branchId == null) return { clause: "", params: [] };
+  return { clause: `AND (${col} = ? OR ${col} IS NULL)`, params: [branchId] };
+}

@@ -95,6 +95,7 @@ export const queryKeys = {
   branches: {
     all: ["branches"],
     stats: ["branches", "stats"],
+    overview: ["branches", "overview"],
   },
   news: {
     all: ["news"],

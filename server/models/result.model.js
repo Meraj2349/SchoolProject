@@ -290,9 +290,10 @@ const addResult = async (resultData, branchId = null) => {
     }
 
     const [result] = await db.query(
-      `INSERT INTO Results (StudentID, ExamID, SubjectID, ClassID, MarksObtained)
-      VALUES (?, ?, ?, ?, ?)`,
-      [StudentID, ExamID, SubjectID, ClassID, MarksObtained],
+      // The result belongs to its student's branch.
+      `INSERT INTO Results (StudentID, ExamID, SubjectID, ClassID, MarksObtained, branch_id)
+       SELECT ?, ?, ?, ?, ?, branch_id FROM Students WHERE StudentID = ?`,
+      [StudentID, ExamID, SubjectID, ClassID, MarksObtained, StudentID],
     );
 
     return {
@@ -449,9 +450,9 @@ const addResultByStudentDetails = async (resultData, branchId = null) => {
     }
 
     const [result] = await db.query(
-      `INSERT INTO Results (StudentID, ExamID, SubjectID, ClassID, MarksObtained)
-      VALUES (?, ?, ?, ?, ?)`,
-      [studentId, examId, subjectId, classId, marksObtained],
+      `INSERT INTO Results (StudentID, ExamID, SubjectID, ClassID, MarksObtained, branch_id)
+       SELECT ?, ?, ?, ?, ?, branch_id FROM Students WHERE StudentID = ?`,
+      [studentId, examId, subjectId, classId, marksObtained, studentId],
     );
 
     return {
@@ -533,6 +534,20 @@ const addMultipleResults = async (resultsData, branchId = null) => {
         }
       }
 
+      // Same checks as addResult: the student, exam and subject must all be
+      // in the row's class (so in the student's branch and section too).
+      const [[classMatch]] = await db.query(
+        `SELECT
+           EXISTS (SELECT 1 FROM Students WHERE StudentID = ? AND ClassID = ?) AS student,
+           EXISTS (SELECT 1 FROM Exams WHERE ExamID = ? AND ClassID = ?) AS exam,
+           EXISTS (SELECT 1 FROM Subjects WHERE SubjectID = ? AND ClassID = ?) AS subject`,
+        [StudentID, ClassID, ExamID, ClassID, SubjectID, ClassID],
+      );
+      if (!classMatch.student || !classMatch.exam || !classMatch.subject) {
+        errors.push(`Row ${i + 1}: Student, exam and subject must belong to the same class`);
+        continue;
+      }
+
       const exists = await checkResultExists(StudentID, ExamID, SubjectID);
       if (exists) {
         errors.push(
@@ -541,17 +556,19 @@ const addMultipleResults = async (resultsData, branchId = null) => {
         continue;
       }
 
+      // Every student was checked to be in this branch above.
       validatedResults.push([
         StudentID,
         ExamID,
         SubjectID,
         ClassID,
         MarksObtained,
+        branchId,
       ]);
     }
 
     if (errors.length > 0) {
-      throw new Error("Validation errors:\n" + errors.join("\n"));
+      throw new ValidationError("result_invalid", "Validation errors:\n" + errors.join("\n"));
     }
 
     if (validatedResults.length === 0) {
@@ -559,9 +576,10 @@ const addMultipleResults = async (resultsData, branchId = null) => {
     }
 
     const [result] = await db.query(
-      `INSERT INTO Results (StudentID, ExamID, SubjectID, ClassID, MarksObtained) VALUES ?`,
+      `INSERT INTO Results (StudentID, ExamID, SubjectID, ClassID, MarksObtained, branch_id) VALUES ?`,
       [validatedResults],
     );
+
 
     return {
       success: true,
@@ -570,6 +588,7 @@ const addMultipleResults = async (resultsData, branchId = null) => {
       message: `Successfully inserted ${validatedResults.length} results`,
     };
   } catch (err) {
+    if (err instanceof ValidationError) throw err;
     throw new Error("Error adding multiple results: " + err.message);
   }
 };

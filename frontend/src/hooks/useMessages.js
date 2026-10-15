@@ -2,11 +2,13 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/queryKeys";
+import { useBranchStore } from "@/store/branchStore";
 import { messagesService } from "@/services/messages.service";
 
 export function useMessages() {
+  const branchId = useBranchStore((s) => s.currentBranchId);
   return useQuery({
-    queryKey: queryKeys.messages.all,
+    queryKey: [...queryKeys.messages.all, { branchId }],
     queryFn: messagesService.getAll,
   });
 }

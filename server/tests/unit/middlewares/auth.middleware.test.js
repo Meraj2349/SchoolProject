@@ -44,6 +44,14 @@ describe("authMiddleware", () => {
     expect(res.status).toBe(401);
   });
 
+  it("logs out a branch admin who has no branch (e.g. their branch was deleted) instead of showing every branch", async () => {
+    const res = await request(buildApp(stored({ id: 5, role: "branch_admin", branchId: null })))
+      .get("/private")
+      .set("Authorization", branchAdminLogin);
+
+    expect(res.status).toBe(401);
+  });
+
   it("treats a demoted super admin as a branch admin of their new branch", async () => {
     const res = await request(buildApp(stored({ id: 9, role: "branch_admin", branchId: 1 })))
       .get("/private?branch_id=2")
@@ -58,6 +66,14 @@ describe("authMiddleware", () => {
       .set("Authorization", superAdminLogin);
 
     expect(res.body).toEqual({ adminId: 9, role: "super_admin", branchId: 2 });
+  });
+
+  it.each(["abc", "0", "-3", "1.5"])("ignores a malformed ?branch_id=%s instead of passing it on", async (value) => {
+    const res = await request(buildApp(stored({ id: 9, role: "super_admin", branchId: null })))
+      .get(`/public?branch_id=${value}`)
+      .set("Authorization", superAdminLogin);
+
+    expect(res.body.branchId).toBeNull();
   });
 
   it("never looks up a quiz student's token and refuses it", async () => {
@@ -92,6 +108,14 @@ describe("optionalAuth", () => {
       .set("Authorization", branchAdminLogin);
 
     expect(res.body).toEqual({ adminId: 5, role: "branch_admin", branchId: 2 });
+  });
+
+  it("treats a branch admin without a branch as a public visitor", async () => {
+    const res = await request(buildApp(stored({ id: 5, role: "branch_admin", branchId: null })))
+      .get("/public?branch_id=1")
+      .set("Authorization", branchAdminLogin);
+
+    expect(res.body).toEqual({ adminId: null, role: "public", branchId: 1 });
   });
 
   it("treats a removed admin as a public visitor", async () => {

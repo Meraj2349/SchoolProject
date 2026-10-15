@@ -2,7 +2,7 @@
 
 import { FiCalendar, FiCheckSquare, FiDollarSign, FiUserCheck, FiUsers } from "react-icons/fi";
 import { Badge, Box, Button, DataTable, MoneyText, PageHeader, StatBox } from "@/components/admin/ui";
-import { useBranchStats } from "@/hooks/useBranchStats";
+import { useBranchOverview } from "@/hooks/useBranchStats";
 import { useDashboardSummary } from "@/hooks/useDashboard";
 import { formatTaka } from "@/lib/money";
 import { fillTemplate } from "@/lib/template";
@@ -53,13 +53,28 @@ function UpcomingEvents({ events, t }) {
 }
 
 function BranchOverview({ t }) {
-  const { data: branches = [], isLoading } = useBranchStats();
+  const { data: branches = [], isLoading } = useBranchOverview();
   const setBranch = useBranchStore((s) => s.setBranch);
   const columns = [
     { key: "name", header: t("branch"), sortable: true, sortValue: (b) => b.name_en || b.name_bn, render: (b) => b.name_en || b.name_bn },
     { key: "studentCount", header: t("students"), sortable: true, align: "right" },
     { key: "teacherCount", header: t("teachers"), sortable: true, align: "right" },
     { key: "classCount", header: t("classes"), sortable: true, align: "right" },
+    { key: "adminCount", header: t("admins"), sortable: true, align: "right" },
+    {
+      key: "feesBilled",
+      header: t("feesBilledThisMonth"),
+      sortable: true,
+      align: "right",
+      render: (b) => <MoneyText amount={b.feesBilled} />,
+    },
+    {
+      key: "feesCollected",
+      header: t("feesCollectedThisMonth"),
+      sortable: true,
+      align: "right",
+      render: (b) => <MoneyText amount={b.feesCollected} className="text-emerald-700" />,
+    },
     {
       key: "status",
       header: "",

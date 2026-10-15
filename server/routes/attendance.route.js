@@ -1,5 +1,6 @@
 import express from "express";
 import authMiddleware, { optionalAuth } from "../middlewares/auth.middleware.js";
+import { requireWriteBranch } from "../src/shared/http/requireWriteBranch.js";
 import {
   bulkCreateAttendanceController,
   checkAttendanceExistsController,
@@ -78,9 +79,9 @@ router.get("/date/:date", getAttendanceByDateController);
 
 // CRUD Routes
 router.get("/", getAllAttendanceController);
-router.post("/", createAttendanceController);
+router.post("/", requireWriteBranch, createAttendanceController);
 router.post("/mark", markAttendanceController);
-router.post("/bulk", bulkCreateAttendanceController);
+router.post("/bulk", requireWriteBranch, bulkCreateAttendanceController);
 router.post("/validate-sync", validateDatabaseSyncController);
 router.post("/force-sync", forceSyncController);
 

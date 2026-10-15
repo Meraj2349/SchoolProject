@@ -1,5 +1,7 @@
 import db from "../config/db.config.js";
 import { branchFilter } from "../utils/branchFilter.js";
+import { branchOf } from "../utils/branchOwnership.js";
+import { ValidationError } from "../src/shared/errors/index.js";
 
 // Add a new class (branch-scoped)
 export const addClass = async ({ className, section, teacherId }, branchId = null) => {
@@ -68,6 +70,13 @@ export const getClasses = async (branchId = null) => {
 // Edit a class by ID (branch-scoped)
 export const editClass = async (classId, { className, section, teacherId }, branchId = null) => {
   const { clause, params: branchParams } = branchFilter(branchId);
+  // A class teacher must teach in the class's own branch.
+  if (teacherId != null) {
+    const classBranch = await branchOf("Classes", classId);
+    if (classBranch !== undefined && (await branchOf("Teachers", teacherId)) !== classBranch) {
+      throw new ValidationError("branch_mismatch");
+    }
+  }
   const sql = `
     UPDATE Classes
     SET ClassName = ?, Section = ?, TeacherID = ?

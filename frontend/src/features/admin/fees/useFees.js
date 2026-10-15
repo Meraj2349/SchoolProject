@@ -3,17 +3,12 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/queryKeys";
 import { feesService } from "@/services/fees.service";
-import { useAuthStore } from "@/store/authStore";
-import { useBranchStore } from "@/store/branchStore";
+import { useWriteBranch } from "@/hooks/useWriteBranch";
 
 const dataOf = (body) => body?.data;
 
 /** The branch fee data belongs to; a super admin on "All branches" cannot change fees. */
-export function useFeeBranch() {
-  const role = useAuthStore((s) => s.role);
-  const branchId = useBranchStore((s) => s.currentBranchId);
-  return { branchId, needsBranch: role === "super_admin" && branchId == null };
-}
+export const useFeeBranch = useWriteBranch;
 
 const useFeeQuery = (keyOf, fetch, { enabled = true } = {}) => {
   const { branchId } = useFeeBranch();
