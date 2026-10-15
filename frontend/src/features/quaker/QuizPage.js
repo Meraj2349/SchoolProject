@@ -27,11 +27,11 @@ export default function QuizPage() {
   const [error, setError] = useState("");
 
   const [questionLanguage, setQuestionLanguage] = useState(siteLanguage);
+  const [quizId, setQuizId] = useState(null);
   const [questions, setQuestions] = useState([]);
   const [current, setCurrent] = useState(0);
   const [answers, setAnswers] = useState({});
   const [result, setResult] = useState(null);
-  const startedAt = useRef(0);
   const shownAt = useRef(0);
   const secondsOn = useRef({});
 
@@ -70,11 +70,11 @@ export default function QuizPage() {
     setError("");
     try {
       const quiz = await quizService.start({ subject, count });
+      setQuizId(quiz.quizId);
       setQuestions(quiz.questions);
       setCurrent(0);
       setAnswers({});
       secondsOn.current = {};
-      startedAt.current = Date.now();
       shownAt.current = Date.now();
       setQuestionLanguage(siteLanguage);
       setPhase("playing");
@@ -97,13 +97,14 @@ export default function QuizPage() {
     setBusy(true);
     setError("");
     try {
+      // The server scores the questions it served for this quiz and times it.
       const finished = await quizService.finish({
+        quizId,
         answers: questions.map((q) => ({
           questionId: q.id,
           userAnswer: answers[q.id] ?? "",
           timeSpentSeconds: secondsOn.current[q.id] ?? 0,
         })),
-        timeTakenSeconds: Math.round((Date.now() - startedAt.current) / 1000),
       });
       setResult(finished);
       setPhase("results");

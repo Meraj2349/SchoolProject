@@ -3,6 +3,7 @@
 export function makeFakeQuizRepository() {
   const questions = new Map();
   const sessions = [];
+  const starts = new Map();
   let nextId = 1;
 
   const matches = ({ classKey, subject, activeOnly }) => (q) =>
@@ -11,6 +12,7 @@ export function makeFakeQuizRepository() {
   return {
     questions,
     sessions,
+    starts,
 
     existingSourceKeys: async (keys) =>
       new Set([...questions.values()].map((q) => q.sourceKey).filter((k) => keys.includes(k))),
@@ -51,7 +53,19 @@ export function makeFakeQuizRepository() {
 
     questionsByIds: async (ids) => ids.map((id) => questions.get(id)).filter(Boolean),
 
+    createStart: async ({ studentId, questionIds, subject, startedAt }) => {
+      const id = starts.size + 1;
+      starts.set(id, { id, studentId, questionIds, subject, startedAt, finishedAt: null });
+      return { id };
+    },
+
+    findStart: async (id) => starts.get(Number(id)) ?? null,
+
+    // Claims the quiz and saves the session together; null if already finished.
     saveSession: async (session, graded) => {
+      const start = starts.get(session.quizId);
+      if (!start || start.finishedAt) return null;
+      start.finishedAt = session.completedAt;
       const row = { id: sessions.length + 1, ...session, graded };
       sessions.push(row);
       return row.id;

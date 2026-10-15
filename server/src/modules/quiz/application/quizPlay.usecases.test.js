@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from "@jest/globals";
-import { NotFoundError, ValidationError } from "../../../shared/errors/index.js";
+import { ConflictError, NotFoundError, ValidationError } from "../../../shared/errors/index.js";
 import { makeFakeQuizRepository } from "./fakeQuizRepository.js";
 import { makeQuizPlayUseCases } from "./quizPlay.usecases.js";
 
@@ -100,6 +100,19 @@ describe("quiz play", () => {
       expect(quiz.startedAt).toBe("2026-10-15T10:00:00.000Z");
     });
 
+    it("remembers which questions it served, under a quiz id", async () => {
+      const quiz = await play.startQuiz({ studentId: 7, subject: "Science" });
+
+      expect(quiz.quizId).toEqual(expect.any(Number));
+      expect(repo.starts.get(quiz.quizId)).toMatchObject({
+        studentId: 7,
+        questionIds: [ids.science8],
+        subject: "Science",
+        startedAt: new Date("2026-10-15T10:00:00Z"),
+        finishedAt: null,
+      });
+    });
+
     it("can be limited to one subject", async () => {
       const quiz = await play.startQuiz({ studentId: 7, subject: "Science", count: 10 });
 
@@ -132,14 +145,31 @@ describe("quiz play", () => {
   });
 
   describe("finishQuiz", () => {
-    it("scores, saves the session under the verified student, and returns the review", async () => {
+    // The clock the use cases see; tests move it forward.
+    let clock;
+    const at = (iso) => (clock = new Date(iso));
+
+    beforeEach(() => {
+      at("2026-10-15T10:00:00Z");
+      play = makeQuizPlayUseCases({
+        quizRepository: repo,
+        studentDirectory: { verify: async () => null, findById: async (id) => students.get(Number(id)) ?? null },
+        issueToken: () => "t",
+        now: () => clock,
+      });
+    });
+
+    const startMath = async () => (await play.startQuiz({ studentId: 7, count: 10 })).quizId;
+    const answer = (id, userAnswer) => ({ questionId: id, userAnswer });
+
+    it("scores the served questions, saves the session and returns the review", async () => {
+      const quizId = await startMath();
+      at("2026-10-15T10:01:35Z");
+
       const result = await play.finishQuiz({
         studentId: 7,
-        answers: [
-          { questionId: ids.math8, userAnswer: "B" },
-          { questionId: ids.science8, userAnswer: "A" },
-        ],
-        timeTakenSeconds: 95,
+        quizId,
+        answers: [answer(ids.math8, "B"), answer(ids.science8, "A")],
       });
 
       expect(result).toMatchObject({ totalQuestions: 2, correctAnswers: 1, scorePercentage: 50, grade: "F" });
@@ -156,55 +186,85 @@ describe("quiz play", () => {
         correctAnswers: 1,
         scorePercentage: 50,
         timeTakenSeconds: 95,
-        startedAt: new Date("2026-10-15T09:58:25Z"),
-        completedAt: new Date("2026-10-15T10:00:00Z"),
+        startedAt: new Date("2026-10-15T10:00:00Z"),
+        completedAt: new Date("2026-10-15T10:01:35Z"),
+        quizId,
       });
     });
 
-    it("records the subject when every question shares one", async () => {
-      await play.finishQuiz({ studentId: 7, answers: [{ questionId: ids.math8, userAnswer: "B" }] });
+    it("counts a served question that was not answered as wrong", async () => {
+      const quizId = await startMath();
 
-      expect(repo.sessions[0].subject).toBe("Math");
+      const result = await play.finishQuiz({ studentId: 7, quizId, answers: [answer(ids.math8, "B")] });
+
+      expect(result).toMatchObject({ totalQuestions: 2, correctAnswers: 1, scorePercentage: 50 });
+      expect(result.details.find((d) => d.questionId === ids.science8)).toMatchObject({ userAnswer: "", isCorrect: false });
     });
 
-    it("ignores questions from another class and hidden questions", async () => {
+    it("ignores answers to questions that were not served in this quiz", async () => {
+      const quizId = (await play.startQuiz({ studentId: 7, subject: "Science" })).quizId;
+
       const result = await play.finishQuiz({
         studentId: 7,
-        answers: [
-          { questionId: ids.math8, userAnswer: "B" },
-          { questionId: ids.math10, userAnswer: "A" },
-          { questionId: ids.hidden8, userAnswer: "A" },
-        ],
+        quizId,
+        answers: [answer(ids.science8, "C"), answer(ids.math8, "B"), answer(ids.math10, "A"), answer(99, "A")],
       });
 
       expect(result).toMatchObject({ totalQuestions: 1, correctAnswers: 1, scorePercentage: 100 });
+      expect(repo.sessions[0].subject).toBe("Science");
     });
 
-    it("needs at least one answer to a real question", async () => {
-      await expect(play.finishQuiz({ studentId: 7, answers: [] })).rejects.toBeInstanceOf(ValidationError);
-      await expect(play.finishQuiz({ studentId: 7, answers: [{ questionId: ids.math10, userAnswer: "A" }] })).rejects.toMatchObject({
-        code: "quiz_no_valid_answers",
+    it("measures the time itself and ignores the time the browser sends", async () => {
+      const quizId = await startMath();
+      at("2026-10-15T10:00:30Z");
+
+      await play.finishQuiz({ studentId: 7, quizId, answers: [answer(ids.math8, "B")], timeTakenSeconds: 1 });
+
+      expect(repo.sessions[0].timeTakenSeconds).toBe(30);
+    });
+
+    it("can be finished only once", async () => {
+      const quizId = await startMath();
+      await play.finishQuiz({ studentId: 7, quizId, answers: [answer(ids.math8, "A")] });
+
+      const again = play.finishQuiz({ studentId: 7, quizId, answers: [answer(ids.math8, "B"), answer(ids.science8, "C")] });
+
+      await expect(again).rejects.toBeInstanceOf(ConflictError);
+      await expect(again).rejects.toMatchObject({ code: "quiz_already_finished" });
+      expect(repo.sessions).toHaveLength(1);
+    });
+
+    it("refuses another student's quiz and an unknown quiz", async () => {
+      const quizId = await startMath();
+      students.set(8, { ...RAHIM, studentId: 8, firstName: "Nadia" });
+
+      await expect(play.finishQuiz({ studentId: 8, quizId, answers: [answer(ids.math8, "B")] })).rejects.toMatchObject({
+        code: "quiz_not_found",
+      });
+      await expect(play.finishQuiz({ studentId: 7, quizId: 999, answers: [answer(ids.math8, "B")] })).rejects.toMatchObject({
+        code: "quiz_not_found",
+      });
+      await expect(play.finishQuiz({ studentId: 7, answers: [answer(ids.math8, "B")] })).rejects.toMatchObject({
+        code: "quiz_not_found",
       });
       expect(repo.sessions).toHaveLength(0);
     });
 
-    it("rejects malformed answers with a clear error instead of crashing", async () => {
-      await expect(play.finishQuiz({ studentId: 7, answers: [null, "x", 5] })).rejects.toMatchObject({
-        code: "quiz_no_valid_answers",
+    it("refuses a quiz started too long ago", async () => {
+      const quizId = await startMath();
+      at("2026-10-15T12:00:01Z");
+
+      await expect(play.finishQuiz({ studentId: 7, quizId, answers: [answer(ids.math8, "B")] })).rejects.toMatchObject({
+        code: "quiz_expired",
       });
     });
 
-    it("refuses more answers than a quiz can have", async () => {
-      const answers = Array.from({ length: 51 }, (_, i) => ({ questionId: i + 1, userAnswer: "A" }));
+    it("still needs an answer list, and copes with malformed entries", async () => {
+      const quizId = await startMath();
 
-      await expect(play.finishQuiz({ studentId: 7, answers })).rejects.toMatchObject({ code: "quiz_too_many_answers" });
-      expect(repo.sessions).toHaveLength(0);
-    });
-
-    it("never trusts a negative or silly time", async () => {
-      await play.finishQuiz({ studentId: 7, answers: [{ questionId: ids.math8, userAnswer: "B" }], timeTakenSeconds: -20 });
-
-      expect(repo.sessions[0].timeTakenSeconds).toBe(0);
+      await expect(play.finishQuiz({ studentId: 7, quizId, answers: "nope" })).rejects.toBeInstanceOf(ValidationError);
+      const result = await play.finishQuiz({ studentId: 7, quizId, answers: [null, "x", answer(ids.math8, "B")] });
+      expect(result).toMatchObject({ totalQuestions: 2, correctAnswers: 1 });
     });
   });
 });

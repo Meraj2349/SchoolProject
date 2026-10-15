@@ -29,6 +29,17 @@ const addQuestion = (classKey, subject, answer = "A", extra = {}) =>
     ...extra,
   });
 
+// Starts a quiz (up to 50 questions) and finishes it, answering each served
+// question with answerFor(questionId). Returns the finish response.
+async function takeQuiz(token, { subject, answerFor = () => "" } = {}) {
+  const start = await request(app).post("/api/quiz/start").set(token).send({ subject, count: 50 });
+  const { quizId, questions } = start.body.data;
+  return request(app)
+    .post("/api/quiz/finish")
+    .set(token)
+    .send({ quizId, answers: questions.map((q) => ({ questionId: q.id, userAnswer: answerFor(q.id) })) });
+}
+
 const identity = {
   branchId: BRANCH_A,
   firstName: "Rahim",
@@ -111,50 +122,90 @@ describe("taking a quiz", () => {
     expect(res.body.message).toBe("There are no quiz questions for your class yet.");
   });
 
-  it("scores only own-class, visible questions and saves the session", async () => {
+  it("scores exactly the questions it served, with the time it measured", async () => {
+    const start = await request(app).post("/api/quiz/start").set(token).send({ subject: "Math", count: 10 });
+    const { quizId, questions } = start.body.data;
+    expect(questions.map((q) => q.id)).toEqual([ids.math8]);
+
     const res = await request(app)
       .post("/api/quiz/finish")
       .set(token)
       .send({
+        quizId,
         answers: [
           { questionId: ids.math8, userAnswer: "B" },
           { questionId: ids.math10, userAnswer: "A" },
           { questionId: ids.hidden8, userAnswer: "A" },
-          { questionId: ids.math8, userAnswer: "B" },
+          { questionId: ids.science8, userAnswer: "C" },
           { questionId: 99999, userAnswer: "A" },
         ],
-        timeTakenSeconds: 40,
+        timeTakenSeconds: 9999,
         studentName: "Top Scorer",
       });
 
     expect(res.status).toBe(201);
     expect(res.body.data).toMatchObject({ totalQuestions: 1, correctAnswers: 1, scorePercentage: 100, grade: "A" });
     const [[session]] = await db.query("SELECT * FROM QuizSessions");
-    expect(session).toMatchObject({
-      StudentName: "Rahim Uddin",
-      ClassName: "Class 8",
-      Grade: "8",
-      Subject: "Math",
-      TimeTakenSeconds: 40,
-      branch_id: BRANCH_A,
-    });
-    expect(new Date(session.CompletedAt) - new Date(session.StartedAt)).toBe(40000);
+    expect(session).toMatchObject({ StudentName: "Rahim Uddin", ClassName: "Class 8", Grade: "8", Subject: "Math", branch_id: BRANCH_A });
+    expect(session.TimeTakenSeconds).toBeLessThan(10);
+    expect((new Date(session.CompletedAt) - new Date(session.StartedAt)) / 1000).toBe(session.TimeTakenSeconds);
     expect(await count("QuizAttempts")).toBe(1);
   });
 
-  it("rejects a submission with no answers to real questions of the class", async () => {
-    const res = await request(app)
-      .post("/api/quiz/finish")
-      .set(token)
-      .send({ answers: [{ questionId: ids.math10, userAnswer: "A" }] });
+  it("counts a served question that was not answered as wrong", async () => {
+    const res = await takeQuiz(token, { answerFor: (id) => (id === ids.math8 ? "B" : undefined) });
 
-    expect(res.status).toBe(400);
+    expect(res.body.data).toMatchObject({ totalQuestions: 2, correctAnswers: 1, scorePercentage: 50 });
+  });
+
+  it("lets a quiz be finished only once", async () => {
+    const start = await request(app).post("/api/quiz/start").set(token).send({ subject: "Math" });
+    const finish = (userAnswer) =>
+      request(app)
+        .post("/api/quiz/finish")
+        .set(token)
+        .send({ quizId: start.body.data.quizId, answers: [{ questionId: ids.math8, userAnswer }] });
+
+    expect((await finish("A")).status).toBe(201);
+    const replay = await finish("B");
+
+    expect(replay.status).toBe(409);
+    expect(await count("QuizSessions")).toBe(1);
+  });
+
+  it("counts only one of two submissions sent at the same moment", async () => {
+    const start = await request(app).post("/api/quiz/start").set(token).send({ subject: "Math" });
+    const submit = () =>
+      request(app)
+        .post("/api/quiz/finish")
+        .set(token)
+        .send({ quizId: start.body.data.quizId, answers: [{ questionId: ids.math8, userAnswer: "B" }] });
+
+    const results = await Promise.all([submit(), submit(), submit()]);
+
+    expect(results.map((r) => r.status).sort()).toEqual([201, 409, 409]);
+    expect(await count("QuizSessions")).toBe(1);
+    expect(await count("QuizAttempts")).toBe(1);
+  });
+
+  it("refuses another student's quiz, a missing quiz id and an old quiz", async () => {
+    const start = await request(app).post("/api/quiz/start").set(token).send({ subject: "Math" });
+    const { studentId } = await seedStudent({ className: "Class 8", roll: "2", firstName: "Nadia" });
+    const nadia = bearer(quizStudentToken(studentId, BRANCH_A));
+    const answers = [{ questionId: ids.math8, userAnswer: "B" }];
+
+    const stolen = await request(app).post("/api/quiz/finish").set(nadia).send({ quizId: start.body.data.quizId, answers });
+    const missing = await request(app).post("/api/quiz/finish").set(token).send({ answers });
+    await db.query("UPDATE QuizStarts SET StartedAt = NOW() - INTERVAL 3 HOUR");
+    const old = await request(app).post("/api/quiz/finish").set(token).send({ quizId: start.body.data.quizId, answers });
+
+    expect([stolen.status, missing.status, old.status]).toEqual([404, 404, 409]);
     expect(await count("QuizSessions")).toBe(0);
   });
 
   it("shows the student their own history and progress", async () => {
-    await request(app).post("/api/quiz/finish").set(token).send({ answers: [{ questionId: ids.math8, userAnswer: "B" }] });
-    await request(app).post("/api/quiz/finish").set(token).send({ answers: [{ questionId: ids.science8, userAnswer: "A" }] });
+    await takeQuiz(token, { subject: "Math", answerFor: () => "B" });
+    await takeQuiz(token, { subject: "Science", answerFor: () => "A" });
 
     const sessions = await request(app).get("/api/quiz/my-sessions").set(token);
     const progress = await request(app).get("/api/quiz/my-progress").set(token);
@@ -247,16 +298,11 @@ describe("question bank (admin)", () => {
 describe("quiz results (admin)", () => {
   beforeEach(async () => {
     await resetDb();
-    const q = await addQuestion("8", "Math", "B");
+    await addQuestion("8", "Math", "B");
     const a = await seedStudent({ branchId: BRANCH_A, className: "Class 8", firstName: "Rahim" });
     const b = await seedStudent({ branchId: BRANCH_B, className: "Class 8", firstName: "Nadia" });
-    const finish = (studentId, branchId, userAnswer) =>
-      request(app)
-        .post("/api/quiz/finish")
-        .set(bearer(quizStudentToken(studentId, branchId)))
-        .send({ answers: [{ questionId: q, userAnswer }] });
-    await finish(a.studentId, BRANCH_A, "B");
-    await finish(b.studentId, BRANCH_B, "A");
+    await takeQuiz(bearer(quizStudentToken(a.studentId, BRANCH_A)), { answerFor: () => "B" });
+    await takeQuiz(bearer(quizStudentToken(b.studentId, BRANCH_B)), { answerFor: () => "A" });
   });
 
   it("shows a branch admin only their branch's sessions", async () => {
@@ -287,11 +333,8 @@ describe("quiz results (admin)", () => {
   it("lists a student once on the leaderboard even after changing class", async () => {
     const [[rahim]] = await db.query("SELECT StudentID FROM Students WHERE FirstName = 'Rahim'");
     await db.query("UPDATE QuizSessions SET ClassName = 'Class 7', Section = 'Better' WHERE StudentID = ? ", [rahim.StudentID]);
-    const q = await addQuestion("8", "Science", "A");
-    await request(app)
-      .post("/api/quiz/finish")
-      .set(bearer(quizStudentToken(rahim.StudentID, BRANCH_A)))
-      .send({ answers: [{ questionId: q, userAnswer: "A" }] });
+    await addQuestion("8", "Science", "A");
+    await takeQuiz(bearer(quizStudentToken(rahim.StudentID, BRANCH_A)), { subject: "Science", answerFor: () => "A" });
 
     const board = await request(app).get("/api/quiz/admin/leaderboard").set(bearer(superAdminToken()));
 
@@ -300,14 +343,14 @@ describe("quiz results (admin)", () => {
     ]);
   });
 
-  it("answers 400, not 500, for malformed answers", async () => {
+  it("treats malformed answers as unanswered instead of failing", async () => {
     const [[rahim]] = await db.query("SELECT StudentID FROM Students WHERE FirstName = 'Rahim'");
+    const token = bearer(quizStudentToken(rahim.StudentID, BRANCH_A));
+    const start = await request(app).post("/api/quiz/start").set(token).send({});
 
-    const res = await request(app)
-      .post("/api/quiz/finish")
-      .set(bearer(quizStudentToken(rahim.StudentID, BRANCH_A)))
-      .send({ answers: [null] });
+    const res = await request(app).post("/api/quiz/finish").set(token).send({ quizId: start.body.data.quizId, answers: [null] });
 
-    expect(res.status).toBe(400);
+    expect(res.status).toBe(201);
+    expect(res.body.data).toMatchObject({ correctAnswers: 0 });
   });
 });

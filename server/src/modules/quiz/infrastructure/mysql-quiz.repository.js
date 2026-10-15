@@ -123,11 +123,48 @@ export const mysqlQuizRepository = {
     return rows.map(toQuestion);
   },
 
-  /** Saves a finished quiz and its answers in one transaction; returns the session id. */
+  async createStart({ studentId, questionIds, subject, startedAt }) {
+    const [result] = await db.query(
+      "INSERT INTO QuizStarts (StudentID, QuestionIDsJSON, Subject, StartedAt) VALUES (?, ?, ?, ?)",
+      [studentId, JSON.stringify(questionIds), subject, startedAt],
+    );
+    return { id: result.insertId };
+  },
+
+  async findStart(id) {
+    const [rows] = await db.query(
+      "SELECT QuizStartID, StudentID, QuestionIDsJSON, Subject, StartedAt, FinishedAt FROM QuizStarts WHERE QuizStartID = ?",
+      [id],
+    );
+    const row = rows[0];
+    if (!row) return null;
+    return {
+      id: row.QuizStartID,
+      studentId: row.StudentID,
+      questionIds: json(row.QuestionIDsJSON),
+      subject: row.Subject,
+      startedAt: new Date(row.StartedAt),
+      finishedAt: row.FinishedAt,
+    };
+  },
+
+  /**
+   * Claims the quiz start and saves the finished quiz with its answers, in one
+   * transaction. Returns the session id, or null when the quiz had already
+   * been finished (e.g. two submissions at once).
+   */
   async saveSession(session, graded) {
     const connection = await db.getConnection();
     try {
       await connection.beginTransaction();
+      const [claim] = await connection.query(
+        "UPDATE QuizStarts SET FinishedAt = ? WHERE QuizStartID = ? AND FinishedAt IS NULL",
+        [session.completedAt, session.quizId],
+      );
+      if (claim.affectedRows === 0) {
+        await connection.rollback();
+        return null;
+      }
       const [result] = await connection.query(
         `INSERT INTO QuizSessions
            (StudentID, StudentName, ClassName, Section, Subject, Grade, TotalQuestions, CorrectAnswers,
@@ -149,6 +186,7 @@ export const mysqlQuizRepository = {
           session.completedAt,
         ],
       );
+      await connection.query("UPDATE QuizStarts SET SessionID = ? WHERE QuizStartID = ?", [result.insertId, session.quizId]);
       await connection.query(
         `INSERT INTO QuizAttempts (SessionID, QuestionID, UserAnswer, CorrectAnswer, IsCorrect, TimeSpentSeconds) VALUES ?`,
         [graded.map((g) => [result.insertId, g.questionId, g.userAnswer || null, g.correctAnswer, g.isCorrect ? 1 : 0, g.timeSpentSeconds])],

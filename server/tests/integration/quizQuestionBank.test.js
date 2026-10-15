@@ -9,10 +9,11 @@ import { db, resetDb } from "./helpers.js";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const FIXTURES = path.resolve(__dirname, "fixtures/benqa");
 const MIGRATION = fs.readFileSync(path.resolve(__dirname, "../../Sql/quiz_question_bank_migration.sql"), "utf8");
+const STARTS_MIGRATION = fs.readFileSync(path.resolve(__dirname, "../../Sql/quiz_starts_migration.sql"), "utf8");
 
 afterAll(() => db.end());
 
-async function runMigration() {
+async function runMigration(sql = MIGRATION) {
   const connection = await mysql.createConnection({
     host: process.env.DB_HOST,
     port: Number(process.env.DB_PORT),
@@ -22,7 +23,7 @@ async function runMigration() {
     multipleStatements: true,
   });
   try {
-    await connection.query(MIGRATION);
+    await connection.query(sql);
   } finally {
     await connection.end();
   }
@@ -74,6 +75,27 @@ describe("quiz_question_bank_migration.sql", () => {
     ]);
     const [sessions] = await db.query("SELECT Grade FROM QuizSessions ORDER BY SessionID");
     expect(sessions.map((s) => s.Grade)).toEqual(["10", null]);
+  });
+});
+
+describe("quiz_starts_migration.sql", () => {
+  beforeEach(resetDb);
+
+  it("creates the QuizStarts table like a fresh install, safely twice", async () => {
+    const columns = async () => {
+      const [rows] = await db.query(
+        "SELECT COLUMN_NAME AS name, COLUMN_TYPE AS type, IS_NULLABLE AS nullable FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'QuizStarts' ORDER BY COLUMN_NAME",
+      );
+      return rows;
+    };
+    const fresh = await columns();
+    await db.query("DROP TABLE QuizStarts");
+
+    await runMigration(STARTS_MIGRATION);
+    await runMigration(STARTS_MIGRATION);
+
+    expect(fresh.length).toBeGreaterThan(0);
+    expect(await columns()).toEqual(fresh);
   });
 });
 
