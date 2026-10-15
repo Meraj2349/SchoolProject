@@ -29,6 +29,12 @@ describe("fresh database schema", () => {
     "Events",
     "Routines",
     "QuizSessions",
+    "FeeSettings",
+    "FeeStructures",
+    "FeeHeads",
+    "StudentDiscounts",
+    "FeeInvoices",
+    "FeePayments",
   ])("scopes %s by branch_id", async (table) => {
     expect(await columnsOf(table)).toContain("branch_id");
   });

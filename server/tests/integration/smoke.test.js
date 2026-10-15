@@ -82,6 +82,15 @@ const endpoints = () => [
   "/api/quiz/meta",
   "/api/quiz/admin/sessions",
   "/api/quiz/admin/leaderboard",
+  "/api/fees/settings",
+  "/api/fees/structures?academic_year=2026",
+  "/api/fees/heads",
+  `/api/fees/discounts?student_id=${ids.studentId}`,
+  "/api/fees/invoices?year=2026&month=3&status=unpaid&class_name=Class 5&section=Good",
+  `/api/fees/invoices/${ids.invoiceId}`,
+  `/api/fees/payments/${ids.paymentId}`,
+  `/api/fees/students/${ids.studentId}/ledger`,
+  "/api/fees/reports/summary?year=2026&month=3",
 ];
 
 describe("every read endpoint works with branch scoping", () => {
@@ -103,7 +112,15 @@ describe("every read endpoint works with branch scoping", () => {
     });
     await insert("Teachers", { FirstName: "Nasima", LastName: "B", branch_id: BRANCH_A });
     await insert("Events", { EventName: "Sports Day", EventType: "Sports", StartDate: "2026-02-01", EndDate: "2026-02-01" });
-    ids = { classId, studentId, examId, subjectId, resultId, attendanceId, routineId };
+    const invoiceId = await insert("FeeInvoices", {
+      branch_id: BRANCH_A, student_id: studentId, class_name: "Class 5", section: "Good",
+      year: 2026, month: 3, due_date: "2026-03-10", status: "partial",
+    });
+    await insert("FeeInvoiceItems", { invoice_id: invoiceId, kind: "tuition", label: "Tuition", amount: 1000 });
+    const paymentId = await insert("FeePayments", {
+      branch_id: BRANCH_A, invoice_id: invoiceId, amount: 100, method: "cash", paid_on: "2026-03-05", receipt_no: "RCT-2026-00001",
+    });
+    ids = { classId, studentId, examId, subjectId, resultId, attendanceId, routineId, invoiceId, paymentId };
   });
   afterAll(() => db.end());
 
