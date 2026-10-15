@@ -1062,7 +1062,8 @@
       "average": "Average",
       "best": "Best",
       "noLeaderboard": "No results yet",
-      "allSubjectsShort": "Mixed"
+      "allSubjectsShort": "Mixed",
+      "readOnlyNote": "Only super admins can add or change questions."
     }
   },
   "branches": {

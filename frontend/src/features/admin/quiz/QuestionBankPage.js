@@ -5,6 +5,7 @@ import { FiEdit2, FiEye, FiEyeOff, FiPlus } from "react-icons/fi";
 import { Badge, Box, Button, DataTable, PageHeader, errorMessage, notify } from "@/components/admin/ui";
 import MathText from "@/features/quaker/MathText";
 import { localize } from "@/features/quaker/quizText";
+import { useAuthStore } from "@/store/authStore";
 import { useLanguageStore, useTranslations } from "@/store/languageStore";
 import QuestionFormDrawer from "./QuestionFormDrawer";
 import { emptyQuestion, toFormValues } from "./questionForm";
@@ -14,10 +15,15 @@ import { useClassOptions, useQuestionSubjects, useQuestions, useSaveQuestion, us
 const PAGE_SIZE = 25;
 const NO_FILTERS = { classKey: "", subject: "", search: "", status: "active", page: 1 };
 
-/** The quiz question bank: questions per class, shared by every branch. */
+/**
+ * The quiz question bank: questions per class, shared by every branch. Any
+ * admin can browse it; only super admins can add, edit, hide or show (the
+ * server enforces this too).
+ */
 export default function QuestionBankPage() {
   const t = useTranslations("admin.quiz");
   const language = useLanguageStore((s) => s.language);
+  const canEdit = useAuthStore((s) => s.role) === "super_admin";
   const [filters, setFilters] = useState(NO_FILTERS);
   const [searchText, setSearchText] = useState("");
   const [editing, setEditing] = useState(null); // null = closed, {} = new, question = edit
@@ -79,23 +85,33 @@ export default function QuestionBankPage() {
       header: t("status"),
       render: (q) => <Badge tone={q.active ? "success" : "default"}>{q.active ? t("shown") : t("hidden")}</Badge>,
     },
-    {
-      key: "actions",
-      header: t("actions"),
-      align: "right",
-      render: (q) => (
-        <div className="inline-flex gap-1">
-          <Button size="sm" icon={FiEdit2} onClick={() => setEditing(q)} aria-label={t("edit")} title={t("edit")} />
-          <Button
-            size="sm"
-            icon={q.active ? FiEyeOff : FiEye}
-            onClick={() => toggle(q)}
-            aria-label={q.active ? t("hide") : t("show")}
-            title={q.active ? t("hideHelp") : t("show")}
-          />
-        </div>
-      ),
-    },
+    ...(canEdit
+      ? [
+          {
+            key: "actions",
+            header: t("actions"),
+            align: "right",
+            render: (q) => (
+              <div className="inline-flex gap-1">
+                <Button
+                  size="sm"
+                  icon={FiEdit2}
+                  onClick={() => setEditing(q)}
+                  aria-label={t("edit")}
+                  title={t("edit")}
+                />
+                <Button
+                  size="sm"
+                  icon={q.active ? FiEyeOff : FiEye}
+                  onClick={() => toggle(q)}
+                  aria-label={q.active ? t("hide") : t("show")}
+                  title={q.active ? t("hideHelp") : t("show")}
+                />
+              </div>
+            ),
+          },
+        ]
+      : []),
   ];
 
   return (
@@ -104,11 +120,19 @@ export default function QuestionBankPage() {
         title={t("bankTitle")}
         subtitle={t("bankSubtitle")}
         actions={
-          <Button variant="primary" icon={FiPlus} onClick={() => setEditing({})}>
-            {t("addQuestion")}
-          </Button>
+          canEdit && (
+            <Button variant="primary" icon={FiPlus} onClick={() => setEditing({})}>
+              {t("addQuestion")}
+            </Button>
+          )
         }
       />
+
+      {!canEdit && (
+        <div role="note" className="px-4 py-3 text-sm bg-sky-50 border border-sky-200 text-sky-800 rounded-sm">
+          {t("readOnlyNote")}
+        </div>
+      )}
 
       <Box title={t("questions")} tone="primary" bodyClassName="">
         <div className="flex flex-wrap items-center gap-3 px-4 py-3 border-b border-slate-200">
@@ -168,7 +192,7 @@ export default function QuestionBankPage() {
         )}
       </Box>
 
-      {editing && (
+      {canEdit && editing && (
         <QuestionFormDrawer
           key={editing.id ?? "new"}
           isNew={!editing.id}

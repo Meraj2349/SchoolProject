@@ -1,4 +1,5 @@
 import { t } from "../../../../config/i18n.js";
+import { requireRole } from "../../../shared/http/requireRole.js";
 import { sendError } from "../../../shared/http/sendError.js";
 
 // HTTP adapter for managing admin accounts. No business rules or SQL here.
@@ -12,14 +13,8 @@ export function makeAdminController({ useCases }) {
   };
 
   return {
-    // Middleware for account management, after authMiddleware (which loads the
-    // admin's current role from the database, so a demotion applies at once).
-    requireSuperAdmin: (req, res, next) => {
-      if (req.role !== "super_admin") {
-        return res.status(403).json({ success: false, message: t("forbidden", req.language) });
-      }
-      next();
-    },
+    // Middleware for account management, after authMiddleware.
+    requireSuperAdmin: requireRole("super_admin"),
 
     list: handle(async (req, res) => {
       const admins = await useCases.listAdmins({ currentAdminId: req.adminId });
