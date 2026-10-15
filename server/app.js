@@ -16,6 +16,7 @@ import classRoutes from "./routes/classes.routes.js";
 import eventRoutes from "./routes/event.routes.js";
 import examRoutes from "./routes/exam.routes.js";
 import feeRoutes from "./routes/fees.routes.js";
+import dashboardRoutes from "./routes/dashboard.routes.js";
 import imageRoutes from "./routes/image.routes.js";
 import chairmanRoutes from "./routes/chairman.routes.js";
 import messageRoutes from "./routes/messages.routes.js";
@@ -69,6 +70,7 @@ app.use("/api/news", newsRoutes);
 app.use("/api/notice-announcements", noticeAnnouncementRoutes);
 app.use("/api/quiz", quizRoutes);
 app.use("/api/fees", feeRoutes);
+app.use("/api/dashboard", dashboardRoutes);
 
 // Handle root URL (Welcome message)
 app.get("/", (req, res) => {

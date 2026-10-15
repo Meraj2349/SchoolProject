@@ -79,6 +79,7 @@ const endpoints = () => [
   "/api/applications",
   "/api/chairman",
   "/api/images",
+  "/api/dashboard/summary",
   "/api/quiz/meta",
   "/api/quiz/admin/sessions",
   "/api/quiz/admin/leaderboard",
