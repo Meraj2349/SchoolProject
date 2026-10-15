@@ -4,7 +4,19 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { FiDollarSign, FiEdit2, FiTrash2, FiUserPlus } from "react-icons/fi";
-import { Badge, Box, Button, ConfirmDialog, DataTable, PageHeader, Select, errorMessage, notify } from "@/components/admin/ui";
+import {
+  Badge,
+  Box,
+  Button,
+  ChooseBranchNotice,
+  ConfirmDialog,
+  DataTable,
+  PageHeader,
+  Select,
+  errorMessage,
+  notify,
+} from "@/components/admin/ui";
+import { useWriteBranch } from "@/hooks/useWriteBranch";
 import { localDateString } from "@/lib/dates";
 import { queryKeys } from "@/lib/queryKeys";
 import { classesService } from "@/services/classes.service";
@@ -34,6 +46,7 @@ export default function AdminPage() {
   const t = useTranslations("admin.students");
   const qc = useQueryClient();
   const branchId = useBranchStore((s) => s.currentBranchId);
+  const { needsBranch } = useWriteBranch();
   const [filters, setFilters] = useState(NO_FILTERS);
   const [editing, setEditing] = useState(null); // null = closed, {} = new, student = edit
   const [deleting, setDeleting] = useState(null);
@@ -113,7 +126,9 @@ export default function AdminPage() {
       align: "right",
       render: (s) => (
         <div className="inline-flex gap-1">
-          <Button size="sm" icon={FiEdit2} onClick={() => setEditing(s)} aria-label={t("edit")} title={t("edit")} />
+          {!needsBranch && (
+            <Button size="sm" icon={FiEdit2} onClick={() => setEditing(s)} aria-label={t("edit")} title={t("edit")} />
+          )}
           <Link
             href={`/admin/fees/students/${s.StudentID}`}
             prefetch={false}
@@ -123,7 +138,9 @@ export default function AdminPage() {
           >
             <FiDollarSign aria-hidden="true" />
           </Link>
-          <Button size="sm" variant="danger" icon={FiTrash2} onClick={() => setDeleting(s)} aria-label={t("delete")} title={t("delete")} />
+          {!needsBranch && (
+            <Button size="sm" variant="danger" icon={FiTrash2} onClick={() => setDeleting(s)} aria-label={t("delete")} title={t("delete")} />
+          )}
         </div>
       ),
     },
@@ -135,11 +152,15 @@ export default function AdminPage() {
         title={t("title")}
         subtitle={t("subtitle")}
         actions={
-          <Button variant="primary" icon={FiUserPlus} onClick={() => setEditing({})}>
-            {t("addStudent")}
-          </Button>
+          !needsBranch && (
+            <Button variant="primary" icon={FiUserPlus} onClick={() => setEditing({})}>
+              {t("addStudent")}
+            </Button>
+          )
         }
       />
+
+      {needsBranch && <ChooseBranchNotice />}
 
       <Box title={t("allStudents")} tone="primary" bodyClassName="">
         <DataTable

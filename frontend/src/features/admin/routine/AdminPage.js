@@ -9,6 +9,8 @@ import {
 } from "@/hooks/useRoutines";
 import { useClasses } from "@/hooks/useClasses";
 import { useTranslations } from "@/store/languageStore";
+import { ChooseBranchNotice } from "@/components/admin/ui";
+import { useWriteBranch } from "@/hooks/useWriteBranch";
 import {
   FiEdit2,
   FiTrash2,
@@ -31,6 +33,7 @@ export default function AdminPage() {
   const update = useUpdateRoutine();
   const remove = useDeleteRoutine();
   const t = useTranslations("admin.routine");
+  const { needsBranch } = useWriteBranch();
 
   const [form, setForm] = useState(EMPTY);
   const [editId, setEditId] = useState(null);
@@ -94,101 +97,106 @@ export default function AdminPage() {
         <div className="success-message">{status.success}</div>
       )}
 
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-        <div className="px-6 py-4 border-b border-slate-100 flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center">
-            <FiPlusCircle className="text-indigo-600 text-sm" />
-          </div>
-          <h2 className="text-base font-semibold text-slate-800">
-            {editId ? t("editRoutine") : t("addRoutine")}
-          </h2>
-        </div>
-        <form onSubmit={handleSave} className="p-6">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
-                {t("routineTitle")}
-              </label>
-              <input
-                type="text"
-                name="RoutineTitle"
-                value={form.RoutineTitle}
-                onChange={handleChange}
-                className="form-input"
-                required
-              />
+      {/* Hidden until a super admin picks a branch */}
+      {needsBranch ? (
+        <ChooseBranchNotice />
+      ) : (
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+          <div className="px-6 py-4 border-b border-slate-100 flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center">
+              <FiPlusCircle className="text-indigo-600 text-sm" />
             </div>
-            <div>
-              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
-                {t("class")}
-              </label>
-              <select
-                name="ClassID"
-                value={form.ClassID}
-                onChange={handleChange}
-                className="form-input"
+            <h2 className="text-base font-semibold text-slate-800">
+              {editId ? t("editRoutine") : t("addRoutine")}
+            </h2>
+          </div>
+          <form onSubmit={handleSave} className="p-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
+                  {t("routineTitle")}
+                </label>
+                <input
+                  type="text"
+                  name="RoutineTitle"
+                  value={form.RoutineTitle}
+                  onChange={handleChange}
+                  className="form-input"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
+                  {t("class")}
+                </label>
+                <select
+                  name="ClassID"
+                  value={form.ClassID}
+                  onChange={handleChange}
+                  className="form-input"
+                >
+                  <option value="">{t("selectClass")}</option>
+                  {classes.map((c) => (
+                    <option key={c.ClassID || c.id} value={c.ClassID || c.id}>
+                      {c.className || c.ClassName} – {c.section || c.Section}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
+                  {t("date")}
+                </label>
+                <input
+                  type="date"
+                  name="RoutineDate"
+                  value={form.RoutineDate}
+                  onChange={handleChange}
+                  className="form-input"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
+                  {t("file")}
+                </label>
+                <input
+                  type="file"
+                  ref={fileRef}
+                  accept=".pdf,image/*"
+                  className="block w-full text-sm text-slate-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer mt-0.5"
+                />
+              </div>
+              <div className="sm:col-span-2">
+                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
+                  {t("description")}
+                </label>
+                <textarea
+                  name="Description"
+                  value={form.Description}
+                  onChange={handleChange}
+                  rows={3}
+                  className="form-input"
+                />
+              </div>
+            </div>
+            <div className="flex gap-3 mt-6 pt-5 border-t border-slate-100">
+              <button
+                type="submit"
+                className="btn-primary"
+                disabled={create.isPending || update.isPending}
               >
-                <option value="">{t("selectClass")}</option>
-                {classes.map((c) => (
-                  <option key={c.ClassID || c.id} value={c.ClassID || c.id}>
-                    {c.className || c.ClassName} – {c.section || c.Section}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
-                {t("date")}
-              </label>
-              <input
-                type="date"
-                name="RoutineDate"
-                value={form.RoutineDate}
-                onChange={handleChange}
-                className="form-input"
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
-                {t("file")}
-              </label>
-              <input
-                type="file"
-                ref={fileRef}
-                accept=".pdf,image/*"
-                className="block w-full text-sm text-slate-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer mt-0.5"
-              />
-            </div>
-            <div className="sm:col-span-2">
-              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
-                {t("description")}
-              </label>
-              <textarea
-                name="Description"
-                value={form.Description}
-                onChange={handleChange}
-                rows={3}
-                className="form-input"
-              />
-            </div>
-          </div>
-          <div className="flex gap-3 mt-6 pt-5 border-t border-slate-100">
-            <button
-              type="submit"
-              className="btn-primary"
-              disabled={create.isPending || update.isPending}
-            >
-              {editId ? t("updateRoutine") : t("addRoutine")}
-            </button>
-            {editId && (
-              <button type="button" onClick={reset} className="btn-secondary">
-                {t("cancel")}
+                {editId ? t("updateRoutine") : t("addRoutine")}
               </button>
-            )}
-          </div>
-        </form>
-      </div>
+              {editId && (
+                <button type="button" onClick={reset} className="btn-secondary">
+                  {t("cancel")}
+                </button>
+              )}
+            </div>
+          </form>
+        </div>
+      )}
 
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
         <div className="px-6 py-4 border-b border-slate-100 flex items-center gap-3">
@@ -254,33 +262,35 @@ export default function AdminPage() {
                       )}
                     </td>
                     <td className="table-cell">
-                      <div className="flex items-center gap-1">
-                        <button
-                          onClick={() => {
-                            setEditId(r.RoutineID);
-                            setForm({
-                              RoutineTitle: r.RoutineTitle || "",
-                              ClassID: r.ClassID || "",
-                              RoutineDate: r.RoutineDate?.split("T")[0] || "",
-                              Description: r.Description || "",
-                            });
-                          }}
-                          className="btn-icon edit"
-                          title={t("editRoutine")}
-                        >
-                          <FiEdit2 />
-                        </button>
-                        <button
-                          onClick={() => {
-                            if (window.confirm(t("deleteConfirm")))
-                              remove.mutate(r.RoutineID);
-                          }}
-                          className="btn-icon delete"
-                          title={t("deleted")}
-                        >
-                          <FiTrash2 />
-                        </button>
-                      </div>
+                      {!needsBranch && (
+                        <div className="flex items-center gap-1">
+                          <button
+                            onClick={() => {
+                              setEditId(r.RoutineID);
+                              setForm({
+                                RoutineTitle: r.RoutineTitle || "",
+                                ClassID: r.ClassID || "",
+                                RoutineDate: r.RoutineDate?.split("T")[0] || "",
+                                Description: r.Description || "",
+                              });
+                            }}
+                            className="btn-icon edit"
+                            title={t("editRoutine")}
+                          >
+                            <FiEdit2 />
+                          </button>
+                          <button
+                            onClick={() => {
+                              if (window.confirm(t("deleteConfirm")))
+                                remove.mutate(r.RoutineID);
+                            }}
+                            className="btn-icon delete"
+                            title={t("deleted")}
+                          >
+                            <FiTrash2 />
+                          </button>
+                        </div>
+                      )}
                     </td>
                   </tr>
                 ))}

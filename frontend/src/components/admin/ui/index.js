@@ -1,6 +1,7 @@
 export { default as Badge } from "./Badge";
 export { default as Box } from "./Box";
 export { default as Button } from "./Button";
+export { default as ChooseBranchNotice } from "./ChooseBranchNotice";
 export { default as ConfirmDialog } from "./ConfirmDialog";
 export { default as DataTable } from "./DataTable";
 export { default as Drawer } from "./Drawer";

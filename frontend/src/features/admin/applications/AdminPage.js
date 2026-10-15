@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { applicationService } from "@/services/application.service";
 import { useTranslations } from "@/store/languageStore";
+import { ChooseBranchNotice } from "@/components/admin/ui";
+import { useWriteBranch } from "@/hooks/useWriteBranch";
 import { FiClipboard, FiTrash2 } from "react-icons/fi";
 
 const STATUSES = ["pending", "reviewed", "accepted", "rejected"];
@@ -29,6 +31,7 @@ export default function AdminApplicationsPage() {
   const [loading, setLoading] = useState(true);
   const [flash, setFlash] = useState({ msg: "", error: false });
   const t = useTranslations("admin.applications");
+  const { needsBranch } = useWriteBranch();
   const tCommon = useTranslations("common");
 
   const showFlash = (msg, error = false) => {
@@ -107,6 +110,9 @@ export default function AdminApplicationsPage() {
         </p>
       </div>
 
+      {/* Accepting enrols the child in a branch, so a super admin picks one first */}
+      {needsBranch && <ChooseBranchNotice />}
+
       {flash.msg && (
         <div className={flash.error ? "error-message" : "success-message"}>
           {flash.msg}
@@ -180,6 +186,7 @@ export default function AdminApplicationsPage() {
                       <select
                         className="status-select"
                         value={app.status}
+                        disabled={needsBranch}
                         onChange={(e) =>
                           handleStatusChange(app.id, e.target.value)
                         }
@@ -197,13 +204,15 @@ export default function AdminApplicationsPage() {
                     <td className="table-cell whitespace-nowrap">
                       <div className="flex items-center gap-2">
                         <StatusBadge status={app.status} t={t} />
-                        <button
-                          className="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 border-none cursor-pointer transition-all hover:scale-105"
-                          onClick={() => handleDelete(app.id)}
-                          title={tCommon("delete")}
-                        >
-                          <FiTrash2 className="text-xs" />
-                        </button>
+                        {!needsBranch && (
+                          <button
+                            className="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 border-none cursor-pointer transition-all hover:scale-105"
+                            onClick={() => handleDelete(app.id)}
+                            title={tCommon("delete")}
+                          >
+                            <FiTrash2 className="text-xs" />
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>

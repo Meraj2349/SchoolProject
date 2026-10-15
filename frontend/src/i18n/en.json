@@ -825,7 +825,8 @@
       "cancel": "Cancel",
       "confirm": "Confirm",
       "save": "Save",
-      "saving": "Saving…"
+      "saving": "Saving…",
+      "chooseBranch": "You are viewing all branches. Choose a branch in the top bar to add or change records."
     },
     "fees": {
       "overviewTitle": "Fees",
