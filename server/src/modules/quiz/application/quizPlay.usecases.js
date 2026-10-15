@@ -96,13 +96,17 @@ export function makeQuizPlayUseCases({ quizRepository, studentDirectory, issueTo
 
     async finishQuiz({ studentId, answers, timeTakenSeconds }) {
       if (!Array.isArray(answers) || answers.length === 0) throw new ValidationError("quiz_answers_required");
+      // No quiz has more than MAX_COUNT questions; more answers is someone
+      // harvesting the answer key.
+      if (answers.length > MAX_COUNT) throw new ValidationError("quiz_too_many_answers");
       const student = await requireStudent(studentId);
 
-      const ids = [...new Set(answers.map((a) => Number.parseInt(a.questionId, 10)).filter(Number.isInteger))];
+      const wellFormed = answers.filter((a) => a && typeof a === "object");
+      const ids = [...new Set(wellFormed.map((a) => Number.parseInt(a.questionId, 10)).filter(Number.isInteger))];
       const allowed = (await quizRepository.questionsByIds(ids)).filter(
         (q) => q.active && q.classKey === student.classKey,
       );
-      const graded = scoreAnswers(answers, allowed);
+      const graded = scoreAnswers(wellFormed, allowed);
       if (graded.length === 0) throw new ValidationError("quiz_no_valid_answers");
 
       const { total, correct, percentage } = summarize(graded);

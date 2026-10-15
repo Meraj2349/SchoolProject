@@ -145,31 +145,35 @@ export default function DataTable({
               </tbody>
             </table>
           </div>
-
-          <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 border-t border-slate-200 text-sm text-slate-600">
-            <span>
-              {fillTemplate(t("showing"), { from: start + 1, to: start + pageRows.length, total: totalRows })}
-            </span>
-            <div className="flex gap-1">
-              <button
-                type="button"
-                className="admin-btn admin-btn-default admin-btn-sm"
-                onClick={() => goTo(currentPage - 1)}
-                disabled={currentPage === 1}
-              >
-                {t("previous")}
-              </button>
-              <button
-                type="button"
-                className="admin-btn admin-btn-default admin-btn-sm"
-                onClick={() => goTo(currentPage + 1)}
-                disabled={currentPage === pageCount}
-              >
-                {t("next")}
-              </button>
-            </div>
-          </div>
         </>
+      )}
+
+      {/* On an emptied later page (server paging) the footer stays, so you can go back. */}
+      {!loading && (pageRows.length > 0 || (server && currentPage > 1)) && (
+        <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 border-t border-slate-200 text-sm text-slate-600">
+          <span>
+            {pageRows.length > 0 &&
+              fillTemplate(t("showing"), { from: start + 1, to: start + pageRows.length, total: totalRows })}
+          </span>
+          <div className="flex gap-1">
+            <button
+              type="button"
+              className="admin-btn admin-btn-default admin-btn-sm"
+              onClick={() => goTo(currentPage - 1)}
+              disabled={currentPage === 1}
+            >
+              {t("previous")}
+            </button>
+            <button
+              type="button"
+              className="admin-btn admin-btn-default admin-btn-sm"
+              onClick={() => goTo(currentPage + 1)}
+              disabled={currentPage === pageCount}
+            >
+              {t("next")}
+            </button>
+          </div>
+        </div>
       )}
     </div>
   );

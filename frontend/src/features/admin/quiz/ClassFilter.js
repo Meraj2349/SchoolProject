@@ -1,16 +1,20 @@
 "use client";
 
+import { useId } from "react";
 import { Select } from "@/components/admin/ui";
 import { useTranslations } from "@/store/languageStore";
 import { useClassOptions } from "./useQuiz";
 
-/** A labelled select for a toolbar. */
+/** A labelled select for a toolbar (label linked by id, so its name is just the label). */
 export function FilterSelect({ label, ...props }) {
+  const id = useId();
   return (
-    <label className="flex items-center gap-2 text-sm">
-      <span className="font-semibold text-slate-600">{label}</span>
-      <Select className="w-auto" {...props} />
-    </label>
+    <div className="flex items-center gap-2 text-sm">
+      <label htmlFor={id} className="font-semibold text-slate-600">
+        {label}
+      </label>
+      <Select id={id} className="w-auto" {...props} />
+    </div>
   );
 }
 

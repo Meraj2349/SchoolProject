@@ -283,4 +283,31 @@ describe("quiz results (admin)", () => {
       ["Nadia Uddin", 0],
     ]);
   });
+
+  it("lists a student once on the leaderboard even after changing class", async () => {
+    const [[rahim]] = await db.query("SELECT StudentID FROM Students WHERE FirstName = 'Rahim'");
+    await db.query("UPDATE QuizSessions SET ClassName = 'Class 7', Section = 'Better' WHERE StudentID = ? ", [rahim.StudentID]);
+    const q = await addQuestion("8", "Science", "A");
+    await request(app)
+      .post("/api/quiz/finish")
+      .set(bearer(quizStudentToken(rahim.StudentID, BRANCH_A)))
+      .send({ answers: [{ questionId: q, userAnswer: "A" }] });
+
+    const board = await request(app).get("/api/quiz/admin/leaderboard").set(bearer(superAdminToken()));
+
+    expect(board.body.data.filter((r) => r.StudentID === rahim.StudentID)).toEqual([
+      expect.objectContaining({ StudentName: "Rahim Uddin", ClassName: "Class 8", sessions: 2 }),
+    ]);
+  });
+
+  it("answers 400, not 500, for malformed answers", async () => {
+    const [[rahim]] = await db.query("SELECT StudentID FROM Students WHERE FirstName = 'Rahim'");
+
+    const res = await request(app)
+      .post("/api/quiz/finish")
+      .set(bearer(quizStudentToken(rahim.StudentID, BRANCH_A)))
+      .send({ answers: [null] });
+
+    expect(res.status).toBe(400);
+  });
 });

@@ -19,6 +19,11 @@ Re-running adds only new questions; questions edited in the admin panel are
 left alone. Rows with spreadsheet errors (`#ERROR!`), missing options, an
 answer other than A–D, or a repeated question are skipped and counted.
 
+Each question's key is its file and row number (`benqa:10th-Physics:17`). When
+updating these files from upstream, only add rows at the end of a file:
+inserting or removing a row in the middle shifts the keys, and a re-import
+would add the shifted questions again.
+
 ## Citation
 
 ```

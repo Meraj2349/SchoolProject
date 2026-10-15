@@ -116,5 +116,15 @@ describe("DataTable", () => {
 
       expect(onPageChange).toHaveBeenCalledWith(2);
     });
+
+    it("lets you go back from a page that has become empty", () => {
+      const onPageChange = vi.fn();
+      render(<DataTable columns={columns} rows={[]} emptyText="No rows" pagination={{ page: 3, pageSize: 10, total: 12, onPageChange }} />);
+
+      expect(screen.getByText("No rows")).toBeInTheDocument();
+      fireEvent.click(screen.getByRole("button", { name: "Previous" }));
+
+      expect(onPageChange).toHaveBeenCalledWith(2);
+    });
   });
 });

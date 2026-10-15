@@ -60,3 +60,13 @@ UPDATE QuizQuestions
 SET ClassKey = CAST(CAST(REGEXP_SUBSTR(Grade, '[0-9]+') AS UNSIGNED) AS CHAR)
 WHERE ClassKey IS NULL
   AND Grade REGEXP '^(class[ _-]*)?[0-9]{1,2}(st|nd|rd|th)?$';
+
+-- Older quiz results stored the grade the student picked ("10th", "all").
+-- Results now record the class key ("10"); "all" and other text become NULL.
+UPDATE QuizSessions
+SET Grade = CASE
+  WHEN Grade REGEXP '^(class[ _-]*)?[0-9]{1,2}(st|nd|rd|th)?$'
+    THEN CAST(CAST(REGEXP_SUBSTR(Grade, '[0-9]+') AS UNSIGNED) AS CHAR)
+  ELSE NULL
+END
+WHERE Grade IS NOT NULL AND Grade NOT REGEXP '^[0-9]{1,2}$' AND Grade NOT IN ('play', 'nursery', 'kg');

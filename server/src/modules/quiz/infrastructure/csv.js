@@ -19,8 +19,8 @@ function parseRows(text) {
       } else {
         field += char;
       }
-    } else if (char === '"') {
-      quoted = true;
+    } else if (char === '"' && field === "") {
+      quoted = true; // a quote opens a quoted field only at its start
     } else if (char === ",") {
       row.push(field);
       field = "";

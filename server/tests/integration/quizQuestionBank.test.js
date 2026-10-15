@@ -53,6 +53,13 @@ describe("quiz_question_bank_migration.sql", () => {
     await old("Class 5");
     await old("8");
     await old("Nursery");
+    const session = (grade) =>
+      db.query(
+        "INSERT INTO QuizSessions (StudentName, Grade, TotalQuestions, CorrectAnswers, ScorePercentage, TimeTakenSeconds) VALUES ('Old', ?, 1, 1, 100, 10)",
+        [grade],
+      );
+    await session("10th");
+    await session("all");
 
     await runMigration();
     await runMigration();
@@ -65,6 +72,8 @@ describe("quiz_question_bank_migration.sql", () => {
       { Grade: "8", ClassKey: "8", Active: 1 },
       { Grade: "Nursery", ClassKey: null, Active: 1 },
     ]);
+    const [sessions] = await db.query("SELECT Grade FROM QuizSessions ORDER BY SessionID");
+    expect(sessions.map((s) => s.Grade)).toEqual(["10", null]);
   });
 });
 

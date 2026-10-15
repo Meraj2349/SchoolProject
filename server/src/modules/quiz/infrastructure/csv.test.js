@@ -32,4 +32,11 @@ describe("parseCsv", () => {
   it("fills missing trailing cells with empty strings", () => {
     expect(parseCsv("a,b,c\n1\n")).toEqual([{ a: "1", b: "", c: "" }]);
   });
+
+  it("treats a quote inside an unquoted field as a normal character", () => {
+    expect(parseCsv('q,a\nA 5" pipe,x\nnext,y\n')).toEqual([
+      { q: 'A 5" pipe', a: "x" },
+      { q: "next", a: "y" },
+    ]);
+  });
 });

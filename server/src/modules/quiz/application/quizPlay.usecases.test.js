@@ -188,6 +188,19 @@ describe("quiz play", () => {
       expect(repo.sessions).toHaveLength(0);
     });
 
+    it("rejects malformed answers with a clear error instead of crashing", async () => {
+      await expect(play.finishQuiz({ studentId: 7, answers: [null, "x", 5] })).rejects.toMatchObject({
+        code: "quiz_no_valid_answers",
+      });
+    });
+
+    it("refuses more answers than a quiz can have", async () => {
+      const answers = Array.from({ length: 51 }, (_, i) => ({ questionId: i + 1, userAnswer: "A" }));
+
+      await expect(play.finishQuiz({ studentId: 7, answers })).rejects.toMatchObject({ code: "quiz_too_many_answers" });
+      expect(repo.sessions).toHaveLength(0);
+    });
+
     it("never trusts a negative or silly time", async () => {
       await play.finishQuiz({ studentId: 7, answers: [{ questionId: ids.math8, userAnswer: "B" }], timeTakenSeconds: -20 });
 

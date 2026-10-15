@@ -31,6 +31,10 @@ const i18n = {
     en: "Please answer at least one question.",
     bn: "অন্তত একটি প্রশ্নের উত্তর দিন।",
   },
+  quiz_too_many_answers: {
+    en: "A quiz cannot have that many answers.",
+    bn: "একটি কুইজে এত উত্তর থাকতে পারে না।",
+  },
   quiz_no_valid_answers: {
     en: "None of these answers belong to your quiz.",
     bn: "এই উত্তরগুলোর কোনোটিই আপনার কুইজের নয়।",

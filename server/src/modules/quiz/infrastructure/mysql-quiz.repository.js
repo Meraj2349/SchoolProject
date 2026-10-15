@@ -228,14 +228,18 @@ export const mysqlQuizRepository = {
       classClause = "AND qs.Grade = ?";
       values.push(classKey);
     }
+    // One row per student, with their current name and class (a student who
+    // changed class still has one row).
     const [rows] = await db.query(
-      `SELECT qs.StudentID, qs.StudentName, qs.ClassName, qs.Section, s.RollNumber AS StudentRoll,
+      `SELECT s.StudentID, CONCAT(s.FirstName, ' ', s.LastName) AS StudentName, c.ClassName, c.Section,
+              s.RollNumber AS StudentRoll,
               COUNT(*) AS sessions, AVG(qs.ScorePercentage) AS avgScore, MAX(qs.ScorePercentage) AS bestScore
          FROM QuizSessions qs
-         LEFT JOIN Students s ON s.StudentID = qs.StudentID
-        WHERE qs.StudentID IS NOT NULL ${clause} ${classClause}
-        GROUP BY qs.StudentID, qs.StudentName, qs.ClassName, qs.Section, s.RollNumber
-        ORDER BY avgScore DESC, sessions DESC, qs.StudentName
+         JOIN Students s ON s.StudentID = qs.StudentID
+         LEFT JOIN Classes c ON c.ClassID = s.ClassID
+        WHERE 1=1 ${clause} ${classClause}
+        GROUP BY s.StudentID, c.ClassID
+        ORDER BY avgScore DESC, sessions DESC, StudentName
         LIMIT ?`,
       [...values, limit],
     );

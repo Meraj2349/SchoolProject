@@ -15,7 +15,8 @@ router.post("/finish", quizStudentMiddleware, quiz.finish);
 router.get("/my-sessions", quizStudentMiddleware, quiz.mySessions);
 router.get("/my-progress", quizStudentMiddleware, quiz.myProgress);
 
-// Admins: the question bank (shared by every branch) and results (branch-scoped).
+// Admins: the question bank and results (branch-scoped). The bank is shared by
+// every branch, and any admin may add, edit or hide questions in it.
 const admin = express.Router();
 admin.use(authMiddleware);
 admin.get("/questions", quiz.listQuestions);
