@@ -1,22 +1,14 @@
 import express from "express";
-import authMiddleware from "../middlewares/auth.middleware.js";
-import {
-  getActiveNewsController,
-  getAllNewsController,
-  createNewsController,
-  updateNewsController,
-  deleteNewsController,
-} from "../controllers/news.controller.js";
+import authMiddleware, { optionalAuth } from "../middlewares/auth.middleware.js";
+import { newsController as news } from "../src/modules/content/index.js";
 
+// News, per branch or for the whole school.
 const router = express.Router();
 
-// Public routes
-router.get("/", getActiveNewsController);
-
-// Admin routes (require auth)
-router.get("/all", authMiddleware, getAllNewsController);
-router.post("/", authMiddleware, createNewsController);
-router.put("/:id", authMiddleware, updateNewsController);
-router.delete("/:id", authMiddleware, deleteNewsController);
+router.get("/", optionalAuth, news.listVisible); // the website: active news only
+router.get("/all", authMiddleware, news.list);
+router.post("/", authMiddleware, news.create);
+router.put("/:id", authMiddleware, news.update);
+router.delete("/:id", authMiddleware, news.remove);
 
 export default router;

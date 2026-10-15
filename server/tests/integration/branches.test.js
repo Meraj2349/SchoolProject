@@ -22,9 +22,16 @@ describe("creating and deleting branches", () => {
     expect(await count("Branches", "name_en = 'South'")).toBe(1);
   });
 
-  it("refuses to delete a branch that still has students, admins or fee records, and says what", async () => {
+  it("refuses to delete a branch that still has students, admins, fees, applications or website content, and says what", async () => {
     const { studentId } = await seedStudent({ branchId: BRANCH_B });
     await insert("FeeInvoices", { branch_id: BRANCH_B, student_id: studentId, year: 2026, month: 10, class_name: "Class 5", due_date: "2026-10-10", status: "unpaid" });
+    await insert("Applications", {
+      applicant_name: "N", date_of_birth: "2016-01-01", gender: "male", applying_for_class: "Class 1",
+      parent_name: "P", parent_contact: "0170", branch_id: BRANCH_B,
+    });
+    await insert("Notices", { Title: "T", Description: "D", branch_id: BRANCH_B });
+    await insert("Images", { ImagePath: "https://cdn.test/x.png", PublicID: "p", ImageType: "event", branch_id: BRANCH_B });
+    await insert("Notices", { Title: "Whole school", Description: "D", branch_id: null });
 
     const res = await asSuper(request(app).delete(`/api/branches/${BRANCH_B}`));
 
@@ -32,7 +39,7 @@ describe("creating and deleting branches", () => {
     expect(res.body).toEqual({
       success: false,
       message: expect.stringMatching(/still/i),
-      data: { students: 1, teachers: 0, classes: 1, admins: 1, invoices: 1, payments: 0 },
+      data: { students: 1, teachers: 0, classes: 1, admins: 1, invoices: 1, payments: 0, applications: 1, websiteItems: 2 },
     });
     expect(await count("Branches", "id = ?", [BRANCH_B])).toBe(1);
   });

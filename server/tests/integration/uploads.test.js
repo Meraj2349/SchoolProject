@@ -45,7 +45,7 @@ describe("file uploads", () => {
         .attach("image", PNG, "photo.png");
 
       expect(res.status).toBe(201);
-      expect(res.body).toMatchObject({ ImagePath: "https://cdn.test/1.png", Description: null });
+      expect(res.body.data).toMatchObject({ ImagePath: "https://cdn.test/1.png", Description: null, branch_id: null });
     });
 
     it("points the record at the new file when the image file is replaced", async () => {

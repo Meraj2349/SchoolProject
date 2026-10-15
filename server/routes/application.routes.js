@@ -1,22 +1,16 @@
 import express from "express";
 import authMiddleware from "../middlewares/auth.middleware.js";
-import {
-  deleteApplicationController,
-  getAllApplicationsController,
-  getApplicationByIdController,
-  submitApplicationController,
-  updateApplicationStatusController,
-} from "../controllers/application.controller.js";
+import { applicationController as applications } from "../src/modules/applications/index.js";
 
 const router = express.Router();
 
-// PUBLIC — submit a new application
-router.post("/", submitApplicationController);
+// Public: families apply to one branch (campus).
+router.post("/", applications.submit);
 
-// PROTECTED — admin routes
-router.get("/", authMiddleware, getAllApplicationsController);
-router.get("/:id", authMiddleware, getApplicationByIdController);
-router.put("/:id/status", authMiddleware, updateApplicationStatusController);
-router.delete("/:id", authMiddleware, deleteApplicationController);
+// Admins: a branch admin handles their branch's applications, the super admin all.
+router.get("/", authMiddleware, applications.list);
+router.get("/:id", authMiddleware, applications.get);
+router.put("/:id/status", authMiddleware, applications.setStatus);
+router.delete("/:id", authMiddleware, applications.remove);
 
 export default router;

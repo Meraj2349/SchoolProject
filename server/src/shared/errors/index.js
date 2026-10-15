@@ -17,3 +17,7 @@ export class NotFoundError extends DomainError {}
 // The request is valid but clashes with the current state (e.g. a duplicate,
 // or removing the last super admin).
 export class ConflictError extends DomainError {}
+
+// The admin may see the row but not change it (e.g. a branch admin and a
+// whole-school notice).
+export class ForbiddenError extends DomainError {}

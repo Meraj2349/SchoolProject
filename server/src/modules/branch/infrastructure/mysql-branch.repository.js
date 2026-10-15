@@ -40,20 +40,27 @@ export const mysqlBranchRepository = {
 
   /** How many rows of each kind still belong to the branch. */
   async usage(id) {
-    const tables = {
-      students: "Students",
-      teachers: "Teachers",
-      classes: "Classes",
-      admins: "Admin",
-      invoices: "FeeInvoices",
-      payments: "FeePayments",
+    const countIn = async (tables) => {
+      const counts = await Promise.all(
+        tables.map(async (table) => {
+          const [[row]] = await db.query(`SELECT COUNT(*) AS n FROM \`${table}\` WHERE branch_id = ?`, [id]);
+          return Number(row.n);
+        }),
+      );
+      return counts.reduce((sum, n) => sum + n, 0);
     };
-    const entries = await Promise.all(
-      Object.entries(tables).map(async ([key, table]) => {
-        const [[row]] = await db.query(`SELECT COUNT(*) AS n FROM \`${table}\` WHERE branch_id = ?`, [id]);
-        return [key, Number(row.n)];
-      }),
-    );
+    const groups = {
+      students: ["Students"],
+      teachers: ["Teachers"],
+      classes: ["Classes"],
+      admins: ["Admin"],
+      invoices: ["FeeInvoices"],
+      payments: ["FeePayments"],
+      applications: ["Applications"],
+      // The branch's own website content (whole-school content has no branch).
+      websiteItems: ["Notices", "NoticeAnnouncements", "News", "Messages", "Images", "Events"],
+    };
+    const entries = await Promise.all(Object.entries(groups).map(async ([key, tables]) => [key, await countIn(tables)]));
     return Object.fromEntries(entries);
   },
 };

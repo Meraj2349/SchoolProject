@@ -1,10 +1,11 @@
 import { t } from "../../../config/i18n.js";
-import { ConflictError, NotFoundError, ValidationError } from "../errors/index.js";
+import { ConflictError, ForbiddenError, NotFoundError, ValidationError } from "../errors/index.js";
 
 const STATUS_BY_ERROR = [
   [ValidationError, 400],
   [NotFoundError, 404],
   [ConflictError, 409],
+  [ForbiddenError, 403],
 ];
 
 // Maps domain errors to HTTP responses. Unknown errors are logged and

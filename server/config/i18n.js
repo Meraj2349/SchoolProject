@@ -3,12 +3,16 @@
 
 const i18n = {
   branch_in_use: {
-    en: "This branch still has students, staff, admins or fee records. Move or remove them first.",
-    bn: "এই শাখায় এখনো শিক্ষার্থী, শিক্ষক, অ্যাডমিন বা ফি-এর তথ্য আছে। আগে সেগুলো সরান।",
+    en: "This branch still has students, staff, admins, fee records, applications or website content. Move or remove them first.",
+    bn: "এই শাখায় এখনো শিক্ষার্থী, শিক্ষক, অ্যাডমিন, ফি-এর তথ্য, আবেদন বা ওয়েবসাইটের কনটেন্ট আছে। আগে সেগুলো সরান।",
   },
   branch_required: {
     en: "Choose a branch first.",
     bn: "আগে একটি শাখা বেছে নিন।",
+  },
+  content_not_yours: {
+    en: "Only the super admin can change content for the whole school or another branch.",
+    bn: "পুরো স্কুলের বা অন্য শাখার কনটেন্ট শুধু সুপার অ্যাডমিন পরিবর্তন করতে পারেন।",
   },
   branch_mismatch: {
     en: "That record belongs to another branch.",
@@ -276,6 +280,10 @@ const i18n = {
   },
 
   // ── Messages (Chairman) ────────────────────────────────────────────────────
+  message_not_found: {
+    en: "Message not found.",
+    bn: "বার্তাটি পাওয়া যায়নি।",
+  },
   message_added: {
     en: "Message added successfully.",
     bn: "বার্তা সফলভাবে যোগ হয়েছে।",
@@ -656,6 +664,10 @@ const i18n = {
     en: "No file uploaded.",
     bn: "কোনো ফাইল আপলোড করা হয়নি।",
   },
+  image_type_invalid: {
+    en: "Unknown image type.",
+    bn: "ছবির ধরনটি সঠিক নয়।",
+  },
   image_type_required: {
     en: "Image type is required.",
     bn: "ছবির ধরন আবশ্যক।",
@@ -792,6 +804,10 @@ const i18n = {
   },
 
   // ── Applications ──────────────────────────────────────────────────────────
+  application_branch_required: {
+    en: "Choose the branch (campus) you are applying to.",
+    bn: "যে শাখায় (ক্যাম্পাসে) ভর্তি হতে চান তা বেছে নিন।",
+  },
   application_submitted: {
     en: "Application submitted successfully.",
     bn: "আবেদন সফলভাবে জমা হয়েছে।",
