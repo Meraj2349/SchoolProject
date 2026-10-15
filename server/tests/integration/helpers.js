@@ -6,6 +6,9 @@ export { db };
 export const BRANCH_A = 1;
 export const BRANCH_B = 2;
 
+// Admin accounts seeded by resetDb, used by the default tokens.
+export const FIXTURE_ADMINS = { super: 9001, [BRANCH_A]: 9002, [BRANCH_B]: 9003 };
+
 // Reference data loaded by database.sql that tests must not wipe.
 const REFERENCE_TABLES = ["ClassNames", "ChairmanProfile"];
 
@@ -28,6 +31,20 @@ export async function resetDb() {
     "INSERT INTO Branches (id, name_en, name_bn) VALUES (?, 'Main', 'প্রধান'), (?, 'North', 'উত্তর')",
     [BRANCH_A, BRANCH_B],
   );
+  // The server checks every admin token against the Admin table, so the
+  // default tokens below belong to these real accounts.
+  await db.query(
+    `INSERT INTO Admin (AdminID, Username, Email, Password, role, branch_id) VALUES
+       (?, 'fixture-super', 'super@fixture.test', 'x', 'super_admin', NULL),
+       (?, 'fixture-a', 'a@fixture.test', 'x', 'branch_admin', ?),
+       (?, 'fixture-b', 'b@fixture.test', 'x', 'branch_admin', ?)`,
+    [FIXTURE_ADMINS.super, FIXTURE_ADMINS[BRANCH_A], BRANCH_A, FIXTURE_ADMINS[BRANCH_B], BRANCH_B],
+  );
+}
+
+// For tests that manage admin accounts themselves (counts, first registration).
+export async function clearAdmins() {
+  await db.query("DELETE FROM Admin");
 }
 
 export async function insert(table, row) {
@@ -46,10 +63,10 @@ export async function count(table, where = "1=1", params = []) {
 
 const sign = (payload) => jwt.sign(payload, process.env.JWT_SECRET_KEY, { expiresIn: "1h" });
 
-export const superAdminToken = (adminID = 1) =>
+export const superAdminToken = (adminID = FIXTURE_ADMINS.super) =>
   sign({ adminID, role: "super_admin", branch_id: null });
 
-export const branchAdminToken = (branchId, adminID = 2) =>
+export const branchAdminToken = (branchId, adminID = FIXTURE_ADMINS[branchId]) =>
   sign({ adminID, role: "branch_admin", branch_id: branchId });
 
 export const quizStudentToken = (studentId, branchId) =>

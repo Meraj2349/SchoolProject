@@ -14,7 +14,7 @@ import {
 } from "./helpers.js";
 
 const adminA = bearer(branchAdminToken(BRANCH_A));
-const adminB = bearer(branchAdminToken(BRANCH_B, 3));
+const adminB = bearer(branchAdminToken(BRANCH_B));
 const YEAR = 2026;
 const MONTH = 3;
 

@@ -12,3 +12,6 @@ const useCases = makeAdminUseCases({
 });
 
 export const adminController = makeAdminController({ useCases });
+
+// The admin as stored now, for the auth middleware.
+export const currentAdmin = (id) => useCases.currentAdmin(id);

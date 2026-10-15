@@ -7,6 +7,7 @@ import {
   BRANCH_A,
   bearer,
   branchAdminToken,
+  clearAdmins,
   count,
   db,
   insert,
@@ -37,7 +38,11 @@ async function seedAdmin({ email = "admin@school.test", password = "secret123", 
 }
 
 describe("authentication & authorization", () => {
-  beforeEach(resetDb);
+  // These tests count admins and register the very first one, so start with none.
+  beforeEach(async () => {
+    await resetDb();
+    await clearAdmins();
+  });
   afterAll(() => db.end());
 
   describe("tokens", () => {
@@ -111,11 +116,11 @@ describe("authentication & authorization", () => {
     });
 
     it("lets a super admin create a branch admin", async () => {
-      await seedAdmin();
+      const bossId = await seedAdmin();
 
       const res = await request(app)
         .post("/api/admin/createAdmin")
-        .set(bearer(superAdminToken()))
+        .set(bearer(superAdminToken(bossId)))
         .send({ Username: "b", Email: "b@school.test", Password: "secret123", branch_id: BRANCH_A });
 
       expect(res.status).toBe(201);

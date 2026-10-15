@@ -2,7 +2,7 @@ import { afterAll, beforeEach, describe, expect, it } from "@jest/globals";
 import bcrypt from "bcryptjs";
 import request from "supertest";
 import app from "../../app.js";
-import { BRANCH_A, BRANCH_B, bearer, branchAdminToken, count, db, insert, resetDb, superAdminToken } from "./helpers.js";
+import { BRANCH_A, BRANCH_B, bearer, branchAdminToken, clearAdmins, count, db, insert, resetDb, seedStudent, superAdminToken } from "./helpers.js";
 
 async function seedAdmin({ email, role = "branch_admin", branchId = null, password = "secret123" }) {
   return insert("Admin", {
@@ -25,6 +25,7 @@ describe("managing admins (/api/admins)", () => {
 
   beforeEach(async () => {
     await resetDb();
+    await clearAdmins();
     bossId = await seedAdmin({ email: "boss@school.test", role: "super_admin" });
     asBoss = (req) => req.set(bearer(superAdminToken(bossId)));
   });
@@ -195,6 +196,35 @@ describe("managing admins (/api/admins)", () => {
       expect(await count("Admin", "AdminID = ?", [bossId])).toBe(1);
     });
 
+    it("a removed branch admin is logged out of their branch at once", async () => {
+      const karim = await seedAdmin({ email: "karim@school.test", branchId: BRANCH_A });
+      const asKarim = bearer(branchAdminToken(BRANCH_A, karim));
+      expect((await request(app).get("/api/fees/settings").set(asKarim)).status).toBe(200);
+
+      await asBoss(request(app).delete(`/api/admins/${karim}`));
+
+      expect((await request(app).get("/api/fees/settings").set(asKarim)).status).toBe(401);
+      const write = await request(app)
+        .post("/api/students")
+        .set(asKarim)
+        .send({ FirstName: "X", LastName: "Y", DateOfBirth: "2015-01-01", Gender: "Male", ClassName: "Class 5", Section: "Good", RollNumber: "7" });
+      expect(write.status).toBe(401);
+      expect(await count("Students")).toBe(0);
+    });
+
+    it("a branch admin moved to another branch only sees the new branch, with the same login", async () => {
+      await seedStudent({ branchId: BRANCH_A, firstName: "Rahim" });
+      await seedStudent({ branchId: BRANCH_B, firstName: "Nadia" });
+      const karim = await seedAdmin({ email: "karim@school.test", branchId: BRANCH_A });
+      const asKarim = bearer(branchAdminToken(BRANCH_A, karim)); // token still says branch A
+
+      await asBoss(request(app).put(`/api/admins/${karim}`)).send({ branch_id: BRANCH_B });
+      const res = await request(app).get("/api/students").set(asKarim);
+
+      expect(res.status).toBe(200);
+      expect(res.body.data.map((s) => s.FirstName)).toEqual(["Nadia"]);
+    });
+
     it("also guards the old /api/admin routes", async () => {
       const exBoss = await seedAdmin({ email: "ex@school.test", role: "super_admin" });
       await asBoss(request(app).put(`/api/admins/${exBoss}`)).send({ role: "branch_admin", branch_id: BRANCH_A });
@@ -219,7 +249,10 @@ describe("managing admins (/api/admins)", () => {
 });
 
 describe("the old /api/admin routes use the same rules", () => {
-  beforeEach(resetDb);
+  beforeEach(async () => {
+    await resetDb();
+    await clearAdmins();
+  });
 
   it("registration checks the password length", async () => {
     const res = await request(app)
