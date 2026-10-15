@@ -226,7 +226,7 @@ const getStudentById = async (studentID, branchId = null) => {
   }
 };
 
-const getStudentsByClass = async (classID, branchId = null) => {
+const getStudentsByClass = async (className, branchId = null) => {
   const { clause, params } = branchFilter(branchId, "s");
   try {
     const [rows] = await db.query(
@@ -246,9 +246,9 @@ const getStudentsByClass = async (classID, branchId = null) => {
         c.Section
       FROM Students s
       LEFT JOIN Classes c ON s.ClassID = c.ClassID
-      WHERE s.ClassID = ? ${clause}
-      ORDER BY s.RollNumber`,
-      [classID, ...params],
+      WHERE c.ClassName = ? ${clause}
+      ORDER BY c.Section, s.RollNumber`,
+      [className, ...params],
     );
     return rows;
   } catch (error) {
@@ -262,7 +262,7 @@ const checkRollNumberExists = async (rollNumber, className, section, excludeStud
     const branchParam = branchId != null ? [branchId] : [];
 
     const [classResult] = await db.query(
-      `SELECT ClassID FROM Classes WHERE ClassName = ? AND Section = ? ${branchClause}`,
+      `SELECT c.ClassID FROM Classes c WHERE c.ClassName = ? AND c.Section = ? ${branchClause}`,
       [className, section, ...branchParam],
     );
 

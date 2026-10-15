@@ -20,6 +20,7 @@ import {
   updateResult,
 } from "../models/result.model.js";
 import { getExamById } from "../models/exam.model.js";
+import { ValidationError } from "../src/shared/errors/index.js";
 
 // Utility function for validation
 const validateResultData = (data) => {
@@ -255,7 +256,6 @@ const addResultController = async (req, res) => {
     }
 
     const result = await addResult(resultData, branchId);
-    console.log("🔍 Database result:", result);
 
     if (result && result.affectedRows > 0) {
       console.log("✅ Result added successfully, ID:", result.insertId);
@@ -272,6 +272,9 @@ const addResultController = async (req, res) => {
       });
     }
   } catch (error) {
+    if (error instanceof ValidationError) {
+      return res.status(400).json({ success: false, message: error.message });
+    }
     res.status(500).json({
       success: false,
       message: "Error adding result",
@@ -306,11 +309,11 @@ const addMultipleResultsController = async (req, res) => {
 
     const result = await addMultipleResults(results, branchId);
 
-    if (result.affectedRows > 0) {
+    if (result.insertedCount > 0) {
       res.status(201).json({
         success: true,
-        message: `${result.affectedRows} results added successfully`,
-        data: { affectedRows: result.affectedRows },
+        message: `${result.insertedCount} results added successfully`,
+        data: { affectedRows: result.insertedCount },
       });
     } else {
       res.status(400).json({
@@ -724,7 +727,7 @@ const advancedSearchResultsController = async (req, res) => {
       studentName,
       rollNumber,
       className,
-      sectionName,
+      section: sectionName,
       examName,
       subjectName,
       minMarks: minMarks ? parseInt(minMarks) : undefined,

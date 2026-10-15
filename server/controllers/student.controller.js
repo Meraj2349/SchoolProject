@@ -287,6 +287,7 @@ const checkRollNumberController = async (req, res) => {
       className,
       section,
       excludeStudentID ? parseInt(excludeStudentID) : null,
+      req.branchId ?? null,
     );
 
     res.status(200).json({ success: true, data: { exists } });

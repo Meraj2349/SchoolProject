@@ -7,7 +7,8 @@ export const createImage = async (imageData) => {
     [
       imageData.ImagePath,
       imageData.PublicID,
-      imageData.Description,
+      // db.execute rejects undefined parameters; an omitted description is NULL
+      imageData.Description ?? null,
       imageData.ImageType,
       imageData.StudentID || null,
       imageData.TeacherID || null,
@@ -24,20 +25,27 @@ export const getImageById = async (id) => {
   return rows[0];
 };
 
+// Metadata columns a client may change; fields left undefined keep their value.
+const METADATA_COLUMNS = ["Description", "ImageType", "StudentID", "TeacherID", "AssociatedID"];
+
 export const updateImage = async (id, updateData) => {
-  const { Description, ImageType, StudentID, TeacherID, AssociatedID } =
-    updateData;
-  await db.execute(
-    "UPDATE Images SET Description = ?, ImageType = ?, StudentID = ?, TeacherID = ?, AssociatedID = ? WHERE ImageID = ?",
-    [
-      Description,
-      ImageType,
-      StudentID || null,
-      TeacherID || null,
-      AssociatedID || null,
-      id,
-    ],
-  );
+  const columns = METADATA_COLUMNS.filter((column) => updateData[column] !== undefined);
+  if (columns.length > 0) {
+    await db.execute(
+      `UPDATE Images SET ${columns.map((c) => `${c} = ?`).join(", ")} WHERE ImageID = ?`,
+      [...columns.map((c) => (updateData[c] === "" ? null : updateData[c])), id],
+    );
+  }
+  return getImageById(id);
+};
+
+// Points the record at a newly uploaded file.
+export const updateImageFile = async (id, { ImagePath, PublicID }) => {
+  await db.execute("UPDATE Images SET ImagePath = ?, PublicID = ? WHERE ImageID = ?", [
+    ImagePath,
+    PublicID,
+    id,
+  ]);
   return getImageById(id);
 };
 

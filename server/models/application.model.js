@@ -1,4 +1,6 @@
 import db from "../config/db.config.js";
+import { STANDARD_SECTIONS } from "./classes.model.js";
+import { addStudent } from "./student.model.js";
 
 const getAllApplications = async () => {
   try {
@@ -65,20 +67,21 @@ const createApplication = async (data) => {
   }
 };
 
-const updateApplicationStatus = async (id, status) => {
-  try {
-    const [result] = await db.query(
-      "UPDATE Applications SET status = ? WHERE id = ?",
-      [status, id],
-    );
-    if (result.affectedRows === 0) throw new Error("Application not found");
+// Students admitted from an application start in the general section.
+const ADMISSION_SECTION = STANDARD_SECTIONS.includes("General") ? "General" : STANDARD_SECTIONS[0];
 
-    // When accepted, auto-create the student record
-    if (status === "accepted") {
-      // Fetch the application data
-      const [rows] = await db.query("SELECT * FROM Applications WHERE id = ?", [id]);
-      if (rows.length === 0) throw new Error("Application not found");
-      const app = rows[0];
+// branchId: the accepting admin's branch (null for super_admin → default branch)
+const updateApplicationStatus = async (id, status, branchId = null) => {
+  try {
+    const [rows] = await db.query("SELECT * FROM Applications WHERE id = ?", [id]);
+    if (rows.length === 0) throw new Error("Application not found");
+    const app = rows[0];
+
+    await db.query("UPDATE Applications SET status = ? WHERE id = ?", [status, id]);
+
+    // Create the student only once: student_id remembers the enrolment, so
+    // accepted → reviewed → accepted does not enrol the same child twice.
+    if (status === "accepted" && app.student_id == null) {
 
       // Split full name into first/last
       const nameParts = (app.applicant_name || "").trim().split(/\s+/);
@@ -90,47 +93,34 @@ const updateApplicationStatus = async (id, status) => {
         app.gender === "male" ? "Male" :
         app.gender === "female" ? "Female" : "Male";
 
-      // Find or create the class (default section 'A')
       const className = app.applying_for_class;
-      const section = "A";
-      const [existingClass] = await db.query(
-        "SELECT ClassID FROM Classes WHERE ClassName = ? AND Section = ?",
-        [className, section],
-      );
-      let classId;
-      if (existingClass.length > 0) {
-        classId = existingClass[0].ClassID;
-      } else {
-        const [newClass] = await db.query(
-          "INSERT INTO Classes (ClassName, Section) VALUES (?, ?)",
-          [className, section],
-        );
-        classId = newClass.insertId;
-      }
+      const effectiveBranch = branchId ?? 1;
 
-      // Generate a unique roll number: max existing + 1 for this class
+      // Generate a unique roll number: max existing + 1 for this class in this branch
       const [maxRoll] = await db.query(
-        "SELECT MAX(CAST(RollNumber AS UNSIGNED)) AS maxRoll FROM Students WHERE ClassID = ?",
-        [classId],
+        `SELECT MAX(CAST(s.RollNumber AS UNSIGNED)) AS maxRoll
+           FROM Students s JOIN Classes c ON c.ClassID = s.ClassID
+          WHERE c.ClassName = ? AND c.Section = ? AND c.branch_id = ?`,
+        [className, ADMISSION_SECTION, effectiveBranch],
       );
       const nextRoll = ((maxRoll[0].maxRoll || 0) + 1).toString();
 
-      // Insert into Students
-      await db.query(
-        `INSERT INTO Students
-          (FirstName, LastName, DateOfBirth, Gender, ClassID, AdmissionDate, Address, ParentContact, RollNumber)
-         VALUES (?, ?, ?, ?, ?, CURDATE(), ?, ?, ?)`,
-        [
-          firstName,
-          lastName,
-          app.date_of_birth,
-          gender,
-          classId,
-          app.address || null,
-          app.parent_contact,
-          nextRoll,
-        ],
+      const { studentID } = await addStudent(
+        {
+          FirstName: firstName,
+          LastName: lastName,
+          DateOfBirth: app.date_of_birth,
+          Gender: gender,
+          Class: className,
+          Section: ADMISSION_SECTION,
+          AdmissionDate: new Date().toISOString().split("T")[0],
+          Address: app.address || null,
+          ParentContact: app.parent_contact,
+          RollNumber: nextRoll,
+        },
+        effectiveBranch,
       );
+      await db.query("UPDATE Applications SET student_id = ? WHERE id = ?", [studentID, id]);
     }
 
     return { id, status };

@@ -13,6 +13,31 @@ import {
   verifyStudentIdentity,
   generateQuizToken,
 } from "../models/quizStudent.model.js";
+import { getStudentById } from "../models/student.model.js";
+
+// One graded answer per real question: unknown question IDs are dropped (they
+// used to count as correct when left blank) and repeats of the same question
+// are ignored (they used to inflate the score).
+export const gradeAnswers = (answers, questions) => {
+  const byId = new Map(questions.map((q) => [q.id, q]));
+  const seen = new Set();
+  const graded = [];
+  for (const answer of answers) {
+    const questionId = parseInt(answer.questionId, 10);
+    const question = byId.get(questionId);
+    if (!question || seen.has(questionId)) continue;
+    seen.add(questionId);
+    const userAnswer = (answer.userAnswer ?? "").toString().toUpperCase().slice(0, 1);
+    graded.push({
+      questionId,
+      userAnswer,
+      correctAnswer: question.correct_answer,
+      isCorrect: userAnswer !== "" && userAnswer === question.correct_answer,
+      timeSpentSeconds: answer.timeSpentSeconds ?? null,
+    });
+  }
+  return graded;
+};
 
 // Public meta
 export const getMetaController = async (req, res) => {
@@ -113,8 +138,7 @@ export const startController = async (req, res) => {
 // Finish quiz — receives all answers, scores server-side, saves a session.
 export const finishController = async (req, res) => {
   try {
-    const { subject, grade, answers, timeTakenSeconds, studentName, className, section } =
-      req.body;
+    const { subject, grade, answers, timeTakenSeconds } = req.body;
 
     if (!Array.isArray(answers) || answers.length === 0) {
       return res.status(400).json({ error: "answers array required" });
@@ -124,21 +148,15 @@ export const finishController = async (req, res) => {
       .map((a) => parseInt(a.questionId, 10))
       .filter((n) => Number.isFinite(n));
 
-    const questions = await getQuestionsByIds(questionIds);
-    const qMap = new Map(questions.map((q) => [q.id, q]));
+    const questions = await getQuestionsByIds([...new Set(questionIds)]);
+    const graded = gradeAnswers(answers, questions);
+    if (graded.length === 0) {
+      return res.status(400).json({ error: "No valid answers to score" });
+    }
 
-    const graded = answers.map((a) => {
-      const q = qMap.get(parseInt(a.questionId, 10));
-      const correct = q?.correct_answer ?? "";
-      const user = (a.userAnswer ?? "").toString().toUpperCase().slice(0, 1);
-      return {
-        questionId: parseInt(a.questionId, 10),
-        userAnswer: user,
-        correctAnswer: correct,
-        isCorrect: user === correct,
-        timeSpentSeconds: a.timeSpentSeconds ?? null,
-      };
-    });
+    // Name and class come from the verified student record, not the request,
+    // so nobody can post a session under someone else's name.
+    const student = await getStudentById(req.quizStudentId);
 
     const correctCount = graded.filter((g) => g.isCorrect).length;
     const total = graded.length;
@@ -146,9 +164,9 @@ export const finishController = async (req, res) => {
 
     const sessionId = await createQuizSession({
       studentId: req.quizStudentId,
-      studentName: studentName || "Student",
-      className: className || null,
-      section: section || null,
+      studentName: student ? `${student.FirstName} ${student.LastName}` : "Student",
+      className: student?.ClassName ?? null,
+      section: student?.Section ?? null,
       subject: subject || null,
       grade: grade || null,
       totalQuestions: total,

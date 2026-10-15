@@ -411,6 +411,7 @@ CREATE TABLE
         address TEXT,
         additional_info TEXT,
         status ENUM ('pending', 'reviewed', 'accepted', 'rejected') DEFAULT 'pending',
+        student_id INT NULL COMMENT 'Student created when the application was accepted',
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
     );
