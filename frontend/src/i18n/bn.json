@@ -744,7 +744,18 @@
       "operationFailed": "কার্যক্রম ব্যর্থ হয়েছে",
       "nameRequired": "কমপক্ষে একটি শাখার নাম প্রয়োজন",
       "noBranches": "কোনো শাখা পাওয়া যায়নি।",
-      "superAdminOnly": "শাখা ব্যবস্থাপনা শুধুমাত্র সুপার অ্যাডমিনের জন্য।"
+      "superAdminOnly": "শাখা ব্যবস্থাপনা শুধুমাত্র সুপার অ্যাডমিনের জন্য।",
+      "students": "শিক্ষার্থী",
+      "admins": "অ্যাডমিন",
+      "feesThisMonth": "এ মাসের ফি (আদায় / ধার্য)",
+      "usage": {
+        "students": "{count} জন শিক্ষার্থী",
+        "teachers": "{count} জন শিক্ষক",
+        "classes": "{count}টি শ্রেণি",
+        "admins": "{count} জন অ্যাডমিন",
+        "invoices": "{count}টি ফি ইনভয়েস",
+        "payments": "{count}টি পেমেন্ট"
+      }
     },
     "dashboard": {
       "title": "ড্যাশবোর্ড",
@@ -786,7 +797,10 @@
       "amount": "পরিমাণ",
       "date": "তারিখ",
       "method": "মাধ্যম",
-      "branch": "শাখা"
+      "branch": "শাখা",
+      "admins": "অ্যাডমিন",
+      "feesBilledThisMonth": "এ মাসে ধার্য",
+      "feesCollectedThisMonth": "এ মাসে আদায়"
     },
     "shell": {
       "home": "অ্যাডমিন",

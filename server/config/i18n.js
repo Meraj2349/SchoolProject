@@ -2,6 +2,10 @@
 // Usage: i18n[key][req.language]
 
 const i18n = {
+  branch_in_use: {
+    en: "This branch still has students, staff, admins or fee records. Move or remove them first.",
+    bn: "এই শাখায় এখনো শিক্ষার্থী, শিক্ষক, অ্যাডমিন বা ফি-এর তথ্য আছে। আগে সেগুলো সরান।",
+  },
   branch_required: {
     en: "Choose a branch first.",
     bn: "আগে একটি শাখা বেছে নিন।",

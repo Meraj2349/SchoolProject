@@ -19,7 +19,11 @@ const summary = {
 const getSummary = vi.fn();
 vi.mock("@/services/dashboard.service", () => ({ dashboardService: { getSummary: () => getSummary() } }));
 vi.mock("@/services/branch.service", () => ({
-  branchService: { getStats: async () => [{ id: 1, name_en: "Main", studentCount: 120, teacherCount: 9, classCount: 6 }] },
+  branchService: {
+    getOverview: async () => [
+      { id: 1, name_en: "Main", studentCount: 120, teacherCount: 9, classCount: 6, adminCount: 2, feesBilled: 180000, feesCollected: 150000 },
+    ],
+  },
 }));
 
 describe("AdminDashboardPage", () => {
@@ -80,6 +84,9 @@ describe("AdminDashboardPage", () => {
     renderWithQuery(<AdminDashboardPage />);
 
     const branches = await screen.findByRole("region", { name: "Branch Overview" });
-    expect(await within(branches).findByText("Main")).toBeInTheDocument();
+    const row = (await within(branches).findByText("Main")).closest("tr");
+    expect(within(row).getByText("120")).toBeInTheDocument();
+    expect(within(row).getByText("৳1,50,000.00")).toBeInTheDocument();
+    expect(within(row).getByText("৳1,80,000.00")).toBeInTheDocument();
   });
 });

@@ -32,6 +32,11 @@ export function makeBranchController({ useCases, removeFile }) {
       res.status(200).json({ success: true, data: await useCases.getBranchStats() });
     }),
 
+    // Super admins: counts plus this month's fees per branch.
+    overview: handle(async (req, res) => {
+      res.status(200).json({ success: true, data: await useCases.getBranchOverview() });
+    }),
+
     getById: handle(async (req, res) => {
       res.status(200).json({ success: true, data: await useCases.getBranch(req.params.id) });
     }),

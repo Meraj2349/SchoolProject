@@ -12,7 +12,9 @@ const STATUS_BY_ERROR = [
 export function sendError(res, error, lang, fallbackKey = "internal_server_error") {
   const match = STATUS_BY_ERROR.find(([ErrorType]) => error instanceof ErrorType);
   if (match) {
-    return res.status(match[1]).json({ success: false, message: t(error.code, lang) });
+    const body = { success: false, message: t(error.code, lang) };
+    if (error.details !== undefined) body.data = error.details;
+    return res.status(match[1]).json(body);
   }
 
   console.error(error);

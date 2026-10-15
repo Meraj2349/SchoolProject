@@ -7,8 +7,11 @@ import {
   useUpdateBranch,
   useDeleteBranch,
 } from "@/hooks/useBranches";
+import { useBranchOverview } from "@/hooks/useBranchStats";
+import { formatTaka } from "@/lib/money";
 import { useAuthStore } from "@/store/authStore";
-import { useTranslations } from "@/store/languageStore";
+import { useLanguageStore, useTranslations } from "@/store/languageStore";
+import { usageSummary } from "./branchUsage";
 import { toast } from "react-toastify";
 import {
   FiEdit2,
@@ -40,7 +43,11 @@ export default function AdminPage() {
   const role = useAuthStore((s) => s.role);
   const t = useTranslations("admin.branches");
 
+  const language = useLanguageStore((s) => s.language);
   const { data: branches = [], isLoading } = useBranches();
+  // Counts and this month's fees per branch, by branch id.
+  const { data: overview = [] } = useBranchOverview({ enabled: role === "super_admin" });
+  const numbersOf = (id) => overview.find((row) => row.id === id);
   const create = useCreateBranch();
   const update = useUpdateBranch();
   const remove = useDeleteBranch();
@@ -142,9 +149,10 @@ export default function AdminPage() {
         setConfirmDeleteId(null);
       },
       onError: (err) => {
-        toast.error(
-          err?.response?.data?.message || err.message || t("operationFailed"),
-        );
+        // A branch that still has data: say what is left.
+        const message = err?.response?.data?.message || t("operationFailed");
+        const left = usageSummary(err?.response?.data?.data, t);
+        toast.error(left ? `${message} (${left})` : message);
         setConfirmDeleteId(null);
       },
     });
@@ -157,6 +165,9 @@ export default function AdminPage() {
     t("nameBn"),
     t("addressEn"),
     t("status"),
+    t("students"),
+    t("admins"),
+    t("feesThisMonth"),
     t("establishedDate"),
     t("actions"),
   ];
@@ -422,6 +433,17 @@ export default function AdminPage() {
                       >
                         {branch.is_proposed ? t("proposed") : t("active")}
                       </span>
+                    </td>
+                    <td className="table-cell text-slate-700 text-right">
+                      {numbersOf(branch.id)?.studentCount ?? "—"}
+                    </td>
+                    <td className="table-cell text-slate-700 text-right">
+                      {numbersOf(branch.id)?.adminCount ?? "—"}
+                    </td>
+                    <td className="table-cell text-slate-700 text-sm whitespace-nowrap">
+                      {numbersOf(branch.id)
+                        ? `${formatTaka(numbersOf(branch.id).feesCollected, language)} / ${formatTaka(numbersOf(branch.id).feesBilled, language)}`
+                        : "—"}
                     </td>
                     <td className="table-cell text-slate-600 text-sm">
                       {branch.established_date

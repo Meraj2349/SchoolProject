@@ -11,3 +11,12 @@ export function useBranchStats() {
     select: (data) => (Array.isArray(data) ? data : (data?.data ?? [])),
   });
 }
+
+/** Super admins only: each branch's counts and this month's fees. */
+export function useBranchOverview({ enabled = true } = {}) {
+  return useQuery({
+    queryKey: queryKeys.branches.overview,
+    queryFn: branchService.getOverview,
+    enabled,
+  });
+}

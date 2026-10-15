@@ -24,6 +24,15 @@ describe("sendError", () => {
     expect(res.body.message).not.toBe(error.code);
   });
 
+  it("passes on an error's details, e.g. what still uses a branch", () => {
+    const res = fakeRes();
+
+    sendError(res, new ConflictError("branch_in_use", "branch_in_use", { details: { students: 3 } }), "en");
+
+    expect(res.statusCode).toBe(409);
+    expect(res.body).toEqual({ success: false, message: expect.any(String), data: { students: 3 } });
+  });
+
   it("hides unknown errors behind the fallback message", () => {
     const res = fakeRes();
     const log = jest.spyOn(console, "error").mockImplementation(() => {});

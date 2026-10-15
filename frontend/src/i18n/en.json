@@ -744,7 +744,18 @@
       "operationFailed": "Operation failed",
       "nameRequired": "At least one branch name is required",
       "noBranches": "No branches found. Add one above.",
-      "superAdminOnly": "Branch management is only available to super admins."
+      "superAdminOnly": "Branch management is only available to super admins.",
+      "students": "Students",
+      "admins": "Admins",
+      "feesThisMonth": "Fees this month (collected / billed)",
+      "usage": {
+        "students": "{count} students",
+        "teachers": "{count} teachers",
+        "classes": "{count} classes",
+        "admins": "{count} admins",
+        "invoices": "{count} fee invoices",
+        "payments": "{count} payments"
+      }
     },
     "dashboard": {
       "title": "Dashboard",
@@ -786,7 +797,10 @@
       "amount": "Amount",
       "date": "Date",
       "method": "Method",
-      "branch": "Branch"
+      "branch": "Branch",
+      "admins": "Admins",
+      "feesBilledThisMonth": "Billed this month",
+      "feesCollectedThisMonth": "Collected this month"
     },
     "shell": {
       "home": "Admin",
