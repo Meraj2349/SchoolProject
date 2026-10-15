@@ -106,7 +106,7 @@ export default function Footer() {
             </p>
           </address>
           <div className="mt-6 flex items-center gap-3">
-            <Image src="/images/sustLogo.png" alt="SUST logo" width={48} height={48} className="rounded bg-white p-1" />
+            <Image src="/images/sustLogo.png" alt={t("footer.sustLogo")} width={48} height={48} className="rounded bg-white p-1" />
             <span className="text-xs text-white/70">{t("footer.maintainedBy")}</span>
           </div>
         </section>

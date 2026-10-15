@@ -10,7 +10,8 @@ import { useTranslations } from "@/store/languageStore";
 export const SLIDE_INTERVAL_MS = 6000;
 
 const REDUCED_MOTION = "(prefers-reduced-motion: reduce)";
-const reducedMotionQuery = () => (typeof window === "undefined" ? null : window.matchMedia?.(REDUCED_MOTION));
+const reducedMotionQuery = () =>
+  typeof window === "undefined" ? null : window.matchMedia?.(REDUCED_MOTION);
 const subscribeReducedMotion = (onChange) => {
   const query = reducedMotionQuery();
   query?.addEventListener?.("change", onChange);
@@ -27,17 +28,25 @@ const prefersReducedMotion = () => Boolean(reducedMotionQuery()?.matches);
 export default function HeroSlider({ slides }) {
   const t = useTranslations();
   const [index, setIndex] = useState(0);
-  const reducedMotion = useSyncExternalStore(subscribeReducedMotion, prefersReducedMotion, () => false);
+  const reducedMotion = useSyncExternalStore(
+    subscribeReducedMotion,
+    prefersReducedMotion,
+    () => false,
+  );
   const [playChoice, setPlayChoice] = useState(null); // null until the visitor presses play/pause
   const playing = playChoice ?? !reducedMotion;
   const [held, setHeld] = useState(false); // hovered or focused
   const count = slides.length;
   const current = count > 0 ? index % count : 0;
-  const label = (n) => t("home.hero.slide").replace("{n}", n).replace("{total}", count);
+  const label = (n) =>
+    t("home.hero.slide").replace("{n}", n).replace("{total}", count);
 
   useEffect(() => {
     if (!playing || held || count < 2) return undefined;
-    const timer = setInterval(() => setIndex((i) => (i + 1) % count), SLIDE_INTERVAL_MS);
+    const timer = setInterval(
+      () => setIndex((i) => (i + 1) % count),
+      SLIDE_INTERVAL_MS,
+    );
     return () => clearInterval(timer);
   }, [playing, held, count]);
 
@@ -53,25 +62,44 @@ export default function HeroSlider({ slides }) {
       onFocus={() => setHeld(true)}
       onBlur={() => setHeld(false)}
     >
-      {slides.map((slide, i) => (
-        <div
-          key={slide.src}
-          role="group"
-          aria-roledescription="slide"
-          aria-label={label(i + 1)}
-          aria-hidden={i !== current}
-          className={`absolute inset-0 transition-opacity duration-1000 ${i === current ? "opacity-100" : "opacity-0"}`}
-        >
-          <Image src={slide.src} alt={slide.alt} fill priority={i === 0} sizes="100vw" unoptimized={isRemoteImage(slide.src)} className="object-cover" />
-        </div>
-      ))}
-      <div className="absolute inset-0 bg-gradient-to-r from-school-navy-deep/90 via-school-navy/70 to-school-navy/20" aria-hidden="true" />
+      <div aria-live={playing ? "off" : "polite"}>
+        {slides.map((slide, i) => (
+          <div
+            key={`${i}-${slide.src}`}
+            role="group"
+            aria-roledescription="slide"
+            aria-label={label(i + 1)}
+            aria-hidden={i !== current}
+            className={`absolute inset-0 transition-opacity duration-1000 ${i === current ? "opacity-100" : "opacity-0"}`}
+          >
+            <Image
+              src={slide.src}
+              alt={slide.alt}
+              fill
+              priority={i === 0}
+              sizes="100vw"
+              unoptimized={isRemoteImage(slide.src)}
+              className="object-cover"
+            />
+          </div>
+        ))}
+      </div>
+      <div
+        className="absolute inset-0 bg-gradient-to-r from-school-navy-deep/90 via-school-navy/70 to-school-navy/20"
+        aria-hidden="true"
+      />
 
       <div className="relative z-10 mx-auto flex h-full max-w-7xl flex-col justify-center px-4 text-white">
-        <p className="m-0 text-sm font-semibold uppercase tracking-[0.3em] text-school-gold-soft">{t("home.hero.welcome")}</p>
-        <h1 className="m-0 mt-2 max-w-3xl font-school-heading text-4xl font-bold leading-tight md:text-6xl">{t("schoolName")}</h1>
+        <p className="m-0 text-sm font-semibold uppercase tracking-[0.3em] text-school-gold-soft">
+          {t("home.hero.welcome")}
+        </p>
+        <h1 className="m-0 mt-2 max-w-3xl font-school-heading text-4xl font-bold leading-tight md:text-6xl">
+          {t("schoolName")}
+        </h1>
         <span className="site-rule !mt-4 !w-24" aria-hidden="true" />
-        <p className="m-0 mt-4 text-base font-semibold tracking-wide text-white/90 md:text-lg">{t("site.motto")}</p>
+        <p className="m-0 mt-4 text-base font-semibold tracking-wide text-white/90 md:text-lg">
+          {t("site.motto")}
+        </p>
         <p className="m-0 mt-1 text-sm text-white/75">{t("location")}</p>
         <div className="mt-8 flex flex-wrap gap-3">
           <Link href="/apply" className="site-cta">
@@ -88,7 +116,7 @@ export default function HeroSlider({ slides }) {
           <div className="flex items-center gap-2">
             {slides.map((slide, i) => (
               <button
-                key={slide.src}
+                key={`${i}-${slide.src}`}
                 type="button"
                 aria-label={label(i + 1)}
                 aria-current={i === current ? "true" : undefined}
@@ -99,9 +127,21 @@ export default function HeroSlider({ slides }) {
           </div>
           <div className="flex items-center gap-2">
             {[
-              { label: playing ? t("home.hero.pause") : t("home.hero.play"), icon: playing ? FiPause : FiPlay, onClick: () => setPlayChoice(!playing) },
-              { label: t("home.hero.previous"), icon: FiChevronLeft, onClick: () => go(-1) },
-              { label: t("home.hero.next"), icon: FiChevronRight, onClick: () => go(1) },
+              {
+                label: playing ? t("home.hero.pause") : t("home.hero.play"),
+                icon: playing ? FiPause : FiPlay,
+                onClick: () => setPlayChoice(!playing),
+              },
+              {
+                label: t("home.hero.previous"),
+                icon: FiChevronLeft,
+                onClick: () => go(-1),
+              },
+              {
+                label: t("home.hero.next"),
+                icon: FiChevronRight,
+                onClick: () => go(1),
+              },
             ].map(({ label: name, icon: Icon, onClick }) => (
               <button
                 key={name}

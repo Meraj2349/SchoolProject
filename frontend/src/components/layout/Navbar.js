@@ -26,89 +26,141 @@ export default function Navbar() {
     setMobileOpen(false);
   }
 
-  const isCurrent = (path) => (path === "/" ? pathname === "/" : pathname === path || pathname?.startsWith(`${path}/`));
+  const isCurrent = (path) =>
+    path === "/"
+      ? pathname === "/"
+      : pathname === path || pathname?.startsWith(`${path}/`);
   const items = PUBLIC_NAV.map((item) => ({
     ...item,
     label: t(`nav.${item.key}`),
-    children: item.children?.map((child) => ({ ...child, label: t(`nav.${child.key}`) })),
+    children: item.children?.map((child) => ({
+      ...child,
+      label: t(`nav.${child.key}`),
+    })),
   }));
 
   return (
-    <header className="font-school-body">
-      {/* Contact strip */}
-      <div className="bg-school-navy-deep text-white/90 text-xs">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-1.5">
-          <div className="flex min-w-0 items-center gap-4">
-            <a href={SCHOOL_CONTACT.phoneHref} className="inline-flex items-center gap-1.5 text-inherit no-underline hover:text-school-gold-soft">
-              <FiPhone aria-hidden="true" />
-              <span className="sr-only">{t("site.call")}: </span>
-              {SCHOOL_CONTACT.phone}
-            </a>
-            <a
-              href={`mailto:${SCHOOL_CONTACT.email}`}
-              className="hidden sm:inline-flex items-center gap-1.5 truncate text-inherit no-underline hover:text-school-gold-soft"
+    <>
+      <a
+        href="#content-start"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-[400] focus:rounded focus:bg-school-gold focus:px-4 focus:py-2 focus:font-bold focus:text-school-navy"
+      >
+        {t("site.skipToContent")}
+      </a>
+      <header className="font-school-body">
+        {/* Contact strip */}
+        <div className="bg-school-navy-deep text-white/90 text-xs">
+          <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-1.5">
+            <div className="flex min-w-0 items-center gap-4">
+              <a
+                href={SCHOOL_CONTACT.phoneHref}
+                className="inline-flex items-center gap-1.5 text-inherit no-underline hover:text-school-gold-soft"
+              >
+                <FiPhone aria-hidden="true" />
+                <span className="sr-only">{t("site.call")}: </span>
+                {SCHOOL_CONTACT.phone}
+              </a>
+              <a
+                href={`mailto:${SCHOOL_CONTACT.email}`}
+                className="hidden sm:inline-flex items-center gap-1.5 truncate text-inherit no-underline hover:text-school-gold-soft"
+              >
+                <FiMail aria-hidden="true" />
+                <span className="sr-only">{t("site.email")}: </span>
+                {SCHOOL_CONTACT.email}
+              </a>
+            </div>
+            <div className="hidden items-center gap-3 lg:flex">
+              <LanguageSwitcher />
+              <PublicBranchSelector />
+            </div>
+          </div>
+        </div>
+
+        {/* Crest band */}
+        <div className="border-b-4 border-school-gold bg-school-cream">
+          <div className="mx-auto flex max-w-7xl items-center gap-4 px-4 py-3 md:py-4">
+            <Link
+              href="/"
+              className="flex min-w-0 flex-1 items-center gap-3 text-inherit no-underline"
             >
-              <FiMail aria-hidden="true" />
-              <span className="sr-only">{t("site.email")}: </span>
-              {SCHOOL_CONTACT.email}
-            </a>
-          </div>
-          <div className="hidden items-center gap-3 lg:flex">
-            <LanguageSwitcher />
-            <PublicBranchSelector />
-          </div>
-        </div>
-      </div>
-
-      {/* Crest band */}
-      <div className="border-b-4 border-school-gold bg-school-cream">
-        <div className="mx-auto flex max-w-7xl items-center gap-4 px-4 py-3 md:py-4">
-          <Link href="/" className="flex min-w-0 flex-1 items-center gap-3 text-inherit no-underline">
-            <Image src="/images/logo1.png" alt={`${t("schoolName")} logo`} width={72} height={72} className="h-14 w-14 shrink-0 md:h-[72px] md:w-[72px]" priority />
-            <span className="flex min-w-0 flex-col">
-              <span className="font-school-heading text-xl font-bold leading-tight text-school-navy md:text-3xl">{t("schoolName")}</span>
-              <span className="text-xs text-school-muted md:text-sm">
-                {t("site.estd")}: {t("establishedYear")} · {t("location")}
+              <Image
+                src="/images/logo1.png"
+                alt={`${t("schoolName")} logo`}
+                width={72}
+                height={72}
+                className="h-14 w-14 shrink-0 md:h-[72px] md:w-[72px]"
+                priority
+              />
+              <span className="flex min-w-0 flex-col">
+                <span className="font-school-heading text-xl font-bold leading-tight text-school-navy md:text-3xl">
+                  {t("schoolName")}
+                </span>
+                <span className="text-xs text-school-muted md:text-sm">
+                  {t("site.estd")}: {t("establishedYear")} · {t("location")}
+                </span>
+                <span className="hidden text-xs font-semibold uppercase tracking-[0.2em] text-school-gold md:block">
+                  {t("site.motto")}
+                </span>
               </span>
-              <span className="hidden text-xs font-semibold uppercase tracking-[0.2em] text-school-gold md:block">{t("site.motto")}</span>
+            </Link>
+            <Link href="/apply" className="site-cta hidden md:inline-flex">
+              {t("nav.onlineApply")}
+            </Link>
+          </div>
+        </div>
+
+        {/* Main menu */}
+        <nav
+          aria-label={t("site.mainNavigation")}
+          className="sticky top-0 z-[100] bg-school-navy shadow-md"
+        >
+          <div className="mx-auto flex max-w-7xl items-center justify-between px-4">
+            <ul className="m-0 hidden list-none items-stretch p-0 lg:flex">
+              {items.map((item) => (
+                <li key={item.key} className="flex">
+                  {item.children ? (
+                    <NavMenu
+                      label={item.label}
+                      links={item.children}
+                      isCurrent={isCurrent}
+                    />
+                  ) : (
+                    <Link
+                      href={item.path}
+                      aria-current={isCurrent(item.path) ? "page" : undefined}
+                      className="site-nav-link"
+                    >
+                      {item.label}
+                    </Link>
+                  )}
+                </li>
+              ))}
+            </ul>
+            <span className="py-3 font-school-heading text-sm text-white/90 lg:hidden">
+              {t("site.menu")}
             </span>
-          </Link>
-          <Link href="/apply" className="site-cta hidden md:inline-flex">
-            {t("nav.onlineApply")}
-          </Link>
-        </div>
-      </div>
+            <button
+              type="button"
+              onClick={() => setMobileOpen(true)}
+              aria-label={t("site.openMenu")}
+              aria-expanded={mobileOpen}
+              className="inline-flex h-10 w-10 items-center justify-center rounded border border-white/30 bg-transparent text-white cursor-pointer lg:hidden"
+            >
+              <FiMenu aria-hidden="true" />
+            </button>
+          </div>
+        </nav>
 
-      {/* Main menu */}
-      <nav aria-label={t("site.mainNavigation")} className="sticky top-0 z-[100] bg-school-navy shadow-md">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-4">
-          <ul className="m-0 hidden list-none items-stretch p-0 lg:flex">
-            {items.map((item) => (
-              <li key={item.key} className="flex">
-                {item.children ? (
-                  <NavMenu label={item.label} links={item.children} isCurrent={isCurrent} />
-                ) : (
-                  <Link href={item.path} aria-current={isCurrent(item.path) ? "page" : undefined} className="site-nav-link">
-                    {item.label}
-                  </Link>
-                )}
-              </li>
-            ))}
-          </ul>
-          <span className="py-3 font-school-heading text-sm text-white/90 lg:hidden">{t("site.menu")}</span>
-          <button
-            type="button"
-            onClick={() => setMobileOpen(true)}
-            aria-label={t("site.openMenu")}
-            aria-expanded={mobileOpen}
-            className="inline-flex h-10 w-10 items-center justify-center rounded border border-white/30 bg-transparent text-white cursor-pointer lg:hidden"
-          >
-            <FiMenu aria-hidden="true" />
-          </button>
-        </div>
-      </nav>
-
-      {mobileOpen && <MobileMenu items={items} isCurrent={isCurrent} onClose={() => setMobileOpen(false)} />}
-    </header>
+        {mobileOpen && (
+          <MobileMenu
+            items={items}
+            isCurrent={isCurrent}
+            onClose={() => setMobileOpen(false)}
+          />
+        )}
+      </header>
+      {/* Target of the skip link: the page content starts here. */}
+      <div id="content-start" tabIndex={-1} className="outline-none" />
+    </>
   );
 }

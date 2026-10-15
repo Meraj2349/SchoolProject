@@ -130,10 +130,11 @@ function CategoryTabs({ categories, selected, onSelect, panelId }) {
   const { t } = useText();
   const options = ["all", ...categories];
   const onKeyDown = (event) => {
-    const step = { ArrowRight: 1, ArrowLeft: -1 }[event.key];
-    if (!step) return;
+    const at = options.indexOf(selected);
+    const index = { ArrowRight: at + 1, ArrowLeft: at - 1, Home: 0, End: options.length - 1 }[event.key];
+    if (index === undefined) return;
     event.preventDefault();
-    const next = options[(options.indexOf(selected) + step + options.length) % options.length];
+    const next = options[(index + options.length) % options.length];
     onSelect(next);
     event.currentTarget.parentElement.querySelector(`[data-tab="${next}"]`)?.focus();
   };

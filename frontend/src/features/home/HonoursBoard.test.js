@@ -56,6 +56,18 @@ describe("HonoursBoard", () => {
     expect(within(panel).queryByText("Science olympiad gold")).not.toBeInTheDocument();
   });
 
+  it("moves between categories with the arrow, Home and End keys", async () => {
+    renderWithQuery(<HonoursBoard />);
+    const tabs = await screen.findByRole("tablist", { name: "Show achievements" });
+    const all = within(tabs).getByRole("tab", { name: "All" });
+
+    fireEvent.keyDown(all, { key: "End" });
+    expect(within(tabs).getByRole("tab", { name: "Competitions" })).toHaveAttribute("aria-selected", "true");
+    fireEvent.keyDown(within(tabs).getByRole("tab", { name: "Competitions" }), { key: "Home" });
+    expect(all).toHaveAttribute("aria-selected", "true");
+    expect(all).toHaveFocus();
+  });
+
   it("is written in Bangla for Bangla readers", async () => {
     useLanguageStore.getState().setLanguage("bn");
     renderWithQuery(<HonoursBoard />);

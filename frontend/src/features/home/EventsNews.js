@@ -33,7 +33,9 @@ function Panel({ id, title, children }) {
   );
 }
 
-const isLocal = (href) => href.startsWith("/");
+// A page of this site ("/events" but not "//host"), or an outside web address.
+const isLocal = (href) => /^\/(?!\/)/.test(href);
+const isWeb = (href) => /^https?:\/\//i.test(href);
 
 /** Upcoming events and the latest news, side by side. */
 export default function EventsNews() {
@@ -90,10 +92,12 @@ export default function EventsNews() {
                       <Link href={href} className={linkClass}>
                         {title}
                       </Link>
-                    ) : (
+                    ) : isWeb(href) ? (
                       <a href={href} target="_blank" rel="noopener noreferrer" className={linkClass}>
                         {title}
                       </a>
+                    ) : (
+                      <span className={linkClass}>{title}</span>
                     )}
                   </li>
                 );

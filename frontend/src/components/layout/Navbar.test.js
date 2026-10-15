@@ -51,6 +51,24 @@ describe("Navbar (site header)", () => {
     expect(within(mainNav()).queryByRole("link", { name: "Results" })).not.toBeInTheDocument();
   });
 
+  it("lets keyboard users skip straight to the page content", () => {
+    renderWithQuery(<Navbar />);
+
+    const skip = screen.getByRole("link", { name: "Skip to main content" });
+    expect(skip).toHaveAttribute("href", "#content-start");
+    expect(document.getElementById("content-start")).toBeInTheDocument();
+  });
+
+  it("closes the Academics menu when focus moves elsewhere", () => {
+    renderWithQuery(<Navbar />);
+    const academics = within(mainNav()).getByRole("button", { name: "Academics" });
+    fireEvent.click(academics);
+
+    fireEvent.focusOut(academics, { relatedTarget: within(mainNav()).getByRole("link", { name: "Gallery" }) });
+
+    expect(academics).toHaveAttribute("aria-expanded", "false");
+  });
+
   it("opens a mobile menu with every page and closes it on Escape", () => {
     renderWithQuery(<Navbar />);
 

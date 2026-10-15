@@ -31,6 +31,24 @@ describe("PublicBranchSelector", () => {
     expect(screen.getByRole("button", { name: /Switch Branch/ })).toHaveTextContent("Main Campus");
   });
 
+  it("closes the list with Escape without closing anything around it, and moves with the arrow keys", async () => {
+    const outer = vi.fn();
+    document.addEventListener("keydown", outer);
+    renderWithQuery(<PublicBranchSelector />);
+    fireEvent.click(screen.getByRole("button", { name: /Switch Branch/ }));
+    const main = await screen.findByRole("option", { name: /Main Campus/ });
+
+    expect(screen.getByRole("option", { name: /All Branches/ })).toHaveFocus();
+    fireEvent.keyDown(document.activeElement, { key: "ArrowDown" });
+    expect(main).toHaveFocus();
+
+    fireEvent.keyDown(main, { key: "Escape" });
+    expect(screen.queryByRole("listbox")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Switch Branch/ })).toHaveFocus();
+    expect(outer).not.toHaveBeenCalledWith(expect.objectContaining({ key: "Escape" }));
+    document.removeEventListener("keydown", outer);
+  });
+
   it("names branches in Bangla and can go back to all branches", async () => {
     useLanguageStore.getState().setLanguage("bn");
     useBranchStore.setState({ currentBranchId: 1, currentBranchName: "Main Campus" });

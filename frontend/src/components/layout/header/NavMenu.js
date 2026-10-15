@@ -22,7 +22,13 @@ export default function NavMenu({ label, links, isCurrent }) {
   }, [open, menuId]);
 
   return (
-    <div className="relative" data-nav-menu={menuId}>
+    <div
+      className="relative"
+      data-nav-menu={menuId}
+      onBlur={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget)) setOpen(false);
+      }}
+    >
       <button
         type="button"
         aria-expanded={open}
