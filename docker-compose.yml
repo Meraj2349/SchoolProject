@@ -8,13 +8,13 @@ services:
       - PORT=3000
       - DB_HOST=db
       - DB_USER=root
-      - DB_PASSWORD=schoolproject123
-      - DB_NAME=School_Management
-      - JWT_SECRET_KEY=q9R2$$hQv6jB
-      - JWT_EXPIRES_IN=30h
-      - CLOUDINARY_CLOUD_NAME=ddwezcham
-      - CLOUDINARY_API_KEY=597838886274737
-      - CLOUDINARY_API_SECRET=c3de7UcLEyMeS9U7hi-cN7kOp9w
+      - DB_PASSWORD=${MYSQL_ROOT_PASSWORD:?Set MYSQL_ROOT_PASSWORD in .env}
+      - DB_NAME=${DB_NAME:-School_Management}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY:?Set JWT_SECRET_KEY in .env}
+      - JWT_EXPIRES_IN=${JWT_EXPIRES_IN:-30h}
+      - CLOUDINARY_CLOUD_NAME=${CLOUDINARY_CLOUD_NAME:?Set CLOUDINARY_CLOUD_NAME in .env}
+      - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY:?Set CLOUDINARY_API_KEY in .env}
+      - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET:?Set CLOUDINARY_API_SECRET in .env}
       - FRONTEND_URL=http://localhost:5174
     depends_on:
       db:
@@ -40,8 +40,8 @@ services:
   db:
     image: mysql:8.0
     environment:
-      MYSQL_DATABASE: School_Management
-      MYSQL_ROOT_PASSWORD: schoolproject123
+      MYSQL_DATABASE: ${DB_NAME:-School_Management}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Set MYSQL_ROOT_PASSWORD in .env}
       MYSQL_ROOT_HOST: "%"
     ports:
       - "3307:3306"
@@ -50,17 +50,8 @@ services:
       - ./server/Sql/database.sql:/docker-entrypoint-initdb.d/database.sql
     restart: unless-stopped
     healthcheck:
-      test:
-        [
-          "CMD",
-          "mysqladmin",
-          "ping",
-          "-h",
-          "localhost",
-          "-u",
-          "root",
-          "-pschoolproject123",
-        ]
+      # $$ = read the password inside the container, not from this file
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u root -p$$MYSQL_ROOT_PASSWORD"]
       timeout: 20s
       retries: 10
     networks:
