@@ -44,6 +44,17 @@ describe("creating and deleting branches", () => {
     expect(await count("Branches", "id = ?", [BRANCH_B])).toBe(1);
   });
 
+  it("refuses with 409 when only fee settings still point at the branch", async () => {
+    const id = await insert("Branches", { name_en: "Set up", name_bn: "প্রস্তুত" });
+    await insert("FeeSettings", { branch_id: id });
+
+    const res = await asSuper(request(app).delete(`/api/branches/${id}`));
+
+    expect(res.status).toBe(409);
+    expect(res.body.success).toBe(false);
+    expect(await count("Branches", "id = ?", [id])).toBe(1);
+  });
+
   it("deletes an empty branch", async () => {
     const id = await insert("Branches", { name_en: "Empty", name_bn: "খালি" });
 

@@ -6,9 +6,10 @@ const bearerToken = (req) => {
   return scheme === "Bearer" && token ? token : null;
 };
 
+// ?branch_id as a branch id; anything else (missing, "abc", "0") means none.
 const queryBranchId = (req) => {
-  const qb = req.query?.branch_id;
-  return qb != null && qb !== "" ? parseInt(qb, 10) : null;
+  const id = Number(req.query?.branch_id);
+  return Number.isInteger(id) && id > 0 ? id : null;
 };
 
 /**

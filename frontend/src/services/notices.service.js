@@ -8,6 +8,7 @@ export const noticesService = {
       .post("/notices/add", {
         title: data.Title,
         description: data.Description,
+        show: Boolean(data.Show),
       })
       .then((r) => r.data),
 

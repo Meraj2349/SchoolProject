@@ -40,10 +40,14 @@ const inputCls = (hasError) =>
   }`;
 
 export default function OnlineApplyPage() {
-  // Start with the branch the visitor chose on the website, if any.
-  const selectedBranchId = useBranchStore((s) => s.currentBranchId);
-  const emptyForm = { ...EMPTY, branch_id: selectedBranchId == null ? "" : String(selectedBranchId) };
-  const [form, setForm] = useState(emptyForm);
+  const [chosen, setForm] = useState(EMPTY);
+  // Until the family picks a branch, use the one chosen on the website (the
+  // saved choice can load after the first render).
+  const websiteBranchId = useBranchStore((s) => s.currentBranchId);
+  const form = {
+    ...chosen,
+    branch_id: chosen.branch_id || (websiteBranchId == null ? "" : String(websiteBranchId)),
+  };
   const { data: branches = [] } = useBranches();
   const language = useLanguageStore((s) => s.language);
   const [errors, setErrors] = useState({});
@@ -89,7 +93,7 @@ export default function OnlineApplyPage() {
   };
 
   const handleReset = () => {
-    setForm(emptyForm);
+    setForm(EMPTY);
     setErrors({});
     setSubmitError("");
     setSuccess(false);

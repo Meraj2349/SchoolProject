@@ -1,4 +1,4 @@
-import { fireEvent, screen, waitFor } from "@testing-library/react";
+import { act, fireEvent, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { useBranchStore } from "@/store/branchStore";
 import { useLanguageStore } from "@/store/languageStore";
@@ -53,5 +53,24 @@ describe("OnlineApplyPage", () => {
     fireEvent.click(screen.getByRole("button", { name: /submit/i }));
 
     await waitFor(() => expect(submit).toHaveBeenCalledWith(expect.objectContaining({ branch_id: 2, applicant_name: "Nusrat Jahan" })));
+  });
+
+  it("picks up the website's branch when it loads after the form", async () => {
+    renderWithQuery(<OnlineApplyPage />);
+    await screen.findByRole("option", { name: "North" });
+
+    act(() => useBranchStore.setState({ currentBranchId: 2 })); // saved choice restored late
+
+    expect(screen.getByLabelText(/Branch/)).toHaveValue("2");
+  });
+
+  it("keeps the family's own choice of branch", async () => {
+    useBranchStore.setState({ currentBranchId: 2 });
+    renderWithQuery(<OnlineApplyPage />);
+    await screen.findByRole("option", { name: "Main" });
+
+    fireEvent.change(screen.getByLabelText(/Branch/), { target: { value: "1" } });
+
+    expect(screen.getByLabelText(/Branch/)).toHaveValue("1");
   });
 });

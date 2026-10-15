@@ -89,6 +89,17 @@ describe("content controller", () => {
     expect(files.discarded).toEqual(["/uploads/x/new.png"]);
   });
 
+  it("never takes an image path from the request body", async () => {
+    const files = fakeFiles();
+    let seen;
+    const app = buildApp({ update: async (args) => ((seen = args), { image_url: "/uploads/x/old.png" }) }, { files });
+
+    await request(app).put("/items/1").send({ title: "A", image_url: "/uploads/routines/b.png" });
+
+    expect(seen.input.image_url).toBeUndefined();
+    expect(files.discarded).toEqual([]);
+  });
+
   it("discards the old image after it is replaced", async () => {
     const files = fakeFiles();
     const app = buildApp({ update: async () => ({ image_url: "/uploads/x/old.png" }) }, { files, file: { filename: "new.png" } });

@@ -79,6 +79,19 @@ describe("results API", () => {
       expect(res.status).toBe(201);
       expect(await count("Results")).toBe(1);
     });
+
+    it.each([
+      ["exam", "examId"],
+      ["subject", "subjectId"],
+    ])("refuses a batch row with another class's %s", async (_label, key) => {
+      const s = await seedClassWithExam();
+      const other = await seedClassWithExam({ section: "Better", roll: "2", firstName: "Karim" });
+
+      const res = await request(app).post("/api/results/batch").set(adminA).send({ results: [resultFor({ ...s, [key]: other[key] }, 70)] });
+
+      expect(res.status).toBe(400);
+      expect(await count("Results")).toBe(0);
+    });
   });
 
   describe("public search", () => {

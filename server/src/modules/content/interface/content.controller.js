@@ -9,10 +9,9 @@ import { sendError } from "../../../shared/http/sendError.js";
 export function makeContentController({ useCases, messages, files = null }) {
   const viewerOf = (req) => ({ role: req.role, branchId: req.branchId ?? null });
   const uploadedUrl = (req) => (files && req.file ? files.urlFor(req.file) : undefined);
-  const inputOf = (req) => {
-    const url = uploadedUrl(req);
-    return url ? { ...req.body, image_url: url } : req.body;
-  };
+  // image_url only ever comes from this request's upload, never from the body,
+  // so a client cannot point an item at (and later delete) some other file.
+  const inputOf = (req) => ({ ...req.body, image_url: uploadedUrl(req) });
   const discard = async (url) => {
     if (files && url) await files.discard(url).catch(() => {});
   };

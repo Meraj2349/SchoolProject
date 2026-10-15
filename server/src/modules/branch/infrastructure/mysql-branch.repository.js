@@ -2,7 +2,6 @@ import db from "../../../../config/db.config.js";
 import { ConflictError } from "../../../shared/errors/index.js";
 import {
   createBranch,
-  deleteBranch,
   getAllBranches,
   getBranchById,
   getBranchStats,
@@ -20,11 +19,12 @@ export const mysqlBranchRepository = {
   },
   update: (id, data) => updateBranch(id, data),
   // The database refuses to delete a branch something still points at.
+  // usage() counts the common cases first; this catches anything else.
   remove: async (id) => {
     try {
-      await deleteBranch(id);
+      await db.query("DELETE FROM Branches WHERE id = ?", [id]);
     } catch (error) {
-      if (/ER_ROW_IS_REFERENCED/.test(error.message)) throw new ConflictError("branch_in_use");
+      if (error.code === "ER_ROW_IS_REFERENCED_2") throw new ConflictError("branch_in_use");
       throw error;
     }
   },

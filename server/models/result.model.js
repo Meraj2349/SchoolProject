@@ -534,6 +534,20 @@ const addMultipleResults = async (resultsData, branchId = null) => {
         }
       }
 
+      // Same checks as addResult: the student, exam and subject must all be
+      // in the row's class (so in the student's branch and section too).
+      const [[classMatch]] = await db.query(
+        `SELECT
+           EXISTS (SELECT 1 FROM Students WHERE StudentID = ? AND ClassID = ?) AS student,
+           EXISTS (SELECT 1 FROM Exams WHERE ExamID = ? AND ClassID = ?) AS exam,
+           EXISTS (SELECT 1 FROM Subjects WHERE SubjectID = ? AND ClassID = ?) AS subject`,
+        [StudentID, ClassID, ExamID, ClassID, SubjectID, ClassID],
+      );
+      if (!classMatch.student || !classMatch.exam || !classMatch.subject) {
+        errors.push(`Row ${i + 1}: Student, exam and subject must belong to the same class`);
+        continue;
+      }
+
       const exists = await checkResultExists(StudentID, ExamID, SubjectID);
       if (exists) {
         errors.push(
@@ -554,7 +568,7 @@ const addMultipleResults = async (resultsData, branchId = null) => {
     }
 
     if (errors.length > 0) {
-      throw new Error("Validation errors:\n" + errors.join("\n"));
+      throw new ValidationError("result_invalid", "Validation errors:\n" + errors.join("\n"));
     }
 
     if (validatedResults.length === 0) {
@@ -574,6 +588,7 @@ const addMultipleResults = async (resultsData, branchId = null) => {
       message: `Successfully inserted ${validatedResults.length} results`,
     };
   } catch (err) {
+    if (err instanceof ValidationError) throw err;
     throw new Error("Error adding multiple results: " + err.message);
   }
 };

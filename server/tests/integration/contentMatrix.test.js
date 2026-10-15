@@ -269,6 +269,39 @@ describe.each(KINDS)("$name per branch", (kind) => {
   });
 });
 
+describe("notice announcement images", () => {
+  beforeEach(resetDb);
+
+  it("ignores an image path sent in the request, so it can never delete another file", async () => {
+    const victim = await insert("NoticeAnnouncements", {
+      title_bn: "খ", title_en: "B's", category: "Notice", date: "2030-01-01", image_url: "/uploads/routines/b.png", branch_id: BRANCH_B,
+    });
+    const own = await insert("NoticeAnnouncements", {
+      title_bn: "ক", title_en: "A's", category: "Notice", date: "2030-01-01", image_url: "/uploads/notice-announcements/a.png", branch_id: BRANCH_A,
+    });
+
+    await request(app)
+      .put(`/api/notice-announcements/${own}`)
+      .set(adminA)
+      .send({ title_bn: "ক", title_en: "A's", category: "Notice", date: "2030-01-01", image_url: "/uploads/routines/b.png" })
+      .expect(200);
+
+    const [[row]] = await db.query("SELECT image_url FROM NoticeAnnouncements WHERE id = ?", [own]);
+    expect(row.image_url).toBe("/uploads/notice-announcements/a.png");
+    expect(await count("NoticeAnnouncements", "id = ?", [victim])).toBe(1);
+  });
+
+  it("needs an uploaded image to create one, whatever path is sent", async () => {
+    const res = await request(app)
+      .post("/api/notice-announcements")
+      .set(adminA)
+      .send({ title_bn: "ক", title_en: "A", category: "Notice", date: "2030-01-01", image_url: "https://elsewhere.test/x.png" });
+
+    expect(res.status).toBe(400);
+    expect(await count("NoticeAnnouncements")).toBe(0);
+  });
+});
+
 describe("gallery photos of people", () => {
   beforeEach(resetDb);
 

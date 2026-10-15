@@ -68,6 +68,14 @@ describe("authMiddleware", () => {
     expect(res.body).toEqual({ adminId: 9, role: "super_admin", branchId: 2 });
   });
 
+  it.each(["abc", "0", "-3", "1.5"])("ignores a malformed ?branch_id=%s instead of passing it on", async (value) => {
+    const res = await request(buildApp(stored({ id: 9, role: "super_admin", branchId: null })))
+      .get(`/public?branch_id=${value}`)
+      .set("Authorization", superAdminLogin);
+
+    expect(res.body.branchId).toBeNull();
+  });
+
   it("never looks up a quiz student's token and refuses it", async () => {
     const findAdmin = stored({ id: 5, role: "super_admin", branchId: null });
 
