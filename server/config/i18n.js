@@ -165,6 +165,10 @@ const i18n = {
     en: "Student deleted successfully.",
     bn: "শিক্ষার্থী সফলভাবে মুছে ফেলা হয়েছে।",
   },
+  student_has_fee_records: {
+    en: "This student has fee records, so they cannot be deleted.",
+    bn: "এই শিক্ষার্থীর বেতনের রেকর্ড আছে, তাই মুছে ফেলা যাবে না।",
+  },
   student_not_found: {
     en: "Student not found.",
     bn: "শিক্ষার্থী পাওয়া যায়নি।",
@@ -642,6 +646,168 @@ const i18n = {
   application_all_required: {
     en: "Applicant name, date of birth, gender, applying class, parent name, and parent contact are required.",
     bn: "আবেদনকারীর নাম, জন্ম তারিখ, লিঙ্গ, ভর্তির শ্রেণি, অভিভাবকের নাম এবং অভিভাবকের যোগাযোগ নম্বর আবশ্যক।",
+  },
+
+  // ── Fees ──────────────────────────────────────────────────────────────────
+  fee_branch_required: {
+    en: "Select a branch first.",
+    bn: "প্রথমে একটি শাখা নির্বাচন করুন।",
+  },
+  fee_amount_invalid: {
+    en: "Enter a valid amount (0 or more, up to 2 decimals).",
+    bn: "সঠিক পরিমাণ লিখুন (০ বা তার বেশি, সর্বোচ্চ ২ দশমিক ঘর)।",
+  },
+  fee_due_day_invalid: {
+    en: "Due day must be between 1 and 28.",
+    bn: "পরিশোধের শেষ দিন ১ থেকে ২৮-এর মধ্যে হতে হবে।",
+  },
+  fee_receipt_prefix_invalid: {
+    en: "Receipt prefix must be 1–10 letters or digits.",
+    bn: "রসিদের প্রিফিক্স ১–১০টি অক্ষর বা সংখ্যা হতে হবে।",
+  },
+  fee_class_required: {
+    en: "Class is required.",
+    bn: "শ্রেণি আবশ্যক।",
+  },
+  fee_year_invalid: {
+    en: "Enter a valid academic year.",
+    bn: "সঠিক শিক্ষাবর্ষ লিখুন।",
+  },
+  fee_period_invalid: {
+    en: "Enter a valid month and year.",
+    bn: "সঠিক মাস ও বছর লিখুন।",
+  },
+  fee_head_name_required: {
+    en: "Fee name is required.",
+    bn: "ফি-এর নাম আবশ্যক।",
+  },
+  fee_student_required: {
+    en: "Student is required.",
+    bn: "শিক্ষার্থী আবশ্যক।",
+  },
+  fee_discount_kind_invalid: {
+    en: "Discount must be a percent or fixed amount, on tuition or all fees.",
+    bn: "ছাড় শতাংশ বা নির্দিষ্ট পরিমাণ হতে হবে, বেতন বা সকল ফি-এর উপর।",
+  },
+  fee_discount_value_invalid: {
+    en: "Discount must be more than 0 (and at most 100%).",
+    bn: "ছাড় ০-এর বেশি হতে হবে (এবং সর্বোচ্চ ১০০%)।",
+  },
+  fee_date_invalid: {
+    en: "Enter a valid date.",
+    bn: "সঠিক তারিখ লিখুন।",
+  },
+  fee_date_range_invalid: {
+    en: "End date cannot be before start date.",
+    bn: "শেষের তারিখ শুরুর তারিখের আগে হতে পারে না।",
+  },
+  fee_generate_invalid: {
+    en: "Classes and extra fees must be sent as lists.",
+    bn: "শ্রেণি ও অতিরিক্ত ফি তালিকা আকারে পাঠাতে হবে।",
+  },
+  fee_filter_invalid: {
+    en: "Filter by one class and one section at a time.",
+    bn: "একবারে একটি শ্রেণি ও একটি সেকশন দিয়ে খুঁজুন।",
+  },
+  fee_status_invalid: {
+    en: "Invalid invoice status.",
+    bn: "অবৈধ ইনভয়েস অবস্থা।",
+  },
+  fee_structure_exists: {
+    en: "Tuition for this class and year already exists.",
+    bn: "এই শ্রেণি ও বছরের বেতন ইতিমধ্যে নির্ধারিত আছে।",
+  },
+  fee_structure_not_found: {
+    en: "Class tuition not found.",
+    bn: "শ্রেণির বেতন পাওয়া যায়নি।",
+  },
+  fee_head_not_found: {
+    en: "Fee not found.",
+    bn: "ফি পাওয়া যায়নি।",
+  },
+  fee_discount_not_found: {
+    en: "Discount not found.",
+    bn: "ছাড় পাওয়া যায়নি।",
+  },
+  fee_student_not_found: {
+    en: "Student not found.",
+    bn: "শিক্ষার্থী পাওয়া যায়নি।",
+  },
+  fee_invoice_not_found: {
+    en: "Invoice not found.",
+    bn: "ইনভয়েস পাওয়া যায়নি।",
+  },
+  fee_payment_not_found: {
+    en: "Payment not found.",
+    bn: "পেমেন্ট পাওয়া যায়নি।",
+  },
+  fee_payment_amount_invalid: {
+    en: "Payment amount must be more than 0.",
+    bn: "পেমেন্টের পরিমাণ ০-এর বেশি হতে হবে।",
+  },
+  fee_payment_method_invalid: {
+    en: "Choose a payment method: cash, bKash, Nagad, bank or other.",
+    bn: "পেমেন্ট পদ্ধতি বাছাই করুন: নগদ টাকা, বিকাশ, নগদ, ব্যাংক বা অন্যান্য।",
+  },
+  fee_payment_date_future: {
+    en: "Payment date cannot be in the future.",
+    bn: "পেমেন্টের তারিখ ভবিষ্যতের হতে পারে না।",
+  },
+  fee_payment_exceeds_balance: {
+    en: "Payment is more than the amount due.",
+    bn: "পেমেন্ট বকেয়া পরিমাণের চেয়ে বেশি।",
+  },
+  fee_payment_already_voided: {
+    en: "This payment is already voided.",
+    bn: "এই পেমেন্ট ইতিমধ্যে বাতিল করা হয়েছে।",
+  },
+  fee_void_reason_required: {
+    en: "A reason is required to void a payment.",
+    bn: "পেমেন্ট বাতিল করতে কারণ লিখতে হবে।",
+  },
+  fee_settings_saved: {
+    en: "Fee settings saved.",
+    bn: "ফি সেটিংস সংরক্ষিত হয়েছে।",
+  },
+  fee_structure_saved: {
+    en: "Class tuition saved.",
+    bn: "শ্রেণির বেতন সংরক্ষিত হয়েছে।",
+  },
+  fee_structure_deleted: {
+    en: "Class tuition deleted.",
+    bn: "শ্রেণির বেতন মুছে ফেলা হয়েছে।",
+  },
+  fee_head_saved: {
+    en: "Fee saved.",
+    bn: "ফি সংরক্ষিত হয়েছে।",
+  },
+  fee_head_deleted: {
+    en: "Fee deleted.",
+    bn: "ফি মুছে ফেলা হয়েছে।",
+  },
+  fee_discount_saved: {
+    en: "Discount saved.",
+    bn: "ছাড় সংরক্ষিত হয়েছে।",
+  },
+  fee_discount_deleted: {
+    en: "Discount deleted.",
+    bn: "ছাড় মুছে ফেলা হয়েছে।",
+  },
+  fee_invoices_generated: {
+    en: "Invoices generated.",
+    bn: "ইনভয়েস তৈরি হয়েছে।",
+  },
+  fee_late_fines_applied: {
+    en: "Late fines applied.",
+    bn: "বিলম্ব জরিমানা যোগ করা হয়েছে।",
+  },
+  fee_payment_recorded: {
+    en: "Payment recorded.",
+    bn: "পেমেন্ট গ্রহণ করা হয়েছে।",
+  },
+  fee_payment_voided: {
+    en: "Payment voided.",
+    bn: "পেমেন্ট বাতিল করা হয়েছে।",
   },
 
   // ── Generic ───────────────────────────────────────────────────────────────
