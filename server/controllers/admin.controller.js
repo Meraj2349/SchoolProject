@@ -85,13 +85,23 @@ const loginAdminController = async (req, res) => {
   }
 };
 
-// Update admin
+// Update admin (super_admin only — enforced in the route)
 const updateAdminController = async (req, res) => {
   const lang = req.language;
+  const { Email, Password } = req.body;
+  if (!Email && !Password) {
+    return res.status(400).json({ error: t("all_fields_required", lang) });
+  }
   try {
-    const result = await updateAdmin(req.params.id, req.body);
+    const result = await updateAdmin(req.params.id, {
+      Email,
+      Password: Password ? await bcrypt.hash(Password, 10) : undefined,
+    });
     res.json(result);
   } catch (error) {
+    if (error.message.includes("No admin found")) {
+      return res.status(404).json({ error: t("admin_not_found", lang) });
+    }
     res.status(500).json({ error: t("internal_server_error", lang) });
   }
 };

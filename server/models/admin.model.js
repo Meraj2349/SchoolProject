@@ -93,17 +93,29 @@ export const getAdminById = async (adminId) => {
   return rows[0];
 };
 
+// Updates only the fields provided. Password must already be hashed.
 export const updateAdmin = async (adminId, adminData) => {
-  const { Email, Password } = adminData;
-  const sql = "UPDATE Admin SET Email = ?, Password = ? WHERE AdminID = ?";
-  try {
-    const [result] = await db.query(sql, [Email, Password, adminId]);
-    if (result.affectedRows === 0) {
-      throw new Error("No admin found with that ID");
+  const updates = [];
+  const params = [];
+  for (const field of ["Email", "Password"]) {
+    if (adminData[field] !== undefined && adminData[field] !== "") {
+      updates.push(`${field} = ?`);
+      params.push(adminData[field]);
     }
-    return { success: true };
-  } catch (err) {
-    console.error("Error updating admin:", err);
-    throw err;
   }
+  if (updates.length === 0) throw new Error("No fields to update");
+
+  const [result] = await db.query(
+    `UPDATE Admin SET ${updates.join(", ")} WHERE AdminID = ?`,
+    [...params, adminId],
+  );
+  if (result.affectedRows === 0) {
+    throw new Error("No admin found with that ID");
+  }
+  return { success: true };
+};
+
+export const countAdmins = async () => {
+  const [[row]] = await db.query("SELECT COUNT(*) AS total FROM Admin");
+  return Number(row.total);
 };

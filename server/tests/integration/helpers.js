@@ -6,14 +6,24 @@ export { db };
 export const BRANCH_A = 1;
 export const BRANCH_B = 2;
 
-// Empties every table and re-seeds two branches so each test starts clean.
+// Reference data loaded by database.sql that tests must not wipe.
+const REFERENCE_TABLES = ["ClassNames", "ChairmanProfile"];
+
+// Empties every data table and re-seeds two branches so each test starts clean.
 export async function resetDb() {
   const [tables] = await db.query(
-    "SELECT TABLE_NAME AS name FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE()",
+    "SELECT TABLE_NAME AS name FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME NOT IN (?)",
+    [REFERENCE_TABLES],
   );
-  await db.query("SET FOREIGN_KEY_CHECKS = 0");
-  for (const { name } of tables) await db.query(`TRUNCATE TABLE \`${name}\``);
-  await db.query("SET FOREIGN_KEY_CHECKS = 1");
+  // FOREIGN_KEY_CHECKS is per connection, so do all of it on one connection.
+  const connection = await db.getConnection();
+  try {
+    await connection.query("SET FOREIGN_KEY_CHECKS = 0");
+    for (const { name } of tables) await connection.query(`TRUNCATE TABLE \`${name}\``);
+    await connection.query("SET FOREIGN_KEY_CHECKS = 1");
+  } finally {
+    connection.release();
+  }
   await db.query(
     "INSERT INTO Branches (id, name_en, name_bn) VALUES (?, 'Main', 'প্রধান'), (?, 'North', 'উত্তর')",
     [BRANCH_A, BRANCH_B],
