@@ -1,74 +1,81 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { quizService } from "@/services/quiz.service";
-import { useQuizSessionStore } from "@/store/quizSessionStore";
+import { quizErrorMessage, quizService } from "@/services/quiz.service";
 import { branchService } from "@/services/branch.service";
+import { useLanguageStore, useTranslations } from "@/store/languageStore";
+import { useQuizSessionStore } from "@/store/quizSessionStore";
+import { classesOf, sectionsOf } from "./quizText";
 
-export default function IdentityFormPage() {
+const EMPTY = { branchId: "", firstName: "", lastName: "", className: "", section: "", rollNumber: "" };
+
+/* Same input look as LoginPage / RegisterPage */
+const inputClass =
+  "w-full px-4 py-3 rounded-xl border border-white/20 bg-white/10 text-white placeholder-white/50 backdrop-blur-sm transition-all focus:outline-none focus:border-amber-300 focus:bg-white/15 focus:ring-2 focus:ring-amber-300/40 disabled:opacity-50";
+const selectClass = `${inputClass} cursor-pointer appearance-none`;
+const labelClass = "block text-sm font-medium text-white/80 mb-2";
+
+/**
+ * A student proves who they are (branch, class, section, name, roll) and gets
+ * a quiz session. Class and section come from the branch's real classes, so
+ * they always match the register. Afterwards it calls `onVerified`, or else
+ * goes to `next`.
+ */
+export default function IdentityFormPage({ next = "/quaker/quiz", onVerified }) {
   const router = useRouter();
+  const t = useTranslations("quiz");
+  const language = useLanguageStore((s) => s.language);
   const setSession = useQuizSessionStore((s) => s.setSession);
+  const ids = { branch: useId(), first: useId(), last: useId(), class: useId(), section: useId(), roll: useId() };
 
   const [branches, setBranches] = useState([]);
-  const [branchId, setBranchId] = useState("");
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [className, setClassName] = useState("");
-  const [section, setSection] = useState("");
-  const [rollNumber, setRollNumber] = useState("");
-
+  const [classes, setClasses] = useState([]);
+  const [form, setForm] = useState(EMPTY);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   useEffect(() => {
     branchService
       .getAll()
-      .then((data) => {
-        const list = Array.isArray(data) ? data : [];
-        setBranches(list.filter((b) => !b.is_proposed));
-      })
+      .then((data) => setBranches((Array.isArray(data) ? data : []).filter((b) => !b.is_proposed)))
       .catch(() => setBranches([]));
   }, []);
 
-  /* Exact same input class as LoginPage / RegisterPage */
-  const inputClass =
-    "w-full px-4 py-3 rounded-xl border border-white/20 bg-white/10 text-white placeholder-white/50 backdrop-blur-sm transition-all focus:outline-none focus:border-amber-300 focus:bg-white/15 focus:ring-2 focus:ring-amber-300/40";
-  const labelClass = "block text-sm font-medium text-white/80 mb-2";
+  const set = (field) => (event) => setForm((previous) => ({ ...previous, [field]: event.target.value }));
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  // A new branch has its own classes; a new class its own sections.
+  const chooseBranch = (event) => {
+    const branchId = event.target.value;
+    setForm((previous) => ({ ...previous, branchId, className: "", section: "" }));
+    setClasses([]);
+    if (!branchId) return;
+    quizService
+      .classesOf(branchId)
+      .then((rows) => setClasses(Array.isArray(rows) ? rows : []))
+      .catch(() => setClasses([]));
+  };
+  const chooseClass = (event) => setForm((previous) => ({ ...previous, className: event.target.value, section: "" }));
+
+  const branchName = (b) => (language === "bn" ? b.name_bn || b.name_en : b.name_en || b.name_bn) || `#${b.id}`;
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
     setError("");
-
-    if (
-      !branchId ||
-      !firstName ||
-      !lastName ||
-      !className ||
-      !section ||
-      !rollNumber
-    ) {
-      setError("Please fill in all fields.");
+    const identity = Object.fromEntries(Object.entries(form).map(([field, value]) => [field, value.trim()]));
+    if (Object.values(identity).some((value) => !value)) {
+      setError(t("fillAllFields"));
       return;
     }
-
     setLoading(true);
     try {
-      const { token, student } = await quizService.verifyStudent({
-        branchId,
-        firstName,
-        lastName,
-        className,
-        section,
-        rollNumber,
-      });
+      const { token, student } = await quizService.verifyStudent(identity);
       setSession(token, student);
-      router.push("/quaker/quiz");
-    } catch (err) {
-      const msg =
-        err.response?.data?.error || err.message || "Verification failed";
-      setError(msg);
+      if (onVerified) await onVerified(student);
+      else router.push(next);
+    } catch (failure) {
+      setError(quizErrorMessage(failure, t("verifyFailed")));
     } finally {
       setLoading(false);
     }
@@ -135,119 +142,103 @@ export default function IdentityFormPage() {
         <div className="relative w-full max-w-md">
           {/* Card — exact same as LoginPage card */}
           <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-8 shadow-2xl">
-            {/* Header */}
             <div className="mb-6">
-              <p className="text-center text-xs font-bold tracking-[0.14em] uppercase text-amber-300 mb-2">
-                Verify Identity
-              </p>
-              <h2 className="text-center text-3xl font-bold text-white mb-1">
-                Enter your details
-              </h2>
-              <p className="text-center text-sm text-white/60">
-                We verify your identity against the student register. No account
-                needed.
-              </p>
+              <h2 className="text-center text-3xl font-bold text-white mb-1">{t("identityTitle")}</h2>
+              <p className="text-center text-sm text-white/60">{t("identityBody")}</p>
             </div>
 
-            {/* Error banner */}
             {error && (
-              <div className="bg-red-500/10 border border-red-400/30 text-red-200 px-4 py-2.5 rounded-lg mb-5 text-sm">
+              <div role="alert" className="bg-red-500/10 border border-red-400/30 text-red-200 px-4 py-2.5 rounded-lg mb-5 text-sm">
                 {error}
               </div>
             )}
 
-            <form onSubmit={handleSubmit} className="space-y-5">
-              {/* Branch */}
+            <form onSubmit={handleSubmit} className="space-y-5" noValidate>
               <div>
-                <label className={labelClass}>Branch</label>
-                <select
-                  value={branchId}
-                  onChange={(e) => setBranchId(e.target.value)}
-                  className={inputClass + " cursor-pointer appearance-none"}
-                  style={{ colorScheme: "dark" }}
-                  required
-                >
-                  <option value="">— Select your branch —</option>
+                <label htmlFor={ids.branch} className={labelClass}>
+                  {t("branch")}
+                </label>
+                <select id={ids.branch} value={form.branchId} onChange={chooseBranch} className={selectClass} style={{ colorScheme: "dark" }}>
+                  <option value="">{t("selectBranch")}</option>
                   {branches.map((b) => (
                     <option key={b.id} value={b.id}>
-                      {b.name_en || b.name_bn || `Branch ${b.id}`}
+                      {branchName(b)}
                     </option>
                   ))}
                 </select>
               </div>
 
-              {/* First / Last name */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className={labelClass}>First Name</label>
-                  <input
-                    type="text"
-                    value={firstName}
-                    onChange={(e) => setFirstName(e.target.value)}
-                    placeholder="e.g. Rifat"
-                    className={inputClass}
-                    required
-                  />
+                  <label htmlFor={ids.class} className={labelClass}>
+                    {t("class")}
+                  </label>
+                  <select
+                    id={ids.class}
+                    value={form.className}
+                    onChange={chooseClass}
+                    disabled={!form.branchId}
+                    className={selectClass}
+                    style={{ colorScheme: "dark" }}
+                  >
+                    <option value="">{t("selectClass")}</option>
+                    {classesOf(classes).map((name) => (
+                      <option key={name} value={name}>
+                        {name}
+                      </option>
+                    ))}
+                  </select>
                 </div>
                 <div>
-                  <label className={labelClass}>Last Name</label>
-                  <input
-                    type="text"
-                    value={lastName}
-                    onChange={(e) => setLastName(e.target.value)}
-                    placeholder="e.g. Ahmed"
-                    className={inputClass}
-                    required
-                  />
+                  <label htmlFor={ids.section} className={labelClass}>
+                    {t("section")}
+                  </label>
+                  <select
+                    id={ids.section}
+                    value={form.section}
+                    onChange={set("section")}
+                    disabled={!form.className}
+                    className={selectClass}
+                    style={{ colorScheme: "dark" }}
+                  >
+                    <option value="">{t("selectSection")}</option>
+                    {sectionsOf(classes, form.className).map((section) => (
+                      <option key={section} value={section}>
+                        {section}
+                      </option>
+                    ))}
+                  </select>
                 </div>
               </div>
 
-              {/* Class / Section */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className={labelClass}>Class</label>
-                  <input
-                    type="text"
-                    value={className}
-                    onChange={(e) => setClassName(e.target.value)}
-                    placeholder="e.g. Nursery"
-                    className={inputClass}
-                    required
-                  />
+                  <label htmlFor={ids.first} className={labelClass}>
+                    {t("firstName")}
+                  </label>
+                  <input id={ids.first} type="text" value={form.firstName} onChange={set("firstName")} className={inputClass} autoComplete="given-name" />
                 </div>
                 <div>
-                  <label className={labelClass}>Section</label>
-                  <input
-                    type="text"
-                    value={section}
-                    onChange={(e) => setSection(e.target.value)}
-                    placeholder="e.g. A"
-                    className={inputClass}
-                    required
-                  />
+                  <label htmlFor={ids.last} className={labelClass}>
+                    {t("lastName")}
+                  </label>
+                  <input id={ids.last} type="text" value={form.lastName} onChange={set("lastName")} className={inputClass} autoComplete="family-name" />
                 </div>
               </div>
 
-              {/* Roll number */}
               <div>
-                <label className={labelClass}>Roll Number</label>
-                <input
-                  type="text"
-                  value={rollNumber}
-                  onChange={(e) => setRollNumber(e.target.value)}
-                  placeholder="e.g. B1-N-Be-01"
-                  className={inputClass}
-                  required
-                />
+                <label htmlFor={ids.roll} className={labelClass}>
+                  {t("rollNumber")}
+                </label>
+                <input id={ids.roll} type="text" value={form.rollNumber} onChange={set("rollNumber")} className={inputClass} />
               </div>
 
-              {/* Primary button — exact LoginPage style */}
               <button
                 type="submit"
                 disabled={loading}
                 className="w-full py-3.5 bg-amber-400 text-[#0a1628] font-bold text-base rounded-xl cursor-pointer transition-all mt-2 disabled:opacity-60 disabled:cursor-not-allowed hover:bg-amber-300 hover:shadow-lg hover:shadow-amber-400/30"
               >
-                {loading ? "Verifying…" : "Verify & Start Quiz →"}
+                {loading ? t("verifying") : t("verify")}
               </button>
             </form>
 
