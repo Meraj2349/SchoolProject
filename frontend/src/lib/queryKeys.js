@@ -68,6 +68,13 @@ export const queryKeys = {
   fees: {
     all: ["fees"],
     invoices: (filters = {}, branchId = null) => ["fees", "invoices", filters, { branchId }],
+    summary: (period, branchId = null) => ["fees", "summary", period, { branchId }],
+    invoice: (invoiceId, branchId = null) => ["fees", "invoice", String(invoiceId), { branchId }],
+    ledger: (studentId, branchId = null) => ["fees", "ledger", String(studentId), { branchId }],
+    receipt: (paymentId, branchId = null) => ["fees", "receipt", String(paymentId), { branchId }],
+    settings: (branchId = null) => ["fees", "settings", { branchId }],
+    structures: (year, branchId = null) => ["fees", "structures", year, { branchId }],
+    heads: (branchId = null) => ["fees", "heads", { branchId }],
   },
   dashboard: {
     summary: (branchId = null) => ["dashboard", "summary", { branchId }],

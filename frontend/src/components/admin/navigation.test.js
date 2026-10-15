@@ -46,6 +46,14 @@ describe("admin navigation", () => {
       expect(findNavItem("/admin/results").group.key).toBe("sidebar.groups.examsResults");
     });
 
+    it("puts the fee pages in the Fees group, sub-pages under the overview", () => {
+      expect(findNavItem("/admin/fees/invoices").item.key).toBe("sidebar.feeInvoices");
+      expect(findNavItem("/admin/fees/students/7")).toMatchObject({
+        group: { key: "sidebar.groups.fees" },
+        item: { path: "/admin/fees" },
+      });
+    });
+
     it("returns null for unknown pages", () => {
       expect(findNavItem("/admin/nope")).toBeNull();
       expect(findNavItem("/admin/studentListing")).toBeNull();

@@ -7,14 +7,17 @@ import {
   FiCheckSquare,
   FiClipboard,
   FiClock,
+  FiDollarSign,
   FiFileText,
   FiGitBranch,
   FiGrid,
   FiImage,
   FiLayout,
   FiMessageSquare,
+  FiPieChart,
   FiRss,
   FiSettings,
+  FiSliders,
   FiStar,
   FiTable,
   FiUser,
@@ -60,6 +63,15 @@ export const NAV_GROUPS = [
     items: [
       { path: "/admin/attendance", key: "sidebar.attendance", icon: FiCheckSquare },
       { path: "/admin/attendance/grid", key: "sidebar.attendanceGrid", icon: FiTable },
+    ],
+  },
+  {
+    key: "sidebar.groups.fees",
+    icon: FiDollarSign,
+    items: [
+      { path: "/admin/fees", key: "sidebar.feesOverview", icon: FiPieChart },
+      { path: "/admin/fees/invoices", key: "sidebar.feeInvoices", icon: FiFileText },
+      { path: "/admin/fees/setup", key: "sidebar.feeSetup", icon: FiSliders },
     ],
   },
   {
