@@ -1,5 +1,6 @@
 import express from "express";
 import authMiddleware, { optionalAuth, authorize } from "../middlewares/auth.middleware.js";
+import { requireWriteBranch } from "../src/shared/http/requireWriteBranch.js";
 import {
   addClassController,
   deleteClassController,
@@ -29,7 +30,7 @@ router.get(
 
 // ── Write routes — require a valid JWT ──
 // POST /add — super_admin only (creates new class rows)
-router.post("/add", authMiddleware, authorize("super_admin"), addClassController);
+router.post("/add", authMiddleware, authorize("super_admin"), requireWriteBranch, addClassController);
 // PUT /edit/:id — any authenticated admin can reassign a teacher to a class
 router.put("/edit/:id", authMiddleware, editClassController);
 // DELETE /delete/:id — unassigns teacher; any authenticated admin (branch-scoped)

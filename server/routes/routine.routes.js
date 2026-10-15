@@ -2,6 +2,7 @@ import express from "express";
 import upload from "../config/multer.config.js";
 import * as RoutineController from "../controllers/routine.controller.js";
 import authMiddleware, { optionalAuth } from "../middlewares/auth.middleware.js"; // For admin authentication
+import { requireWriteBranch } from "../src/shared/http/requireWriteBranch.js";
 
 const router = express.Router();
 
@@ -48,6 +49,7 @@ router.get(
 router.post(
   "/",
   authMiddleware,
+  requireWriteBranch,
   upload.single("routineFile"),
   RoutineController.createRoutine,
 );

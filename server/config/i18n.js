@@ -2,6 +2,14 @@
 // Usage: i18n[key][req.language]
 
 const i18n = {
+  branch_required: {
+    en: "Choose a branch first.",
+    bn: "আগে একটি শাখা বেছে নিন।",
+  },
+  branch_mismatch: {
+    en: "That record belongs to another branch.",
+    bn: "এই তথ্যটি অন্য শাখার।",
+  },
   // ── Quiz ──────────────────────────────────────────────────────────────────
   quiz_failed: {
     en: "Could not load the quiz. Please try again.",

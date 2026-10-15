@@ -1,4 +1,5 @@
 import { t } from "../config/i18n.js";
+import { ValidationError } from "../src/shared/errors/index.js";
 import {
   addClass,
   deleteClass,
@@ -91,6 +92,9 @@ export const editClassController = async (req, res) => {
       .status(200)
       .json({ message: t("class_updated", lang), success: result.success });
   } catch (error) {
+    if (error instanceof ValidationError) {
+      return res.status(400).json({ success: false, message: t(error.code, lang) });
+    }
     console.error("Error editing class:", error);
     if (error?.code === "ER_DUP_ENTRY") {
       return res.status(409).json({

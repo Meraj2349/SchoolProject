@@ -1,4 +1,5 @@
 import { t } from "../config/i18n.js";
+import { ValidationError } from "../src/shared/errors/index.js";
 import {
   addSubject,
   deleteSubject,
@@ -28,6 +29,9 @@ export const addSubjectController = async (req, res) => {
       .status(201)
       .json({ message: t("subject_added", lang), SubjectID: result.SubjectID });
   } catch (error) {
+    if (error instanceof ValidationError) {
+      return res.status(400).json({ success: false, message: t(error.code, lang) });
+    }
     res.status(500).json({ error: t("subject_add_failed", lang) });
   }
 };
@@ -119,6 +123,9 @@ export const editSubjectController = async (req, res) => {
       .status(200)
       .json({ message: t("subject_updated", lang), success: result.success });
   } catch (error) {
+    if (error instanceof ValidationError) {
+      return res.status(400).json({ success: false, message: t(error.code, lang) });
+    }
     res.status(500).json({ error: t("subject_update_failed", lang) });
   }
 };

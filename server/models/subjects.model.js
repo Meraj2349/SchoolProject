@@ -1,8 +1,14 @@
 import db from "../config/db.config.js";
 import { branchFilter } from "../utils/branchFilter.js";
+import { branchOf } from "../utils/branchOwnership.js";
+import { ValidationError } from "../src/shared/errors/index.js";
 
 // Add a new subject (classId is the integer ClassID from the Classes table)
 export const addSubject = async ({ subjectName, classId }, branchId = null) => {
+  // The class must be in the branch the subject is added to.
+  if (branchId != null && (await branchOf("Classes", classId)) !== Number(branchId)) {
+    throw new ValidationError("branch_mismatch");
+  }
   try {
     let sql, values;
     if (branchId != null) {
@@ -105,6 +111,11 @@ export const getSubjectsByClassName = async (className, branchId = null) => {
 // Edit a subject by ID (branch-scoped)
 export const editSubject = async (subjectId, { subjectName, classId }, branchId = null) => {
   const { clause, params: branchParams } = branchFilter(branchId);
+  // The new class must be in the subject's own branch.
+  const subjectBranch = await branchOf("Subjects", subjectId);
+  if (subjectBranch !== undefined && (await branchOf("Classes", classId)) !== subjectBranch) {
+    throw new ValidationError("branch_mismatch");
+  }
   try {
     const [result] = await db.query(
       `UPDATE Subjects SET SubjectName = ?, ClassID = ? WHERE SubjectID = ? ${clause}`,

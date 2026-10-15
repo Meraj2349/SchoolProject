@@ -1,5 +1,6 @@
 import express from "express";
 import authMiddleware, { optionalAuth } from "../middlewares/auth.middleware.js";
+import { requireWriteBranch } from "../src/shared/http/requireWriteBranch.js";
 import {
   addMultipleResultsController,
   addResultByStudentDetailsController,
@@ -32,13 +33,13 @@ router.use(authMiddleware);
 router.get("/", getAllResultsController);
 
 // Route to add a new result by IDs
-router.post("/", addResultController);
+router.post("/", requireWriteBranch, addResultController);
 
 // Route to add a result using student details (names, roll number, etc.)
-router.post("/add-by-details", addResultByStudentDetailsController);
+router.post("/add-by-details", requireWriteBranch, addResultByStudentDetailsController);
 
 // Route to add multiple results (batch insert)
-router.post("/batch", addMultipleResultsController);
+router.post("/batch", requireWriteBranch, addMultipleResultsController);
 
 // Route to get the total count of results
 router.get("/count", getResultCountController);

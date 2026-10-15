@@ -290,9 +290,10 @@ const addResult = async (resultData, branchId = null) => {
     }
 
     const [result] = await db.query(
-      `INSERT INTO Results (StudentID, ExamID, SubjectID, ClassID, MarksObtained)
-      VALUES (?, ?, ?, ?, ?)`,
-      [StudentID, ExamID, SubjectID, ClassID, MarksObtained],
+      // The result belongs to its student's branch.
+      `INSERT INTO Results (StudentID, ExamID, SubjectID, ClassID, MarksObtained, branch_id)
+       SELECT ?, ?, ?, ?, ?, branch_id FROM Students WHERE StudentID = ?`,
+      [StudentID, ExamID, SubjectID, ClassID, MarksObtained, StudentID],
     );
 
     return {
@@ -449,9 +450,9 @@ const addResultByStudentDetails = async (resultData, branchId = null) => {
     }
 
     const [result] = await db.query(
-      `INSERT INTO Results (StudentID, ExamID, SubjectID, ClassID, MarksObtained)
-      VALUES (?, ?, ?, ?, ?)`,
-      [studentId, examId, subjectId, classId, marksObtained],
+      `INSERT INTO Results (StudentID, ExamID, SubjectID, ClassID, MarksObtained, branch_id)
+       SELECT ?, ?, ?, ?, ?, branch_id FROM Students WHERE StudentID = ?`,
+      [studentId, examId, subjectId, classId, marksObtained, studentId],
     );
 
     return {
@@ -541,12 +542,14 @@ const addMultipleResults = async (resultsData, branchId = null) => {
         continue;
       }
 
+      // Every student was checked to be in this branch above.
       validatedResults.push([
         StudentID,
         ExamID,
         SubjectID,
         ClassID,
         MarksObtained,
+        branchId,
       ]);
     }
 
@@ -559,9 +562,10 @@ const addMultipleResults = async (resultsData, branchId = null) => {
     }
 
     const [result] = await db.query(
-      `INSERT INTO Results (StudentID, ExamID, SubjectID, ClassID, MarksObtained) VALUES ?`,
+      `INSERT INTO Results (StudentID, ExamID, SubjectID, ClassID, MarksObtained, branch_id) VALUES ?`,
       [validatedResults],
     );
+
 
     return {
       success: true,

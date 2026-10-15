@@ -146,8 +146,10 @@ const addExamByClassDetails = async (examData, branchId = null) => {
     }
 
     const [result] = await db.query(
-      `INSERT INTO Exams (ExamType, ExamName, ClassID, ExamDate) VALUES (?, ?, ?, ?)`,
-      [examType, examName, classInfo.ClassID, examDate],
+      // The exam belongs to its class's branch.
+      `INSERT INTO Exams (ExamType, ExamName, ClassID, ExamDate, branch_id)
+       SELECT ?, ?, ClassID, ?, branch_id FROM Classes WHERE ClassID = ?`,
+      [examType, examName, examDate, classInfo.ClassID],
     );
 
     return {
@@ -217,8 +219,10 @@ const createExamByClassNameAndSection = async (
     }
 
     const [result] = await db.query(
-      `INSERT INTO Exams (ExamType, ExamName, ClassID, ExamDate) VALUES (?, ?, ?, ?)`,
-      [examType, examName, classInfo.ClassID, examDate],
+      // The exam belongs to its class's branch.
+      `INSERT INTO Exams (ExamType, ExamName, ClassID, ExamDate, branch_id)
+       SELECT ?, ?, ClassID, ?, branch_id FROM Classes WHERE ClassID = ?`,
+      [examType, examName, examDate, classInfo.ClassID],
     );
 
     return {

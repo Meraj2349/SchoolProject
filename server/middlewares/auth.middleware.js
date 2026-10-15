@@ -54,7 +54,12 @@ export function makeAuthMiddleware({ findAdmin }) {
     } catch {
       return null; // malformed, tampered with or expired
     }
-    return decoded ? findAdmin(decoded.adminID) : null;
+    if (!decoded) return null;
+    const admin = await findAdmin(decoded.adminID);
+    // A branch admin without a branch (their branch was deleted) must not fall
+    // through to "no branch filter", which would mean every branch.
+    if (admin && admin.role !== "super_admin" && admin.branchId == null) return null;
+    return admin;
   }
 
   const serverError = (res, error) => {
