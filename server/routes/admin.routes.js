@@ -23,6 +23,11 @@ const firstAdminOrSuperAdmin = async (req, res, next) => {
   } catch (error) {
     return res.status(500).json({ error: "Could not verify admin setup" });
   }
+  if (!req.headers.authorization) {
+    return res.status(401).json({
+      error: "Only a super admin can create admin accounts. Please log in as super admin first.",
+    });
+  }
   authMiddleware(req, res, () => authorize("super_admin")(req, res, next));
 };
 

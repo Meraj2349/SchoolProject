@@ -55,6 +55,7 @@ export default function Sidebar({ open, onClose }) {
       path: "/admin/chairman",
       icon: <FaHandshake />,
       key: "sidebar.chairmanProfile",
+      superAdminOnly: true,
     },
     { path: "/admin/gallery", icon: <FaImage />, key: "sidebar.imageGallery" },
     { path: "/admin/routine", icon: <RiTimerLine />, key: "sidebar.routine" },

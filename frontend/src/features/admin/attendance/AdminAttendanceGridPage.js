@@ -4,6 +4,7 @@ import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { attendanceService } from "@/services/attendance.service";
 import { classesService } from "@/services/classes.service";
+import { localDateString } from "@/lib/dates";
 import { queryKeys } from "@/lib/queryKeys";
 import { useTranslations } from "@/store/languageStore";
 import { useBranchStore } from "@/store/branchStore";
@@ -93,12 +94,6 @@ function getDayAbbr(dateStr) {
   return ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"][day];
 }
 
-function getLocalDateStr(date = new Date()) {
-  const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, "0");
-  const d = String(date.getDate()).padStart(2, "0");
-  return `${y}-${m}-${d}`;
-}
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
@@ -164,7 +159,7 @@ export default function AdminAttendanceGridPage() {
   const t = useTranslations("admin.attendance");
   const branchId = useBranchStore((s) => s.currentBranchId);
 
-  const todayStr = getLocalDateStr();
+  const todayStr = localDateString();
   const todayDate = new Date();
 
   const [filter, setFilter] = useState({ className: "", section: "" });

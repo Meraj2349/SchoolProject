@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { attendanceService } from "@/services/attendance.service";
 import { studentsService } from "@/services/students.service";
 import { classesService } from "@/services/classes.service";
+import { localDateString } from "@/lib/dates";
 import { queryKeys } from "@/lib/queryKeys";
 import { useTranslations } from "@/store/languageStore";
 import { useBranchStore } from "@/store/branchStore";
@@ -17,7 +18,7 @@ export default function AdminPage() {
   const [filter, setFilter] = useState({
     className: "",
     section: "",
-    date: new Date().toISOString().split("T")[0],
+    date: localDateString(),
   });
   const [students, setStudents] = useState([]);
   const [attendance, setAttendance] = useState({});
