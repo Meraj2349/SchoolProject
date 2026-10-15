@@ -17,6 +17,7 @@ import {
   FiPieChart,
   FiRss,
   FiSettings,
+  FiShield,
   FiSliders,
   FiStar,
   FiTable,
@@ -102,6 +103,7 @@ export const NAV_GROUPS = [
     icon: FiSettings,
     items: [
       { path: "/admin/branches", key: "sidebar.branches", icon: FiGitBranch, superAdminOnly: true },
+      { path: "/admin/admins", key: "sidebar.admins", icon: FiShield, superAdminOnly: true },
       { path: "/admin/updateEmailPassword", key: "sidebar.settings", icon: FiSettings },
     ],
   },

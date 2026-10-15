@@ -13,7 +13,7 @@ describe("admin navigation", () => {
 
   it("shows super-admin-only pages to super admins", () => {
     expect(paths(visibleNavigation("super_admin"))).toEqual(
-      expect.arrayContaining(["/admin/branches", "/admin/chairman"]),
+      expect.arrayContaining(["/admin/branches", "/admin/admins", "/admin/chairman"]),
     );
   });
 
@@ -21,6 +21,7 @@ describe("admin navigation", () => {
     const visible = paths(visibleNavigation("branch_admin"));
 
     expect(visible).not.toContain("/admin/branches");
+    expect(visible).not.toContain("/admin/admins");
     expect(visible).not.toContain("/admin/chairman");
     expect(visible).toContain("/admin/studentList");
     expect(visible).toContain("/admin/dashboard");

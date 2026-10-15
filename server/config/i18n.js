@@ -23,6 +23,58 @@ const i18n = {
     en: "Admin not found.",
     bn: "অ্যাডমিন পাওয়া যায়নি।",
   },
+  admin_updated: {
+    en: "Admin updated.",
+    bn: "অ্যাডমিন হালনাগাদ হয়েছে।",
+  },
+  admin_deleted: {
+    en: "Admin removed.",
+    bn: "অ্যাডমিন সরানো হয়েছে।",
+  },
+  admin_fetch_failed: {
+    en: "Could not load the admins.",
+    bn: "অ্যাডমিনদের তালিকা আনা যায়নি।",
+  },
+  admin_username_required: {
+    en: "Please enter a name.",
+    bn: "অনুগ্রহ করে নাম লিখুন।",
+  },
+  admin_username_too_long: {
+    en: "The name can be at most 50 characters.",
+    bn: "নাম সর্বোচ্চ ৫০ অক্ষরের হতে পারে।",
+  },
+  admin_email_invalid: {
+    en: "Please enter a valid email address.",
+    bn: "অনুগ্রহ করে সঠিক ইমেইল ঠিকানা লিখুন।",
+  },
+  admin_password_too_short: {
+    en: "The password must be at least 8 characters.",
+    bn: "পাসওয়ার্ড কমপক্ষে ৮ অক্ষরের হতে হবে।",
+  },
+  admin_role_invalid: {
+    en: "Unknown admin role.",
+    bn: "অজানা অ্যাডমিন ভূমিকা।",
+  },
+  admin_branch_required: {
+    en: "Please choose the branch this admin runs.",
+    bn: "এই অ্যাডমিন কোন শাখা পরিচালনা করবেন তা বেছে নিন।",
+  },
+  admin_email_taken: {
+    en: "Another admin already logs in with this email for that branch.",
+    bn: "এই শাখার জন্য এই ইমেইল দিয়ে অন্য একজন অ্যাডমিন আছেন।",
+  },
+  admin_cannot_change_own_role: {
+    en: "You cannot change your own role. Ask another super admin.",
+    bn: "আপনি নিজের ভূমিকা পরিবর্তন করতে পারবেন না। অন্য একজন সুপার অ্যাডমিনকে বলুন।",
+  },
+  admin_cannot_delete_self: {
+    en: "You cannot remove your own account.",
+    bn: "আপনি নিজের অ্যাকাউন্ট সরাতে পারবেন না।",
+  },
+  admin_last_super_admin: {
+    en: "There must always be at least one super admin.",
+    bn: "অন্তত একজন সুপার অ্যাডমিন থাকতেই হবে।",
+  },
   invalid_credentials: {
     en: "Invalid email or password.",
     bn: "ইমেইল বা পাসওয়ার্ড সঠিক নয়।",

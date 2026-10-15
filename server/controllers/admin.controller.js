@@ -1,47 +1,11 @@
 import bcrypt from "bcryptjs";
 import { t } from "../config/i18n.js";
 import {
-  createAdmin,
   authenticateAdmin,
   generateAuthToken,
   updateAdmin,
-  deleteAdmin,
   getAdminById,
 } from "../models/admin.model.js";
-
-// Create a new admin
-const createAdminController = async (req, res) => {
-  const lang = req.language;
-  const { Username, Email, Password, role, branch_id } = req.body;
-  if (!Username || !Email || !Password) {
-    return res
-      .status(400)
-      .json({ error: t("username_email_password_required", lang) });
-  }
-
-  // Determine effective role — defaults to branch_admin
-  const effectiveRole = role === "super_admin" ? "super_admin" : "branch_admin";
-  // branch_admin must have a branch_id; super_admin must NOT have one
-  if (effectiveRole === "branch_admin" && !branch_id) {
-    return res
-      .status(400)
-      .json({ error: "Please select a branch before registering" });
-  }
-
-  try {
-    const result = await createAdmin({
-      Username,
-      Email,
-      Password,
-      role: effectiveRole,
-      branch_id: effectiveRole === "super_admin" ? null : branch_id,
-    });
-    res.status(201).json(result);
-  } catch (error) {
-    console.error("Error creating admin:", error);
-    res.status(500).json({ error: error.message });
-  }
-};
 
 // Login admin
 const loginAdminController = async (req, res) => {
@@ -82,38 +46,6 @@ const loginAdminController = async (req, res) => {
     });
   } catch (error) {
     res.status(401).json({ error: t("invalid_credentials", lang) });
-  }
-};
-
-// Update admin (super_admin only — enforced in the route)
-const updateAdminController = async (req, res) => {
-  const lang = req.language;
-  const { Email, Password } = req.body;
-  if (!Email && !Password) {
-    return res.status(400).json({ error: t("all_fields_required", lang) });
-  }
-  try {
-    const result = await updateAdmin(req.params.id, {
-      Email,
-      Password: Password ? await bcrypt.hash(Password, 10) : undefined,
-    });
-    res.json(result);
-  } catch (error) {
-    if (error.message.includes("No admin found")) {
-      return res.status(404).json({ error: t("admin_not_found", lang) });
-    }
-    res.status(500).json({ error: t("internal_server_error", lang) });
-  }
-};
-
-// Delete admin
-const deleteAdminController = async (req, res) => {
-  const lang = req.language;
-  try {
-    const result = await deleteAdmin(req.params.id);
-    res.json(result);
-  } catch (error) {
-    res.status(500).json({ error: t("internal_server_error", lang) });
   }
 };
 
@@ -178,10 +110,7 @@ const updateEmailPassword = async (req, res) => {
 };
 
 export {
-  createAdminController,
   loginAdminController,
-  updateAdminController,
-  deleteAdminController,
   updateEmailPassword,
   handleLogout,
 };

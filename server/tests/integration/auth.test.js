@@ -100,10 +100,11 @@ describe("authentication & authorization", () => {
 
     it("refuses a branch admin creating other admins", async () => {
       await seedAdmin();
+      const branchAdmin = await seedAdmin({ email: "b@school.test", role: "branch_admin", branchId: BRANCH_A });
 
       const res = await request(app)
         .post("/api/admin/createAdmin")
-        .set(bearer(branchAdminToken(BRANCH_A)))
+        .set(bearer(branchAdminToken(BRANCH_A, branchAdmin)))
         .send(superAdminSignup);
 
       expect(res.status).toBe(403);
@@ -125,10 +126,11 @@ describe("authentication & authorization", () => {
   describe("managing admins", () => {
     it("refuses a branch admin changing another admin's credentials", async () => {
       const victim = await seedAdmin();
+      const attacker = await seedAdmin({ email: "b@school.test", role: "branch_admin", branchId: BRANCH_A });
 
       const res = await request(app)
         .put(`/api/admin/update/${victim}`)
-        .set(bearer(branchAdminToken(BRANCH_A, 99)))
+        .set(bearer(branchAdminToken(BRANCH_A, attacker)))
         .send({ Email: "attacker@evil.test", Password: "owned" });
 
       expect(res.status).toBe(403);
@@ -136,21 +138,23 @@ describe("authentication & authorization", () => {
 
     it("refuses a branch admin deleting another admin", async () => {
       const victim = await seedAdmin();
+      const attacker = await seedAdmin({ email: "b@school.test", role: "branch_admin", branchId: BRANCH_A });
 
       const res = await request(app)
         .delete(`/api/admin/delete/${victim}`)
-        .set(bearer(branchAdminToken(BRANCH_A, 99)));
+        .set(bearer(branchAdminToken(BRANCH_A, attacker)));
 
       expect(res.status).toBe(403);
-      expect(await count("Admin")).toBe(1);
+      expect(await count("Admin")).toBe(2);
     });
 
     it("stores a password changed by a super admin hashed, so the admin can still log in", async () => {
+      const bossId = await seedAdmin();
       const id = await seedAdmin({ email: "b@school.test", role: "branch_admin", branchId: BRANCH_A });
 
       await request(app)
         .put(`/api/admin/update/${id}`)
-        .set(bearer(superAdminToken()))
+        .set(bearer(superAdminToken(bossId)))
         .send({ Password: "newpass123" })
         .expect(200);
 
@@ -162,11 +166,12 @@ describe("authentication & authorization", () => {
     });
 
     it("keeps the email when only the password is changed", async () => {
+      const bossId = await seedAdmin();
       const id = await seedAdmin({ email: "b@school.test", role: "branch_admin", branchId: BRANCH_A });
 
       await request(app)
         .put(`/api/admin/update/${id}`)
-        .set(bearer(superAdminToken()))
+        .set(bearer(superAdminToken(bossId)))
         .send({ Password: "newpass123" });
 
       const [[row]] = await db.query("SELECT Email FROM Admin WHERE AdminID = ?", [id]);
