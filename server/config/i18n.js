@@ -2,6 +2,103 @@
 // Usage: i18n[key][req.language]
 
 const i18n = {
+  // ── Quiz ──────────────────────────────────────────────────────────────────
+  quiz_failed: {
+    en: "Could not load the quiz. Please try again.",
+    bn: "কুইজ লোড করা যায়নি। আবার চেষ্টা করুন।",
+  },
+  quiz_save_failed: {
+    en: "Could not save. Please try again.",
+    bn: "সংরক্ষণ করা যায়নি। আবার চেষ্টা করুন।",
+  },
+  quiz_identity_required: {
+    en: "Please fill in branch, name, class, section and roll number.",
+    bn: "শাখা, নাম, শ্রেণি, শাখা/সেকশন ও রোল নম্বর পূরণ করুন।",
+  },
+  quiz_student_not_found: {
+    en: "No student matches these details. Please check them.",
+    bn: "এই তথ্যের সাথে কোনো শিক্ষার্থী মেলেনি। তথ্যগুলো যাচাই করুন।",
+  },
+  quiz_no_questions_for_class: {
+    en: "There are no quiz questions for your class yet.",
+    bn: "আপনার শ্রেণির জন্য এখনো কোনো কুইজ প্রশ্ন নেই।",
+  },
+  quiz_no_questions_for_subject: {
+    en: "There are no questions for this subject yet. Choose another subject.",
+    bn: "এই বিষয়ে এখনো কোনো প্রশ্ন নেই। অন্য বিষয় বেছে নিন।",
+  },
+  quiz_answers_required: {
+    en: "Please answer at least one question.",
+    bn: "অন্তত একটি প্রশ্নের উত্তর দিন।",
+  },
+  quiz_too_many_answers: {
+    en: "A quiz cannot have that many answers.",
+    bn: "একটি কুইজে এত উত্তর থাকতে পারে না।",
+  },
+  quiz_no_valid_answers: {
+    en: "None of these answers belong to your quiz.",
+    bn: "এই উত্তরগুলোর কোনোটিই আপনার কুইজের নয়।",
+  },
+  quiz_class_invalid: {
+    en: "Please choose a valid class.",
+    bn: "সঠিক শ্রেণি বেছে নিন।",
+  },
+  quiz_subject_required: {
+    en: "Please enter a subject.",
+    bn: "বিষয়ের নাম লিখুন।",
+  },
+  quiz_subject_too_long: {
+    en: "The subject can be at most 100 characters.",
+    bn: "বিষয়ের নাম সর্বোচ্চ ১০০ অক্ষরের হতে পারে।",
+  },
+  quiz_prompt_required: {
+    en: "Please enter the question.",
+    bn: "প্রশ্নটি লিখুন।",
+  },
+  quiz_options_required: {
+    en: "Please fill in all four options (A–D).",
+    bn: "চারটি অপশনই (A–D) পূরণ করুন।",
+  },
+  quiz_answer_invalid: {
+    en: "The correct answer must be A, B, C or D.",
+    bn: "সঠিক উত্তর A, B, C অথবা D হতে হবে।",
+  },
+  quiz_bangla_incomplete: {
+    en: "A Bangla question needs all four Bangla options.",
+    bn: "বাংলা প্রশ্নের জন্য চারটি বাংলা অপশনই লাগবে।",
+  },
+  quiz_spreadsheet_error: {
+    en: "The question contains a spreadsheet error such as #ERROR!.",
+    bn: "প্রশ্নে #ERROR! এর মতো স্প্রেডশিট ত্রুটি আছে।",
+  },
+  quiz_duplicate: {
+    en: "This question is repeated.",
+    bn: "প্রশ্নটি একাধিকবার আছে।",
+  },
+  quiz_question_not_found: {
+    en: "Question not found.",
+    bn: "প্রশ্নটি পাওয়া যায়নি।",
+  },
+  quiz_active_invalid: {
+    en: "Say whether the question should be shown or hidden.",
+    bn: "প্রশ্নটি দেখানো হবে নাকি লুকানো হবে তা জানান।",
+  },
+  quiz_question_created: {
+    en: "Question added.",
+    bn: "প্রশ্ন যোগ হয়েছে।",
+  },
+  quiz_question_updated: {
+    en: "Question updated.",
+    bn: "প্রশ্ন হালনাগাদ হয়েছে।",
+  },
+  quiz_question_hidden: {
+    en: "Question hidden from students.",
+    bn: "প্রশ্নটি শিক্ষার্থীদের কাছ থেকে লুকানো হয়েছে।",
+  },
+  quiz_question_shown: {
+    en: "Question shown to students again.",
+    bn: "প্রশ্নটি আবার শিক্ষার্থীদের দেখানো হচ্ছে।",
+  },
   // ── Auth / Admin ──────────────────────────────────────────────────────────
   admin_created: {
     en: "Admin created successfully.",

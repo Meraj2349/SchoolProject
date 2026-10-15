@@ -1,34 +1,32 @@
 import express from "express";
 import authMiddleware from "../middlewares/auth.middleware.js";
 import quizStudentMiddleware from "../middlewares/quizStudent.middleware.js";
-import {
-  getMetaController,
-  verifyStudentController,
-  startController,
-  finishController,
-  mySessionsController,
-  myProgressController,
-  adminSessionsController,
-  adminLeaderboardController,
-} from "../controllers/quiz.controller.js";
+import { quizController as quiz } from "../src/modules/quiz/index.js";
 
 const router = express.Router();
 
-// Public: subject + grade list (for filter dropdowns)
-router.post("/meta", getMetaController);
-router.get("/meta", getMetaController);
+// Public: a student proves who they are and gets a 30-minute quiz token.
+router.post("/verify", quiz.verify);
 
-// Public: verify student identity, returns 30m quiz JWT
-router.post("/verify", verifyStudentController);
+// Quiz token (userType "quiz"): the student's own class, quizzes and history.
+router.get("/meta", quizStudentMiddleware, quiz.meta);
+router.post("/start", quizStudentMiddleware, quiz.start);
+router.post("/finish", quizStudentMiddleware, quiz.finish);
+router.get("/my-sessions", quizStudentMiddleware, quiz.mySessions);
+router.get("/my-progress", quizStudentMiddleware, quiz.myProgress);
 
-// Quiz-token-authenticated (30m JWT, userType: "quiz")
-router.post("/start", quizStudentMiddleware, startController);
-router.post("/finish", quizStudentMiddleware, finishController);
-router.get("/my-sessions", quizStudentMiddleware, mySessionsController);
-router.get("/my-progress", quizStudentMiddleware, myProgressController);
-
-// Admin-authenticated (branch-scoped inside the controller)
-router.get("/admin/sessions", authMiddleware, adminSessionsController);
-router.get("/admin/leaderboard", authMiddleware, adminLeaderboardController);
+// Admins: the question bank and results (branch-scoped). The bank is shared by
+// every branch, and any admin may add, edit or hide questions in it.
+const admin = express.Router();
+admin.use(authMiddleware);
+admin.get("/questions", quiz.listQuestions);
+admin.get("/questions/subjects", quiz.subjects);
+admin.get("/questions/:id", quiz.getQuestion);
+admin.post("/questions", quiz.createQuestion);
+admin.put("/questions/:id", quiz.updateQuestion);
+admin.patch("/questions/:id/active", quiz.setActive);
+admin.get("/sessions", quiz.sessions);
+admin.get("/leaderboard", quiz.leaderboard);
+router.use("/admin", admin);
 
 export default router;

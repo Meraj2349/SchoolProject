@@ -1,2 +1,6 @@
-import AdminQuakerPage from "@/features/admin/quicker/AdminPage";
-export default function Page() { return <AdminQuakerPage />; }
+import { redirect } from "next/navigation";
+
+// The quiz admin moved to /admin/quiz/*; keep old links working.
+export default function Page() {
+  redirect("/admin/quiz/results");
+}

@@ -421,16 +421,30 @@ CREATE TABLE
     IF NOT EXISTS QuizQuestions (
         QuestionID INT PRIMARY KEY AUTO_INCREMENT,
         SourceQuestionID INT DEFAULT NULL,
+        -- Where an imported question came from, e.g. "benqa:10th-Physics:17";
+        -- unique so re-running an import adds nothing twice. NULL if typed in.
+        SourceKey VARCHAR(120) DEFAULT NULL,
+        -- The class the question is for: "1".."12", "play", "nursery" or "kg".
+        ClassKey VARCHAR(20) DEFAULT NULL,
         Prompt TEXT NOT NULL,
         OptionsJSON JSON NOT NULL,
+        PromptBn TEXT DEFAULT NULL,
+        OptionsBnJSON JSON DEFAULT NULL,
         CorrectAnswer CHAR(1) NOT NULL,
         Subject VARCHAR(100) DEFAULT NULL,
         Grade VARCHAR(50) DEFAULT NULL,
         Difficulty VARCHAR(50) DEFAULT NULL,
         SourceFile VARCHAR(255) DEFAULT NULL,
         Language VARCHAR(20) DEFAULT 'en',
+        -- Hidden questions are never served. Questions are hidden, not deleted,
+        -- so past quiz attempts keep their questions.
+        Active BOOLEAN NOT NULL DEFAULT TRUE,
+        CreatedBy INT DEFAULT NULL,
+        UpdatedBy INT DEFAULT NULL,
         CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        UpdatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+        UpdatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        CONSTRAINT uq_quiz_question_source UNIQUE (SourceKey),
+        INDEX idx_quiz_question_class_subject (ClassKey, Subject)
     );
 
 CREATE TABLE

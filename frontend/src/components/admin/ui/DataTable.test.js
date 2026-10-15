@@ -1,5 +1,5 @@
 import { fireEvent, render, screen, within } from "@testing-library/react";
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { useLanguageStore } from "@/store/languageStore";
 import DataTable from "./DataTable";
 
@@ -93,5 +93,38 @@ describe("DataTable", () => {
     render(<DataTable columns={columns} rows={[]} />);
 
     expect(screen.getByText("কোনো তথ্য নেই")).toBeInTheDocument();
+  });
+
+  describe("with server-side paging", () => {
+    const page2 = students.slice(10, 12);
+
+    it("shows the rows it is given and the overall position", () => {
+      render(<DataTable columns={columns} rows={page2} pagination={{ page: 2, pageSize: 10, total: 12, onPageChange: () => {} }} />);
+
+      expect(firstCells()).toEqual(["Student K", "Student L"]);
+      expect(screen.getByText("Showing 11–12 of 12")).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "Next" })).toBeDisabled();
+    });
+
+    it("asks for another page instead of slicing", () => {
+      const onPageChange = vi.fn();
+      render(<DataTable columns={columns} rows={students.slice(0, 10)} pagination={{ page: 1, pageSize: 10, total: 12, onPageChange }} />);
+
+      expect(bodyRows()).toHaveLength(10);
+      expect(screen.getByRole("button", { name: "Previous" })).toBeDisabled();
+      fireEvent.click(screen.getByRole("button", { name: "Next" }));
+
+      expect(onPageChange).toHaveBeenCalledWith(2);
+    });
+
+    it("lets you go back from a page that has become empty", () => {
+      const onPageChange = vi.fn();
+      render(<DataTable columns={columns} rows={[]} emptyText="No rows" pagination={{ page: 3, pageSize: 10, total: 12, onPageChange }} />);
+
+      expect(screen.getByText("No rows")).toBeInTheDocument();
+      fireEvent.click(screen.getByRole("button", { name: "Previous" }));
+
+      expect(onPageChange).toHaveBeenCalledWith(2);
+    });
   });
 });

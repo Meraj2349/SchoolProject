@@ -19,9 +19,13 @@ function compare(a, b) {
 const defaultSearchText = (columns) => (row) => columns.map((column) => row[column.key] ?? "").join(" ");
 
 /**
- * Client-side table with optional search, sortable columns and pagination.
+ * Table with optional search, sortable columns and pagination.
  *
  * columns: [{ key, header, render?(row), sortable?, sortValue?(row), align?: "left"|"right"|"center", className? }]
+ *
+ * Client-side by default. Pass `pagination={{ page, pageSize, total, onPageChange }}`
+ * when the server pages the data: `rows` is then the current page as given
+ * (search and sort happen on the server too).
  */
 export default function DataTable({
   columns,
@@ -33,6 +37,7 @@ export default function DataTable({
   loading = false,
   emptyText,
   toolbar,
+  pagination,
 }) {
   const t = useTranslations("admin.shell");
   const [query, setQuery] = useState("");
@@ -49,10 +54,14 @@ export default function DataTable({
     return [...matching].sort((a, b) => sign * compare(cellValue(column, a), cellValue(column, b)));
   }, [rows, columns, query, sort, searchText]);
 
-  const pageCount = Math.max(1, Math.ceil(visibleRows.length / pageSize));
-  const currentPage = Math.min(page, pageCount);
-  const start = (currentPage - 1) * pageSize;
-  const pageRows = visibleRows.slice(start, start + pageSize);
+  const server = Boolean(pagination);
+  const size = server ? pagination.pageSize : pageSize;
+  const totalRows = server ? pagination.total : visibleRows.length;
+  const pageCount = Math.max(1, Math.ceil(totalRows / size));
+  const currentPage = server ? pagination.page : Math.min(page, pageCount);
+  const start = (currentPage - 1) * size;
+  const pageRows = server ? rows : visibleRows.slice(start, start + size);
+  const goTo = server ? pagination.onPageChange : setPage;
 
   const toggleSort = (key) => {
     setSort((current) =>
@@ -93,7 +102,7 @@ export default function DataTable({
         <div role="status" className="py-12 text-center text-sm text-slate-500">
           {t("loading")}
         </div>
-      ) : visibleRows.length === 0 ? (
+      ) : pageRows.length === 0 ? (
         <div className="py-12 text-center text-sm text-slate-500">{emptyText ?? t("noData")}</div>
       ) : (
         <>
@@ -136,31 +145,35 @@ export default function DataTable({
               </tbody>
             </table>
           </div>
-
-          <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 border-t border-slate-200 text-sm text-slate-600">
-            <span>
-              {fillTemplate(t("showing"), { from: start + 1, to: start + pageRows.length, total: visibleRows.length })}
-            </span>
-            <div className="flex gap-1">
-              <button
-                type="button"
-                className="admin-btn admin-btn-default admin-btn-sm"
-                onClick={() => setPage(currentPage - 1)}
-                disabled={currentPage === 1}
-              >
-                {t("previous")}
-              </button>
-              <button
-                type="button"
-                className="admin-btn admin-btn-default admin-btn-sm"
-                onClick={() => setPage(currentPage + 1)}
-                disabled={currentPage === pageCount}
-              >
-                {t("next")}
-              </button>
-            </div>
-          </div>
         </>
+      )}
+
+      {/* On an emptied later page (server paging) the footer stays, so you can go back. */}
+      {!loading && (pageRows.length > 0 || (server && currentPage > 1)) && (
+        <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 border-t border-slate-200 text-sm text-slate-600">
+          <span>
+            {pageRows.length > 0 &&
+              fillTemplate(t("showing"), { from: start + 1, to: start + pageRows.length, total: totalRows })}
+          </span>
+          <div className="flex gap-1">
+            <button
+              type="button"
+              className="admin-btn admin-btn-default admin-btn-sm"
+              onClick={() => goTo(currentPage - 1)}
+              disabled={currentPage === 1}
+            >
+              {t("previous")}
+            </button>
+            <button
+              type="button"
+              className="admin-btn admin-btn-default admin-btn-sm"
+              onClick={() => goTo(currentPage + 1)}
+              disabled={currentPage === pageCount}
+            >
+              {t("next")}
+            </button>
+          </div>
+        </div>
       )}
     </div>
   );

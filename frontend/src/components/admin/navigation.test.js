@@ -55,6 +55,13 @@ describe("admin navigation", () => {
       });
     });
 
+    it("puts the quiz pages in the Quiz group, for every admin", () => {
+      for (const path of ["/admin/quiz/questions", "/admin/quiz/results", "/admin/quiz/leaderboard"]) {
+        expect(findNavItem(path)).toMatchObject({ group: { key: "sidebar.groups.quiz" }, item: { path } });
+        expect(paths(visibleNavigation("branch_admin"))).toContain(path);
+      }
+    });
+
     it("returns null for unknown pages", () => {
       expect(findNavItem("/admin/nope")).toBeNull();
       expect(findNavItem("/admin/studentListing")).toBeNull();
