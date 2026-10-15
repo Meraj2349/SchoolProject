@@ -2,6 +2,8 @@ import bodyParser from "body-parser";
 import cors from "cors";
 import dotenv from "dotenv";
 import express from "express";
+import path from "path";
+import { fileURLToPath } from "url";
 import db from "./config/db.config.js";
 import { languageMiddleware } from "./middlewares/language.middleware.js";
 import adminRouter from "./routes/admin.routes.js";
@@ -45,15 +47,6 @@ app.use(languageMiddleware);
 // Serve static files from public directory (for file uploads)
 app.use(express.static("public"));
 
-// Database connection check
-db.connect((err) => {
-  if (err) {
-    console.error("Database connection failed: " + err.message);
-    return;
-  }
-  console.log("Connected to the database");
-});
-
 // Use the routes under /api/
 app.use("/api/admin", adminRouter);
 app.use("/api/students", studentRouter);
@@ -80,8 +73,20 @@ app.get("/", (req, res) => {
   res.send("Welcome to the School Project API");
 });
 
-// Starting the server
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
-});
+export default app;
+
+// Only listen when run directly (`node app.js`); tests and serverless
+// platforms import the app instead.
+const isMainModule =
+  process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+
+if (isMainModule) {
+  db.query("SELECT 1")
+    .then(() => console.log("Connected to the database"))
+    .catch((err) => console.error("Database connection failed: " + err.message));
+
+  const PORT = process.env.PORT || 3000;
+  app.listen(PORT, () => {
+    console.log(`Server running on http://localhost:${PORT}`);
+  });
+}
