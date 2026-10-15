@@ -86,11 +86,12 @@ describe("quiz controller — student", () => {
 
     const res = await request(buildApp({ play: { finishQuiz } }))
       .post("/finish")
-      .send({ answers: [{ questionId: 1, userAnswer: "A" }], timeTakenSeconds: 30 });
+      .send({ quizId: 4, answers: [{ questionId: 1, userAnswer: "A" }], timeTakenSeconds: 30 });
 
     expect(res.status).toBe(201);
     expect(res.body).toEqual({ success: true, data: { sessionId: 1 } });
-    expect(finishQuiz).toHaveBeenCalledWith({ studentId: 7, answers: [{ questionId: 1, userAnswer: "A" }], timeTakenSeconds: 30 });
+    // The browser's time is not passed on: the server measures it.
+    expect(finishQuiz).toHaveBeenCalledWith({ studentId: 7, quizId: 4, answers: [{ questionId: 1, userAnswer: "A" }] });
   });
 
   it("GET /my-sessions and /my-progress are the student's own", async () => {

@@ -484,6 +484,22 @@ CREATE TABLE
         FOREIGN KEY (QuestionID) REFERENCES QuizQuestions (QuestionID) ON DELETE CASCADE
     );
 
+CREATE TABLE
+    IF NOT EXISTS QuizStarts (
+        -- One row per quiz a student starts: the exact questions served.
+        -- Finishing scores only these, once (FinishedAt), timed by the server.
+        QuizStartID BIGINT PRIMARY KEY AUTO_INCREMENT,
+        StudentID INT NOT NULL,
+        QuestionIDsJSON JSON NOT NULL,
+        Subject VARCHAR(100) DEFAULT NULL,
+        StartedAt DATETIME NOT NULL,
+        FinishedAt DATETIME DEFAULT NULL,
+        SessionID BIGINT DEFAULT NULL,
+        INDEX idx_quiz_starts_student (StudentID),
+        CONSTRAINT fk_quiz_starts_student FOREIGN KEY (StudentID) REFERENCES Students (StudentID) ON DELETE CASCADE,
+        CONSTRAINT fk_quiz_starts_session FOREIGN KEY (SessionID) REFERENCES QuizSessions (SessionID) ON DELETE SET NULL
+    );
+
 -- Chairman Profile Table
 -- Single-row table (id=1) for the school chairman's public profile.
 CREATE TABLE

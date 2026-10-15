@@ -55,7 +55,7 @@ describe("QuizPage", () => {
     router.replace.mockReset();
     api.token = "quiz-token";
     api.getMeta.mockResolvedValue(META);
-    api.start.mockResolvedValue({ questions: QUESTIONS, subject: null, classKey: "8" });
+    api.start.mockResolvedValue({ quizId: 42, questions: QUESTIONS, subject: null, classKey: "8" });
     api.finish.mockResolvedValue({
       totalQuestions: 2,
       correctAnswers: 1,
@@ -145,11 +145,11 @@ describe("QuizPage", () => {
 
     await waitFor(() => expect(api.finish).toHaveBeenCalled());
     const payload = api.finish.mock.calls[0][0];
+    expect(payload.quizId).toBe(42);
     expect(payload.answers).toEqual([
       expect.objectContaining({ questionId: 11, userAnswer: "B" }),
       expect.objectContaining({ questionId: 12, userAnswer: "A" }),
     ]);
-    expect(payload.timeTakenSeconds).toEqual(expect.any(Number));
 
     expect(await screen.findByText("1 out of 2 correct")).toBeInTheDocument();
     expect(screen.getByText("50.0%")).toBeInTheDocument();

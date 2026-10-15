@@ -64,10 +64,10 @@ export const quizService = {
   /** The student's class and its subjects: { className, classKey, subjects: [{ subject, count }], total }. */
   getMeta: async () => dataOf(await quizClient.get("/quiz/meta")),
 
-  /** { subject?, count } → { questions, subject, classKey, startedAt } */
+  /** { subject?, count } → { quizId, questions, subject, classKey, startedAt } */
   start: async (payload) => dataOf(await quizClient.post("/quiz/start", payload)),
 
-  /** { answers, timeTakenSeconds } → { totalQuestions, correctAnswers, scorePercentage, grade, details } */
+  /** { quizId, answers } → { totalQuestions, correctAnswers, scorePercentage, grade, details } */
   finish: async (payload) => dataOf(await quizClient.post("/quiz/finish", payload)),
 
   mySessions: async () => dataOf(await quizClient.get("/quiz/my-sessions")),

@@ -31,6 +31,18 @@ const i18n = {
     en: "Please answer at least one question.",
     bn: "অন্তত একটি প্রশ্নের উত্তর দিন।",
   },
+  quiz_not_found: {
+    en: "This quiz was not found. Please start a new quiz.",
+    bn: "এই কুইজটি পাওয়া যায়নি। নতুন কুইজ শুরু করুন।",
+  },
+  quiz_already_finished: {
+    en: "This quiz has already been submitted.",
+    bn: "এই কুইজটি আগেই জমা দেওয়া হয়েছে।",
+  },
+  quiz_expired: {
+    en: "This quiz was started too long ago. Please start a new quiz.",
+    bn: "এই কুইজটি অনেক আগে শুরু হয়েছিল। নতুন কুইজ শুরু করুন।",
+  },
   quiz_too_many_answers: {
     en: "A quiz cannot have that many answers.",
     bn: "একটি কুইজে এত উত্তর থাকতে পারে না।",

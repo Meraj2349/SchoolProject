@@ -27,8 +27,8 @@ export function makeQuizController({ play, bank, results }) {
     }, "quiz_failed"),
 
     finish: handle(async (req, res) => {
-      const { answers, timeTakenSeconds } = req.body ?? {};
-      ok(res, await play.finishQuiz({ studentId: req.quizStudentId, answers, timeTakenSeconds }), 201);
+      const { quizId, answers } = req.body ?? {};
+      ok(res, await play.finishQuiz({ studentId: req.quizStudentId, quizId, answers }), 201);
     }, "quiz_save_failed"),
 
     mySessions: handle(async (req, res) => ok(res, await play.mySessions(req.quizStudentId)), "quiz_failed"),
