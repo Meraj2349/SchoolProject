@@ -7,6 +7,7 @@ import { renderWithQuery } from "@/test-utils";
 import GalleryPage from "./gallery/AdminPage";
 import MessagesPage from "./messages/AdminPage";
 import NewsPage from "./news/AdminNewsPage";
+import AchievementsPage from "./achievements/AchievementsPage";
 import AnnouncementsPage from "./noticeAnnouncements/AdminNoticeAnnouncementsPage";
 import NoticesPage from "./notices/AdminNoticesPage";
 
@@ -47,6 +48,15 @@ const PAGES = [
     rows: [
       { id: 1, title_bn: "ক", title_en: "Own notice", category: "Exam", date: "2030-01-01", is_published: 1, branch_id: 1, image_url: null },
       { id: 2, title_bn: "খ", title_en: "School notice", category: "Exam", date: "2030-01-01", is_published: 1, branch_id: null, image_url: null },
+    ],
+  },
+  {
+    name: "Achievements",
+    Page: AchievementsPage,
+    url: "/achievements/all",
+    rows: [
+      { id: 1, title_en: "Own notice", title_bn: "ক", category: "sports", year: 2025, is_featured: 0, is_published: 1, branch_id: 1 },
+      { id: 2, title_en: "School notice", title_bn: "খ", category: "award", year: 2025, is_featured: 0, is_published: 1, branch_id: null },
     ],
   },
   {

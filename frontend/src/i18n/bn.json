@@ -61,7 +61,8 @@
     "admins": "অ্যাডমিন",
     "quizQuestions": "প্রশ্নব্যাংক",
     "quizResults": "কুইজের ফলাফল",
-    "quizLeaderboard": "লিডারবোর্ড"
+    "quizLeaderboard": "লিডারবোর্ড",
+    "achievements": "অর্জনসমূহ"
   },
   "latestUpdates": {
     "label": "সর্বশেষ আপডেট",
@@ -1087,6 +1088,52 @@
       "noLeaderboard": "এখনো কোনো ফলাফল নেই",
       "allSubjectsShort": "মিশ্র",
       "readOnlyNote": "শুধু সুপার অ্যাডমিনরা প্রশ্ন যোগ বা পরিবর্তন করতে পারেন।"
+    },
+    "achievements": {
+      "title": "অর্জনসমূহ",
+      "subtitle": "ওয়েবসাইটের সম্মাননা বোর্ড: বোর্ড পরীক্ষার ফল, পুরস্কার ও সম্মাননা।",
+      "addAchievement": "অর্জন যোগ করুন",
+      "editAchievement": "অর্জন সম্পাদনা",
+      "allAchievements": "সব অর্জন",
+      "noAchievements": "এখনো কোনো অর্জন নেই",
+      "title_en": "শিরোনাম (ইংরেজি)",
+      "title_bn": "শিরোনাম (বাংলা)",
+      "category": "বিভাগ",
+      "chooseCategory": "বিভাগ বেছে নিন",
+      "year": "সাল",
+      "boardResult": "বোর্ড পরীক্ষার ফল",
+      "examName": "পরীক্ষা",
+      "examNameHelp": "যেমন এসএসসি, জেএসসি বা পিইসি",
+      "examinees": "পরীক্ষার্থী",
+      "passed": "উত্তীর্ণ",
+      "gpa5": "জিপিএ-৫",
+      "passRatePreview": "পাসের হার: {rate}%",
+      "descriptionEn": "বিবরণ (ইংরেজি)",
+      "descriptionBn": "বিবরণ (বাংলা)",
+      "photo": "ছবি",
+      "photoHelp": "JPEG, PNG, GIF বা WEBP, সর্বোচ্চ ৫ এমবি",
+      "photoKeepHelp": "বর্তমান ছবি রাখতে খালি রাখুন",
+      "featured": "বিশেষ",
+      "featuredHelp": "সম্মাননা বোর্ডের শীর্ষে বড় করে দেখানো হবে",
+      "published": "প্রকাশিত",
+      "publishedHelp": "ওয়েবসাইটে দেখান",
+      "hidden": "লুকানো",
+      "result": "ফলাফল",
+      "branch": "শাখা",
+      "actions": "কার্যক্রম",
+      "edit": "সম্পাদনা",
+      "delete": "মুছুন",
+      "deleteConfirm": "এই অর্জনটি মুছবেন?",
+      "deleteConfirmBody": "এটি ওয়েবসাইট থেকে সরিয়ে ফেলা হবে।",
+      "save": "সংরক্ষণ",
+      "cancel": "বাতিল",
+      "added": "অর্জন যোগ করা হয়েছে।",
+      "updated": "অর্জন হালনাগাদ করা হয়েছে।",
+      "deleted": "অর্জন মুছে ফেলা হয়েছে।",
+      "operationFailed": "কিছু একটা ভুল হয়েছে। আবার চেষ্টা করুন।",
+      "required": "আবশ্যক",
+      "invalidYear": "১৯৫০ থেকে আগামী বছরের মধ্যে সাল লিখুন",
+      "resultNumbers": "সংখ্যাগুলো যাচাই করুন: উত্তীর্ণ পরীক্ষার্থীর বেশি হবে না, জিপিএ-৫ উত্তীর্ণের বেশি হবে না"
     }
   },
   "branches": {
@@ -1215,5 +1262,17 @@
     "fillAllFields": "সবগুলো ঘর পূরণ করুন।",
     "verifyFailed": "আপনার তথ্য যাচাই করা যায়নি। আবার চেষ্টা করুন।",
     "sessionExpired": "আপনার কুইজ সেশন শেষ হয়ে গেছে। আবার তথ্য দিন।"
+  },
+  "achievements": {
+    "categories": {
+      "board_result": "বোর্ড পরীক্ষার ফল",
+      "academic": "একাডেমিক",
+      "sports": "খেলাধুলা",
+      "cultural": "সাংস্কৃতিক",
+      "competition": "প্রতিযোগিতা",
+      "award": "পুরস্কার"
+    },
+    "passRate": "{rate}% পাস",
+    "gpa5": "জিপিএ-৫: {count}"
   }
 }

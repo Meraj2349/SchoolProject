@@ -88,6 +88,7 @@ export const NAV_GROUPS = [
     items: [
       { path: "/admin/notices", key: "sidebar.notice", icon: FiBell },
       { path: "/admin/notice-announcements", key: "sidebar.noticeAnnouncements", icon: FiVolume2 },
+      { path: "/admin/achievements", key: "sidebar.achievements", icon: FiAward },
       { path: "/admin/news", key: "sidebar.news", icon: FiRss },
       { path: "/admin/events", key: "sidebar.events", icon: FiCalendar },
       { path: "/admin/gallery", key: "sidebar.imageGallery", icon: FiImage },

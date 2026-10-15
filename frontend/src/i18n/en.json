@@ -61,7 +61,8 @@
     "admins": "Admins",
     "quizQuestions": "Question bank",
     "quizResults": "Quiz results",
-    "quizLeaderboard": "Leaderboard"
+    "quizLeaderboard": "Leaderboard",
+    "achievements": "Achievements"
   },
   "latestUpdates": {
     "label": "Latest Updates",
@@ -1087,6 +1088,52 @@
       "noLeaderboard": "No results yet",
       "allSubjectsShort": "Mixed",
       "readOnlyNote": "Only super admins can add or change questions."
+    },
+    "achievements": {
+      "title": "Achievements",
+      "subtitle": "The honours board on the website: board results, prizes and awards.",
+      "addAchievement": "Add achievement",
+      "editAchievement": "Edit achievement",
+      "allAchievements": "All achievements",
+      "noAchievements": "No achievements yet",
+      "title_en": "Title (English)",
+      "title_bn": "Title (Bangla)",
+      "category": "Category",
+      "chooseCategory": "Choose a category",
+      "year": "Year",
+      "boardResult": "Board exam result",
+      "examName": "Exam",
+      "examNameHelp": "For example SSC, JSC or PEC",
+      "examinees": "Examinees",
+      "passed": "Passed",
+      "gpa5": "GPA-5",
+      "passRatePreview": "Pass rate: {rate}%",
+      "descriptionEn": "Description (English)",
+      "descriptionBn": "Description (Bangla)",
+      "photo": "Photo",
+      "photoHelp": "JPEG, PNG, GIF or WEBP, up to 5 MB",
+      "photoKeepHelp": "Leave empty to keep the current photo",
+      "featured": "Featured",
+      "featuredHelp": "Shown large at the top of the honours board",
+      "published": "Published",
+      "publishedHelp": "Show on the website",
+      "hidden": "Hidden",
+      "result": "Result",
+      "branch": "Branch",
+      "actions": "Actions",
+      "edit": "Edit",
+      "delete": "Delete",
+      "deleteConfirm": "Delete this achievement?",
+      "deleteConfirmBody": "It will be removed from the website.",
+      "save": "Save",
+      "cancel": "Cancel",
+      "added": "Achievement added.",
+      "updated": "Achievement updated.",
+      "deleted": "Achievement deleted.",
+      "operationFailed": "Something went wrong. Please try again.",
+      "required": "Required",
+      "invalidYear": "Enter a year between 1950 and next year",
+      "resultNumbers": "Check the numbers: passed cannot exceed examinees, and GPA-5 cannot exceed passed"
     }
   },
   "branches": {
@@ -1215,5 +1262,17 @@
     "fillAllFields": "Please fill in all fields.",
     "verifyFailed": "Could not check your details. Please try again.",
     "sessionExpired": "Your quiz session has ended. Please enter your details again."
+  },
+  "achievements": {
+    "categories": {
+      "board_result": "Board result",
+      "academic": "Academic",
+      "sports": "Sports",
+      "cultural": "Cultural",
+      "competition": "Competition",
+      "award": "Award"
+    },
+    "passRate": "{rate}% pass",
+    "gpa5": "{count} GPA-5"
   }
 }
