@@ -39,9 +39,16 @@ export default function VoidPaymentDialog({ payment, onClose }) {
       <p className="mt-0">
         {payment.receipt_no} — {t("voidHelp")}
       </p>
-      <Field label={t("voidReason")} required error={error}>
-        {(a11y) => <Input {...a11y} value={reason} onChange={(e) => setReason(e.target.value)} />}
-      </Field>
+      <form
+        onSubmit={(event) => {
+          event.preventDefault();
+          confirm();
+        }}
+      >
+        <Field label={t("voidReason")} required error={error}>
+          {(a11y) => <Input {...a11y} value={reason} onChange={(e) => setReason(e.target.value)} />}
+        </Field>
+      </form>
     </ConfirmDialog>
   );
 }

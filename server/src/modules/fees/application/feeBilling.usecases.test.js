@@ -229,6 +229,20 @@ describe("fee billing use cases", () => {
       await expect(useCases.getInvoice({ branchId: B, id })).rejects.toThrow(code("fee_invoice_not_found"));
     });
 
+    it("says which late fine a payment after the due date would add", async () => {
+      const { id } = await firstInvoiceOf(7);
+
+      expect(await useCases.getInvoice({ branchId: A, id })).toMatchObject({ due_date: "2026-03-10", late_fine_pending: 50 });
+    });
+
+    it("has no pending late fine once the fine was charged", async () => {
+      const { id } = await firstInvoiceOf(7);
+      today = "2026-03-15";
+      await useCases.applyLateFines({ branchId: A, input: march });
+
+      expect(await useCases.getInvoice({ branchId: A, id })).toMatchObject({ balance: 1050, late_fine_pending: 0 });
+    });
+
     it("builds a student's ledger with what they owe overall", async () => {
       await pay((await firstInvoiceOf(7)).id, { amount: 250 });
 

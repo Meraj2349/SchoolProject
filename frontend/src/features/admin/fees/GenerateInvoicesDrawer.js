@@ -3,10 +3,13 @@
 import { useState } from "react";
 import { Button, Drawer, Input, errorMessage, notify } from "@/components/admin/ui";
 import { fillTemplate } from "@/lib/template";
+import { useQuery } from "@tanstack/react-query";
+import { queryKeys } from "@/lib/queryKeys";
+import { classesService } from "@/services/classes.service";
 import { feesService } from "@/services/fees.service";
 import { useLanguageStore, useTranslations } from "@/store/languageStore";
 import { periodLabel } from "./feeRules";
-import { useFeeMutation, useHeads, useStructures } from "./useFees";
+import { useFeeMutation, useHeads } from "./useFees";
 
 function Checkbox({ label, checked, onChange }) {
   return (
@@ -23,7 +26,12 @@ const toggle = (list, value, on) => (on ? [...list, value] : list.filter((v) => 
 export default function GenerateInvoicesDrawer({ period, onClose }) {
   const t = useTranslations("admin.fees");
   const language = useLanguageStore((s) => s.language);
-  const { data: structures = [] } = useStructures(period.year, { enabled: true });
+  // Every class name, not only those with tuition: a class can be billed extra fees alone.
+  const { data: allClassNames = [] } = useQuery({
+    queryKey: queryKeys.classes.names(),
+    queryFn: classesService.getNames,
+    select: (d) => (Array.isArray(d) ? d : (d?.data ?? [])),
+  });
   const { data: heads = [] } = useHeads();
   const [allClasses, setAllClasses] = useState(true);
   const [classNames, setClassNames] = useState([]);
@@ -31,7 +39,6 @@ export default function GenerateInvoicesDrawer({ period, onClose }) {
   const [saveError, setSaveError] = useState(null);
   const generate = useFeeMutation(feesService.generateInvoices);
 
-  const tuitionClasses = [...new Set(structures.map((s) => s.class_name))].sort();
   const activeHeads = heads.filter((h) => Number(h.active) === 1 || h.active === true);
   const headName = (head) => (language === "bn" ? head.name_bn || head.name_en : head.name_en || head.name_bn);
 
@@ -75,7 +82,7 @@ export default function GenerateInvoicesDrawer({ period, onClose }) {
         <Checkbox label={t("allClassesOption")} checked={allClasses} onChange={setAllClasses} />
         {!allClasses && (
           <div className="pl-5">
-            {tuitionClasses.map((name) => (
+            {allClassNames.map((name) => (
               <Checkbox key={name} label={name} checked={classNames.includes(name)} onChange={(on) => setClassNames((list) => toggle(list, name, on))} />
             ))}
           </div>

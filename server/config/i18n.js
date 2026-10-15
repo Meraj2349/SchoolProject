@@ -165,6 +165,10 @@ const i18n = {
     en: "Student deleted successfully.",
     bn: "শিক্ষার্থী সফলভাবে মুছে ফেলা হয়েছে।",
   },
+  student_has_fee_records: {
+    en: "This student has fee records, so they cannot be deleted.",
+    bn: "এই শিক্ষার্থীর বেতনের রেকর্ড আছে, তাই মুছে ফেলা যাবে না।",
+  },
   student_not_found: {
     en: "Student not found.",
     bn: "শিক্ষার্থী পাওয়া যায়নি।",

@@ -3,6 +3,7 @@
 import { useId } from "react";
 import { FiX } from "react-icons/fi";
 import { useTranslations } from "@/store/languageStore";
+import useDialogFocus from "./useDialogFocus";
 import useEscapeKey from "./useEscapeKey";
 
 /** Side panel for forms (add/edit) that slides in from the right. */
@@ -10,12 +11,15 @@ export default function Drawer({ open, title, onClose, footer, width = "max-w-lg
   const t = useTranslations("admin.shell");
   const titleId = useId();
   useEscapeKey(open, onClose);
+  const dialogRef = useDialogFocus(open);
   if (!open) return null;
 
   return (
     <div className="fixed inset-0 z-[1100] flex justify-end">
       <div className="absolute inset-0 bg-black/40" onClick={onClose} aria-hidden="true" />
       <div
+        ref={dialogRef}
+        tabIndex={-1}
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}

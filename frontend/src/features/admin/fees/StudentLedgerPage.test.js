@@ -83,6 +83,18 @@ describe("Student fee ledger", () => {
     await waitFor(() => expect(api.voidPayment).toHaveBeenCalledWith(22, "Entered twice"));
   });
 
+  it("voids with the Enter key in the reason box", async () => {
+    renderWithQuery(<StudentLedgerPage studentId="1" />);
+    await screen.findByText("MC-2026-00002");
+
+    fireEvent.click(within(rowWith("MC-2026-00002")).getByRole("button", { name: "Void" }));
+    const reason = within(screen.getByRole("dialog", { name: "Void this payment?" })).getByLabelText("Reason", { exact: false });
+    fireEvent.change(reason, { target: { value: "Entered twice" } });
+    fireEvent.submit(reason);
+
+    await waitFor(() => expect(api.voidPayment).toHaveBeenCalledWith(22, "Entered twice"));
+  });
+
   it("lists discounts and adds one", async () => {
     renderWithQuery(<StudentLedgerPage studentId="1" />);
     const discounts = await screen.findByRole("region", { name: "Discounts" });

@@ -219,7 +219,14 @@ export function makeFeeBillingUseCases({ feeRepository: repo, today }) {
 
     listInvoices: async ({ branchId, filters }) => repo.listInvoices(branchId, toInvoiceFilters(filters)),
 
-    getInvoice: ({ branchId, id }) => findInvoiceOrFail(branchId, id),
+    // late_fine_pending: the fine a payment dated after due_date would add
+    // first (0 once charged), so a cashier can collect it in the same payment.
+    async getInvoice({ branchId, id }) {
+      const invoice = await findInvoiceOrFail(branchId, id);
+      const hasLateFine = invoice.items.some((item) => item.kind === "late_fine");
+      const { late_fine: lateFine } = await settingsOf(invoice.branch_id);
+      return { ...invoice, late_fine_pending: hasLateFine ? 0 : Number(lateFine) };
+    },
 
     async studentLedger({ branchId, studentId }) {
       const student = await repo.findStudent(branchId, studentId);

@@ -948,7 +948,9 @@
       "print": "Print",
       "back": "Back",
       "voidedReceipt": "VOIDED",
-      "loadFailed": "Could not load fee data"
+      "loadFailed": "Could not load fee data",
+      "lateFineIfLate": "Late fine (paid after the due date)",
+      "amountDue": "Amount due"
     }
   },
   "branches": {

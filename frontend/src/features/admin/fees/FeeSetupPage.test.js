@@ -1,4 +1,4 @@
-import { fireEvent, screen, waitFor, within } from "@testing-library/react";
+import { act, fireEvent, screen, waitFor, within } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { useAuthStore } from "@/store/authStore";
 import { useBranchStore } from "@/store/branchStore";
@@ -91,6 +91,24 @@ describe("Fee setup page", () => {
     fireEvent.click(screen.getByRole("button", { name: "Save" }));
 
     await waitFor(() => expect(api.updateSettings).toHaveBeenCalledWith({ due_day: "10", late_fine: "100", receipt_prefix: "MC" }));
+  });
+
+  it("shows the newly chosen branch's settings after switching branch", async () => {
+    useAuthStore.setState({ role: "super_admin" });
+    api.getSettings.mockImplementation(async () => ({
+      success: true,
+      data: { due_day: useBranchStore.getState().currentBranchId === 2 ? 5 : 10, late_fine: "50.00", receipt_prefix: "MC" },
+    }));
+    renderWithQuery(<FeeSetupPage />);
+    fireEvent.click(screen.getByRole("tab", { name: "Settings" }));
+    await waitFor(() => expect(screen.getByLabelText("Due day of the month", { exact: false })).toHaveValue("10"));
+
+    act(() => useBranchStore.getState().setBranch(2, "North"));
+    await waitFor(() => expect(screen.getByLabelText("Due day of the month", { exact: false })).toHaveValue("5"));
+
+    // Back to branch 1, whose settings are already cached.
+    act(() => useBranchStore.getState().setBranch(1, "Main"));
+    await waitFor(() => expect(screen.getByLabelText("Due day of the month", { exact: false })).toHaveValue("10"));
   });
 
   it("shows the server's message when saving fails", async () => {

@@ -43,6 +43,34 @@ describe("ConfirmDialog", () => {
     expect(onCancel).toHaveBeenCalledTimes(2);
   });
 
+  it("moves focus into the dialog and back to the opener when closed", () => {
+    const opener = document.createElement("button");
+    document.body.appendChild(opener);
+    opener.focus();
+    const { rerender } = render(
+      <ConfirmDialog open title="Delete student?" onConfirm={() => {}} onCancel={() => {}} />,
+    );
+
+    expect(screen.getByRole("dialog").contains(document.activeElement)).toBe(true);
+
+    rerender(<ConfirmDialog open={false} title="Delete student?" onConfirm={() => {}} onCancel={() => {}} />);
+    expect(document.activeElement).toBe(opener);
+    opener.remove();
+  });
+
+  it("keeps Tab inside the dialog", () => {
+    setup({ confirmLabel: "Delete" });
+    const cancel = screen.getByRole("button", { name: "Cancel" });
+    const confirm = screen.getByRole("button", { name: "Delete" });
+
+    confirm.focus();
+    fireEvent.keyDown(confirm, { key: "Tab" });
+    expect(document.activeElement).toBe(cancel);
+
+    fireEvent.keyDown(cancel, { key: "Tab", shiftKey: true });
+    expect(document.activeElement).toBe(confirm);
+  });
+
   it("disables the buttons while working", () => {
     setup({ busy: true, confirmLabel: "Delete" });
 

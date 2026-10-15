@@ -173,12 +173,16 @@ const deleteStudentController = async (req, res) => {
         .status(404)
         .json({ success: false, message: t("student_not_found", lang) });
     }
+    if (result.blocked) {
+      return res.status(409).json({ success: false, message: t(result.blocked, lang) });
+    }
 
     res
       .status(200)
       .json({ success: true, message: t("student_deleted", lang) });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    console.error("Error deleting student:", error);
+    res.status(500).json({ success: false, message: t("internal_server_error", lang) });
   }
 };
 

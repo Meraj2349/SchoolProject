@@ -47,6 +47,7 @@ describe("AdminDashboardPage", () => {
     const payments = await screen.findByRole("region", { name: "Recent payments" });
     expect(within(payments).getByText("Rahim Uddin")).toBeInTheDocument();
     expect(within(payments).getByText("RC-2026-00007")).toBeInTheDocument();
+    expect(within(payments).getByText("bKash")).toBeInTheDocument();
     expect(screen.getByRole("region", { name: "Upcoming events" })).toHaveTextContent("Sports Day");
   });
 

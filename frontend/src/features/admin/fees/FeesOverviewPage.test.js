@@ -15,6 +15,7 @@ const api = vi.hoisted(() => ({
 }));
 vi.mock("@/services/fees.service", () => ({ feesService: api }));
 vi.mock("@/lib/dates", () => ({ localDateString: () => "2026-03-15" }));
+vi.mock("@/services/classes.service", () => ({ classesService: { getNames: async () => ["Class 5", "Class 6", "Class 7"] } }));
 const toasts = vi.hoisted(() => ({ success: vi.fn(), error: vi.fn() }));
 vi.mock("react-toastify", () => ({ toast: toasts, ToastContainer: () => null }));
 
@@ -77,6 +78,17 @@ describe("Fees overview page", () => {
       }),
     );
     expect(toasts.success).toHaveBeenCalledWith("Created 2, already invoiced 1, no fee set 0.");
+  });
+
+  it("lets a class without tuition be billed for extra fees only", async () => {
+    renderWithQuery(<FeesOverviewPage />);
+    await screen.findByText("৳4,500.00");
+
+    fireEvent.click(screen.getByRole("button", { name: "Generate invoices" }));
+    const drawer = await screen.findByRole("dialog", { name: "Generate invoices for March 2026" });
+    fireEvent.click(within(drawer).getByRole("checkbox", { name: "All classes" }));
+
+    expect(await within(drawer).findByRole("checkbox", { name: "Class 7" })).toBeInTheDocument();
   });
 
   it("bills all classes by default", async () => {

@@ -24,6 +24,7 @@ const invoice = {
   total: 1200,
   paid: 200,
   balance: 1000,
+  late_fine_pending: 0,
 };
 
 const setup = () => {
@@ -70,6 +71,31 @@ describe("PaymentDrawer", () => {
 
     expect(screen.getByText("More than the balance due")).toBeInTheDocument();
     expect(api.recordPayment).not.toHaveBeenCalled();
+  });
+
+  it("adds the late fine the server will charge when paying after the due date", async () => {
+    api.getInvoice.mockResolvedValue({ success: true, data: { ...invoice, late_fine_pending: 50 } });
+    api.recordPayment.mockResolvedValue({ success: true, data: { payment: { id: 9 }, invoice } });
+    const { onPaid } = setup();
+
+    await waitFor(() => expect(amountInput()).toHaveValue("1050"));
+    const fineLine = screen.getByText("Late fine (paid after the due date)").closest("tr");
+    expect(fineLine).toHaveTextContent("৳50.00");
+    expect(screen.getByText("Amount due").closest("tr")).toHaveTextContent("৳1,050.00");
+
+    fireEvent.click(screen.getByRole("button", { name: "Record payment" }));
+    await waitFor(() => expect(onPaid).toHaveBeenCalled());
+    expect(api.recordPayment.mock.calls[0][1]).toMatchObject({ amount: "1050" });
+  });
+
+  it("drops the late fine when the payment is dated by the due date", async () => {
+    api.getInvoice.mockResolvedValue({ success: true, data: { ...invoice, late_fine_pending: 50 } });
+    setup();
+    await waitFor(() => expect(amountInput()).toHaveValue("1050"));
+
+    fireEvent.change(screen.getByLabelText("Date", { exact: false }), { target: { value: "2026-03-09" } });
+
+    expect(screen.queryByText("Late fine (paid after the due date)")).not.toBeInTheDocument();
   });
 
   it("records a partial payment and hands back the receipt", async () => {

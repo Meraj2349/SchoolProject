@@ -55,7 +55,7 @@ export function useFeeMutation(mutationFn) {
     mutationFn: (variables) => mutationFn(variables),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: queryKeys.fees.all });
-      qc.invalidateQueries({ queryKey: ["dashboard"] });
+      qc.invalidateQueries({ queryKey: queryKeys.dashboard.all });
     },
   });
 }

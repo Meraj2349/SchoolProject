@@ -35,6 +35,12 @@ export default function InvoicesPage() {
   const [collecting, setCollecting] = useState(null);
   const [paid, setPaid] = useState(null);
 
+  // Another month may not have the chosen class, which would hide every row.
+  const changePeriod = (next) => {
+    setPeriod(next);
+    setClassFilter({ className: "", section: "" });
+  };
+
   const serverFilters = { ...period, ...(status ? { status } : {}) };
   const { data: invoices = [], isLoading, isError } = useInvoices(serverFilters);
   const today = localDateString();
@@ -88,7 +94,7 @@ export default function InvoicesPage() {
 
   return (
     <div className="space-y-4">
-      <PageHeader title={t("invoicesTitle")} subtitle={t("invoicesSubtitle")} actions={<PeriodPicker period={period} onChange={setPeriod} />} />
+      <PageHeader title={t("invoicesTitle")} subtitle={t("invoicesSubtitle")} actions={<PeriodPicker period={period} onChange={changePeriod} />} />
       {needsBranch && <ChooseBranchNotice />}
       {isError && <div role="alert" className="error-message">{t("loadFailed")}</div>}
 

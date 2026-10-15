@@ -60,6 +60,17 @@ describe("Invoices page", () => {
     expect(screen.queryByText("Karima Begum")).not.toBeInTheDocument();
   });
 
+  it("clears the class filter when moving to another month", async () => {
+    renderWithQuery(<InvoicesPage />);
+    await screen.findByText("Karima Begum");
+    fireEvent.change(screen.getByLabelText("Class"), { target: { value: "Class 6" } });
+
+    fireEvent.click(screen.getByRole("button", { name: "Next month" }));
+
+    expect(screen.getByLabelText("Class")).toHaveValue("");
+    expect(await screen.findByText("Karima Begum")).toBeInTheDocument();
+  });
+
   it("only offers to collect on invoices that still owe money", async () => {
     renderWithQuery(<InvoicesPage />);
     await screen.findByText("Karima Begum");

@@ -85,6 +85,7 @@ function BranchOverview({ t }) {
 
 export default function AdminDashboardPage() {
   const t = useTranslations("admin.dashboard");
+  const tFees = useTranslations("admin.fees");
   const language = useLanguageStore((s) => s.language);
   const role = useAuthStore((s) => s.role);
   const { data: summary, isLoading, isError } = useDashboardSummary();
@@ -93,7 +94,7 @@ export default function AdminDashboardPage() {
     { key: "receipt_no", header: t("receipt") },
     { key: "student_name", header: t("student") },
     { key: "amount", header: t("amount"), align: "right", render: (p) => <MoneyText amount={p.amount} /> },
-    { key: "method", header: t("method"), render: (p) => <Badge tone="info">{p.method}</Badge> },
+    { key: "method", header: t("method"), render: (p) => <Badge tone="info">{tFees(`methods.${p.method}`)}</Badge> },
     { key: "paid_on", header: t("date") },
   ];
 

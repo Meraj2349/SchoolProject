@@ -1,11 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { Box, Button, Drawer, Field, Input, Select, errorMessage } from "@/components/admin/ui";
+import { Box, Button, Drawer, Field, Input, MoneyText, Select, errorMessage } from "@/components/admin/ui";
 import { localDateString } from "@/lib/dates";
 import { feesService } from "@/services/fees.service";
 import { useLanguageStore, useTranslations } from "@/store/languageStore";
-import { PAYMENT_METHODS, paymentDefaults, periodLabel, validatePayment } from "./feeRules";
+import { PAYMENT_METHODS, amountDue, lateFineFor, paymentDefaults, periodLabel, validatePayment } from "./feeRules";
 import InvoiceItems from "./InvoiceItems";
 import { useFeeMutation, useInvoice } from "./useFees";
 
@@ -20,7 +20,7 @@ function PaymentForm({ invoice, onPaid, onClose, t }) {
 
   const submit = async (event) => {
     event.preventDefault();
-    const found = validatePayment(form, { balance: invoice.balance, today });
+    const found = validatePayment(form, { invoice, today });
     setErrors(found);
     setSaveError(null);
     if (Object.keys(found).length > 0) return;
@@ -33,6 +33,8 @@ function PaymentForm({ invoice, onPaid, onClose, t }) {
   };
 
   const errorFor = (field) => (errors[field] ? t(errors[field]) : undefined);
+  // The server adds the late fine before taking a payment dated after the due date.
+  const lateFine = lateFineFor(invoice, form.paid_on);
 
   return (
     <form id="payment-form" onSubmit={submit} noValidate>
@@ -40,6 +42,24 @@ function PaymentForm({ invoice, onPaid, onClose, t }) {
         <div role="alert" className="error-message">
           {saveError}
         </div>
+      )}
+      {lateFine > 0 && (
+        <table className="w-full text-sm mb-3">
+          <tbody>
+            <tr>
+              <td className="py-1 text-amber-700">{t("lateFineIfLate")}</td>
+              <td className="py-1 text-right text-amber-700">
+                <MoneyText amount={lateFine} />
+              </td>
+            </tr>
+            <tr>
+              <td className="py-1 font-bold">{t("amountDue")}</td>
+              <td className="py-1 text-right font-bold">
+                <MoneyText amount={amountDue(invoice, form.paid_on)} />
+              </td>
+            </tr>
+          </tbody>
+        </table>
       )}
       <Field label={t("amount")} required error={errorFor("amount")}>
         {(a11y) => <Input {...a11y} inputMode="decimal" value={form.amount} onChange={set("amount")} />}

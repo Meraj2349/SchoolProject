@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   PAYMENT_METHODS,
+  amountDue,
   collectionRate,
   discountText,
   monthName,
@@ -45,20 +46,41 @@ describe("statusBadge", () => {
   });
 });
 
+describe("amountDue", () => {
+  const invoice = { balance: 1000, due_date: "2026-03-10", late_fine_pending: 50 };
+
+  it("is the balance when paid by the due date", () => {
+    expect(amountDue(invoice, "2026-03-10")).toBe(1000);
+  });
+
+  it("adds the late fine the server will charge when paid after the due date", () => {
+    expect(amountDue(invoice, "2026-03-11")).toBe(1050);
+  });
+
+  it("does not add a fine that was already charged or when nothing is owed", () => {
+    expect(amountDue({ ...invoice, late_fine_pending: 0 }, "2026-03-20")).toBe(1000);
+    expect(amountDue({ ...invoice, balance: 0 }, "2026-03-20")).toBe(0);
+  });
+});
+
 describe("paymentDefaults", () => {
   it("suggests paying the full balance in cash today", () => {
-    expect(paymentDefaults({ balance: 1550 }, "2026-03-15")).toEqual({
-      amount: "1550",
+    expect(paymentDefaults({ balance: 1500, due_date: "2026-03-20", late_fine_pending: 50 }, "2026-03-15")).toEqual({
+      amount: "1500",
       method: "cash",
       paid_on: "2026-03-15",
       note: "",
     });
   });
+
+  it("includes the late fine when today is past the due date", () => {
+    expect(paymentDefaults({ balance: 1500, due_date: "2026-03-10", late_fine_pending: 50 }, "2026-03-15").amount).toBe("1550");
+  });
 });
 
 describe("validatePayment", () => {
   const ok = { amount: "500", method: "cash", paid_on: "2026-03-15", note: "" };
-  const context = { balance: 1500, today: "2026-03-15" };
+  const context = { invoice: { balance: 1500, due_date: "2026-03-31", late_fine_pending: 50 }, today: "2026-03-15" };
 
   it("accepts a partial payment", () => {
     expect(validatePayment(ok, context)).toEqual({});
@@ -74,6 +96,13 @@ describe("validatePayment", () => {
 
   it("rejects more than the balance", () => {
     expect(validatePayment({ ...ok, amount: "1500.01" }, context)).toEqual({ amount: "amountTooHigh" });
+  });
+
+  it("allows the late fine on top when the payment date is after the due date", () => {
+    const late = { ...context, invoice: { ...context.invoice, due_date: "2026-03-10" } };
+
+    expect(validatePayment({ ...ok, amount: "1550" }, late)).toEqual({});
+    expect(validatePayment({ ...ok, amount: "1550.01" }, late)).toEqual({ amount: "amountTooHigh" });
   });
 
   it("rejects a future date and an unknown method", () => {

@@ -207,8 +207,10 @@ function SettingsForm({ settings, t }) {
 }
 
 function SettingsTab({ t }) {
+  const { branchId } = useFeeBranch();
   const { data: settings } = useFeeSettings({ enabled: true });
-  return settings ? <SettingsForm settings={settings} t={t} /> : <p role="status">…</p>;
+  // key: a new branch gets a fresh form; its state is copied from `settings` once.
+  return settings ? <SettingsForm key={branchId} settings={settings} t={t} /> : <p role="status">…</p>;
 }
 
 export default function FeeSetupPage() {

@@ -109,9 +109,20 @@ const addStudent = async (studentData, branchId = null) => {
 // Returns null when the student does not exist in the caller's branch.
 // The branch check runs BEFORE child rows are removed, otherwise a branch
 // admin could wipe another branch's attendance and results.
+// A student with fee invoices is never deleted: the fee history is a
+// financial record (FeeInvoices.student_id is ON DELETE RESTRICT).
+const BLOCKED_BY_FEE_RECORDS = { blocked: "student_has_fee_records" };
+const isReferencedRowError = (error) => error?.code === "ER_ROW_IS_REFERENCED_2";
+
 const deleteStudent = async (studentID, branchId = null) => {
   const student = await getStudentById(studentID, branchId);
   if (!student) return null;
+
+  const [[{ invoices }]] = await db.query(
+    "SELECT COUNT(*) AS invoices FROM FeeInvoices WHERE student_id = ?",
+    [studentID],
+  );
+  if (Number(invoices) > 0) return BLOCKED_BY_FEE_RECORDS;
 
   const connection = await db.getConnection();
   try {
@@ -124,6 +135,8 @@ const deleteStudent = async (studentID, branchId = null) => {
     return { message: "Student deleted successfully" };
   } catch (error) {
     await connection.rollback();
+    // Invoices created between the check above and the delete.
+    if (isReferencedRowError(error)) return BLOCKED_BY_FEE_RECORDS;
     throw new Error("Error deleting student: " + error.message);
   } finally {
     connection.release();

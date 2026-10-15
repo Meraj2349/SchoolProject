@@ -77,6 +77,7 @@ export const queryKeys = {
     heads: (branchId = null) => ["fees", "heads", { branchId }],
   },
   dashboard: {
+    all: ["dashboard"],
     summary: (branchId = null) => ["dashboard", "summary", { branchId }],
   },
   branches: {

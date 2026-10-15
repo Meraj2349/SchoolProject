@@ -37,19 +37,27 @@ export function statusBadge(status, { dueDate, today } = {}) {
   return STATUS_BADGES[status] ?? STATUS_BADGES.unpaid;
 }
 
+/** The late fine the server adds first when this payment is dated after the due date. */
+export const lateFineFor = (invoice, paidOn) =>
+  toPoisha(invoice.balance) > 0 && paidOn > invoice.due_date ? Number(invoice.late_fine_pending ?? 0) : 0;
+
+/** What a payment dated `paidOn` can settle: the balance plus any late fine it triggers. */
+export const amountDue = (invoice, paidOn) =>
+  (toPoisha(invoice.balance) + toPoisha(lateFineFor(invoice, paidOn))) / 100;
+
 export const paymentDefaults = (invoice, today) => ({
-  amount: String(invoice.balance),
+  amount: String(amountDue(invoice, today)),
   method: "cash",
   paid_on: today,
   note: "",
 });
 
 /** Field errors for the payment form; empty when it can be sent. */
-export function validatePayment(form, { balance, today }) {
+export function validatePayment(form, { invoice, today }) {
   const errors = {};
   const amount = String(form.amount ?? "").trim();
   if (!AMOUNT_PATTERN.test(amount) || toPoisha(amount) === 0) errors.amount = "amountInvalid";
-  else if (toPoisha(amount) > toPoisha(balance)) errors.amount = "amountTooHigh";
+  else if (toPoisha(amount) > toPoisha(amountDue(invoice, form.paid_on || today))) errors.amount = "amountTooHigh";
   if (!form.paid_on) errors.paid_on = "required";
   else if (form.paid_on > today) errors.paid_on = "dateFuture";
   if (!PAYMENT_METHODS.includes(form.method)) errors.method = "required";

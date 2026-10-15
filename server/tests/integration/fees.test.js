@@ -187,15 +187,39 @@ describe("fees", () => {
     expect(summary.body.data).toMatchObject({ invoices: 1, billed: 1000, collected: 300, outstanding: 700 });
   });
 
+  it("tells the cashier which late fine a late payment will add", async () => {
+    const { invoiceId } = await seedBilledStudent();
+
+    const before = await api.get(`/invoices/${invoiceId}`);
+    expect(before.body.data).toMatchObject({ due_date: "2026-03-10", balance: 1000, late_fine_pending: 50 });
+
+    await api.post(`/invoices/${invoiceId}/payments`, { amount: 1050, method: "cash", paid_on: "2026-03-15" }).expect(201);
+    const after = await api.get(`/invoices/${invoiceId}`);
+    expect(after.body.data).toMatchObject({ status: "paid", balance: 0, late_fine_pending: 0 });
+  });
+
   it("keeps fee history when someone tries to delete a billed student", async () => {
     const { studentId, invoiceId } = await seedBilledStudent();
     await payToday(invoiceId, 300);
 
-    await request(app).delete(`/api/students/${studentId}`).set(adminA);
+    const res = await request(app).delete(`/api/students/${studentId}`).set(adminA).set("Accept-Language", "en");
 
+    expect(res.status).toBe(409);
+    expect(res.body.message).toBe("This student has fee records, so they cannot be deleted.");
+    expect(JSON.stringify(res.body)).not.toMatch(/foreign key|FeeInvoices/i);
     expect(await count("Students")).toBe(1);
     expect(await count("FeeInvoices")).toBe(1);
     expect(await count("FeePayments")).toBe(1);
+  });
+
+  it("keeps the student's attendance and results when the delete is refused", async () => {
+    const { studentId } = await seedBilledStudent();
+    const [[student]] = await db.query("SELECT ClassID FROM Students WHERE StudentID = ?", [studentId]);
+    await db.query("INSERT INTO Attendance (StudentID, ClassID, ClassDate, Status, branch_id) VALUES (?, ?, '2026-03-02', 'Present', ?)", [studentId, student.ClassID, BRANCH_A]);
+
+    await request(app).delete(`/api/students/${studentId}`).set(adminA).expect(409);
+
+    expect(await count("Attendance")).toBe(1);
   });
 
   describe("branch isolation", () => {
