@@ -422,6 +422,30 @@ CREATE TABLE
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
     );
 
+-- Achievements shown on the website (honours board). Existing databases:
+-- achievements_migration.sql
+CREATE TABLE
+    IF NOT EXISTS Achievements (
+        id INT PRIMARY KEY AUTO_INCREMENT,
+        title_en VARCHAR(255) NOT NULL,
+        title_bn VARCHAR(255) NOT NULL,
+        description_en TEXT,
+        description_bn TEXT,
+        category ENUM ('board_result', 'academic', 'sports', 'cultural', 'competition', 'award') NOT NULL,
+        year SMALLINT NOT NULL,
+        image_url VARCHAR(500),
+        is_featured BOOLEAN NOT NULL DEFAULT FALSE,
+        is_published BOOLEAN NOT NULL DEFAULT TRUE,
+        exam_name VARCHAR(30) NULL COMMENT 'Board results only, e.g. SSC',
+        examinees INT NULL,
+        passed INT NULL,
+        gpa5 INT NULL,
+        branch_id INT NULL COMMENT 'Owning branch; NULL = whole school',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        INDEX idx_achievements_showcase (is_published, is_featured, year)
+    );
+
 -- Quiz Tables
 CREATE TABLE
     IF NOT EXISTS QuizQuestions (
@@ -565,6 +589,7 @@ ALTER TABLE News ADD CONSTRAINT fk_news_branch FOREIGN KEY (branch_id) REFERENCE
 ALTER TABLE Messages ADD CONSTRAINT fk_messages_branch FOREIGN KEY (branch_id) REFERENCES Branches (id);
 ALTER TABLE Images ADD CONSTRAINT fk_images_branch FOREIGN KEY (branch_id) REFERENCES Branches (id);
 ALTER TABLE Applications ADD CONSTRAINT fk_applications_branch FOREIGN KEY (branch_id) REFERENCES Branches (id);
+ALTER TABLE Achievements ADD CONSTRAINT fk_achievements_branch FOREIGN KEY (branch_id) REFERENCES Branches (id);
 
 -- ============================================================
 -- Fees: monthly tuition + extra fee heads, discounts, invoices,

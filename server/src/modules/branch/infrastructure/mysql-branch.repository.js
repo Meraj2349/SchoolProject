@@ -58,7 +58,7 @@ export const mysqlBranchRepository = {
       payments: ["FeePayments"],
       applications: ["Applications"],
       // The branch's own website content (whole-school content has no branch).
-      websiteItems: ["Notices", "NoticeAnnouncements", "News", "Messages", "Images", "Events"],
+      websiteItems: ["Notices", "NoticeAnnouncements", "News", "Messages", "Images", "Events", "Achievements"],
     };
     const entries = await Promise.all(Object.entries(groups).map(async ([key, tables]) => [key, await countIn(tables)]));
     return Object.fromEntries(entries);

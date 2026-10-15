@@ -18,6 +18,27 @@ const i18n = {
     en: "That record belongs to another branch.",
     bn: "এই তথ্যটি অন্য শাখার।",
   },
+  // ── Achievements (honours board) ─────────────────────────────────────────
+  achievement_created: { en: "Achievement added.", bn: "অর্জন যোগ করা হয়েছে।" },
+  achievement_updated: { en: "Achievement updated.", bn: "অর্জন হালনাগাদ করা হয়েছে।" },
+  achievement_deleted: { en: "Achievement deleted.", bn: "অর্জন মুছে ফেলা হয়েছে।" },
+  achievement_publish_toggled: { en: "Achievement visibility changed.", bn: "অর্জন দেখানোর অবস্থা বদলানো হয়েছে।" },
+  achievement_not_found: { en: "Achievement not found.", bn: "অর্জনটি পাওয়া যায়নি।" },
+  achievement_title_required: {
+    en: "Enter the title in English and Bangla.",
+    bn: "ইংরেজি ও বাংলায় শিরোনাম লিখুন।",
+  },
+  achievement_category_invalid: { en: "Choose a category.", bn: "একটি বিভাগ বেছে নিন।" },
+  achievement_year_invalid: { en: "Enter a valid year.", bn: "সঠিক সাল লিখুন।" },
+  achievement_exam_required: {
+    en: "Enter the exam name (for example SSC).",
+    bn: "পরীক্ষার নাম লিখুন (যেমন এসএসসি)।",
+  },
+  achievement_result_numbers_invalid: {
+    en: "Check the numbers: examinees must be more than 0, passed cannot exceed examinees, and GPA-5 cannot exceed passed.",
+    bn: "সংখ্যাগুলো যাচাই করুন: পরীক্ষার্থী ০-এর বেশি হতে হবে, উত্তীর্ণ পরীক্ষার্থীর বেশি হবে না, এবং জিপিএ-৫ উত্তীর্ণের বেশি হবে না।",
+  },
+  achievement_invalid_publish: { en: "Published must be true or false.", bn: "প্রকাশের মান সত্য বা মিথ্যা হতে হবে।" },
   // ── Quiz ──────────────────────────────────────────────────────────────────
   quiz_failed: {
     en: "Could not load the quiz. Please try again.",

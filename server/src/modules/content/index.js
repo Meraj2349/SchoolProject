@@ -1,6 +1,7 @@
 import path from "path";
 import { fileURLToPath } from "url";
 import { makeContentUseCases } from "./application/content.usecases.js";
+import { achievement } from "./domain/achievement.js";
 import { announcement, message, news, notice } from "./domain/contentKinds.js";
 import { makeLocalUploadStore } from "./infrastructure/localUploadStore.js";
 import { makeMysqlContentRepository } from "./infrastructure/mysql-content.repository.js";
@@ -48,4 +49,18 @@ export const announcementsController = controllerFor({
     visibility: "notice_announcement_publish_toggled",
   },
   files: makeLocalUploadStore({ publicDir: PUBLIC_DIR, folder: "notice-announcements" }),
+});
+
+export const ACHIEVEMENT_UPLOADS = path.join(PUBLIC_DIR, "uploads", "achievements");
+
+export const achievementsController = controllerFor({
+  kind: achievement,
+  table: { table: "Achievements", idColumn: "id", visibleColumn: "is_published", orderBy: "is_featured DESC, year DESC, id DESC" },
+  messages: {
+    created: "achievement_created",
+    updated: "achievement_updated",
+    deleted: "achievement_deleted",
+    visibility: "achievement_publish_toggled",
+  },
+  files: makeLocalUploadStore({ publicDir: PUBLIC_DIR, folder: "achievements" }),
 });

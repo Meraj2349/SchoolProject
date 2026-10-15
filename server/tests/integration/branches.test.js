@@ -32,6 +32,7 @@ describe("creating and deleting branches", () => {
     await insert("Notices", { Title: "T", Description: "D", branch_id: BRANCH_B });
     await insert("Images", { ImagePath: "https://cdn.test/x.png", PublicID: "p", ImageType: "event", branch_id: BRANCH_B });
     await insert("Notices", { Title: "Whole school", Description: "D", branch_id: null });
+    await insert("Achievements", { title_en: "Win", title_bn: "জয়", category: "sports", year: 2025, branch_id: BRANCH_B });
 
     const res = await asSuper(request(app).delete(`/api/branches/${BRANCH_B}`));
 
@@ -39,7 +40,7 @@ describe("creating and deleting branches", () => {
     expect(res.body).toEqual({
       success: false,
       message: expect.stringMatching(/still/i),
-      data: { students: 1, teachers: 0, classes: 1, admins: 1, invoices: 1, payments: 0, applications: 1, websiteItems: 2 },
+      data: { students: 1, teachers: 0, classes: 1, admins: 1, invoices: 1, payments: 0, applications: 1, websiteItems: 3 },
     });
     expect(await count("Branches", "id = ?", [BRANCH_B])).toBe(1);
   });
