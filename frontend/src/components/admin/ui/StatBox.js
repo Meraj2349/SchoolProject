@@ -20,7 +20,7 @@ export default function StatBox({ icon: Icon, label, value, hint, tone = "primar
       <div className="flex flex-col justify-center px-4 py-2 min-w-0">
         <span className="text-xs font-semibold uppercase tracking-wide text-slate-500 truncate">{label}</span>
         <span className="text-2xl font-bold text-slate-800">{value}</span>
-        {hint && <span className="text-xs text-slate-500 truncate">{hint}</span>}
+        {hint && <span className="text-xs text-slate-500">{hint}</span>}
       </div>
     </div>
   );
