@@ -106,25 +106,27 @@ const addStudent = async (studentData, branchId = null) => {
   }
 };
 
+// Returns null when the student does not exist in the caller's branch.
+// The branch check runs BEFORE child rows are removed, otherwise a branch
+// admin could wipe another branch's attendance and results.
 const deleteStudent = async (studentID, branchId = null) => {
+  const student = await getStudentById(studentID, branchId);
+  if (!student) return null;
+
+  const connection = await db.getConnection();
   try {
-    const { clause, params } = branchFilter(branchId);
-
+    await connection.beginTransaction();
     // Remove child records first (FK constraints, no CASCADE)
-    await db.query("DELETE FROM Attendance WHERE StudentID = ?", [studentID]);
-    await db.query("DELETE FROM Results WHERE StudentID = ?", [studentID]);
-
-    const [result] = await db.query(
-      `DELETE FROM Students WHERE StudentID = ? ${clause}`,
-      [studentID, ...params],
-    );
-
-    if (result.affectedRows === 0) {
-      throw new Error("Student not found");
-    }
+    await connection.query("DELETE FROM Attendance WHERE StudentID = ?", [studentID]);
+    await connection.query("DELETE FROM Results WHERE StudentID = ?", [studentID]);
+    await connection.query("DELETE FROM Students WHERE StudentID = ?", [studentID]);
+    await connection.commit();
     return { message: "Student deleted successfully" };
   } catch (error) {
+    await connection.rollback();
     throw new Error("Error deleting student: " + error.message);
+  } finally {
+    connection.release();
   }
 };
 
@@ -142,9 +144,13 @@ const updateStudent = async (studentID, studentData, branchId = null) => {
     RollNumber,
   } = studentData;
 
+  // Returns null when the student does not exist in the caller's branch.
+  const existing = await getStudentById(studentID, branchId);
+  if (!existing) return null;
+
   try {
-    const classId = await findOrCreateClass(Class, Section, branchId);
-    const { clause, params } = branchFilter(branchId);
+    // Keep the student in their own branch's class namespace.
+    const classId = await findOrCreateClass(Class, Section, existing.branch_id);
 
     const sql = `UPDATE Students SET
       FirstName = ?,
@@ -156,7 +162,7 @@ const updateStudent = async (studentID, studentData, branchId = null) => {
       Address = ?,
       ParentContact = ?,
       RollNumber = ?
-      WHERE StudentID = ? ${clause}`;
+      WHERE StudentID = ?`;
 
     const [result] = await db.query(sql, [
       FirstName,
@@ -169,7 +175,6 @@ const updateStudent = async (studentID, studentData, branchId = null) => {
       ParentContact,
       RollNumber,
       studentID,
-      ...params,
     ]);
 
     return { message: `Student with ID ${studentID} updated successfully` };
@@ -215,11 +220,7 @@ const getStudentById = async (studentID, branchId = null) => {
       [studentID, ...params],
     );
 
-    if (results.length === 0) {
-      throw new Error("Student not found");
-    }
-
-    return results[0];
+    return results[0] ?? null;
   } catch (error) {
     throw new Error("Error fetching student: " + error.message);
   }

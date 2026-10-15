@@ -19,6 +19,7 @@ import {
   searchResults,
   updateResult,
 } from "../models/result.model.js";
+import { getExamById } from "../models/exam.model.js";
 
 // Utility function for validation
 const validateResultData = (data) => {
@@ -376,6 +377,7 @@ const updateResultController = async (req, res) => {
 
 // Delete result
 const deleteResultController = async (req, res) => {
+  const branchId = req.branchId ?? null;
   try {
     const { id } = req.params;
 
@@ -386,8 +388,8 @@ const deleteResultController = async (req, res) => {
       });
     }
 
-    // Check if result exists
-    const existingResult = await getResultById(id);
+    // Check if result exists in the caller's branch
+    const existingResult = await getResultById(id, branchId);
     if (!existingResult) {
       return res.status(404).json({
         success: false,
@@ -419,6 +421,7 @@ const deleteResultController = async (req, res) => {
 
 // Delete results by exam
 const deleteResultsByExamController = async (req, res) => {
+  const branchId = req.branchId ?? null;
   try {
     const { examId } = req.params;
 
@@ -427,6 +430,12 @@ const deleteResultsByExamController = async (req, res) => {
         success: false,
         message: "Valid exam ID is required",
       });
+    }
+
+    // The exam must belong to the caller's branch
+    const exam = await getExamById(examId, branchId);
+    if (!exam) {
+      return res.status(404).json({ success: false, message: "Exam not found" });
     }
 
     const result = await deleteResultsByExam(examId);

@@ -18,13 +18,13 @@ const addTeacher = async ({
       INSERT INTO Teachers (FirstName, LastName, Subject, ContactNumber, Email, JoiningDate, Address, branch_id)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     `;
-    values = [FirstName, LastName, Subject, ContactNumber, Email, JoiningDate, Address, branchId];
+    values = [FirstName, LastName, Subject, ContactNumber, Email, emptyToNull(JoiningDate), Address, branchId];
   } else {
     sql = `
       INSERT INTO Teachers (FirstName, LastName, Subject, ContactNumber, Email, JoiningDate, Address)
       VALUES (?, ?, ?, ?, ?, ?, ?)
     `;
-    values = [FirstName, LastName, Subject, ContactNumber, Email, JoiningDate, Address];
+    values = [FirstName, LastName, Subject, ContactNumber, Email, emptyToNull(JoiningDate), Address];
   }
   const [result] = await db.query(sql, values);
   return { TeacherID: result.insertId };
@@ -40,20 +40,30 @@ const getAllTeachers = async (branchId = null) => {
   return rows;
 };
 
+// Columns a client may change. Anything else in the request body (branch_id,
+// TeacherID, or a crafted key) is ignored — keys are never put into SQL.
+const EDITABLE_COLUMNS = [
+  "FirstName",
+  "LastName",
+  "Subject",
+  "ContactNumber",
+  "Email",
+  "JoiningDate",
+  "Address",
+];
+
+// Empty form fields become NULL (MySQL rejects '' for a DATE column).
+const emptyToNull = (value) => (value === "" ? null : value);
+
 // Update a teacher (branch-scoped)
 const updateTeacher = async (teacherID, updateData, branchId = null) => {
   const { clause, params: branchParams } = branchFilter(branchId);
-  let sql = "UPDATE Teachers SET ";
-  const params = [];
+  const columns = EDITABLE_COLUMNS.filter((column) => updateData[column] !== undefined);
+  if (columns.length === 0) return { affectedRows: 0, noFields: true };
 
-  Object.keys(updateData).forEach((key) => {
-    sql += `${key} = ?, `;
-    params.push(updateData[key]);
-  });
-
-  sql = sql.slice(0, -2); // Remove the last comma
-  sql += ` WHERE TeacherID = ? ${clause}`;
-  params.push(teacherID, ...branchParams);
+  const sql = `UPDATE Teachers SET ${columns.map((c) => `${c} = ?`).join(", ")}
+    WHERE TeacherID = ? ${clause}`;
+  const params = [...columns.map((c) => emptyToNull(updateData[c])), teacherID, ...branchParams];
 
   const [result] = await db.query(sql, params);
   return result;

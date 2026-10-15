@@ -175,7 +175,7 @@ export const getRoutineById = async (req, res) => {
       return res.status(400).json({ message: t("routine_id_required", lang) });
     }
 
-    const routine = await RoutineModel.getRoutineById(id);
+    const routine = await RoutineModel.getRoutineById(id, req.branchId ?? null);
 
     if (!routine) {
       return res.status(404).json({ message: t("routine_not_found", lang) });
@@ -254,8 +254,9 @@ export const updateRoutine = async (req, res) => {
       return res.status(400).json({ message: "Valid routine ID is required" });
     }
 
-    // Check if routine exists
-    const existingRoutine = await RoutineModel.getRoutineById(id);
+    // Check if routine exists in the caller's branch
+    const branchId = req.branchId ?? null;
+    const existingRoutine = await RoutineModel.getRoutineById(id, branchId);
     if (!existingRoutine) {
       return res.status(404).json({ message: "Routine not found" });
     }
@@ -264,7 +265,7 @@ export const updateRoutine = async (req, res) => {
 
     // Validate ClassID if provided (Classes table এ exist করে কিনা check)
     if (updateData.ClassID) {
-      const classInfo = await RoutineModel.validateClassId(updateData.ClassID);
+      const classInfo = await RoutineModel.validateClassId(updateData.ClassID, branchId);
       if (!classInfo) {
         return res.status(400).json({
           message: `Invalid ClassID: ${updateData.ClassID}. Class does not exist.`,
@@ -276,17 +277,7 @@ export const updateRoutine = async (req, res) => {
     // Handle file upload if present
     if (req.file) {
       try {
-        // Delete old file from Cloudinary if exists
-        if (existingRoutine.FilePublicID) {
-          try {
-            await deleteFromCloudinary(existingRoutine.FilePublicID);
-            console.log("Old file deleted from Cloudinary");
-          } catch (deleteError) {
-            console.error("Error deleting old file:", deleteError);
-          }
-        }
-
-        // Upload new file using your existing function
+        // Upload the new file first: if this fails the routine keeps its old file.
         const result = await uploadToCloudinary(
           req.file.path,
           "school/routines",
@@ -319,6 +310,13 @@ export const updateRoutine = async (req, res) => {
 
     const updatedRoutine = await RoutineModel.updateRoutine(id, updateData);
 
+    // Only now that the routine points at the new file, remove the old one.
+    if (req.file && existingRoutine.FilePublicID) {
+      await deleteFromCloudinary(existingRoutine.FilePublicID).catch((deleteError) =>
+        console.error("Error deleting old file:", deleteError),
+      );
+    }
+
     res.status(200).json({
       message: t("routine_updated", req.language),
       routine: updatedRoutine,
@@ -345,7 +343,7 @@ export const deleteRoutine = async (req, res) => {
     }
 
     // Get routine to delete file from Cloudinary এবং class info show করার জন্য
-    const routine = await RoutineModel.getRoutineById(id);
+    const routine = await RoutineModel.getRoutineById(id, req.branchId ?? null);
     if (!routine) {
       return res.status(404).json({ message: "Routine not found" });
     }

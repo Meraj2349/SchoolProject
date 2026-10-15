@@ -102,7 +102,7 @@ const getStudentByIdController = async (req, res) => {
         .json({ success: false, message: t("student_required_fields", lang) });
     }
 
-    const student = await getStudentById(parseInt(id));
+    const student = await getStudentById(parseInt(id), req.branchId ?? null);
 
     if (!student) {
       return res
