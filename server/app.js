@@ -27,6 +27,7 @@ import studentRouter from "./routes/student.route.js";
 import quizRoutes from "./routes/quiz.routes.js";
 import subjectRoutes from "./routes/subjects.routes.js";
 import teacherRoutes from "./routes/teacher.routes.js";
+import adminsRoutes from "./routes/admins.routes.js";
 
 dotenv.config();
 
@@ -51,6 +52,7 @@ app.use(express.static("public"));
 
 // Use the routes under /api/
 app.use("/api/admin", adminRouter);
+app.use("/api/admins", adminsRoutes);
 app.use("/api/students", studentRouter);
 app.use("/api/teachers", teacherRoutes);
 app.use("/api/notices", noticeRoutes);

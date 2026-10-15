@@ -1,15 +1,13 @@
 import express from "express";
 import {
-  createAdminController,
   loginAdminController,
   handleLogout,
-  updateAdminController,
   updateEmailPassword,
-  deleteAdminController,
 } from "../controllers/admin.controller.js";
 
 import authMiddleware, { authorize } from "../middlewares/auth.middleware.js";
 import { countAdmins } from "../models/admin.model.js";
+import { adminController } from "../src/modules/admins/index.js";
 
 const router = express.Router();
 
@@ -31,16 +29,15 @@ const firstAdminOrSuperAdmin = async (req, res, next) => {
   authMiddleware(req, res, () => authorize("super_admin")(req, res, next));
 };
 
-// Create a new admin
-router.post("/createAdmin", firstAdminOrSuperAdmin, createAdminController);
+// Account management lives in src/modules/admins (also at /api/admins);
+// these older paths are kept for the register page and existing clients.
+router.post("/createAdmin", firstAdminOrSuperAdmin, adminController.create);
 //login admin
 router.post("/login", loginAdminController);
 //logout admin
 router.post("/logout", handleLogout);
-// Update admin
-router.put("/update/:id", ...superAdminOnly, updateAdminController);
-//delete admin
-router.delete("/delete/:id", ...superAdminOnly, deleteAdminController);
+router.put("/update/:id", ...superAdminOnly, adminController.update);
+router.delete("/delete/:id", ...superAdminOnly, adminController.remove);
 //updateEmallpassword
 router.put("/updateEmailPassword", authMiddleware, updateEmailPassword);
 

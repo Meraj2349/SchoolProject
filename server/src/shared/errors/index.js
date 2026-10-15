@@ -11,3 +11,7 @@ export class DomainError extends Error {
 export class ValidationError extends DomainError {}
 
 export class NotFoundError extends DomainError {}
+
+// The request is valid but clashes with the current state (e.g. a duplicate,
+// or removing the last super admin).
+export class ConflictError extends DomainError {}
