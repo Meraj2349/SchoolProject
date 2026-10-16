@@ -35,7 +35,7 @@ function ChairmanMessage() {
             <Image src={photo} alt={name} fill sizes="144px" unoptimized={isRemoteImage(photo)} className="object-cover" />
           </div>
           <figcaption className="mt-3">
-            <span className="block max-w-40 break-words font-school-heading font-bold text-school-navy">{name}</span>
+            <span className="mx-auto block max-w-40 break-words font-school-heading font-bold text-school-navy">{name}</span>
             <span className="block text-sm text-school-muted">{localized(profile, "title", language) || t("chairman.title")}</span>
           </figcaption>
         </figure>

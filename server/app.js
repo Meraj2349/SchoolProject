@@ -31,8 +31,10 @@ import studentRouter from "./routes/student.route.js";
 import quizRoutes from "./routes/quiz.routes.js";
 import subjectRoutes from "./routes/subjects.routes.js";
 import teacherRoutes from "./routes/teacher.routes.js";
+import teacherAppRoutes from "./routes/teacherApp.routes.js";
 import adminsRoutes from "./routes/admins.routes.js";
 import { errorHandler } from "./src/shared/http/errorHandler.js";
+import { startAbsenceSmsWorker } from "./src/modules/notifications/index.js";
 
 dotenv.config();
 
@@ -85,6 +87,7 @@ app.use("/api/subjects", subjectRoutes);
 app.use("/api/images", imageRoutes);
 app.use("/api/routines", routineRoutes);
 app.use("/api/attendance", attendanceRoutes);
+app.use("/api/teacher-app/v1", teacherAppRoutes);
 app.use("/api/exams", examRoutes);
 app.use("/api/results", resultRoutes);
 app.use("/api/branches", branchRoutes);
@@ -117,6 +120,9 @@ if (isMainModule) {
   db.query("SELECT 1")
     .then(() => console.log("Connected to the database"))
     .catch((err) => console.error("Database connection failed: " + err.message));
+
+  // SMS to parents of absent children, once their delay is over.
+  startAbsenceSmsWorker();
 
   const PORT = process.env.PORT || 3000;
   app.listen(PORT, () => {

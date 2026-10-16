@@ -11,3 +11,7 @@ process.env.TRUST_PROXY = "loopback";
 process.env.JOB_APPLICATIONS_PER_HOUR = "5";
 // CVs go to a throw-away folder, never the server's real private_uploads.
 process.env.JOB_APPLICATION_CV_DIR = `${process.env.TMPDIR || "/tmp"}/school-test-cvs-${process.pid}`;
+// Absence SMS are queued (log-only sender); tests send them themselves.
+process.env.ATTENDANCE_SMS_ENABLED = "true";
+process.env.ATTENDANCE_SMS_DELAY_MINUTES = "15";
+process.env.SMS_PROVIDER = "log";

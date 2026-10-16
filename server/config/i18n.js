@@ -667,6 +667,107 @@ const i18n = {
     en: "Class name and section are required.",
     bn: "শ্রেণির নাম এবং বিভাগ আবশ্যক।",
   },
+  attendance_saved: {
+    en: "Attendance saved.",
+    bn: "উপস্থিতি সংরক্ষণ হয়েছে।",
+  },
+  attendance_status_invalid: {
+    en: "Status must be Present, Absent, Late or Leave.",
+    bn: "অবস্থা হতে হবে উপস্থিত, অনুপস্থিত, দেরি বা ছুটি।",
+  },
+  attendance_date_invalid: {
+    en: "Give a valid date (YYYY-MM-DD).",
+    bn: "সঠিক তারিখ দিন (YYYY-MM-DD)।",
+  },
+  attendance_date_future: {
+    en: "Attendance cannot be taken for a day that has not come yet.",
+    bn: "যে দিন এখনো আসেনি তার উপস্থিতি নেওয়া যায় না।",
+  },
+  attendance_range_invalid: {
+    en: "Choose a start date on or before the end date, at most one year apart.",
+    bn: "শুরুর তারিখ শেষের তারিখের আগে বা একই দিনে দিন, সর্বোচ্চ এক বছরের ব্যবধানে।",
+  },
+  attendance_entries_required: {
+    en: "Give at least one student's attendance.",
+    bn: "অন্তত একজন শিক্ষার্থীর উপস্থিতি দিন।",
+  },
+  attendance_entries_invalid: {
+    en: "Each entry needs a student and a status.",
+    bn: "প্রতিটি তথ্যে একজন শিক্ষার্থী ও একটি অবস্থা থাকতে হবে।",
+  },
+  attendance_entries_duplicate: {
+    en: "A student appears more than once.",
+    bn: "একজন শিক্ষার্থী একাধিকবার এসেছে।",
+  },
+  attendance_entries_incomplete: {
+    en: "Mark every student of the class.",
+    bn: "শ্রেণির সব শিক্ষার্থীর উপস্থিতি দিন।",
+  },
+  attendance_student_not_in_class: {
+    en: "This student is not in this class.",
+    bn: "এই শিক্ষার্থী এই শ্রেণিতে নেই।",
+  },
+  attendance_taken_at_invalid: {
+    en: "The time the attendance was taken is not valid.",
+    bn: "উপস্থিতি নেওয়ার সময়টি সঠিক নয়।",
+  },
+  attendance_day_locked: {
+    en: "Teachers can take today's attendance only. Ask an admin to correct another day.",
+    bn: "শিক্ষকেরা শুধু আজকের উপস্থিতি নিতে পারেন। অন্য দিনের সংশোধনের জন্য অ্যাডমিনকে বলুন।",
+  },
+  attendance_class_not_found: {
+    en: "Class not found.",
+    bn: "শ্রেণি পাওয়া যায়নি।",
+  },
+  // ── Teacher app (attendance on the phone) ─────────────────────────────────
+  teacher_app_login_failed: {
+    en: "Wrong mobile number or password, or app access is off. After 5 wrong tries, wait 15 minutes. Ask your school admin if you cannot sign in.",
+    bn: "মোবাইল নম্বর বা পাসওয়ার্ড ভুল, অথবা অ্যাপ ব্যবহারের অনুমতি বন্ধ। ৫ বার ভুল হলে ১৫ মিনিট অপেক্ষা করুন। সাইন ইন করতে না পারলে বিদ্যালয়ের অ্যাডমিনকে বলুন।",
+  },
+  teacher_app_locked: {
+    en: "Too many wrong passwords. Try again in 15 minutes, or ask your school admin to set a new password.",
+    bn: "অনেকবার ভুল পাসওয়ার্ড দেওয়া হয়েছে। ১৫ মিনিট পরে আবার চেষ্টা করুন, অথবা অ্যাডমিনকে নতুন পাসওয়ার্ড দিতে বলুন।",
+  },
+  teacher_app_signed_out: {
+    en: "You have been signed out. Please sign in again.",
+    bn: "আপনাকে সাইন আউট করা হয়েছে। আবার সাইন ইন করুন।",
+  },
+  teacher_app_phone_invalid: {
+    en: "Give a valid Bangladeshi mobile number (01XXXXXXXXX).",
+    bn: "সঠিক মোবাইল নম্বর দিন (01XXXXXXXXX)।",
+  },
+  teacher_app_phone_taken: {
+    en: "Another teacher already signs in with this mobile number.",
+    bn: "এই মোবাইল নম্বর দিয়ে অন্য একজন শিক্ষক সাইন ইন করেন।",
+  },
+  teacher_app_password_short: {
+    en: "The password must have at least 8 characters.",
+    bn: "পাসওয়ার্ডে অন্তত ৮টি অক্ষর থাকতে হবে।",
+  },
+  teacher_app_password_long: {
+    en: "The password is too long.",
+    bn: "পাসওয়ার্ড খুব বড়।",
+  },
+  teacher_app_password_required: {
+    en: "Set a password before turning app access on.",
+    bn: "অ্যাপ চালু করার আগে একটি পাসওয়ার্ড দিন।",
+  },
+  teacher_app_password_wrong: {
+    en: "The current password is wrong.",
+    bn: "বর্তমান পাসওয়ার্ড ভুল।",
+  },
+  teacher_app_access_saved: {
+    en: "App access saved.",
+    bn: "অ্যাপ ব্যবহারের অনুমতি সংরক্ষণ হয়েছে।",
+  },
+  teacher_app_password_changed: {
+    en: "Password changed.",
+    bn: "পাসওয়ার্ড পরিবর্তন হয়েছে।",
+  },
+  attendance_not_your_class: {
+    en: "You are not the class teacher of this class.",
+    bn: "আপনি এই শ্রেণির শ্রেণিশিক্ষক নন।",
+  },
 
   // ── Routines ──────────────────────────────────────────────────────────────
   routine_created: {

@@ -1,17 +1,21 @@
 // Framework-free helpers for the public attendance page.
+import { attendanceTotals } from "@/lib/attendance";
 
-const STATUSES = ["present", "absent", "late", "excused"];
+const STATUSES = ["present", "absent", "late", "leave"];
 
-/** "present", "absent", "late" or "excused"; null for anything else. */
+/** "present", "absent", "late" or "leave"; null for anything else. */
 export function statusKey(status) {
   const key = String(status ?? "").trim().toLowerCase();
   return STATUSES.includes(key) ? key : null;
 }
 
-/** Totals for the summary cards; the rate is a percentage rounded to one decimal. */
+const asStatus = (key) => key && key[0].toUpperCase() + key.slice(1);
+
+/**
+ * Totals for the summary cards. The rate is the percent of expected days the
+ * student came (late counts as came, leave was not expected), to one decimal.
+ */
 export function attendanceSummary(records = []) {
-  const count = (key) => records.filter((r) => statusKey(r.Status) === key).length;
-  const total = records.length;
-  const present = count("present");
-  return { total, present, absent: count("absent"), rate: total ? Math.round((present / total) * 1000) / 10 : 0 };
+  const { present, absent, rate } = attendanceTotals(records.map((r) => asStatus(statusKey(r.Status))), { decimals: 1 });
+  return { total: records.length, present, absent, rate: rate ?? 0 };
 }

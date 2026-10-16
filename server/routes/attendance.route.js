@@ -1,92 +1,47 @@
 import express from "express";
 import authMiddleware, { optionalAuth } from "../middlewares/auth.middleware.js";
+import { attendanceController as attendance } from "../src/modules/attendance/index.js";
+import { absenceSmsController } from "../src/modules/notifications/index.js";
 import { requireWriteBranch } from "../src/shared/http/requireWriteBranch.js";
-import {
-  bulkCreateAttendanceController,
-  checkAttendanceExistsController,
-  createAttendanceController,
-  deleteAttendanceController,
-  forceSyncController,
-  getAllAttendanceController,
-  getAttendanceByClassAndSectionController,
-  getAttendanceByClassIDController,
-  getAttendanceByDateController,
-  getAttendanceByDateRangeController,
-  getAttendanceByIDController,
-  getAttendanceByNameRollClassSectionController,
-  getAttendanceByStudentIdController,
-  getAttendanceCountController,
-  getAttendanceGridController,
-  getAttendanceStatisticsController,
-  getAttendanceSummaryByStudentController,
-  getClassAttendanceSummaryByClassAndDateController,
-  markAttendanceController,
-  updateAttendanceController,
-  upsertAttendanceCellController,
-  validateDatabaseSyncController,
-} from "../controllers/attendance.controller.js";
 
 const router = express.Router();
 
-// ── Public read routes (optionalAuth: branch-scoped via ?branch_id) ──
-// Students/parents can look up attendance without an admin token
+// ── Public lookups (optionalAuth: branch-scoped via ?branch_id) ──
+// Students and parents look up attendance without signing in.
+router.get("/search/class/:className/section/:section", optionalAuth, attendance.byClassSection);
+router.get("/search/name/:firstName/roll/:roll/class/:class/section/:section", optionalAuth, attendance.byNameRoll);
+router.get("/student/:studentID", optionalAuth, attendance.byStudent);
+router.get("/summary/student/:studentID", optionalAuth, attendance.studentSummary);
 
-// Search by class + section (used by public AttendancePage)
-router.get(
-  "/search/class/:className/section/:section",
-  optionalAuth,
-  getAttendanceByClassAndSectionController,
-);
-
-// Search by name/roll/class/section
-router.get(
-  "/search/name/:firstName/roll/:roll/class/:class/section/:section",
-  optionalAuth,
-  getAttendanceByNameRollClassSectionController,
-);
-
-// Student-specific attendance lookup
-router.get("/student/:studentID", optionalAuth, getAttendanceByStudentIdController);
-router.get("/summary/student/:studentID", optionalAuth, getAttendanceSummaryByStudentController);
-
-// ── Admin-only routes — require a valid JWT ──
+// ── Admins ──
 router.use(authMiddleware);
 
-// Statistics and Count Routes
-router.get("/statistics", getAttendanceStatisticsController);
+router.get("/statistics", attendance.statistics);
+router.get("/count", attendance.count);
+router.get("/exists", attendance.exists);
+// GET /grid?className=&section=&startDate=&endDate=
+router.get("/grid", attendance.grid);
+// GET /roster?classId=&date=  a class's students with their status that day
+router.get("/roster", attendance.roster);
+// GET /sms?date=  the day's SMS to parents of absent children
+router.get("/sms", absenceSmsController.list);
+router.get("/summary/class/:classID/date/:date", attendance.classDaySummary);
+router.get("/search/daterange/:startDate/:endDate", attendance.byDateRange);
+router.get("/class/:classID", attendance.byClass);
+router.get("/date/:date", attendance.byDate);
 
-// Grid route: GET /attendance/grid?className=&section=&startDate=&endDate=
-router.get("/grid", getAttendanceGridController);
+// A class's whole day in one request.
+router.put("/class/:classId/date/:date", attendance.saveDay);
+// One student's day, filed under their own class and branch.
+router.post("/cell", attendance.markStudent);
+router.post("/mark", attendance.markStudent);
 
-// Upsert a single attendance cell
-router.post("/cell", upsertAttendanceCellController);
+router.get("/", attendance.all);
+router.post("/", requireWriteBranch, attendance.create);
+router.post("/bulk", requireWriteBranch, attendance.bulk);
 
-router.get("/count", getAttendanceCountController);
-router.get("/exists", checkAttendanceExistsController);
-
-router.get(
-  "/summary/class/:classID/date/:date",
-  getClassAttendanceSummaryByClassAndDateController,
-);
-
-router.get(
-  "/search/daterange/:startDate/:endDate",
-  getAttendanceByDateRangeController,
-);
-
-router.get("/class/:classID", getAttendanceByClassIDController);
-router.get("/date/:date", getAttendanceByDateController);
-
-// CRUD Routes
-router.get("/", getAllAttendanceController);
-router.post("/", requireWriteBranch, createAttendanceController);
-router.post("/mark", markAttendanceController);
-router.post("/bulk", requireWriteBranch, bulkCreateAttendanceController);
-router.post("/validate-sync", validateDatabaseSyncController);
-router.post("/force-sync", forceSyncController);
-
-router.get("/:id", getAttendanceByIDController);
-router.put("/:id", updateAttendanceController);
-router.delete("/:id", deleteAttendanceController);
+router.get("/:id", attendance.byId);
+router.put("/:id", attendance.update);
+router.delete("/:id", attendance.remove);
 
 export default router;

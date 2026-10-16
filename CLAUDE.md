@@ -7,6 +7,8 @@ Multi-branch school management system.
   images. Bilingual API messages in `server/config/i18n.js` (`en`, `bn`).
 - `frontend/` — Next.js (App Router), React 19, React Query, Zustand, Ant Design,
   Tailwind. JSX in `.js` files. **Read `frontend/AGENTS.md` before touching Next APIs.**
+- `mobile/teacher_app/` — Flutter (Android) app for class teachers to take
+  attendance, offline-first; talks to `/api/teacher-app/v1`. See its README.
 - `docker-compose.yml` — backend, frontend, MySQL 8.
 
 ## How we work: TDD + Clean Architecture
@@ -44,6 +46,10 @@ cd server && npm run dev               # needs MySQL + server/.env
 cd frontend && npm test          # Vitest + Testing Library
 cd frontend && npm run lint
 cd frontend && npm run dev       # http://localhost:5173
+
+# mobile app (Flutter 3.47)
+cd mobile/teacher_app && flutter analyze && flutter test
+cd mobile/teacher_app && tool/live_api_test.sh   # against the real API + MySQL
 ```
 
 Integration tests (`server/tests/integration`) build a fresh database from
@@ -55,6 +61,19 @@ recreated on every run — never point it at real data.
 
 CI (`.github/workflows/test.yml`) runs the unit tests, the integration tests
 against a MySQL 8 service, and the frontend tests and lint on every push and PR.
+`.github/workflows/mobile.yml` analyzes and tests the app, runs it against the
+real API, and builds the APK (artifact `teacher-app-apk`).
+
+## Attendance
+
+- One row per student per day (`UNIQUE (StudentID, ClassDate)`); statuses
+  Present, Absent, Late, Leave. `server/src/modules/attendance`.
+- A save never overwrites a day taken later (`MarkedAt`): an admin's correction
+  survives an older offline save from a phone.
+- Teachers (app) mark their own class, today only (offline catch-up ≤ 48 h);
+  admins correct any past day on the website.
+- Absence SMS: `server/src/modules/notifications`, one per child per day, after
+  `ATTENDANCE_SMS_DELAY_MINUTES`; provider switch `SMS_PROVIDER=log|bulksmsbd`.
 
 ## Schema changes
 

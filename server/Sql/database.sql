@@ -56,7 +56,16 @@ CREATE TABLE
         Email VARCHAR(100),
         JoiningDate DATE,
         Address TEXT,
-        branch_id INT NOT NULL DEFAULT 1
+        branch_id INT NOT NULL DEFAULT 1,
+        -- Sign-in for the attendance app (existing databases: attendance_v2_migration.sql)
+        AppPhone CHAR(11) NULL COMMENT 'Mobile number the teacher signs in with',
+        AppPasswordHash VARCHAR(100) NULL,
+        AppEnabled BOOLEAN NOT NULL DEFAULT FALSE,
+        TokenVersion INT NOT NULL DEFAULT 0 COMMENT 'Bumped to sign the teacher out everywhere',
+        LastLoginAt TIMESTAMP NULL,
+        FailedLogins TINYINT UNSIGNED NOT NULL DEFAULT 0,
+        LockedUntil TIMESTAMP NULL,
+        CONSTRAINT uq_teachers_app_phone UNIQUE (AppPhone)
     );
 
 -- Classes Table
@@ -83,17 +92,23 @@ CREATE TABLE
         CONSTRAINT fk_subjects_class FOREIGN KEY (ClassID) REFERENCES Classes (ClassID) ON DELETE SET NULL
     );
 
+-- One row per student per day. Existing databases: attendance_v2_migration.sql
 CREATE TABLE
     Attendance (
         AttendanceID INT PRIMARY KEY AUTO_INCREMENT,
         StudentID INT NOT NULL,
         ClassID INT NULL, -- nullable so ON DELETE SET NULL works
         ClassDate DATE NOT NULL,
-        Status ENUM ('Present', 'Absent', 'Late') NOT NULL,
+        Status ENUM ('Present', 'Absent', 'Late', 'Leave') NOT NULL,
         branch_id INT NOT NULL DEFAULT 1,
+        MarkedByType ENUM ('admin', 'teacher') NULL,
+        MarkedBy INT NULL COMMENT 'Admin.AdminID or Teachers.TeacherID, by MarkedByType',
+        MarkedAt TIMESTAMP(3) NULL COMMENT 'When the day was taken; a save taken earlier never overwrites it',
+        UpdatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         FOREIGN KEY (StudentID) REFERENCES Students (StudentID),
         CONSTRAINT fk_attendance_class FOREIGN KEY (ClassID) REFERENCES Classes (ClassID) ON DELETE SET NULL,
-        UNIQUE (StudentID, ClassID, ClassDate) -- prevent duplicate entries
+        CONSTRAINT uq_attendance_student_day UNIQUE (StudentID, ClassDate),
+        INDEX idx_attendance_class_day (ClassID, ClassDate)
     );
 
 -- Exams Table
@@ -782,4 +797,30 @@ CREATE TABLE
         last_seq INT NOT NULL DEFAULT 0,
         PRIMARY KEY (branch_id, year),
         CONSTRAINT fk_receipt_counters_branch FOREIGN KEY (branch_id) REFERENCES Branches (id)
+    );
+
+-- ============================================================
+-- Absence SMS to parents: at most one per student per day.
+-- Existing databases: attendance_v2_migration.sql
+-- ============================================================
+CREATE TABLE
+    IF NOT EXISTS AttendanceSms (
+        id INT PRIMARY KEY AUTO_INCREMENT,
+        student_id INT NOT NULL,
+        class_date DATE NOT NULL,
+        phone VARCHAR(20) NULL COMMENT 'The parent number it was sent to',
+        due_at TIMESTAMP NOT NULL COMMENT 'Sent from this time on, if the student is still absent',
+        status ENUM ('pending', 'sending', 'sent', 'failed', 'cancelled', 'skipped') NOT NULL DEFAULT 'pending',
+        attempts TINYINT UNSIGNED NOT NULL DEFAULT 0,
+        provider_ref VARCHAR(100) NULL,
+        sent_at TIMESTAMP NULL,
+        error VARCHAR(255) NULL,
+        branch_id INT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        CONSTRAINT uq_attendance_sms_day UNIQUE (student_id, class_date),
+        INDEX idx_attendance_sms_due (status, due_at),
+        INDEX idx_attendance_sms_branch_day (branch_id, class_date),
+        CONSTRAINT fk_attendance_sms_student FOREIGN KEY (student_id) REFERENCES Students (StudentID) ON DELETE CASCADE,
+        CONSTRAINT fk_attendance_sms_branch FOREIGN KEY (branch_id) REFERENCES Branches (id)
     );

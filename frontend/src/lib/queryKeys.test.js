@@ -10,6 +10,11 @@ describe("queryKeys", () => {
     expect(queryKeys.students.all()).toEqual(["students", { branchId: null }]);
   });
 
+  it("has prefixes that cover every attendance query and every teacher app-access query", () => {
+    expect(queryKeys.attendance.roster(1, "2026-03-01", 2).slice(0, 1)).toEqual(queryKeys.attendance.prefix);
+    expect(queryKeys.teachers.appAccess(2).slice(0, 2)).toEqual(queryKeys.teachers.appAccessPrefix);
+  });
+
   it("shares no cache between branch-agnostic class names and branch classes", () => {
     expect(queryKeys.classes.names()).toEqual(["classes", "names"]);
   });

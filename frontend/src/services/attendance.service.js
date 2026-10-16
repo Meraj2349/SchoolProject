@@ -36,9 +36,14 @@ export const attendanceService = {
       })
       .then((r) => r.data),
 
-  // Upsert a single attendance cell in the grid
-  upsertCell: (studentId, classDate, status) =>
-    httpClient
-      .post("/attendance/cell", { studentId, classDate, status })
-      .then((r) => r.data),
+  // A class's students with their status on `date`, and who took the day
+  getRoster: (classId, date) =>
+    httpClient.get("/attendance/roster", { params: { classId, date } }).then((r) => r.data),
+
+  // The whole class's day in one request: entries = [{ studentId, status }]
+  saveDay: (classId, date, entries) =>
+    httpClient.put(`/attendance/class/${classId}/date/${date}`, { entries }).then((r) => r.data),
+
+  // The day's SMS to parents of absent children
+  getSms: (date) => httpClient.get("/attendance/sms", { params: { date } }).then((r) => r.data),
 };

@@ -40,3 +40,22 @@ export function useDeleteTeacher() {
     onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.teachers.all(branchId) }),
   });
 }
+
+/** Admin — each teacher's sign-in to the attendance app. */
+export function useTeacherAppAccess() {
+  const branchId = useBranchStore((s) => s.currentBranchId);
+  return useQuery({
+    queryKey: queryKeys.teachers.appAccess(branchId),
+    queryFn: teachersService.getAppAccess,
+    select: (d) => d?.data ?? [],
+  });
+}
+
+/** Admin — sets a teacher's app mobile number, password and on/off switch. */
+export function useSetTeacherAppAccess() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, data }) => teachersService.setAppAccess(id, data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.teachers.appAccessPrefix }),
+  });
+}

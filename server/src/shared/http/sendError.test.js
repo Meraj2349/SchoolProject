@@ -1,5 +1,5 @@
 import { describe, expect, it, jest } from "@jest/globals";
-import { ConflictError, ForbiddenError, NotFoundError, ValidationError } from "../errors/index.js";
+import { ConflictError, ForbiddenError, NotFoundError, TooManyRequestsError, UnauthorizedError, ValidationError } from "../errors/index.js";
 import { sendError } from "./sendError.js";
 
 function fakeRes() {
@@ -15,6 +15,8 @@ describe("sendError", () => {
     [new NotFoundError("branch_not_found"), 404],
     [new ConflictError("admin_last_super_admin"), 409],
     [new ForbiddenError("content_not_yours"), 403],
+    [new UnauthorizedError("teacher_app_login_failed"), 401],
+    [new TooManyRequestsError("teacher_app_locked"), 429],
   ])("answers %s with %i and the translated message", (error, status) => {
     const res = fakeRes();
 
