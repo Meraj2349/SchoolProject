@@ -485,3 +485,10 @@ body {
   .admin-no-print { display: none !important; }
   .admin-shell { background: white; }
 }
+
+/* Letter-spacing (the small-caps "eyebrow" look) splits Bangla letters and
+   conjuncts apart ("বা ণী"), so Bangla text is never spaced out. Outside any
+   layer, so it wins over the tracking-* utilities. */
+:lang(bn) [class*="tracking-"] {
+  letter-spacing: normal;
+}
