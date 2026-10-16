@@ -192,7 +192,8 @@
     "address": "ঠিকানা",
     "addressValue": "নাটিয়াপাড়া, দেলদুয়ার, টাঙ্গাইল, বাংলাদেশ",
     "phone": "ফোন",
-    "emailLabel": "ইমেইল"
+    "emailLabel": "ইমেইল",
+    "mapTitle": "স্টার শিক্ষা পরিবারের মানচিত্র"
   },
   "chairman": {
     "pageTitle": "চেয়ারম্যানের বার্তা",
@@ -201,7 +202,7 @@
     "title": "চেয়ারম্যান",
     "institution": "স্টার শিক্ষা পরিবার",
     "bestRegards": "শুভেচ্ছান্তে,",
-    "backToHome": "← হোমে ফিরে যান",
+    "backToHome": "হোমে ফিরে যান",
     "defaultMessage": "আমাদের স্কুলে স্বাগতম! আমরা উৎকৃষ্ট শিক্ষা প্রদানে প্রতিশ্রুতিবদ্ধ।"
   },
   "gallery": {
@@ -209,13 +210,9 @@
     "browseByCategory": "বিভাগ অনুযায়ী দেখুন",
     "showing": "দেখাচ্ছে",
     "images": "টি ছবি",
-    "in": "এ",
     "loading": "লোড হচ্ছে…",
     "failedToLoad": "ছবি লোড করতে ব্যর্থ হয়েছে",
-    "tryAgain": "আবার চেষ্টা করুন",
     "noImages": "কোনো ছবি পাওয়া যায়নি",
-    "imageNotAvailable": "ছবি পাওয়া যাচ্ছে না",
-    "viewImage": "ছবি দেখুন",
     "of": "এর মধ্যে",
     "categories": {
       "all": "সব ছবি",
@@ -235,7 +232,6 @@
     "upcomingEvents": "আসন্ন ইভেন্ট",
     "loadingEvents": "ইভেন্ট লোড হচ্ছে…",
     "errorLoadingEvents": "ইভেন্ট লোড করতে ত্রুটি",
-    "tryAgain": "আবার চেষ্টা করুন",
     "noUpcomingEvents": "কোনো আসন্ন ইভেন্ট নেই",
     "checkBackLater": "নতুন ইভেন্টের জন্য পরে আবার দেখুন।",
     "happeningNow": "এখন চলছে",
@@ -264,22 +260,18 @@
     "rollNumber": "রোল নম্বর",
     "rollNumberPlaceholder": "রোল নম্বর লিখুন",
     "className": "শ্রেণির নাম",
-    "classNamePlaceholder": "শ্রেণির নাম লিখুন",
     "section": "বিভাগ",
-    "sectionPlaceholder": "বিভাগের নাম লিখুন",
     "searchBtn": "শিক্ষার্থী খুঁজুন",
     "searching": "খোঁজা হচ্ছে…",
     "resetBtn": "রিসেট",
     "fillAllFields": "অনুগ্রহ করে সব অনুসন্ধান ঘর পূরণ করুন।",
     "noStudentsFound": "আপনার নির্দিষ্ট তথ্যে কোনো শিক্ষার্থী পাওয়া যায়নি।",
-    "searchFailed": "অনুসন্ধান ব্যর্থ হয়েছে",
     "searchError": "অনুসন্ধানের সময় একটি ত্রুটি ঘটেছে",
     "searchResults": "অনুসন্ধান ফলাফল",
     "studentFound": "জন শিক্ষার্থী পাওয়া গেছে",
     "studentsFound": "জন শিক্ষার্থী পাওয়া গেছে",
     "class": "শ্রেণি",
     "rollNumberLabel": "রোল নম্বর:",
-    "studentIdLabel": "শিক্ষার্থী আইডি:",
     "gender": "লিঙ্গ",
     "dateOfBirth": "জন্ম তারিখ",
     "parentContact": "অভিভাবকের যোগাযোগ",
@@ -300,7 +292,6 @@
     "teachersFound": "জন শিক্ষক পাওয়া গেছে",
     "loadingTeachers": "শিক্ষক লোড হচ্ছে…",
     "failedToFetch": "শিক্ষক আনতে ব্যর্থ হয়েছে",
-    "tryAgain": "আবার চেষ্টা করুন",
     "noTeachersFound": "কোনো শিক্ষক পাওয়া যায়নি",
     "joined": "যোগদান",
     "pageSubtitle": "যাঁরা প্রতিদিন আমাদের শিক্ষার্থীদের পথ দেখান।",
@@ -1263,7 +1254,6 @@
     "noProposedBranches": "এখনো কোনো প্রস্তাবিত শাখা নেই",
     "loading": "শাখা লোড হচ্ছে…",
     "failedToLoad": "শাখা লোড করতে ব্যর্থ হয়েছে",
-    "tryAgain": "আবার চেষ্টা করুন",
     "students": "শিক্ষার্থী",
     "teachers": "শিক্ষক",
     "classes": "শ্রেণি",
@@ -1472,7 +1462,8 @@
         "time": "সময়"
       },
       "minutes": "{m} মি {s} সে",
-      "seconds": "{s} সে"
+      "seconds": "{s} সে",
+      "failed": "আপনার অগ্রগতি লোড করা যায়নি।"
     }
   }
 }

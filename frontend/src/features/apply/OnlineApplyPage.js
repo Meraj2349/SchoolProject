@@ -3,8 +3,8 @@
 import { useState } from "react";
 import { FiCheckCircle } from "react-icons/fi";
 import { PageHero, PublicPage } from "@/components/site";
+import { useSubmitApplication } from "@/hooks/useApplications";
 import { useBranches } from "@/hooks/useBranches";
-import { applicationService } from "@/services/application.service";
 import { useBranchStore } from "@/store/branchStore";
 import { useLanguageStore, useTranslations } from "@/store/languageStore";
 
@@ -120,7 +120,8 @@ export default function OnlineApplyPage() {
   };
   const { data: branches = [] } = useBranches();
   const [errors, setErrors] = useState({});
-  const [submitting, setSubmitting] = useState(false);
+  const submitApplication = useSubmitApplication();
+  const submitting = submitApplication.isPending;
   const [submitError, setSubmitError] = useState("");
   const [success, setSuccess] = useState(false);
 
@@ -139,16 +140,13 @@ export default function OnlineApplyPage() {
       setSubmitError(t("requiredFields"));
       return;
     }
-    setSubmitting(true);
     try {
-      await applicationService.submit({ ...form, branch_id: Number(form.branch_id) });
+      await submitApplication.mutateAsync({ ...form, branch_id: Number(form.branch_id) });
       setSuccess(true);
     } catch (err) {
       // The API's own message is already translated; anything else (network
       // errors, stack traces) is replaced by ours.
       setSubmitError(err?.response?.data?.message || t("submitFailed"));
-    } finally {
-      setSubmitting(false);
     }
   };
 

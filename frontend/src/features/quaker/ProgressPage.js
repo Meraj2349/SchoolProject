@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 import Link from "next/link";
 import { FiArrowRight } from "react-icons/fi";
-import { SiteLoader } from "@/components/site";
+import { ErrorState, SiteLoader } from "@/components/site";
+import { useMyQuizProgress } from "@/hooks/useQuizStudent";
 import { formatDate, formatNumber } from "@/lib/homePage";
 import { fillTemplate } from "@/lib/template";
-import { isQuizSessionExpired, quizService, quizTokenHolder } from "@/services/quiz.service";
+import { isQuizSessionExpired, quizTokenHolder } from "@/services/quiz.service";
 import { useLanguageStore, useTranslations } from "@/store/languageStore";
 import { useQuizSessionStore } from "@/store/quizSessionStore";
 import IdentityFormPage from "./IdentityFormPage";
@@ -144,40 +145,26 @@ function SessionHistory({ sessions, loading }) {
   );
 }
 
+const noSubscription = () => () => {};
+
 export default function ProgressPage() {
   const t = useTranslations("quaker.progress");
   const language = useLanguageStore((s) => s.language);
   const student = useQuizSessionStore((s) => s.student);
-  const [status, setStatus] = useState("checking"); // checking | needsIdentity | ready
-  const [progress, setProgress] = useState(null);
-  const [sessions, setSessions] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const storeToken = useQuizSessionStore((s) => s.quizToken);
+  // The quiz token lives in sessionStorage, which only the browser has (null while prerendering).
+  const savedToken = useSyncExternalStore(noSubscription, () => quizTokenHolder.get() ?? "", () => null);
+  const token = storeToken || savedToken;
+  const { data, isLoading, isError, error, refetch } = useMyQuizProgress(token);
 
-  const loadData = async () => {
-    setLoading(true);
-    try {
-      const [p, s] = await Promise.all([quizService.myProgress(), quizService.mySessions()]);
-      setProgress(p);
-      setSessions(Array.isArray(s) ? s : []);
-      setStatus("ready");
-    } catch (failure) {
-      // An expired or unknown quiz session: ask who the student is again.
-      setStatus(isQuizSessionExpired(failure) || failure?.response?.status === 404 ? "needsIdentity" : "ready");
-    } finally {
-      setLoading(false);
-    }
-  };
+  if (token === null) return null;
+  // No quiz session, or an expired or unknown one: ask who the student is (again).
+  if (!token || (isError && (isQuizSessionExpired(error) || error?.response?.status === 404))) return <IdentityFormPage onVerified={() => {}} />;
 
-  useEffect(() => {
-    if (quizTokenHolder.get()) loadData();
-    else setStatus("needsIdentity");
-  }, []);
-
-  if (status === "needsIdentity") return <IdentityFormPage onVerified={loadData} />;
-  if (status === "checking") return null;
-
-  const totals = progress?.totals || {};
-  const bySubject = progress?.bySubject || [];
+  const loading = isLoading;
+  const totals = data?.progress?.totals || {};
+  const bySubject = data?.progress?.bySubject || [];
+  const sessions = data?.sessions ?? [];
   const n = (value) => formatNumber(value ?? 0, language);
   const stat = (value) => (loading ? "—" : value);
 
@@ -203,8 +190,14 @@ export default function ProgressPage() {
           <StatCard label={t("totalAnswered")} value={stat(n(totals.totalQuestions))} />
         </div>
 
-        {bySubject.length > 0 && <SubjectBreakdown subjects={bySubject} />}
-        <SessionHistory sessions={sessions} loading={loading} />
+        {isError ? (
+          <ErrorState message={t("failed")} onRetry={refetch} />
+        ) : (
+          <>
+            {bySubject.length > 0 && <SubjectBreakdown subjects={bySubject} />}
+            <SessionHistory sessions={sessions} loading={loading} />
+          </>
+        )}
       </div>
     </div>
   );

@@ -1,7 +1,8 @@
 "use client";
 
+import { formatNumber } from "@/lib/homePage";
 import { fillTemplate } from "@/lib/template";
-import { useTranslations } from "@/store/languageStore";
+import { useLanguageStore, useTranslations } from "@/store/languageStore";
 import MathText from "./MathText";
 import { hasBangla, localize } from "./quizText";
 import { ACCENT, ErrorBox, GoldStrip, PRIMARY_BUTTON, SECONDARY_BUTTON, pill } from "./quizStyles";
@@ -21,6 +22,7 @@ export default function QuizPlayer({
   error,
 }) {
   const t = useTranslations("quiz");
+  const language = useLanguageStore((s) => s.language);
   const question = questions[current];
   const { prompt, options } = localize(question, questionLanguage);
   const selected = answers[question.id];
@@ -33,10 +35,10 @@ export default function QuizPlayer({
       <div className="sticky top-0 z-20 bg-white/90 backdrop-blur-md border-b border-[rgba(201,168,76,0.3)]">
         <div className="max-w-4xl mx-auto px-5 py-4">
           <div className="flex flex-wrap items-center justify-between gap-3 mb-2.5">
-            <p className="m-0 text-lg font-extrabold text-school-navy tabular-nums">
+            <h1 className="m-0 text-lg font-extrabold text-school-navy tabular-nums">
               <span className="text-xs font-bold tracking-[0.15em] uppercase text-[#7a5c1e] mr-2">{t("question")}</span>
-              {current + 1} / {questions.length}
-            </p>
+              {formatNumber(current + 1, language)} / {formatNumber(questions.length, language)}
+            </h1>
             <div className="flex items-center gap-2" role="group" aria-label={t("questionLanguage")}>
               {[
                 ["bn", t("bangla")],

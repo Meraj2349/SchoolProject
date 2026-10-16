@@ -1,13 +1,11 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { FiArrowLeft } from "react-icons/fi";
 import { PageHero, PublicPage, SiteImage, SiteLoader } from "@/components/site";
+import { useChairmanProfile } from "@/hooks/useChairman";
 import { useMessages } from "@/hooks/useMessages";
 import { localized } from "@/lib/homePage";
-import { queryKeys } from "@/lib/queryKeys";
-import { chairmanService } from "@/services/chairman.service";
 import { useLanguageStore, useTranslations } from "@/store/languageStore";
 
 const CHAIRMAN_PHOTO = "/images/WhatsApp Image 2024-12-07 at 20.48.41_3423f492.jpg";
@@ -18,11 +16,7 @@ export default function ChairmanMessagePage() {
   const t = useTranslations("chairman");
   const language = useLanguageStore((s) => s.language);
   const { data: messages = [], isLoading: messagesLoading } = useMessages();
-  const { data: profile, isLoading: profileLoading } = useQuery({
-    queryKey: queryKeys.chairman.profile,
-    queryFn: chairmanService.getProfile,
-    select: (d) => d?.data ?? d,
-  });
+  const { data: profile, isLoading: profileLoading } = useChairmanProfile();
 
   const name = localized(profile, "name", language) || t("name");
   const title = localized(profile, "title", language) || t("title");
@@ -63,7 +57,7 @@ export default function ChairmanMessagePage() {
           <div className="mt-8 text-center">
             <Link href="/" className="site-cta">
               <FiArrowLeft aria-hidden="true" />
-              {t("backToHome").replace(/^←\s*/, "")}
+              {t("backToHome")}
             </Link>
           </div>
         </article>

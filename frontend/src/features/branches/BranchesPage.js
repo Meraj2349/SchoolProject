@@ -68,10 +68,12 @@ function BranchCard({ branch, stats, isSelected, onSelect }) {
         {stats && !proposed && (
           <dl className="m-0 mt-2 grid grid-cols-3 gap-2 text-center">
             {STATS.map(({ key, label, icon: Icon }) => (
-              <div key={key} className="rounded-sm bg-school-cream px-1 py-2">
-                <Icon aria-hidden="true" className="mx-auto text-school-gold" />
-                <dd className="m-0 font-school-heading text-lg font-bold text-school-navy">{formatNumber(stats[key] ?? 0, language)}</dd>
-                <dt className="text-[0.7rem] uppercase tracking-wide text-school-muted">{t(label)}</dt>
+              <div key={key} className="flex flex-col rounded-sm bg-school-cream px-1 py-2">
+                <dt className="order-last text-[0.7rem] uppercase tracking-wide text-school-muted">{t(label)}</dt>
+                <dd className="m-0 font-school-heading text-lg font-bold text-school-navy">
+                  <Icon aria-hidden="true" className="mx-auto block text-base text-school-gold" />
+                  {formatNumber(stats[key] ?? 0, language)}
+                </dd>
               </div>
             ))}
           </dl>

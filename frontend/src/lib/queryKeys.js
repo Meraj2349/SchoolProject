@@ -45,7 +45,7 @@ export const queryKeys = {
   exams: {
     all: (branchId = null) => ["exams", { branchId }],
     byClass: (id, branchId = null) => ["exams", "class", id, { branchId }],
-    publicNames: (branchId = null) => ["exams", "public", "names", { branchId }],
+    publicNames: () => ["exams", "public", "names"],
   },
   results: {
     search: (filters, branchId = null) => ["results", "search", filters, { branchId }],
@@ -88,7 +88,9 @@ export const queryKeys = {
     questions: (filters) => ["quiz", "questions", filters],
     subjects: (classKey) => ["quiz", "subjects", classKey],
     // Public: the classes of one branch, for the quiz identity form
-    classes: (branchId) => ["quiz", "classes", String(branchId)],
+    classes: (branchId = null) => ["quiz", "classes", { branchId }],
+    // The verified student's own progress; keyed by quiz token so a new sign-in refetches
+    mine: (token) => ["quiz", "mine", token],
     sessions: (filters, branchId = null) => ["quiz", "sessions", filters, { branchId }],
     leaderboard: (filters, branchId = null) => ["quiz", "leaderboard", filters, { branchId }],
   },

@@ -6,9 +6,9 @@ import Image from "next/image";
 import { FiCheck } from "react-icons/fi";
 import { useBranches } from "@/hooks/useBranches";
 import { useQuizClasses } from "@/hooks/useQuizClasses";
-import { quizErrorMessage, quizService } from "@/services/quiz.service";
+import { useVerifyQuizStudent } from "@/hooks/useQuizStudent";
+import { quizErrorMessage } from "@/services/quiz.service";
 import { useLanguageStore, useTranslations } from "@/store/languageStore";
-import { useQuizSessionStore } from "@/store/quizSessionStore";
 import { ErrorBox } from "./quizStyles";
 import { classesOf, sectionsOf } from "./quizText";
 
@@ -28,11 +28,10 @@ export default function IdentityFormPage({ next = "/quaker/quiz", onVerified }) 
   const t = useTranslations("quiz");
   const tq = useTranslations("quaker.identity");
   const language = useLanguageStore((s) => s.language);
-  const setSession = useQuizSessionStore((s) => s.setSession);
+  const verify = useVerifyQuizStudent();
   const ids = { branch: useId(), first: useId(), last: useId(), class: useId(), section: useId(), roll: useId() };
 
   const [form, setForm] = useState(EMPTY);
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const { data: allBranches = [] } = useBranches();
   const branches = allBranches.filter((b) => !b.is_proposed);
@@ -51,16 +50,12 @@ export default function IdentityFormPage({ next = "/quaker/quiz", onVerified }) 
       setError(t("fillAllFields"));
       return;
     }
-    setLoading(true);
     try {
-      const { token, student } = await quizService.verifyStudent(identity);
-      setSession(token, student);
+      const { student } = await verify.mutateAsync(identity);
       if (onVerified) await onVerified(student);
       else router.push(next);
     } catch (failure) {
       setError(quizErrorMessage(failure, t("verifyFailed")));
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -129,8 +124,8 @@ export default function IdentityFormPage({ next = "/quaker/quiz", onVerified }) 
             {input(ids.last, t("lastName"), "lastName", "family-name")}
           </div>
           {input(ids.roll, t("rollNumber"), "rollNumber")}
-          <button type="submit" disabled={loading} className="site-cta w-full disabled:opacity-60">
-            {loading ? t("verifying") : t("verify")}
+          <button type="submit" disabled={verify.isPending} className="site-cta w-full disabled:opacity-60">
+            {verify.isPending ? t("verifying") : t("verify")}
           </button>
         </form>
 

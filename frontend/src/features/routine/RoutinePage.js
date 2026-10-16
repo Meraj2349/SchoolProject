@@ -115,19 +115,25 @@ export default function RoutinePage() {
   let content;
   if (isLoading) content = <SiteLoader label={t("loadingRoutines")} />;
   else if (isError) content = <ErrorState message={t("failedToLoad")} onRetry={refetch} />;
-  else if (shown.length === 0) content = <EmptyState title={t("noRoutinesFound")} message={filtering ? t("tryAdjustFilters") : t("noRoutinesPublished")} />;
   else
     content = (
       <>
+        {/* Stays mounted so screen readers hear the count change, including "0 routines found". */}
         <p className="m-0 mb-4 font-school-heading text-xl font-bold text-school-navy" aria-live="polite">
           {formatNumber(shown.length, language)} {shown.length === 1 ? t("routineFound") : t("routinesFound")}
         </p>
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {paged.map((routine) => (
-            <RoutineCard key={routine.RoutineID} routine={routine} />
-          ))}
-        </div>
-        <Pagination page={page} pages={pages} onChange={setPage} />
+        {shown.length === 0 ? (
+          <EmptyState title={t("noRoutinesFound")} message={filtering ? t("tryAdjustFilters") : t("noRoutinesPublished")} />
+        ) : (
+          <>
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {paged.map((routine) => (
+                <RoutineCard key={routine.RoutineID} routine={routine} />
+              ))}
+            </div>
+            <Pagination page={page} pages={pages} onChange={setPage} />
+          </>
+        )}
       </>
     );
 

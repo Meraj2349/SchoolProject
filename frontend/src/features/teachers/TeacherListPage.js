@@ -130,18 +130,21 @@ export default function TeacherListPage() {
           <SiteLoader label={t("loadingTeachers")} />
         ) : isError ? (
           <ErrorState message={t("failedToFetch")} onRetry={refetch} />
-        ) : shown.length === 0 ? (
-          <EmptyState title={t("noTeachersFound")} />
         ) : (
           <>
+            {/* Stays mounted so screen readers hear the count change, including "0 teachers found". */}
             <p className="m-0 mb-4 text-sm text-school-muted" aria-live="polite">
               {formatNumber(shown.length, language)} {shown.length === 1 ? t("teacherFound") : t("teachersFound")}
             </p>
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {shown.map((teacher) => (
-                <TeacherCard key={teacher.TeacherID} teacher={teacher} photo={photos.get(teacher.TeacherID)} classes={classesTaughtBy(classes, teacher.TeacherID)} />
-              ))}
-            </div>
+            {shown.length === 0 ? (
+              <EmptyState title={t("noTeachersFound")} />
+            ) : (
+              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                {shown.map((teacher) => (
+                  <TeacherCard key={teacher.TeacherID} teacher={teacher} photo={photos.get(teacher.TeacherID)} classes={classesTaughtBy(classes, teacher.TeacherID)} />
+                ))}
+              </div>
+            )}
           </>
         )}
       </div>

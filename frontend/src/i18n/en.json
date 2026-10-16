@@ -192,7 +192,8 @@
     "address": "Address",
     "addressValue": "Natiapara, Delduar, Tangail, Bangladesh",
     "phone": "Phone",
-    "emailLabel": "Email"
+    "emailLabel": "Email",
+    "mapTitle": "Map of Star Shikkha Poribar"
   },
   "chairman": {
     "pageTitle": "Chairman's Message",
@@ -201,7 +202,7 @@
     "title": "Chairman",
     "institution": "Star Shikkha Poribar",
     "bestRegards": "Best regards,",
-    "backToHome": "← Back to Home",
+    "backToHome": "Back to Home",
     "defaultMessage": "Welcome to our school! We are committed to providing excellent education."
   },
   "gallery": {
@@ -209,13 +210,9 @@
     "browseByCategory": "Browse by Category",
     "showing": "Showing",
     "images": "images",
-    "in": "in",
     "loading": "Loading…",
     "failedToLoad": "Failed to load images",
-    "tryAgain": "Try Again",
     "noImages": "No images found",
-    "imageNotAvailable": "Image not available",
-    "viewImage": "View Image",
     "of": "of",
     "categories": {
       "all": "All Images",
@@ -235,7 +232,6 @@
     "upcomingEvents": "Upcoming Events",
     "loadingEvents": "Loading events…",
     "errorLoadingEvents": "Error Loading Events",
-    "tryAgain": "Try Again",
     "noUpcomingEvents": "No Upcoming Events",
     "checkBackLater": "Check back later for new events.",
     "happeningNow": "HAPPENING NOW",
@@ -264,22 +260,18 @@
     "rollNumber": "Roll Number",
     "rollNumberPlaceholder": "Enter roll number",
     "className": "Class Name",
-    "classNamePlaceholder": "Enter class name",
     "section": "Section",
-    "sectionPlaceholder": "Enter section name",
     "searchBtn": "Search Students",
     "searching": "Searching…",
     "resetBtn": "Reset",
     "fillAllFields": "Please fill in all search fields.",
     "noStudentsFound": "No students found matching your exact criteria.",
-    "searchFailed": "Search failed",
     "searchError": "An error occurred while searching",
     "searchResults": "Search Results",
     "studentFound": "student found",
     "studentsFound": "students found",
     "class": "Class",
     "rollNumberLabel": "Roll Number:",
-    "studentIdLabel": "Student ID:",
     "gender": "Gender",
     "dateOfBirth": "Date of Birth",
     "parentContact": "Parent Contact",
@@ -300,7 +292,6 @@
     "teachersFound": "teachers found",
     "loadingTeachers": "Loading teachers…",
     "failedToFetch": "Failed to fetch teachers",
-    "tryAgain": "Try Again",
     "noTeachersFound": "No teachers found",
     "joined": "Joined",
     "pageSubtitle": "The teachers who guide our students every day.",
@@ -1263,7 +1254,6 @@
     "noProposedBranches": "No proposed branches yet",
     "loading": "Loading branches…",
     "failedToLoad": "Failed to load branches",
-    "tryAgain": "Try Again",
     "students": "Students",
     "teachers": "Teachers",
     "classes": "Classes",
@@ -1472,7 +1462,8 @@
         "time": "Time"
       },
       "minutes": "{m}m {s}s",
-      "seconds": "{s}s"
+      "seconds": "{s}s",
+      "failed": "Could not load your progress."
     }
   }
 }

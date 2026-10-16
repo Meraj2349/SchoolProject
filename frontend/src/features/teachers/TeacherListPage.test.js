@@ -66,6 +66,8 @@ describe("TeacherListPage", () => {
     fireEvent.change(screen.getByLabelText("Search teachers"), { target: { value: "math" } });
     expect(names()).toEqual(["Karim Ahmed"]);
     expect(screen.getByText("1 teacher found")).toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText("Search teachers"), { target: { value: "nobody" } });
+    expect(screen.getByText("0 teachers found")).toBeInTheDocument();
   });
 
   it("marks class teachers", async () => {

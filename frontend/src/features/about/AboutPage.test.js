@@ -17,7 +17,7 @@ describe("AboutPage", () => {
 
     expect(screen.getByRole("heading", { level: 1, name: "About Us" })).toBeInTheDocument();
     expect(screen.getByRole("img", { name: "The school gate" })).toBeInTheDocument();
-    expect(screen.getByTitle(/location/i)).toBeInTheDocument();
+    expect(screen.getByTitle("Map of Star Shikkha Poribar")).toBeInTheDocument();
   });
 
   it("gives the school's real contact details as links", () => {

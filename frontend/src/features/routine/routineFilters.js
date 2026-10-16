@@ -15,7 +15,7 @@ export function filterRoutines(routines = [], { className = "", section = "", se
     .sort((a, b) => time(b.RoutineDate) - time(a.RoutineDate));
 }
 
-/** "pdf", "image" or null, from the stored type or the file name. */
+/** "pdf", "image" or "file" (any other attachment) from the stored type or the file name; null when there is no file. */
 export function fileKind({ FileType, FileURL } = {}) {
   if (!FileURL) return null;
   if (FileType === "pdf" || /\.pdf$/i.test(FileURL)) return "pdf";

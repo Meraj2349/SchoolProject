@@ -28,9 +28,9 @@ function Countdown({ end }) {
       <p className="m-0 mb-2 text-xs font-bold uppercase tracking-wider text-school-muted">{t("endsIn")}</p>
       <dl className="m-0 grid grid-cols-4 gap-2 text-center">
         {COUNTDOWN_UNITS.map((unit) => (
-          <div key={unit} className="rounded-sm bg-school-navy px-1 py-2 text-white">
+          <div key={unit} className="flex flex-col rounded-sm bg-school-navy px-1 py-2 text-white">
+            <dt className="order-last text-[0.65rem] uppercase tracking-wide text-white/75">{t(unit)}</dt>
             <dd className="m-0 font-school-heading text-xl font-bold text-school-gold-soft">{formatNumber(left[unit], language)}</dd>
-            <dt className="text-[0.65rem] uppercase tracking-wide text-white/75">{t(unit)}</dt>
           </div>
         ))}
       </dl>

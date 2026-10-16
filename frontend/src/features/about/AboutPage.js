@@ -52,7 +52,7 @@ export default function AboutPage() {
                 allowFullScreen
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"
-                title={`${t("schoolName")} location`}
+                title={t("about.mapTitle")}
               />
             </div>
             <SiteCard id="contact-title" title={t("about.getInTouch")}>

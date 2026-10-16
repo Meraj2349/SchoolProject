@@ -1,15 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { EmptyState, ErrorState, PageHero, PublicPage, SiteCard, SiteLoader } from "@/components/site";
 import { useClassNames, useStandardSections } from "@/hooks/useClasses";
 import { useExamNames } from "@/hooks/useExams";
+import { useResultSearch } from "@/hooks/useResults";
 import { gradeFor } from "@/lib/grades";
 import { formatNumber } from "@/lib/homePage";
 import { fullName } from "@/lib/people";
-import { queryKeys } from "@/lib/queryKeys";
-import { resultsService } from "@/services/results.service";
 import { useBranchStore } from "@/store/branchStore";
 import { useLanguageStore, useTranslations } from "@/store/languageStore";
 
@@ -32,15 +30,6 @@ const toQuery = (filters) => ({
   examName: filters.examName.trim() || undefined,
 });
 
-function useResultSearch(query) {
-  const branchId = useBranchStore((s) => s.currentBranchId);
-  return useQuery({
-    queryKey: queryKeys.results.search(query, branchId),
-    queryFn: () => resultsService.search(query),
-    enabled: !!query,
-    select: (data) => (Array.isArray(data) ? data : (data?.data ?? [])),
-  });
-}
 
 function ResultsTable({ query }) {
   const t = useTranslations("results");

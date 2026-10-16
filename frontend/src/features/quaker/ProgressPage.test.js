@@ -84,7 +84,8 @@ describe("ProgressPage", () => {
     });
     render(<ProgressPage />);
 
-    expect(await screen.findByRole("heading", { level: 1, name: "Your learning journey" })).toBeInTheDocument();
+    expect(await screen.findByText(/2 quizzes · 17\/20 correct/)).toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 1, name: "Your learning journey" })).toBeInTheDocument();
     expect(screen.getAllByRole("heading", { level: 1 })).toHaveLength(1);
     expect(screen.getByText("Average score").nextSibling).toHaveTextContent("76%");
     expect(screen.getByText(/2 quizzes · 17\/20 correct/)).toBeInTheDocument();
@@ -98,9 +99,19 @@ describe("ProgressPage", () => {
     useLanguageStore.getState().setLanguage("bn");
     render(<ProgressPage />);
 
-    expect(await screen.findByRole("heading", { level: 1, name: "আপনার শেখার যাত্রা" })).toBeInTheDocument();
-    expect(screen.getByRole("columnheader", { name: "বিষয়" })).toBeInTheDocument();
+    expect(await screen.findByRole("columnheader", { name: "বিষয়" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 1, name: "আপনার শেখার যাত্রা" })).toBeInTheDocument();
     expect(screen.getByText("১ মি ১৫ সে")).toBeInTheDocument();
     expect(screen.queryByText(/Session History|Total Sessions|New Quiz/)).not.toBeInTheDocument();
+  });
+
+  it("says so when the history cannot load, instead of showing zeros", async () => {
+    api.mySessions.mockRejectedValueOnce({ response: { status: 500 } }).mockResolvedValueOnce(SESSIONS);
+    render(<ProgressPage />);
+
+    expect(await screen.findByRole("alert")).toHaveTextContent("Could not load your progress.");
+    expect(screen.queryByText("No quizzes yet.")).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /try again/i }));
+    expect(await screen.findByText("Math")).toBeInTheDocument();
   });
 });
