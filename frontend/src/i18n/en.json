@@ -1406,5 +1406,73 @@
     "skipToContent": "Skip to main content",
     "motto": "Education · Discipline · Character",
     "breadcrumb": "Breadcrumb"
+  },
+  "quaker": {
+    "badge": "A Quaker Education — Student Portal",
+    "headline": "Practice smarter.",
+    "headlineAccent": "Learn faster.",
+    "intro": "Thousands of questions from trusted curriculum sources. Pick a subject, take a quiz, and watch your progress climb. Free for every student — no account required.",
+    "startQuiz": "Start Quiz",
+    "checkProgress": "Check My Progress",
+    "heroAlt": "The school gate",
+    "insideTitle": "What's inside",
+    "insideBody": "Everything a student needs to study on their own and do well in exams.",
+    "features": {
+      "bank": {
+        "title": "Huge Question Bank",
+        "body": "Curated questions across Biology, Chemistry, Math, Physics and more."
+      },
+      "grading": {
+        "title": "Instant Grading",
+        "body": "Scored on the server, with a full answer review after every quiz."
+      },
+      "progress": {
+        "title": "Track Progress",
+        "body": "Subject averages, quiz history and leaderboards."
+      }
+    },
+    "readyTitle": "Ready to start?",
+    "readyBody": "No registration needed — just enter your student details and begin.",
+    "startNow": "Start Now",
+    "identity": {
+      "headline": "Prove who you are.",
+      "headlineAccent": "Start learning.",
+      "body": "No account, no password. Your details are checked against the student register, then every quiz is open to you.",
+      "privacy": "Your details are checked against the student register but never stored separately.",
+      "points": {
+        "account": "No account",
+        "access": "Instant access",
+        "secure": "Secure check"
+      }
+    },
+    "progress": {
+      "title": "Your learning journey",
+      "titleFor": "{name}'s learning journey",
+      "subtitle": "All your quizzes and subject results in one place.",
+      "newQuiz": "New Quiz",
+      "totalSessions": "Quizzes taken",
+      "avgScore": "Average score",
+      "correct": "Correct",
+      "totalAnswered": "Questions answered",
+      "bySubject": "Subject breakdown",
+      "history": "Quiz history",
+      "total": "{count} in total",
+      "loading": "Loading…",
+      "none": "No quizzes yet.",
+      "firstQuiz": "Take your first quiz",
+      "session": "quiz",
+      "sessions": "quizzes",
+      "correctOf": "{correct}/{total} correct",
+      "columns": {
+        "when": "When",
+        "subject": "Subject",
+        "class": "Class",
+        "score": "Score",
+        "grade": "Grade",
+        "time": "Time"
+      },
+      "minutes": "{m}m {s}s",
+      "seconds": "{s}s"
+    }
   }
 }

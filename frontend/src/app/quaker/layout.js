@@ -1,16 +1,10 @@
-"use client";
+import PublicPage from "@/components/site/PublicPage";
 
-import Navbar from "@/components/layout/Navbar";
-import Footer from "@/components/layout/Footer";
-import LatestUpdatesNotice from "@/components/shared/LatestUpdatesNotice";
+export const metadata = {
+  title: { default: "A Quaker Education – Star Shikkha Poribar", template: "%s – A Quaker Education" },
+  description: "Free practice quizzes for Star Shikkha Poribar students, in English and Bangla.",
+};
 
 export default function QuakerLayout({ children }) {
-  return (
-    <div className="min-h-screen bg-white flex flex-col">
-      <Navbar />
-      <LatestUpdatesNotice />
-      <main className="flex-1">{children}</main>
-      <Footer />
-    </div>
-  );
+  return <PublicPage className="bg-school-cream">{children}</PublicPage>;
 }

@@ -1,6 +1,8 @@
-import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
+import { fireEvent, screen, waitFor, within } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { useLanguageStore } from "@/store/languageStore";
+import { renderWithQuery as render } from "@/test-utils";
+import { useQuizSessionStore } from "@/store/quizSessionStore";
 import ProgressPage from "./ProgressPage";
 
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn(), replace: vi.fn() }) }));
@@ -26,6 +28,7 @@ describe("ProgressPage", () => {
     api.myProgress.mockResolvedValue({ totals: { sessions: 1, avgScore: 90, totalCorrect: 9, totalQuestions: 10 }, bySubject: [] });
     api.mySessions.mockResolvedValue(SESSIONS);
     useLanguageStore.getState().setLanguage("en");
+    useQuizSessionStore.getState().clearSession();
   });
 
   it("asks who the student is when there is no quiz session", async () => {
@@ -72,5 +75,32 @@ describe("ProgressPage", () => {
 
     expect(await screen.findByText("Math")).toBeInTheDocument();
     expect(api.mySessions).toHaveBeenCalledTimes(1);
+  });
+
+  it("shows the totals and subject breakdown, with one page heading", async () => {
+    api.myProgress.mockResolvedValue({
+      totals: { sessions: 3, avgScore: 76.4, totalCorrect: 23, totalQuestions: 30 },
+      bySubject: [{ subject: "Math", sessions: 2, totalCorrect: 17, totalQuestions: 20, avgScore: 85 }],
+    });
+    render(<ProgressPage />);
+
+    expect(await screen.findByRole("heading", { level: 1, name: "Your learning journey" })).toBeInTheDocument();
+    expect(screen.getAllByRole("heading", { level: 1 })).toHaveLength(1);
+    expect(screen.getByText("Average score").nextSibling).toHaveTextContent("76%");
+    expect(screen.getByText(/2 quizzes · 17\/20 correct/)).toBeInTheDocument();
+    const row = screen.getAllByText("Math").at(-1).closest("tr");
+    expect(within(row).getByText("1m 15s")).toBeInTheDocument();
+    expect(within(row).getByText("A")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "New Quiz" })).toHaveAttribute("href", "/quaker/quiz");
+  });
+
+  it("speaks Bangla", async () => {
+    useLanguageStore.getState().setLanguage("bn");
+    render(<ProgressPage />);
+
+    expect(await screen.findByRole("heading", { level: 1, name: "আপনার শেখার যাত্রা" })).toBeInTheDocument();
+    expect(screen.getByRole("columnheader", { name: "বিষয়" })).toBeInTheDocument();
+    expect(screen.getByText("১ মি ১৫ সে")).toBeInTheDocument();
+    expect(screen.queryByText(/Session History|Total Sessions|New Quiz/)).not.toBeInTheDocument();
   });
 });

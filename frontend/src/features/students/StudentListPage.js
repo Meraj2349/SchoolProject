@@ -177,7 +177,7 @@ export default function StudentListPage() {
               <button type="submit" className="site-cta">
                 {t("searchBtn")}
               </button>
-              <button type="button" onClick={reset} className="site-cta-outline">
+              <button type="button" onClick={reset} className="site-cta-ghost">
                 {t("resetBtn")}
               </button>
             </div>

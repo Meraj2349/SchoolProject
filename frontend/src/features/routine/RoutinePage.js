@@ -40,7 +40,7 @@ function RoutineCard({ routine }) {
       </p>
       {routine.Description && <p className="m-0 mt-3 leading-relaxed text-school-muted">{routine.Description}</p>}
       {kind && (
-        <a href={assetUrl(routine.FileURL)} target="_blank" rel="noopener noreferrer" className="site-cta-outline mt-4 self-start">
+        <a href={assetUrl(routine.FileURL)} target="_blank" rel="noopener noreferrer" className="site-cta-ghost mt-4 self-start">
           <FiDownload aria-hidden="true" />
           {t(VIEW_LABEL[kind])}
         </a>
@@ -63,7 +63,7 @@ function Pagination({ page, pages, onChange }) {
   if (pages <= 1) return null;
   return (
     <nav aria-label={t("pagination")} className="mt-10 flex flex-wrap items-center justify-center gap-2">
-      <button type="button" onClick={() => onChange(page - 1)} disabled={page === 1} className="site-cta-outline disabled:opacity-50">
+      <button type="button" onClick={() => onChange(page - 1)} disabled={page === 1} className="site-cta-ghost disabled:opacity-50">
         {t("previous")}
       </button>
       {Array.from({ length: pages }, (_, i) => i + 1).map((n) => (
@@ -77,7 +77,7 @@ function Pagination({ page, pages, onChange }) {
           {formatNumber(n, language)}
         </button>
       ))}
-      <button type="button" onClick={() => onChange(page + 1)} disabled={page === pages} className="site-cta-outline disabled:opacity-50">
+      <button type="button" onClick={() => onChange(page + 1)} disabled={page === pages} className="site-cta-ghost disabled:opacity-50">
         {t("next")}
       </button>
     </nav>

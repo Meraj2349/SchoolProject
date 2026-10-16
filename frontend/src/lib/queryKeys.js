@@ -87,6 +87,8 @@ export const queryKeys = {
     all: ["quiz"],
     questions: (filters) => ["quiz", "questions", filters],
     subjects: (classKey) => ["quiz", "subjects", classKey],
+    // Public: the classes of one branch, for the quiz identity form
+    classes: (branchId) => ["quiz", "classes", String(branchId)],
     sessions: (filters, branchId = null) => ["quiz", "sessions", filters, { branchId }],
     leaderboard: (filters, branchId = null) => ["quiz", "leaderboard", filters, { branchId }],
   },

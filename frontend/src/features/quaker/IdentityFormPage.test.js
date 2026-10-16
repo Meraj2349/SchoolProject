@@ -1,6 +1,7 @@
-import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
+import { fireEvent, screen, waitFor, within } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { useLanguageStore } from "@/store/languageStore";
+import { renderWithQuery as render } from "@/test-utils";
 import { useQuizSessionStore } from "@/store/quizSessionStore";
 import IdentityFormPage from "./IdentityFormPage";
 
@@ -124,5 +125,16 @@ describe("IdentityFormPage", () => {
 
     expect(await screen.findByRole("alert")).toHaveTextContent("No student matches these details.");
     expect(router.push).not.toHaveBeenCalled();
+  });
+
+  it("speaks Bangla, including the side panel", async () => {
+    useLanguageStore.getState().setLanguage("bn");
+    render(<IdentityFormPage />);
+
+    expect(await screen.findByRole("heading", { level: 1 })).toHaveTextContent("কে কুইজ দিচ্ছে?");
+    expect(screen.getByText(/আপনার পরিচয় দিন।/)).toBeInTheDocument();
+    expect(screen.getByText("অ্যাকাউন্ট লাগবে না")).toBeInTheDocument();
+    expect(screen.queryByText(/Prove who you are|No account|never\s+stored/)).not.toBeInTheDocument();
+    await waitFor(() => expect(screen.getByRole("option", { name: "প্রধান ক্যাম্পাস" })).toBeInTheDocument());
   });
 });

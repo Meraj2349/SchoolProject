@@ -74,6 +74,24 @@
   .site-cta-outline:hover {
     background: rgb(255 255 255 / 0.1);
   }
+  /* The outline button for light backgrounds (cards, forms). */
+  .site-cta-ghost {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.55rem 1.2rem;
+    border: 2px solid var(--color-school-navy);
+    border-radius: 0.25rem;
+    color: var(--color-school-navy);
+    font-weight: 700;
+    text-decoration: none;
+    transition: background-color 0.2s, border-color 0.2s;
+  }
+  .site-cta-ghost:hover {
+    background: var(--color-school-cream);
+    border-color: var(--color-school-gold);
+  }
   /* A section heading with the gold rule under it. */
   .site-heading {
     font-family: var(--font-school-heading);
