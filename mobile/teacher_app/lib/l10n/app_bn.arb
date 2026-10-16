@@ -1,0 +1,174 @@
+{
+  "@@locale": "bn",
+  "appTitle": "শিক্ষক উপস্থিতি",
+  "schoolName": "স্টার শিক্ষা পরিবার",
+  "signInTitle": "সাইন ইন",
+  "signInHint": "বিদ্যালয় থেকে পাওয়া মোবাইল নম্বর ও পাসওয়ার্ড দিন।",
+  "serverLabel": "বিদ্যালয়ের সার্ভারের ঠিকানা",
+  "serverHint": "যেমন school.example.com",
+  "changeServer": "সার্ভারের ঠিকানা বদলান",
+  "phoneLabel": "মোবাইল নম্বর",
+  "passwordLabel": "পাসওয়ার্ড",
+  "signInButton": "সাইন ইন",
+  "fieldRequired": "এটি দিতে হবে",
+  "serverInvalid": "সঠিক ঠিকানা দিন (https://...)",
+  "offlineSignIn": "ইন্টারনেট সংযোগ নেই। সাইন ইন করতে ইন্টারনেট চালু করুন।",
+  "errorGeneric": "কিছু একটা সমস্যা হয়েছে। আবার চেষ্টা করুন।",
+  "signedOutNotice": "আপনাকে সাইন আউট করা হয়েছে। আবার সাইন ইন করুন।",
+  "greeting": "আসসালামু আলাইকুম, {name}",
+  "@greeting": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "todayIs": "আজ {date}",
+  "@todayIs": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "noClasses": "আপনি এখনো কোনো শ্রেণির শ্রেণিশিক্ষক নন। বিদ্যালয়ের অ্যাডমিনকে বলুন।",
+  "classStudents": "{count} জন শিক্ষার্থী",
+  "@classStudents": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "notTaken": "নেওয়া হয়নি",
+  "takenAt": "নেওয়া হয়েছে {time}",
+  "@takenAt": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "waitingToSync": "পাঠানোর অপেক্ষায়",
+  "offlineBanner": "ইন্টারনেট সংযোগ নেই। ফোনে সংরক্ষিত তালিকা দেখানো হচ্ছে।",
+  "pendingBanner": "{count}টি দিনের উপস্থিতি পাঠানোর অপেক্ষায়",
+  "@pendingBanner": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "syncNow": "এখন পাঠান",
+  "synced": "{count}টি দিনের উপস্থিতি পাঠানো হয়েছে",
+  "@synced": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "refusedTitle": "পাঠানো যায়নি: {className}, {date}",
+  "@refusedTitle": {
+    "placeholders": {
+      "className": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "discard": "বাদ দিন",
+  "takeTitle": "{className} — {section}",
+  "@takeTitle": {
+    "placeholders": {
+      "className": {
+        "type": "String"
+      },
+      "section": {
+        "type": "String"
+      }
+    }
+  },
+  "present": "উপস্থিত",
+  "absent": "অনুপস্থিত",
+  "late": "দেরিতে",
+  "leave": "ছুটি",
+  "counts": "উপস্থিত {present} · অনুপস্থিত {absent} · দেরিতে {late} · ছুটি {leave}",
+  "@counts": {
+    "placeholders": {
+      "present": {
+        "type": "String"
+      },
+      "absent": {
+        "type": "String"
+      },
+      "late": {
+        "type": "String"
+      },
+      "leave": {
+        "type": "String"
+      }
+    }
+  },
+  "allPresent": "সবাই উপস্থিত",
+  "save": "সংরক্ষণ",
+  "savedOnline": "উপস্থিতি সংরক্ষণ হয়েছে",
+  "savedOffline": "ফোনে সংরক্ষণ হয়েছে। ইন্টারনেট পেলেই পাঠানো হবে।",
+  "keptNewer": "{count} জনের অবস্থা পরে অফিস থেকে বদলানো হয়েছে, সেটিই রাখা হয়েছে।",
+  "@keptNewer": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "lockedDay": "অ্যাপে শুধু আজকের উপস্থিতি নেওয়া যায়। অন্য দিনের জন্য অফিসকে বলুন।",
+  "rosterOffline": "ইন্টারনেট নেই: ফোনে সংরক্ষিত তালিকা।",
+  "noRosterOffline": "ইন্টারনেট নেই, আর এই শ্রেণির তালিকা এখনো ফোনে সংরক্ষিত হয়নি।",
+  "takenBy": "{name} নিয়েছেন, {time}",
+  "@takenBy": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "noStudents": "এই শ্রেণিতে কোনো শিক্ষার্থী নেই।",
+  "retry": "আবার চেষ্টা করুন",
+  "settingsTitle": "সেটিংস",
+  "language": "ভাষা",
+  "bangla": "বাংলা",
+  "english": "English",
+  "changePassword": "পাসওয়ার্ড বদলান",
+  "currentPassword": "বর্তমান পাসওয়ার্ড",
+  "newPassword": "নতুন পাসওয়ার্ড",
+  "passwordTooShort": "অন্তত ৮টি অক্ষর দিন",
+  "passwordChanged": "পাসওয়ার্ড বদলানো হয়েছে",
+  "signOut": "সাইন আউট",
+  "signOutConfirm": "সাইন আউট করবেন?",
+  "signOutPending": "{count}টি দিনের উপস্থিতি এখনো পাঠানো হয়নি। সাইন আউট করলে সেগুলো মুছে যাবে।",
+  "@signOutPending": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "cancel": "বাতিল",
+  "signedInAs": "{name} ({phone})",
+  "@signedInAs": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "phone": {
+        "type": "String"
+      }
+    }
+  }
+}
