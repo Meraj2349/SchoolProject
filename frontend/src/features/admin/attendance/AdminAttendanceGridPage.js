@@ -4,7 +4,7 @@ import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { attendanceService } from "@/services/attendance.service";
 import { classesService } from "@/services/classes.service";
-import { attendanceTotals, statusCode } from "@/lib/attendance";
+import { attendanceTotals, schoolDaysOf, statusCode } from "@/lib/attendance";
 import { localDateString } from "@/lib/dates";
 import { queryKeys } from "@/lib/queryKeys";
 import { useTranslations } from "@/store/languageStore";
@@ -204,10 +204,6 @@ export default function AdminAttendanceGridPage() {
     [year, month],
   );
   const allDays = useMemo(() => generateMonthDays(year, month), [year, month]);
-  const schoolDays = useMemo(
-    () => allDays.filter((d) => !isWeekend(d)),
-    [allDays],
-  );
 
   // ── Grid data query ───────────────────────────────────────────────────
   const queryKey = useMemo(
@@ -238,6 +234,10 @@ export default function AdminAttendanceGridPage() {
   });
 
   const students = useMemo(() => data?.students ?? [], [data]);
+  // Weekdays, plus any Friday or Saturday on which attendance was taken.
+  const schoolDays = useMemo(() => schoolDaysOf(allDays, students, isWeekend), [allDays, students]);
+  // A weekend day with no record for this student: shaded, not "not marked".
+  const isOffDay = (d, status) => isWeekend(d) && !status;
 
   // ── Filtered student list (name / roll search) ────────────────────────
   const filteredStudents = useMemo(() => {
@@ -347,7 +347,7 @@ export default function AdminAttendanceGridPage() {
 
     const rows = filteredStudents.map((s, i) => {
       const cells = allDays.map((d) => {
-        if (isWeekend(d)) return "WE";
+        if (isOffDay(d, s.attendance?.[d])) return "WE";
         return statusCode(s.attendance?.[d]);
       });
       const { present, absent, late, leave, marked, pct } = studentSummary(s);
@@ -408,8 +408,8 @@ export default function AdminAttendanceGridPage() {
         const isLow = pct !== null && pct < 75;
         const cellsHtml = allDays
           .map((d) => {
-            const we = isWeekend(d);
             const status = s.attendance?.[d];
+            const we = isOffDay(d, status);
             let bg = "white";
             if (we) bg = "#e5e7eb";
             else if (status === "Present") bg = "#d1fae5";
@@ -452,7 +452,7 @@ export default function AdminAttendanceGridPage() {
       <h2>Attendance Register – ${submitted.className}, Section ${submitted.section}</h2>
       <p class="meta">
         ${MONTH_NAMES[month]} ${year} &nbsp;|&nbsp; ${filteredStudents.length} students
-        &nbsp;|&nbsp; ${schoolDays.length} school days (excl. Fri &amp; Sat)
+        &nbsp;|&nbsp; ${schoolDays.length} school days (Fri &amp; Sat only when taken)
         &nbsp;|&nbsp; Generated: ${new Date().toLocaleDateString()}
       </p>
       <table>
@@ -837,8 +837,8 @@ export default function AdminAttendanceGridPage() {
 
                       {/* Day cells */}
                       {allDays.map((date) => {
-                        const we = isWeekend(date);
                         const status = student.attendance?.[date] ?? null;
+                        const we = isOffDay(date, status);
 
                         if (we) {
                           return (

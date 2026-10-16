@@ -183,6 +183,27 @@ describe("saveDay", () => {
     expect(repository.state.saves[0].takenAt).toEqual(new Date(takenAt));
   });
 
+  it("accepts an earlier day from a phone only as its first sync, or the same save sent again", async () => {
+    const takenAt = "2026-03-09T04:30:00Z";
+    const sync = (entries, at = takenAt) => useCases.saveDay({ actor: teacher, classId: 10, date: "2026-03-09", takenAt: at, entries });
+    await sync(wholeDay("Present", "Absent"));
+
+    await sync(wholeDay("Present", "Absent")); // the reply was lost: the phone sends it again
+    await expectRejects(sync(wholeDay("Absent", "Absent"), "2026-03-09T17:59:00Z"), ForbiddenError, "attendance_day_locked");
+
+    expect(repository.state.records.map((r) => r.status)).toEqual(["Present", "Absent"]);
+  });
+
+  it("refuses an earlier day from a phone once the office has marked it", async () => {
+    await useCases.saveDay({ actor: adminA, classId: 10, date: "2026-03-09", entries: wholeDay("Present", "Leave") });
+
+    await expectRejects(
+      useCases.saveDay({ actor: teacher, classId: 10, date: "2026-03-09", takenAt: "2026-03-09T04:30:00Z", entries: wholeDay("Absent", "Absent") }),
+      ForbiddenError,
+      "attendance_day_locked",
+    );
+  });
+
   it("lets an admin correct an earlier day but not a day to come", async () => {
     await useCases.saveDay({ actor: adminA, classId: 10, date: "2026-01-05", entries: wholeDay("Present", "Absent") });
     await expectRejects(

@@ -58,13 +58,13 @@ describe("BulkSMSBD sender", () => {
 });
 
 describe("log sender", () => {
-  it("only logs, with the number masked", async () => {
+  it("only logs that it would send, with the number masked and without the child's name", async () => {
     const log = jest.spyOn(console, "log").mockImplementation(() => {});
 
-    const result = await makeLogSmsSender().send({ to: "01711000001", text: "hello" });
+    const result = await makeLogSmsSender().send({ to: "01711000001", text: "Rahim Uddin is absent" });
 
     expect(result.ref).toMatch(/^log-/);
-    expect(log).toHaveBeenCalledWith("[SMS log only] to 017*****001: hello");
+    expect(log).toHaveBeenCalledWith("[SMS log only] to 017*****001: 21 characters");
     log.mockRestore();
   });
 });

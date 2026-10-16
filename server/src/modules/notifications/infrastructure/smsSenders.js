@@ -5,12 +5,15 @@ import { maskPhone } from "../domain/absenceSms.js";
 
 const REQUEST_TIMEOUT_MS = 15_000;
 
-/** Writes the message to the server log instead of sending it (SMS_PROVIDER=log, the default). */
+/**
+ * Sends nothing, only logs that it would (SMS_PROVIDER=log, the default). The
+ * text names a child and their absence, so it stays out of the log.
+ */
 export function makeLogSmsSender() {
   return {
     name: "log",
     async send({ to, text }) {
-      console.log(`[SMS log only] to ${maskPhone(to)}: ${text}`);
+      console.log(`[SMS log only] to ${maskPhone(to)}: ${[...text].length} characters`);
       return { ref: `log-${Date.now()}` };
     },
   };

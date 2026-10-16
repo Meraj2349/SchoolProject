@@ -721,8 +721,8 @@ const i18n = {
   },
   // ── Teacher app (attendance on the phone) ─────────────────────────────────
   teacher_app_login_failed: {
-    en: "Wrong mobile number or password, or app access is off. Ask your school admin if you cannot sign in.",
-    bn: "মোবাইল নম্বর বা পাসওয়ার্ড ভুল, অথবা অ্যাপ ব্যবহারের অনুমতি বন্ধ। সাইন ইন করতে না পারলে বিদ্যালয়ের অ্যাডমিনকে বলুন।",
+    en: "Wrong mobile number or password, or app access is off. After 5 wrong tries, wait 15 minutes. Ask your school admin if you cannot sign in.",
+    bn: "মোবাইল নম্বর বা পাসওয়ার্ড ভুল, অথবা অ্যাপ ব্যবহারের অনুমতি বন্ধ। ৫ বার ভুল হলে ১৫ মিনিট অপেক্ষা করুন। সাইন ইন করতে না পারলে বিদ্যালয়ের অ্যাডমিনকে বলুন।",
   },
   teacher_app_locked: {
     en: "Too many wrong passwords. Try again in 15 minutes, or ask your school admin to set a new password.",

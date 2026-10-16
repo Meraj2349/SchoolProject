@@ -41,12 +41,14 @@ export function makeFakeTeacherAccountRepository(teachers = []) {
       if (signOut) account.tokenVersion += 1;
     },
 
-    async recordFailedLogin(id, { max, lockedUntil }) {
+    // Atomic, like the single UPDATE of the MySQL adapter.
+    async reserveLoginAttempt(id, { max, lockedUntil, now }) {
       const account = byId(id);
-      account.failedLogins += 1;
-      if (account.failedLogins < max) return { locked: false };
-      Object.assign(account, { failedLogins: 0, lockedUntil });
-      return { locked: true };
+      if (account.lockedUntil != null && account.lockedUntil > now) return { allowed: false };
+      const expired = account.lockedUntil != null;
+      account.failedLogins = expired ? 1 : account.failedLogins + 1;
+      account.lockedUntil = account.failedLogins >= max ? lockedUntil : null;
+      return { allowed: true };
     },
 
     async recordLogin(id, now) {

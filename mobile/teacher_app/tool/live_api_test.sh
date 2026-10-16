@@ -41,5 +41,5 @@ curl -sf -X PUT "http://127.0.0.1:$API_PORT/api/teachers/7/app-access" \
 cd "$APP_DIR"
 LIVE_API_URL="http://127.0.0.1:$API_PORT" LIVE_ADMIN_TOKEN="$ADMIN_TOKEN" \
   flutter test test/integration/live_api_test.dart "$@"
-echo "--- SMS the server logged (log-only mode) ---"
+echo "--- SMS the server would have sent (log-only mode) ---"
 grep "SMS log only" "$LOG" || true

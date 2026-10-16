@@ -129,15 +129,28 @@ describe("teacher app", () => {
       expect(new Set([wrong.body.message, unknown.body.message, off.body.message]).size).toBe(1);
     });
 
-    it("locks the number for a while after five wrong passwords", async () => {
+    it("checks no more passwords for a while after five wrong ones, and answers just like a wrong password", async () => {
       await giveAccess().expect(200);
-      for (let i = 0; i < 4; i += 1) await login(PHONE, "wrong-password").expect(401);
+      const wrong = [];
+      for (let i = 0; i < 5; i += 1) wrong.push(await login(PHONE, "wrong-password"));
 
-      const fifth = await login(PHONE, "wrong-password");
       const thenRight = await login();
 
-      expect(fifth.status).toBe(429);
-      expect(thenRight.status).toBe(429);
+      expect(wrong.map((r) => r.status)).toEqual([401, 401, 401, 401, 401]);
+      expect(thenRight.status).toBe(401);
+      expect(thenRight.body.message).toBe(wrong[0].body.message);
+    });
+
+    it("checks at most five passwords when guesses arrive at the same moment", async () => {
+      await giveAccess().expect(200);
+      const guesses = Array.from({ length: 12 }, (_, i) => (i === 9 ? PASSWORD : `guess-${i}-x`));
+
+      const results = await Promise.all(guesses.map((password) => login(PHONE, password)));
+
+      expect(results.filter((r) => r.status === 200)).toHaveLength(0);
+      const [[row]] = await db.query("SELECT FailedLogins AS n, LockedUntil AS until FROM Teachers WHERE TeacherID = ?", [teacherId]);
+      expect(row.n).toBe(5);
+      expect(row.until).not.toBeNull();
     });
 
     it("unlocks the number when an admin sets a new password", async () => {
@@ -228,9 +241,15 @@ describe("teacher app", () => {
       // 14:00 in Dhaka yesterday.
       const caughtUp = await save(teacher, { date: yesterday, takenAt: `${yesterday}T08:00:00.000Z` });
 
+      // The same save again (a lost reply) is fine; a different one is not.
+      const resent = await save(teacher, { date: yesterday, takenAt: `${yesterday}T08:00:00.000Z` });
+      const rewritten = await save(teacher, { date: yesterday, takenAt: `${yesterday}T17:59:00.000Z`, entries: day("Absent", "Absent") });
+
       expect(locked.status).toBe(403);
       expect(caughtUp.status).toBe(200);
-      expect(await count("Attendance", "ClassDate = ?", [yesterday])).toBe(2);
+      expect(resent.status).toBe(200);
+      expect(rewritten.status).toBe(403);
+      expect(await count("Attendance", "ClassDate = ? AND Status = 'Absent'", [yesterday])).toBe(1);
     });
 
     it("keeps an admin's correction when the phone syncs an older save, and a repeated sync changes nothing", async () => {

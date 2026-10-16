@@ -126,15 +126,34 @@ describe("signing in to the app", () => {
     );
   });
 
-  it("locks the number for 15 minutes on the fifth wrong password in a row", async () => {
-    for (let i = 0; i < 4; i += 1) {
+  it("checks at most five passwords in 15 minutes, then answers like a wrong password", async () => {
+    for (let i = 0; i < 5; i += 1) {
       await expectRejects(teacherApp.login({ phone: PHONE, password: "wrong-pass" }), UnauthorizedError, "teacher_app_login_failed");
     }
-    await expectRejects(teacherApp.login({ phone: PHONE, password: "wrong-pass" }), TooManyRequestsError, "teacher_app_locked");
-    await expectRejects(teacherApp.login({ phone: PHONE, password: "secret-123" }), TooManyRequestsError, "teacher_app_locked");
+    // Locked: even the right password is not checked, and the answer does not tell a locked number apart.
+    await expectRejects(teacherApp.login({ phone: PHONE, password: "secret-123" }), UnauthorizedError, "teacher_app_login_failed");
 
     clock.now = () => new Date(NOW.getTime() + 15 * 60_000);
     await expect(teacherApp.login({ phone: PHONE, password: "secret-123" })).resolves.toMatchObject({ teacher: { id: 7 } });
+  });
+
+  it("checks at most five passwords even when the guesses arrive at the same moment", async () => {
+    const compared = [];
+    const slowHasher = {
+      ...fakePasswordHasher,
+      compare: async (plain, hash) => {
+        compared.push(plain);
+        await new Promise((resolve) => setTimeout(resolve, 5));
+        return fakePasswordHasher.compare(plain, hash);
+      },
+    };
+    const app = makeTeacherAppUseCases({ repository, attendance, passwordHasher: slowHasher, issueToken: () => "t", clock });
+    const guesses = Array.from({ length: 20 }, (_, i) => (i === 12 ? "secret-123" : `guess-${i}`));
+
+    const results = await Promise.allSettled(guesses.map((password) => app.login({ phone: PHONE, password })));
+
+    expect(compared.filter((p) => p !== "no-such-account")).toHaveLength(5);
+    expect(results.filter((r) => r.status === "fulfilled")).toHaveLength(0);
   });
 
   it("forgets earlier wrong passwords after a good sign-in", async () => {
@@ -166,6 +185,23 @@ describe("a signed-in teacher", () => {
 
     expect(token).toBe("token:7:1:2");
     expect(repository.state.accounts[0].passwordHash).toBe("hash:brand-new-pass");
+  });
+
+  it("counts wrong current passwords toward the same limit", async () => {
+    const teacher = await teacherApp.authenticate({ teacherId: 7, tokenVersion: 1 });
+    for (let i = 0; i < 5; i += 1) {
+      await expectRejects(
+        teacherApp.changePassword({ teacher, current: "nope-nope", next: "brand-new-pass" }),
+        ValidationError,
+        "teacher_app_password_wrong",
+      );
+    }
+
+    await expectRejects(
+      teacherApp.changePassword({ teacher, current: "secret-123", next: "brand-new-pass" }),
+      TooManyRequestsError,
+      "teacher_app_locked",
+    );
   });
 
   it("refuses a password change with the wrong current password", async () => {

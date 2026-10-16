@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { ATTENDANCE_STATUSES, attendanceTotals, formatSchoolTime, statusCode } from "./attendance";
+import { ATTENDANCE_STATUSES, attendanceTotals, formatSchoolTime, schoolDaysOf, statusCode } from "./attendance";
 
 describe("attendance statuses", () => {
   it("are Present, Absent, Late and Leave", () => {
@@ -36,5 +36,18 @@ describe("formatSchoolTime", () => {
     expect(formatSchoolTime("2026-10-15T03:15:00.000Z", "en")).toBe("09:15");
     expect(formatSchoolTime("2026-10-15T13:05:00.000Z", "bn")).toBe("১৯:০৫");
     expect(formatSchoolTime(null, "en")).toBe("");
+  });
+});
+
+describe("schoolDaysOf", () => {
+  const isWeekend = (day) => day.endsWith("6") || day.endsWith("7"); // pretend the 6th and 7th are Friday and Saturday
+
+  it("is every weekday, plus a weekend day on which attendance was taken", () => {
+    const students = [{ attendance: { "2026-10-07": "Present" } }, { attendance: {} }];
+    expect(schoolDaysOf(["2026-10-05", "2026-10-06", "2026-10-07", "2026-10-08"], students, isWeekend)).toEqual([
+      "2026-10-05",
+      "2026-10-07",
+      "2026-10-08",
+    ]);
   });
 });

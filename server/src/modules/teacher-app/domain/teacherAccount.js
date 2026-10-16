@@ -26,8 +26,6 @@ export function parsePassword(value) {
 
 export const lockUntil = (now) => new Date(now.getTime() + LOCK_MINUTES * 60_000);
 
-export const isLocked = (account, now) => account.lockedUntil != null && new Date(account.lockedUntil) > now;
-
 /** What an admin sees of a teacher's app access. */
 export const accessView = (account) => ({
   teacherId: account.id,

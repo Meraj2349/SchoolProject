@@ -231,7 +231,8 @@ export default function AdminPage() {
       {classId && isError && <p className="error-message">{errorMessage(error, t("loadFailed"))}</p>}
 
       {classId && day && (
-        <div className="grid gap-4 lg:grid-cols-[1fr_20rem]">
+        // min-w-0: let the columns shrink so a wide table scrolls inside its box, not the page.
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_20rem] [&>*]:min-w-0">
           <RosterBox key={`${classId}-${day.date}`} classId={classId} day={day} canSave={!needsBranch} />
           <AbsenceSmsBox date={day.date} className={filter.className} section={filter.section} />
         </div>

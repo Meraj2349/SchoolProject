@@ -39,3 +39,7 @@ export function formatSchoolTime(value, language = "en") {
     timeZone: "Asia/Dhaka",
   }).format(new Date(value));
 }
+
+/** The days that count: weekdays, plus any weekend day on which attendance was taken. */
+export const schoolDaysOf = (days, students, isWeekend) =>
+  days.filter((day) => !isWeekend(day) || students.some((s) => s.attendance?.[day]));

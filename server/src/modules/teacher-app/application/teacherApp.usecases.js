@@ -1,7 +1,7 @@
 import { normalizeBdMobile } from "../../../shared/bdMobile.js";
 import { TooManyRequestsError, UnauthorizedError, ValidationError } from "../../../shared/errors/index.js";
 import { schoolToday } from "../../../shared/schoolDate.js";
-import { MAX_FAILED_LOGINS, isLocked, lockUntil, parsePassword } from "../domain/teacherAccount.js";
+import { MAX_FAILED_LOGINS, lockUntil, parsePassword } from "../domain/teacherAccount.js";
 
 /**
  * What a class teacher does in the phone app: sign in with their mobile number
@@ -38,20 +38,37 @@ export function makeTeacherAppUseCases({ repository, attendance, passwordHasher,
 
   const actorOf = (teacher) => ({ kind: "teacher", id: teacher.id, branchId: teacher.branchId });
 
+  /**
+   * Counts a password check before it is made, in one atomic step: guesses
+   * sent at the same moment cannot all slip in before the lock. False when
+   * the number is locked. A successful sign-in or a new password resets it.
+   */
+  async function reserveAttempt(account) {
+    const now = clock.now();
+    const { allowed } = await repository.reserveLoginAttempt(account.id, {
+      max: MAX_FAILED_LOGINS,
+      lockedUntil: lockUntil(now),
+      now,
+    });
+    return allowed;
+  }
+
   return {
-    /** { token, teacher, today, classes }. Five wrong passwords in a row lock the number for a while. */
+    /**
+     * { token, teacher, today, classes }. At most MAX_FAILED_LOGINS passwords
+     * are checked per number until a sign-in succeeds or the lock runs out.
+     * A locked number gets the same answer as a wrong password, so the
+     * answer never tells which numbers have an account.
+     */
     async login({ phone, password }) {
       const number = normalizeBdMobile(phone);
       const account = number ? await repository.findAccountByPhone(number) : null;
-      const now = clock.now();
-      if (account && isLocked(account, now)) throw new TooManyRequestsError("teacher_app_locked");
+      if (account && !(await reserveAttempt(account))) throw loginFailed();
 
       const matches = await passwordHasher.compare(String(password ?? ""), account?.passwordHash ?? null);
-      if (account && account.passwordHash != null && !matches) {
-        const { locked } = await repository.recordFailedLogin(account.id, { max: MAX_FAILED_LOGINS, lockedUntil: lockUntil(now), now });
-        if (locked) throw new TooManyRequestsError("teacher_app_locked");
-      }
       if (!matches || !canSignIn(account)) throw loginFailed();
+
+      const now = clock.now();
 
       await repository.recordLogin(account.id, now);
       return { token: tokenFor(account), ...(await profile(teacherOf(account))) };
@@ -69,6 +86,7 @@ export function makeTeacherAppUseCases({ repository, attendance, passwordHasher,
     /** A new password signs out every other phone; this one gets a fresh token. */
     async changePassword({ teacher, current, next }) {
       const account = await repository.findAccount(teacher.id);
+      if (!(await reserveAttempt(account))) throw new TooManyRequestsError("teacher_app_locked");
       if (!(await passwordHasher.compare(String(current ?? ""), account.passwordHash))) {
         throw new ValidationError("teacher_app_password_wrong");
       }

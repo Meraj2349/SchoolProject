@@ -56,22 +56,22 @@ export const mysqlTeacherAccountRepository = {
   },
 
   /**
-   * Counts a wrong password in one statement, so attempts at the same moment
-   * all count. On the `max`th in a row the number is locked until
-   * `lockedUntil` and the count starts again. LockedUntil is assigned first:
-   * MySQL applies assignments in order, so it still sees the old count.
+   * Counts a password check before it is made, in one statement, so guesses
+   * sent at the same moment cannot all pass a lock check first. Refused
+   * (affectedRows 0) while the number is locked. The `max`th check in a row
+   * locks it until `lockedUntil`; an expired lock starts the count again.
+   * MySQL applies the assignments in order: FailedLogins first (it still sees
+   * the old LockedUntil), then LockedUntil (it sees the new FailedLogins).
    */
-  async recordFailedLogin(id, { max, lockedUntil, now }) {
-    await db.query(
+  async reserveLoginAttempt(id, { max, lockedUntil, now }) {
+    const [result] = await db.query(
       `UPDATE Teachers
-          SET LockedUntil = IF(FailedLogins + 1 >= ?, ?, LockedUntil),
-              FailedLogins = IF(FailedLogins + 1 >= ?, 0, FailedLogins + 1)
-        WHERE TeacherID = ?`,
-      [max, lockedUntil, max, id],
+          SET FailedLogins = IF(LockedUntil IS NOT NULL AND LockedUntil <= ?, 1, FailedLogins + 1),
+              LockedUntil = IF(FailedLogins >= ?, ?, NULL)
+        WHERE TeacherID = ? AND (LockedUntil IS NULL OR LockedUntil <= ?)`,
+      [now, max, lockedUntil, id, now],
     );
-    const [[row]] = await db.query("SELECT LockedUntil AS lockedUntil FROM Teachers WHERE TeacherID = ?", [id]);
-    // The number was not locked before this attempt (login checks that first).
-    return { locked: row?.lockedUntil != null && new Date(row.lockedUntil) > now };
+    return { allowed: result.affectedRows === 1 };
   },
 
   async recordLogin(id, now) {

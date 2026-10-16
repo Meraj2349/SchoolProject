@@ -35,6 +35,17 @@ describe("rateLimit", () => {
     await request(app).post("/").expect(200);
   });
 
+  it("counts a whole IPv6 /64 as one address (one home or phone network gets all of it)", async () => {
+    const limiter = rateLimit({ max: 1, windowMs: 1000, now: () => 0 });
+
+    expect(await call(limiter, "2001:db8:1:2::1")).toBe(200);
+    expect(await call(limiter, "2001:db8:1:2:ffff:abcd:1:9")).toBe(429);
+    expect(await call(limiter, "2001:0db8:0001:0002:0:0:0:5")).toBe(429); // the same /64, written in full
+    expect(await call(limiter, "2001:db8:1:3::1")).toBe(200);
+    expect(await call(limiter, "::ffff:192.0.2.7")).toBe(200); // IPv4 seen through IPv6
+    expect(await call(limiter, "192.0.2.7")).toBe(429);
+  });
+
   it("counts each address on its own", async () => {
     const limiter = rateLimit({ max: 1, windowMs: 1000, now: () => 0 });
 

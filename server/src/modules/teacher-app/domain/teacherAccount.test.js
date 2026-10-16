@@ -1,6 +1,6 @@
 import { describe, expect, it } from "@jest/globals";
 import { ValidationError } from "../../../shared/errors/index.js";
-import { LOCK_MINUTES, accessView, isLocked, lockUntil, parseAppPhone, parsePassword } from "./teacherAccount.js";
+import { LOCK_MINUTES, accessView, lockUntil, parseAppPhone, parsePassword } from "./teacherAccount.js";
 
 const codeOf = (fn) => {
   try {
@@ -25,12 +25,10 @@ describe("teacher app account", () => {
     expect(codeOf(() => parsePassword("অ".repeat(25)))).toBe("teacher_app_password_long"); // 75 bytes
   });
 
-  it("is locked until the lock time has passed", () => {
+  it("locks a number for 15 minutes", () => {
     const now = new Date("2026-03-10T04:00:00Z");
+    expect(LOCK_MINUTES).toBe(15);
     expect(lockUntil(now)).toEqual(new Date(now.getTime() + LOCK_MINUTES * 60_000));
-    expect(isLocked({ lockedUntil: new Date("2026-03-10T04:00:01Z") }, now)).toBe(true);
-    expect(isLocked({ lockedUntil: now }, now)).toBe(false);
-    expect(isLocked({ lockedUntil: null }, now)).toBe(false);
   });
 
   it("shows an admin the access without the password", () => {
