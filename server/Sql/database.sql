@@ -540,8 +540,8 @@ CREATE TABLE
         id INT PRIMARY KEY AUTO_INCREMENT,
         name_en VARCHAR(255) NOT NULL DEFAULT 'Md. Rashedul Islam',
         name_bn VARCHAR(255) NOT NULL DEFAULT 'মোঃ রাশেদুল ইসলাম',
-        title_en VARCHAR(255) NOT NULL DEFAULT 'Founding Director',
-        title_bn VARCHAR(255) NOT NULL DEFAULT 'প্রতিষ্ঠাতা পরিচালক',
+        title_en VARCHAR(255) NOT NULL DEFAULT 'Chairman',
+        title_bn VARCHAR(255) NOT NULL DEFAULT 'চেয়ারম্যান',
         institution_en VARCHAR(255) NOT NULL DEFAULT 'Star Shikkha Poribar',
         institution_bn VARCHAR(255) NOT NULL DEFAULT 'স্টার শিক্ষা পরিবার',
         image_url VARCHAR(500),
@@ -551,7 +551,7 @@ CREATE TABLE
 
 -- Seed the single row (only if the table is empty)
 INSERT IGNORE INTO ChairmanProfile (id, name_en, name_bn, title_en, title_bn, institution_en, institution_bn)
-VALUES (1, 'Md. Rashedul Islam', 'মোঃ রাশেদুল ইসলাম', 'Founding Director', 'প্রতিষ্ঠাতা পরিচালক', 'Star Shikkha Poribar', 'স্টার শিক্ষা পরিবার');
+VALUES (1, 'Md. Rashedul Islam', 'মোঃ রাশেদুল ইসলাম', 'Chairman', 'চেয়ারম্যান', 'Star Shikkha Poribar', 'স্টার শিক্ষা পরিবার');
 
 -- ============================================================
 -- Shared class names (same for every branch; sections differ per branch).

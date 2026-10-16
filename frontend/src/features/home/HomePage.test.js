@@ -45,7 +45,7 @@ describe("HomePage", () => {
     await screen.findByText("Football champions");
 
     const headings = screen.getAllByRole("heading", { level: 2 }).map((h) => h.textContent);
-    const order = ["At a glance", "Honours Board", "From the Founding Director", "Notice Board", "Upcoming events", "Latest news", "From our gallery", "Admission is open"];
+    const order = ["At a glance", "Honours Board", "From the Chairman's desk", "Notice Board", "Upcoming events", "Latest news", "From our gallery", "Admission is open"];
     const positions = order.map((title) => headings.findIndex((h) => h.includes(title)));
     expect(positions.every((p) => p >= 0)).toBe(true);
     expect([...positions].sort((a, b) => a - b)).toEqual(positions);

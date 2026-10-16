@@ -22,7 +22,7 @@ vi.mock("@/services/chairman.service", () => ({
   chairmanService: {
     getProfile: async () => ({
       name_en: "Md. Rashedul Islam", name_bn: "মোঃ রাশেদুল ইসলাম",
-      title_en: "Founding Director", title_bn: "প্রতিষ্ঠাতা পরিচালক",
+      title_en: "Chairman", title_bn: "চেয়ারম্যান",
       institution_en: "Star Shikkha Poribar", institution_bn: "স্টার শিক্ষা পরিবার",
       image_url: profile.imageUrl,
     }),
@@ -36,10 +36,10 @@ describe("ChairmanMessagePage", () => {
     profile.imageUrl = "/uploads/chairman/photo.png";
   });
 
-  it("shows the founding director's published message under the page heading", async () => {
+  it("shows the chairman's published message under the page heading", async () => {
     renderWithQuery(<ChairmanMessagePage />);
 
-    expect(screen.getByRole("heading", { level: 1, name: "Message from the Founding Director" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 1, name: "Chairman's Message" })).toBeInTheDocument();
     expect(await screen.findByText("Dear students and parents, welcome.")).toBeInTheDocument();
     expect(screen.queryByText("Hidden draft")).not.toBeInTheDocument();
   });
@@ -63,15 +63,17 @@ describe("ChairmanMessagePage", () => {
     useLanguageStore.getState().setLanguage("bn");
     renderWithQuery(<ChairmanMessagePage />);
 
-    expect(await screen.findByText(/নাটিয়াপাড়াকে সার্বিক শিক্ষা ব্যবস্থার জন্য আধুনিক শিক্ষার মডেল হিসেবে গড়ে তুলবো ইনশাআল্লাহ্/)).toBeInTheDocument();
-    expect(screen.getAllByText("প্রতিষ্ঠাতা পরিচালক").length).toBeGreaterThan(0);
-    expect(screen.queryByText(/চেয়ারম্যান/)).not.toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 1, name: "চেয়ারম্যানের কথা" })).toBeInTheDocument();
+    expect(await screen.findByText(/টাঙ্গাইল জেলাকে স্টার শিক্ষা পরিবারের মাধ্যমে সার্বিক শিক্ষা ব্যবস্থার উন্নয়ন এবং আধুনিক শিক্ষার মডেল হিসেবে গড়ে তুলবো ইনশাআল্লাহ্/)).toBeInTheDocument();
+    expect(screen.getAllByText("চেয়ারম্যান").length).toBeGreaterThan(0);
+    expect(screen.queryByText(/প্রতিষ্ঠাতা/)).not.toBeInTheDocument();
   });
 
-  it("shows his formal photo until an admin uploads one", async () => {
+  it("shows his photo until an admin uploads one, and his mobile number", async () => {
     profile.imageUrl = null;
     renderWithQuery(<ChairmanMessagePage />);
 
-    expect(await screen.findByRole("img", { name: /Md\. Rashedul Islam/ })).toHaveAttribute("data-src", "/images/founding-director.jpg");
+    expect(await screen.findByRole("img", { name: /Md\. Rashedul Islam/ })).toHaveAttribute("data-src", "/images/chairman.jpg");
+    expect(screen.getByRole("link", { name: /01915-680214/ })).toHaveAttribute("href", "tel:+8801915680214");
   });
 });

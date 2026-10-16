@@ -119,12 +119,12 @@ export default function AdminPage() {
         {
           name: "title_en",
           label: "Title (English)",
-          placeholder: "e.g. Founding Director",
+          placeholder: "e.g. Chairman",
         },
         {
           name: "title_bn",
           label: "Title (Bangla)",
-          placeholder: "e.g. প্রতিষ্ঠাতা পরিচালক",
+          placeholder: "e.g. চেয়ারম্যান",
         },
       ],
     },
@@ -149,10 +149,10 @@ export default function AdminPage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-slate-900">Founding Director Profile</h1>
+        <h1 className="text-2xl font-bold text-slate-900">Chairman Profile</h1>
         <p className="text-sm text-slate-500 mt-1">
           Update the chairman&apos;s name, title, institution, and photo. These
-          appear on the public Founding Director&apos;s message page.
+          appear on the public Chairman&apos;s Message page.
         </p>
       </div>
 
@@ -185,7 +185,7 @@ export default function AdminPage() {
                   <>
                     <Image
                       src={currentImage}
-                      alt="Founding Director"
+                      alt="Chairman"
                       width={128}
                       height={128}
                       unoptimized

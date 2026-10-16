@@ -47,8 +47,8 @@
     "adminDashboard": "Dashboard",
     "branches": "Branch Management",
     "notice": "Notice",
-    "chairMessage": "Founder's Message",
-    "chairmanProfile": "Founding Director Profile",
+    "chairMessage": "Chairman's Message",
+    "chairmanProfile": "Chairman Profile",
     "imageGallery": "Image Gallery",
     "routine": "Routine",
     "studentList": "Student List",
@@ -139,7 +139,7 @@
     },
     "chairman": {
       "eyebrow": "Message",
-      "title": "From the Founding Director",
+      "title": "From the Chairman's desk",
       "readMore": "Read the full message"
     },
     "noticeBoard": {
@@ -180,7 +180,7 @@
   },
   "chairmanCard": {
     "viewFullMessage": "View Full Message",
-    "chairmanMessage": "Message from the Founding Director"
+    "chairmanMessage": "Chairman's Message"
   },
   "about": {
     "title": "About Us",
@@ -202,14 +202,15 @@
     "schoolCode": "School code"
   },
   "chairman": {
-    "pageTitle": "Message from the Founding Director",
-    "loading": "Loading the message…",
+    "pageTitle": "Chairman's Message",
+    "loading": "Loading the chairman's message…",
     "name": "Md. Rashedul Islam",
-    "title": "Founding Director",
+    "title": "Chairman",
     "institution": "Star Shikkha Poribar",
     "bestRegards": "Best regards,",
     "backToHome": "Back to Home",
-    "defaultMessage": "By competing with the country's leading educational institutions, we will build Natiapara into a model of modern education for an all-round education system in southern Tangail, Insha'Allah."
+    "defaultMessage": "By competing with the country's leading educational institutions, we will, through Star Shikkha Poribar, develop the whole education system of Tangail district and build it into a model of modern education, Insha'Allah.",
+    "mobile": "Mobile"
   },
   "gallery": {
     "title": "Gallery",
@@ -438,14 +439,14 @@
       "deleteFailed": "Delete failed"
     },
     "messages": {
-      "title": "Founding Director's Message",
+      "title": "Chairman's Message",
       "editMessage": "Edit Message",
       "addMessage": "Add Message",
       "update": "Update",
       "add": "Add",
       "cancel": "Cancel",
       "allMessages": "All Messages",
-      "messagePlaceholder": "Founding Director's message…",
+      "messagePlaceholder": "Chairman's message…",
       "showOnWebsite": "Show on website",
       "messageRequired": "Message content is required",
       "messageUpdated": "Message updated!",

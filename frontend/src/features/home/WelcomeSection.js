@@ -8,7 +8,7 @@ import { useMessages } from "@/hooks/useMessages";
 import { useNotices } from "@/hooks/useNotices";
 import { isRemoteImage } from "@/lib/assetUrl";
 import { dayAndMonth, localized, visibleNotices } from "@/lib/homePage";
-import { FOUNDER_PHOTO } from "@/lib/schoolInfo";
+import { CHAIRMAN } from "@/lib/schoolInfo";
 import { useLanguageStore, useTranslations } from "@/store/languageStore";
 import SectionHeading from "./SectionHeading";
 
@@ -24,7 +24,7 @@ function ChairmanMessage() {
   const message = shown?.Messages || t("chairman.defaultMessage");
   const preview = message.length > MESSAGE_PREVIEW_CHARS ? `${message.slice(0, MESSAGE_PREVIEW_CHARS).trimEnd()}…` : message;
   const name = localized(profile, "name", language) || t("chairman.name");
-  const photo = profile?.image_url || FOUNDER_PHOTO;
+  const photo = profile?.image_url || CHAIRMAN.photo;
 
   return (
     <section aria-labelledby="chairman-title" className="min-w-0 lg:col-span-2">

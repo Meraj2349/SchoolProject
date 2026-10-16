@@ -1,8 +1,12 @@
 // The school's contact details and links, in one place for the header,
 // footer and home page. Text that changes with the language lives in i18n.
 
-/** Md. Rashedul Islam, Founding Director; shown until an admin uploads a photo. */
-export const FOUNDER_PHOTO = "/images/founding-director.jpg";
+/** Md. Rashedul Islam, Chairman of Star Shikkha Poribar; his photo is shown until an admin uploads one. */
+export const CHAIRMAN = {
+  photo: "/images/chairman.jpg",
+  mobile: "01915-680214",
+  mobileHref: "tel:+8801915680214",
+};
 
 export const SCHOOL_CONTACT = {
   phone: "01997588476",
