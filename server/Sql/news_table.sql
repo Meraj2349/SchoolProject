@@ -19,8 +19,8 @@ INSERT INTO
     News (title_bn, title_en, date, link, is_active)
 VALUES
     (
-        'সিলেট ক্যান্টনমেন্ট পাবলিক স্কুলে নবীন বরণ অনুষ্ঠান',
-        'Nobin Boron Program held in Sylhet Cantonment Public School',
+        'স্টার একাডেমিক স্কুলে নবীন বরণ অনুষ্ঠান',
+        'Nobin Boron Program held at Star Academic School',
         '2023-10-11',
         '/events',
         TRUE
