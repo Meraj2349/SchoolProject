@@ -1359,6 +1359,7 @@
     "closeMenu": "Close menu",
     "menu": "Menu",
     "skipToContent": "Skip to main content",
-    "motto": "Education · Discipline · Character"
+    "motto": "Education · Discipline · Character",
+    "breadcrumb": "Breadcrumb"
   }
 }

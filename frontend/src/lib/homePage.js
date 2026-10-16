@@ -92,3 +92,11 @@ export function dayAndMonth(value, language = "en") {
     month: date.toLocaleDateString(locale, { month: "short" }),
   };
 }
+
+/** "5 Oct 2026" (or Bangla); "" for a missing or broken date. */
+export function formatDate(value, language = "en", options = { day: "numeric", month: "short", year: "numeric" }) {
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  return date.toLocaleDateString(DATE_LOCALES[language] ?? DATE_LOCALES.en, options);
+}

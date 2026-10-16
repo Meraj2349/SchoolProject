@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   boardResultHighlights,
   dayAndMonth,
+  formatDate,
   formatYear,
   categoriesPresent,
   formatNumber,
@@ -138,5 +139,17 @@ describe("dates", () => {
     expect(dayAndMonth("2026-10-05", "en")).toEqual({ day: "05", month: "Oct" });
     expect(dayAndMonth("2026-10-05", "bn").day).toBe("০৫");
     expect(dayAndMonth(null, "en")).toBeNull();
+  });
+});
+
+describe("formatDate", () => {
+  it("writes a date in the reader's language", () => {
+    expect(formatDate("2026-10-05", "en")).toBe("5 Oct 2026");
+    expect(formatDate("2026-10-05", "bn")).toBe("৫ অক্টো, ২০২৬");
+  });
+
+  it("is empty for a missing or broken date instead of 'Invalid Date'", () => {
+    expect(formatDate(null, "en")).toBe("");
+    expect(formatDate("not a date", "en")).toBe("");
   });
 });

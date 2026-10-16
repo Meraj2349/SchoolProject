@@ -6,7 +6,6 @@ import LatestUpdatesNotice from "./LatestUpdatesNotice";
 
 const getAll = vi.fn();
 vi.mock("@/services/notices.service", () => ({ noticesService: { getAll: () => getAll() } }));
-vi.mock("@/components/ui/LottieLoader", () => ({ default: () => null }));
 
 describe("LatestUpdatesNotice", () => {
   beforeEach(() => {

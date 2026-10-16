@@ -81,6 +81,32 @@
     font-weight: 700;
     line-height: 1.2;
   }
+  /* Public forms: label above a full-width field. */
+  .site-label {
+    display: block;
+    margin-bottom: 0.35rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--color-school-navy);
+  }
+  .site-input {
+    width: 100%;
+    padding: 0.6rem 0.8rem;
+    border: 1.5px solid rgb(13 31 60 / 0.2);
+    border-radius: 0.25rem;
+    background: white;
+    color: var(--color-school-ink);
+    font: inherit;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .site-input:focus {
+    outline: none;
+    border-color: var(--color-school-gold);
+    box-shadow: 0 0 0 3px rgb(201 168 76 / 0.25);
+  }
+  .site-input[aria-invalid="true"] {
+    border-color: #dc2626;
+  }
   .site-rule {
     display: block;
     width: 4.5rem;
