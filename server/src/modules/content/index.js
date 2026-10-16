@@ -2,6 +2,8 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { makeContentUseCases } from "./application/content.usecases.js";
 import { achievement } from "./domain/achievement.js";
+import { jobCircular } from "./domain/jobCircular.js";
+import { jobApplicationCvs } from "../job-applications/index.js";
 import { announcement, message, news, notice } from "./domain/contentKinds.js";
 import { makeLocalUploadStore } from "./infrastructure/localUploadStore.js";
 import { makeMysqlContentRepository } from "./infrastructure/mysql-content.repository.js";
@@ -12,9 +14,9 @@ import { makeContentController } from "./interface/content.controller.js";
 
 const PUBLIC_DIR = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../../public");
 
-const controllerFor = ({ kind, table, messages, files }) =>
+const controllerFor = ({ kind, table, messages, files, onRemoved }) =>
   makeContentController({
-    useCases: makeContentUseCases({ kind, repository: makeMysqlContentRepository(table) }),
+    useCases: makeContentUseCases({ kind, repository: makeMysqlContentRepository(table), onRemoved }),
     messages,
     files,
   });
@@ -64,3 +66,15 @@ export const achievementsController = controllerFor({
   },
   files: makeLocalUploadStore({ publicDir: PUBLIC_DIR, folder: "achievements" }),
 });
+
+// Job circulars: posts, dates and a poster (an image or a PDF). Deleting one
+// deletes its applications (ON DELETE CASCADE) and, here, their CV files.
+export const JOB_CIRCULAR_UPLOADS = path.join(PUBLIC_DIR, "uploads", "job-circulars");
+export const jobCircularsController = controllerFor({
+  kind: jobCircular,
+  table: { table: "JobCirculars", idColumn: "id", visibleColumn: "is_published", orderBy: "is_open DESC, circular_date DESC, id DESC" },
+  messages: { created: "job_circular_created", updated: "job_circular_updated", deleted: "job_circular_deleted", visibility: "job_circular_publish_toggled" },
+  files: makeLocalUploadStore({ publicDir: PUBLIC_DIR, folder: "job-circulars" }),
+  onRemoved: (row) => jobApplicationCvs.discardCircular(row.id),
+});
+

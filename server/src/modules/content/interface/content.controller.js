@@ -35,6 +35,11 @@ export function makeContentController({ useCases, messages, files = null }) {
     /** Public lists that never show hidden items, even to admins. */
     listVisible: list(true),
 
+    /** One shown item (public). */
+    getVisible: handle(async (req, res) => {
+      res.status(200).json({ success: true, data: await useCases.getVisible({ id: req.params.id }) });
+    }),
+
     create: handle(async (req, res) => {
       const id = await useCases.create({ admin: viewerOf(req), input: inputOf(req) });
       res.status(201).json({ success: true, message: t(messages.created, req.language), data: { id } });

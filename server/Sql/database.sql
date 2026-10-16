@@ -449,6 +449,49 @@ CREATE TABLE
         INDEX idx_achievements_showcase (is_published, is_featured, year)
     );
 
+-- Job circulars (নিয়োগ বিজ্ঞপ্তি) and the applications sent online.
+-- Existing databases: job_circulars_migration.sql, job_applications_migration.sql
+CREATE TABLE
+    IF NOT EXISTS JobCirculars (
+        id INT PRIMARY KEY AUTO_INCREMENT,
+        title_en VARCHAR(255) NOT NULL,
+        title_bn VARCHAR(255) NOT NULL,
+        circular_date DATE NOT NULL,
+        deadline DATE NULL COMMENT 'Last date to apply; NULL = until closed',
+        posts JSON NOT NULL COMMENT '[{title_en, title_bn, vacancies, qualification_en, qualification_bn, salary_min, salary_max}]',
+        how_to_apply_en TEXT,
+        how_to_apply_bn TEXT,
+        image_url VARCHAR(500) COMMENT 'Poster: an image or a PDF',
+        is_open BOOLEAN NOT NULL DEFAULT TRUE,
+        is_published BOOLEAN NOT NULL DEFAULT TRUE,
+        branch_id INT NULL COMMENT 'Owning branch; NULL = whole school',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        INDEX idx_job_circulars_list (is_published, is_open, circular_date)
+    );
+
+CREATE TABLE
+    IF NOT EXISTS JobApplications (
+        id INT PRIMARY KEY AUTO_INCREMENT,
+        circular_id INT NOT NULL,
+        post_index TINYINT UNSIGNED NOT NULL COMMENT 'Position in JobCirculars.posts',
+        post_title_en VARCHAR(255) NOT NULL COMMENT 'Copied, so the application reads the same if the circular changes',
+        post_title_bn VARCHAR(255) NOT NULL,
+        full_name VARCHAR(150) NOT NULL,
+        phone CHAR(11) NOT NULL,
+        email VARCHAR(150) NULL,
+        address TEXT NOT NULL,
+        education VARCHAR(255) NOT NULL,
+        experience TEXT NULL,
+        cv_file VARCHAR(255) NULL COMMENT 'Stored in private_uploads, never served publicly',
+        status ENUM ('new', 'shortlisted', 'rejected', 'hired') NOT NULL DEFAULT 'new',
+        branch_id INT NULL COMMENT 'The circular''s branch',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        UNIQUE KEY uq_job_application_phone (circular_id, post_index, phone),
+        INDEX idx_job_applications_status (circular_id, status)
+    );
+
 -- Quiz Tables
 CREATE TABLE
     IF NOT EXISTS QuizQuestions (
@@ -593,6 +636,29 @@ ALTER TABLE Messages ADD CONSTRAINT fk_messages_branch FOREIGN KEY (branch_id) R
 ALTER TABLE Images ADD CONSTRAINT fk_images_branch FOREIGN KEY (branch_id) REFERENCES Branches (id);
 ALTER TABLE Applications ADD CONSTRAINT fk_applications_branch FOREIGN KEY (branch_id) REFERENCES Branches (id);
 ALTER TABLE Achievements ADD CONSTRAINT fk_achievements_branch FOREIGN KEY (branch_id) REFERENCES Branches (id);
+ALTER TABLE JobCirculars ADD CONSTRAINT fk_job_circulars_branch FOREIGN KEY (branch_id) REFERENCES Branches (id);
+ALTER TABLE JobApplications ADD CONSTRAINT fk_job_applications_branch FOREIGN KEY (branch_id) REFERENCES Branches (id);
+ALTER TABLE JobApplications ADD CONSTRAINT fk_job_applications_circular FOREIGN KEY (circular_id) REFERENCES JobCirculars (id) ON DELETE CASCADE;
+
+-- The school's two 2025 circulars, closed (applications were by hand).
+-- Added once; an admin may edit, reopen or delete them.
+INSERT INTO JobCirculars (title_en, title_bn, circular_date, posts, image_url, is_open, is_published, branch_id)
+SELECT 'Urgent recruitment: Accountant', 'জরুরি নিয়োগ বিজ্ঞপ্তি: অ্যাকাউন্টেন্ট', '2025-06-28',
+       JSON_ARRAY(JSON_OBJECT('title_en', 'Accountant', 'title_bn', 'অ্যাকাউন্টেন্ট', 'vacancies', 1,
+         'qualification_en', 'Honours / Masters (Accounting)', 'qualification_bn', 'স্নাতক সম্মান / স্নাতকোত্তর (অ্যাকাউন্টিং)',
+         'salary_min', 10000, 'salary_max', 20000)),
+       '/images/circulars/accountant-2025-06-28.jpg', FALSE, TRUE,
+       (SELECT id FROM Branches WHERE name_en LIKE '%Natiapara%' ORDER BY id LIMIT 1)
+WHERE NOT EXISTS (SELECT 1 FROM JobCirculars WHERE title_en = 'Urgent recruitment: Accountant' AND circular_date = '2025-06-28');
+
+INSERT INTO JobCirculars (title_en, title_bn, circular_date, posts, image_url, is_open, is_published, branch_id)
+SELECT 'Urgent recruitment: Assistant Teacher (Bangla)', 'জরুরি নিয়োগ বিজ্ঞপ্তি: সহকারি শিক্ষক (বাংলা)', '2025-07-29',
+       JSON_ARRAY(JSON_OBJECT('title_en', 'Assistant Teacher (Bangla)', 'title_bn', 'সহকারি শিক্ষক (বাংলা)', 'vacancies', 1,
+         'qualification_en', 'Honours / Masters (Bangla)', 'qualification_bn', 'স্নাতক সম্মান / স্নাতকোত্তর (বাংলা)',
+         'salary_min', 10000, 'salary_max', 20000)),
+       '/images/circulars/assistant-teacher-bangla-2025-07-29.jpg', FALSE, TRUE,
+       (SELECT id FROM Branches WHERE name_en LIKE '%Natiapara%' ORDER BY id LIMIT 1)
+WHERE NOT EXISTS (SELECT 1 FROM JobCirculars WHERE title_en = 'Urgent recruitment: Assistant Teacher (Bangla)' AND circular_date = '2025-07-29');
 
 -- ============================================================
 -- Fees: monthly tuition + extra fee heads, discounts, invoices,

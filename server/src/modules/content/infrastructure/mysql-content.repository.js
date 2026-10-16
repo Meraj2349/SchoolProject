@@ -24,6 +24,13 @@ export function makeMysqlContentRepository({ table, idColumn, visibleColumn = nu
       return rows[0] ?? null;
     },
 
+    /** The item when it is shown (kinds without a visible column are always shown). */
+    async findVisible(itemId) {
+      const visible = visibleColumn ? `AND \`${visibleColumn}\` = TRUE` : "";
+      const [rows] = await db.query(`SELECT * FROM ${from} WHERE ${id} = ? ${visible}`, [itemId]);
+      return rows[0] ?? null;
+    },
+
     async insert(row) {
       const [result] = await db.query(`INSERT INTO ${from} SET ?`, [row]);
       return result.insertId;
