@@ -1,6 +1,6 @@
 {
   "schoolName": "Star Shikkha Poribar",
-  "establishedYear": "135479",
+  "eiin": "135479",
   "location": "Natiapara, Delduar, Tangail",
   "nav": {
     "home": "Home",
@@ -1388,7 +1388,7 @@
   "site": {
     "call": "Call",
     "email": "Email",
-    "estd": "ESTD",
+    "eiinLabel": "EIIN",
     "mainNavigation": "Main navigation",
     "openMenu": "Open menu",
     "closeMenu": "Close menu",

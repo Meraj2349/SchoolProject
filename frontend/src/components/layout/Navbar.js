@@ -96,7 +96,7 @@ export default function Navbar() {
                   {t("schoolName")}
                 </span>
                 <span className="text-xs text-school-muted md:text-sm">
-                  {t("site.estd")}: {t("establishedYear")} · {t("location")}
+                  {t("site.eiinLabel")}: {t("eiin")} · {t("location")}
                 </span>
                 <span className="hidden text-xs font-semibold uppercase tracking-[0.2em] text-school-gold md:block">
                   {t("site.motto")}

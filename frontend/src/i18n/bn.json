@@ -1,6 +1,6 @@
 {
   "schoolName": "স্টার শিক্ষা পরিবার",
-  "establishedYear": "১৩৫৪৭৯",
+  "eiin": "১৩৫৪৭৯",
   "location": "নাটিয়াপাড়া, দেলদুয়ার, টাঙ্গাইল",
   "nav": {
     "home": "হোম",
@@ -1388,7 +1388,7 @@
   "site": {
     "call": "ফোন",
     "email": "ইমেইল",
-    "estd": "স্থাপিত",
+    "eiinLabel": "EIIN",
     "mainNavigation": "প্রধান মেনু",
     "openMenu": "মেনু খুলুন",
     "closeMenu": "মেনু বন্ধ করুন",
