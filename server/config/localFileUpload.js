@@ -33,7 +33,8 @@ export function makeLocalFileUpload({
   const allowed = types.map((type) => FILE_TYPES[type]);
   const upload = multer({
     storage: multer.diskStorage({
-      destination: (_req, _file, cb) => cb(null, dir),
+      // Made again if it was removed while the server runs (e.g. a cleaned-up folder).
+      destination: (_req, _file, cb) => fs.mkdir(dir, { recursive: true }, (error) => cb(error ?? null, dir)),
       filename: (_req, file, cb) => {
         const unique = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
         cb(null, `${prefix}-${unique}${path.extname(file.originalname).toLowerCase()}`);

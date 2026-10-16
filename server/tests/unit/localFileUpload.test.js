@@ -57,4 +57,13 @@ describe("makeLocalFileUpload", () => {
 
     expect(res.body.message).toMatch(/image/i);
   });
+
+  it("makes its folder again if it was removed", async () => {
+    const app = appWith({ types: ["pdf"] });
+    fs.rmSync(dir, { recursive: true, force: true });
+
+    const res = await request(app).post("/").attach("file", PDF, { filename: "cv.pdf", contentType: "application/pdf" });
+
+    expect(res.status).toBe(200);
+  });
 });
