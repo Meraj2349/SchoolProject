@@ -29,6 +29,8 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   generate: true # lib/l10n/*.arb → AppLocalizations
+  assets:
+    - assets/images/school_logo.png
   fonts:
     # Hind Siliguri (SIL Open Font License, assets/fonts/OFL.txt): Bangla and Latin.
     - family: HindSiliguri

@@ -1,10 +1,11 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
-import 'package:teacher_app/data/attendance_repository.dart';
-import 'package:teacher_app/data/local_store.dart';
-import 'package:teacher_app/data/session_store.dart';
-import 'package:teacher_app/data/teacher_api.dart';
-import 'package:teacher_app/domain/attendance.dart';
+import 'package:teacher_app/data/datasources/local_store.dart';
+import 'package:teacher_app/data/datasources/session_store.dart';
+import 'package:teacher_app/data/repositories/teacher_app_repository.dart';
+import 'package:teacher_app/domain/entities/attendance_status.dart';
+import 'package:teacher_app/domain/entities/teacher.dart';
+import 'package:teacher_app/domain/errors.dart';
 
 import '../support/fake_school_server.dart';
 
@@ -18,7 +19,7 @@ void main() {
   late FakeSchoolServer school;
   late MemorySessionStore session;
   late LocalStore store;
-  late AttendanceRepository repository;
+  late TeacherAppRepository repository;
   late DateTime now;
   var refs = 0;
 
@@ -27,7 +28,7 @@ void main() {
     school = FakeSchoolServer();
     session = MemorySessionStore();
     store = await SqfliteLocalStore.open(databaseFactoryFfiNoIsolate, inMemoryDatabasePath);
-    repository = AttendanceRepository(
+    repository = TeacherAppRepository(
       store: store,
       session: session,
       client: school.client,

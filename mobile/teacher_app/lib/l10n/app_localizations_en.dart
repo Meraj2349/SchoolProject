@@ -93,7 +93,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String pendingBanner(String count) {
-    return '$count days waiting to be sent';
+    return 'Waiting to be sent: $count';
   }
 
   @override
@@ -101,7 +101,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String synced(String count) {
-    return 'Sent $count days';
+    return 'Sent: $count';
   }
 
   @override
@@ -219,4 +219,61 @@ class AppLocalizationsEn extends AppLocalizations {
   String signedInAs(String name, String phone) {
     return '$name ($phone)';
   }
+
+  @override
+  String get mainNavigation => 'MAIN NAVIGATION';
+
+  @override
+  String get navToday => 'Today\'s attendance';
+
+  @override
+  String get statusOnline => 'Online';
+
+  @override
+  String get statusOffline => 'Offline';
+
+  @override
+  String get signInBoxMessage => 'Sign in to start taking attendance';
+
+  @override
+  String get myClasses => 'My classes';
+
+  @override
+  String get statClasses => 'Classes';
+
+  @override
+  String get statTaken => 'Taken';
+
+  @override
+  String get statNotTaken => 'Not taken';
+
+  @override
+  String get statWaiting => 'To send';
+
+  @override
+  String get studentsBox => 'Students';
+
+  @override
+  String get account => 'Account';
+
+  @override
+  String get security => 'Security';
+
+  @override
+  String get settingsSubtitle => 'Language, password and signing out';
+
+  @override
+  String get sending => 'Sending…';
+
+  @override
+  String get signOutHint =>
+      'Signing out removes everything kept on this phone.';
+
+  @override
+  String roll(String roll) {
+    return 'Roll $roll';
+  }
+
+  @override
+  String get openNavigation => 'Open menu';
 }
