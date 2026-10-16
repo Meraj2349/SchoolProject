@@ -56,6 +56,13 @@ describe("JobCircularPage", () => {
 
     expect(await screen.findByRole("alert")).toHaveTextContent("Please correct the marked fields.");
     expect(screen.getByLabelText(/Full name/)).toHaveAttribute("aria-invalid", "true");
+    expect(screen.getByLabelText(/Full name/)).toHaveAttribute("aria-required", "true");
+    expect(screen.getByLabelText(/Email/)).not.toHaveAttribute("aria-required");
+    const post = screen.getByLabelText(/Post applied for/);
+    expect(post).toHaveAttribute("aria-required", "true");
+    expect(post).toHaveAccessibleDescription("Please fill in this field.");
+    expect(screen.getByLabelText(/^Address/)).toHaveAttribute("maxLength", "1000");
+    expect(screen.getByLabelText(/Experience/)).toHaveAttribute("maxLength", "2000");
     expect(applications.submit).not.toHaveBeenCalled();
   });
 
@@ -111,5 +118,12 @@ describe("JobCircularPage", () => {
 
     await waitFor(() => expect(screen.getByText("This circular could not be found.")).toBeInTheDocument());
     expect(screen.getAllByRole("heading", { level: 1 })).toHaveLength(1);
+  });
+
+  it("does not ask the API for an id that is not a number", async () => {
+    renderWithQuery(<JobCircularPage id="../admins" />);
+
+    expect(await screen.findByText("This circular could not be found.")).toBeInTheDocument();
+    expect(circulars.getById).not.toHaveBeenCalled();
   });
 });

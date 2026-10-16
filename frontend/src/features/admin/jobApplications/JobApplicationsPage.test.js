@@ -60,6 +60,7 @@ describe("JobApplicationsPage", () => {
     fireEvent.click(within(drawer).getByRole("button", { name: "Download CV" }));
     await waitFor(() => expect(service.downloadCv).toHaveBeenCalledWith(7));
     expect(URL.createObjectURL).toHaveBeenCalled();
+    await waitFor(() => expect(URL.revokeObjectURL).toHaveBeenCalledWith("blob:cv"), { timeout: 2000 }); // later, so the download is not cut off
 
     fireEvent.change(within(drawer).getByLabelText("Status"), { target: { value: "hired" } });
     await waitFor(() => expect(service.setStatus).toHaveBeenCalledWith(7, "hired"));

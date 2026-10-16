@@ -23,7 +23,7 @@ import { formatDate, localized } from "@/lib/homePage";
 import { fillTemplate } from "@/lib/template";
 import { useLanguageStore, useTranslations } from "@/store/languageStore";
 import JobCircularFormDrawer from "./JobCircularFormDrawer";
-import { EMPTY_CIRCULAR, toCircularFormData, toFormValues } from "./jobCircularForm";
+import { emptyCircular, toCircularFormData, toFormValues } from "./jobCircularForm";
 
 /** Job circulars (নিয়োগ বিজ্ঞপ্তি) per branch or for the whole school, and how many have applied. */
 export default function JobCircularsPage() {
@@ -142,7 +142,7 @@ export default function JobCircularsPage() {
         <JobCircularFormDrawer
           key={editing.id ?? "new"}
           isNew={!editing.id}
-          initialValues={editing.id ? toFormValues(editing) : EMPTY_CIRCULAR}
+          initialValues={editing.id ? toFormValues(editing) : emptyCircular()}
           onSave={handleSave}
           onClose={() => setEditing(null)}
         />

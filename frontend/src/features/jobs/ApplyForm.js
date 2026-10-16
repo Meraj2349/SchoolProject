@@ -77,6 +77,7 @@ export default function ApplyForm({ circular }) {
           value={form[name]}
           onChange={change(name)}
           aria-invalid={errors[name] ? true : undefined}
+          aria-required={required || undefined}
           aria-describedby={errors[name] || help ? `${fieldId}-note` : undefined}
           className={`site-input ${as === "textarea" ? "min-h-20 resize-y" : ""}`}
           {...props}
@@ -99,7 +100,15 @@ export default function ApplyForm({ circular }) {
             *
           </span>
         </label>
-        <select id={`${id}-post`} value={form.post_index} onChange={change("post_index")} aria-invalid={errors.post_index ? true : undefined} className="site-input">
+        <select
+          id={`${id}-post`}
+          value={form.post_index}
+          onChange={change("post_index")}
+          aria-required="true"
+          aria-invalid={errors.post_index ? true : undefined}
+          aria-describedby={errors.post_index ? `${id}-post-note` : undefined}
+          className="site-input"
+        >
           <option value="">{t("choosePost")}</option>
           {circular.posts.map((post, index) => (
             <option key={index} value={String(index)}>
@@ -107,13 +116,18 @@ export default function ApplyForm({ circular }) {
             </option>
           ))}
         </select>
+        {errors.post_index && (
+          <p id={`${id}-post-note`} className="m-0 mt-1 text-xs font-semibold text-red-700">
+            {t(errors.post_index)}
+          </p>
+        )}
       </div>
       {field("full_name", "fullName", { autoComplete: "name", maxLength: 150 })}
       {field("phone", "phone", { type: "tel", inputMode: "tel", autoComplete: "tel", help: "phoneHelp" })}
       {field("email", "email", { type: "email", autoComplete: "email", required: false, maxLength: 150 })}
       {field("education", "education", { help: "educationHelp", maxLength: 255 })}
-      {field("address", "address", { as: "textarea", rows: 2, autoComplete: "street-address" })}
-      {field("experience", "experience", { as: "textarea", rows: 3, required: false })}
+      {field("address", "address", { as: "textarea", rows: 2, autoComplete: "street-address", maxLength: 1000 })}
+      {field("experience", "experience", { as: "textarea", rows: 3, required: false, maxLength: 2000 })}
       <div className="sm:col-span-2">
         <label htmlFor={`${id}-cv`} className="site-label">
           {t("cv")}

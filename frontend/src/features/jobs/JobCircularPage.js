@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { FiArrowLeft, FiFileText } from "react-icons/fi";
 import { EmptyState, PageHero, PublicPage, SiteCard, SiteImage, SiteLoader } from "@/components/site";
-import { useJobCircular } from "@/hooks/useJobCirculars";
+import { isCircularId, useJobCircular } from "@/hooks/useJobCirculars";
 import { assetUrl } from "@/lib/assetUrl";
 import { localized } from "@/lib/homePage";
 import { HEAD_OFFICE_MOBILES } from "@/lib/schoolInfo";
@@ -74,8 +74,8 @@ export default function JobCircularPage({ id }) {
   const trail = [{ label: t("pageTitle"), href: "/jobs" }];
 
   let content;
-  if (isLoading) content = <SiteLoader />;
-  else if (isError || !circular) content = <EmptyState title={t("notFound")} />;
+  if (!isCircularId(id) || isError || (!isLoading && !circular)) content = <EmptyState title={t("notFound")} />;
+  else if (isLoading) content = <SiteLoader />;
   else
     content = (
       <div className="grid gap-8 lg:grid-cols-[1fr_320px]">

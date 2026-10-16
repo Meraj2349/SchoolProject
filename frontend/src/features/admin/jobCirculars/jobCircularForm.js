@@ -7,17 +7,18 @@ export const MAX_POSTS = 20;
 
 export const EMPTY_POST = { title_en: "", title_bn: "", vacancies: "1", qualification_en: "", qualification_bn: "", salary_min: "", salary_max: "" };
 
-export const EMPTY_CIRCULAR = {
+/** A new circular's form, dated today in Bangladesh (worked out each time the form opens). */
+export const emptyCircular = (now = new Date()) => ({
   title_en: "",
   title_bn: "",
-  circular_date: new Date().toLocaleDateString("en-CA"),
+  circular_date: now.toLocaleDateString("en-CA", { timeZone: "Asia/Dhaka" }),
   deadline: "",
   how_to_apply_en: "",
   how_to_apply_bn: "",
   posts: [EMPTY_POST],
   is_open: true,
   is_published: true,
-};
+});
 
 const text = (value) => String(value ?? "").trim();
 const number = (value) => (text(value) === "" ? null : Number(value));
@@ -66,7 +67,7 @@ export function toCircularFormData(form, poster) {
 
 /** Form values for editing a saved circular. */
 export function toFormValues(circular) {
-  const values = { ...EMPTY_CIRCULAR };
+  const values = emptyCircular();
   for (const field of TEXT_FIELDS) values[field] = circular[field] == null ? "" : String(circular[field]).slice(0, field.endsWith("date") || field === "deadline" ? 10 : undefined);
   const posts = (circular.posts ?? []).map((post) => Object.fromEntries(POST_FIELDS.map((field) => [field, post[field] == null ? "" : String(post[field])])));
   return { ...values, posts: posts.length ? posts : [EMPTY_POST], is_open: Boolean(circular.is_open), is_published: Boolean(circular.is_published) };

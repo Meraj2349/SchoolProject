@@ -41,3 +41,8 @@ function useApplicationMutation(mutationFn) {
 export const useSetJobApplicationStatus = () => useApplicationMutation(({ id, status }) => jobApplicationsService.setStatus(id, status));
 
 export const useDeleteJobApplication = () => useApplicationMutation((id) => jobApplicationsService.remove(id));
+
+/** Admin — the CV as a Blob (sent with the admin's login, so it cannot be a plain link). */
+export function useDownloadJobApplicationCv() {
+  return useMutation({ mutationFn: (id) => jobApplicationsService.downloadCv(id) });
+}

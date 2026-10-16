@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { EMPTY_CIRCULAR, EMPTY_POST, toCircularFormData, toFormValues, validateCircularForm } from "./jobCircularForm";
+import { EMPTY_POST, emptyCircular, toCircularFormData, toFormValues, validateCircularForm } from "./jobCircularForm";
+
+const EMPTY_CIRCULAR = emptyCircular();
 
 const valid = {
   ...EMPTY_CIRCULAR,
@@ -54,5 +56,12 @@ describe("toFormValues", () => {
     const values = toFormValues({ id: 3, title_en: "A", title_bn: "B", circular_date: "2026-10-01", deadline: null, posts: [{ title_en: "X", title_bn: "Y", vacancies: 2, salary_min: null }], is_open: true, is_published: false });
     expect(values).toMatchObject({ title_en: "A", deadline: "", is_open: true, is_published: false });
     expect(values.posts[0]).toEqual({ ...EMPTY_POST, title_en: "X", title_bn: "Y", vacancies: "2" });
+  });
+});
+
+describe("emptyCircular", () => {
+  it("dates a new circular today in Bangladesh, worked out when the form opens", () => {
+    expect(emptyCircular(new Date("2026-10-16T20:30:00Z")).circular_date).toBe("2026-10-17");
+    expect(emptyCircular().posts).toEqual([EMPTY_POST]);
   });
 });

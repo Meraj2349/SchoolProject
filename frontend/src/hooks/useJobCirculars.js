@@ -17,12 +17,15 @@ export function usePublishedJobCirculars() {
   });
 }
 
+/** Circular ids are whole numbers; anything else (from the URL) is never sent to the API. */
+export const isCircularId = (id) => /^\d+$/.test(String(id ?? ""));
+
 // Public — one circular, for its own page.
 export function useJobCircular(id) {
   return useQuery({
     queryKey: queryKeys.jobCirculars.detail(id),
     queryFn: () => jobCircularsService.getById(id),
-    enabled: Boolean(id),
+    enabled: isCircularId(id),
     retry: false,
   });
 }

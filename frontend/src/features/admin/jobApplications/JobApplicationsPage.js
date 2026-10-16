@@ -3,10 +3,9 @@
 import { useState } from "react";
 import { FiDownload, FiEye, FiTrash2 } from "react-icons/fi";
 import { Badge, Box, Button, ConfirmDialog, DataTable, Drawer, Field, PageHeader, Select, errorMessage, notify } from "@/components/admin/ui";
-import { useDeleteJobApplication, useJobApplications, useSetJobApplicationStatus } from "@/hooks/useJobApplications";
+import { useDeleteJobApplication, useDownloadJobApplicationCv, useJobApplications, useSetJobApplicationStatus } from "@/hooks/useJobApplications";
 import { useAllJobCirculars } from "@/hooks/useJobCirculars";
 import { formatDate, localized } from "@/lib/homePage";
-import { jobApplicationsService } from "@/services/jobApplications.service";
 import { useLanguageStore, useTranslations } from "@/store/languageStore";
 
 const STATUSES = ["new", "shortlisted", "rejected", "hired"];
@@ -19,25 +18,22 @@ function saveBlob(blob, name) {
   document.body.append(link);
   link.click();
   link.remove();
-  URL.revokeObjectURL(url);
+  setTimeout(() => URL.revokeObjectURL(url), 1000); // some browsers cancel the download if it goes at once
 }
 
 function ApplicationDrawer({ application, onClose, onStatus }) {
   const t = useTranslations("admin.jobApplications");
   const tJobs = useTranslations("jobs");
   const language = useLanguageStore((s) => s.language);
-  const [downloading, setDownloading] = useState(false);
+  const downloadCv = useDownloadJobApplicationCv();
 
   const download = async () => {
-    setDownloading(true);
     try {
-      const blob = await jobApplicationsService.downloadCv(application.id);
+      const blob = await downloadCv.mutateAsync(application.id);
       const extension = (application.cv_file?.match(/\.\w+$/)?.[0] ?? "").toLowerCase();
       saveBlob(blob, `${application.full_name.replace(/\s+/g, "-")}-CV${extension}`);
     } catch {
       notify.error(t("downloadFailed"));
-    } finally {
-      setDownloading(false);
     }
   };
 
@@ -63,7 +59,7 @@ function ApplicationDrawer({ application, onClose, onStatus }) {
       </dl>
       <div className="mb-4">
         {application.cv_file ? (
-          <Button icon={FiDownload} onClick={download} disabled={downloading}>
+          <Button icon={FiDownload} onClick={download} disabled={downloadCv.isPending}>
             {t("downloadCv")}
           </Button>
         ) : (
