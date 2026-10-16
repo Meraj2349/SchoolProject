@@ -66,4 +66,17 @@ describe("makeLocalFileUpload", () => {
 
     expect(res.status).toBe(200);
   });
+
+  it("refuses a form with too many or too large text fields, before they fill memory", async () => {
+    const app = appWith({ types: ["pdf"] });
+
+    const many = request(app).post("/");
+    for (let i = 0; i < 40; i += 1) many.field(`f${i}`, "x");
+    const tooMany = await many;
+    expect(tooMany.status).toBe(400);
+    expect(tooMany.body).toEqual({ success: false, message: expect.any(String) });
+
+    const huge = await request(app).post("/").field("address", "x".repeat(70 * 1024));
+    expect(huge.status).toBe(400);
+  });
 });

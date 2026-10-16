@@ -10,8 +10,10 @@ import { makeJobApplicationController } from "./interface/jobApplication.control
 
 const SERVER_DIR = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../..");
 
-/** Applicants' CVs: outside public/, so never reachable as /uploads/... */
-export const JOB_APPLICATION_CV_ROOT = path.join(SERVER_DIR, "private_uploads", "job-applications");
+/** Applicants' CVs: outside public/, so never reachable as /uploads/... (JOB_APPLICATION_CV_DIR moves them, e.g. for tests). */
+export const JOB_APPLICATION_CV_ROOT = process.env.JOB_APPLICATION_CV_DIR
+  ? path.resolve(process.env.JOB_APPLICATION_CV_DIR)
+  : path.join(SERVER_DIR, "private_uploads", "job-applications");
 export const jobApplicationCvs = makeCvStore({ root: JOB_APPLICATION_CV_ROOT });
 
 export const jobApplicationController = makeJobApplicationController({

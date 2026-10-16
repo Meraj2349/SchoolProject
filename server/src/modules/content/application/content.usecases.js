@@ -54,7 +54,8 @@ export function makeContentUseCases({ kind, repository, onRemoved = null }) {
     async remove({ admin, id }) {
       const item = await manageable(admin, id);
       await repository.remove(item.id);
-      if (onRemoved) await onRemoved(item.row);
+      // Best effort: the item is gone, so a failed cleanup (e.g. of files) is logged, not reported.
+      if (onRemoved) await onRemoved(item.row).catch((error) => console.error("Cleanup after delete failed:", error?.message ?? error));
       return item.row;
     },
   };

@@ -51,8 +51,9 @@ export function makeJobApplicationUseCases({ repository, circulars, cvs }) {
         if (upload) cv_file = await cvs.keep(upload, circular.id);
         return { id: await repository.insert({ ...row, cv_file }) };
       } catch (error) {
-        if (cv_file) await cvs.discard(circularId, cv_file);
-        else if (upload) await cvs.discardUpload(upload);
+        // Clean up quietly: the reason the application was refused is what the visitor needs.
+        const cleanup = cv_file ? cvs.discard(circularId, cv_file) : upload ? cvs.discardUpload(upload) : null;
+        await cleanup?.catch(() => {});
         throw error;
       }
     },

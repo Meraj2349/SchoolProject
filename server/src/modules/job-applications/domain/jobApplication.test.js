@@ -48,7 +48,9 @@ describe("toNewJobApplication", () => {
     [{ ...FORM, post_index: "2" }, "job_application_post_invalid"],
     [{ ...FORM, post_index: "-1" }, "job_application_post_invalid"],
     [{ ...FORM, post_index: "" }, "job_application_post_invalid"],
-    [{ ...FORM, full_name: "x".repeat(151) }, "job_application_required"],
+    [{ ...FORM, full_name: "x".repeat(151) }, "job_application_too_long"],
+    [{ ...FORM, address: "x".repeat(1001) }, "job_application_too_long"],
+    [{ ...FORM, experience: "x".repeat(2001) }, "job_application_too_long"],
   ])("refuses %o with %s", (input, code) => {
     expect(() => toNewJobApplication(input, CIRCULAR)).toThrow(invalid(code));
   });

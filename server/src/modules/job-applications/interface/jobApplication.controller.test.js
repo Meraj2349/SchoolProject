@@ -57,7 +57,7 @@ describe("job application controller", () => {
 
     const res = await request(app).get("/?circular_id=3&status=new");
 
-    expect(res.body).toEqual({ success: true, data: [{ id: 1 }], count: 1 });
+    expect(res.body).toEqual({ success: true, data: [{ id: 1 }] });
     expect(seen).toEqual({ admin: { role: "branch_admin", branchId: 1 }, circularId: "3", status: "new" });
   });
 

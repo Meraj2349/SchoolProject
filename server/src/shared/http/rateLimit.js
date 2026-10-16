@@ -1,35 +1,50 @@
+import net from "net";
 import { t } from "../../../config/i18n.js";
 
-const PRIVATE = /^(::ffff:)?(127\.|10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.)|^::1$|^f[cd]/i;
-
 /**
- * The visitor's address. Behind our own proxy (the Next.js frontend rewrites
- * /api to this server from a private address) it is the first X-Forwarded-For
- * entry; a request from anywhere else cannot choose its address that way.
+ * The TRUST_PROXY setting for Express's "trust proxy": unset or "false" →
+ * trust nothing (req.ip is the connecting address); a number → that many
+ * proxy hops; anything else (e.g. "loopback, uniquelocal") as Express reads it.
+ * Set it only when a proxy you run sits in front and writes X-Forwarded-For.
  */
-export function clientIp(req) {
-  const remote = req.socket?.remoteAddress ?? "unknown";
-  const forwarded = String(req.headers?.["x-forwarded-for"] ?? "").split(",")[0].trim();
-  return PRIVATE.test(remote) && forwarded ? forwarded : remote;
+export function parseTrustProxy(value) {
+  const text = String(value ?? "").trim();
+  if (!text || text === "false") return false;
+  if (text === "true") return true;
+  return /^\d+$/.test(text) ? Number(text) : text;
 }
 
 /**
  * A small in-memory limit on how often one address may call an endpoint
- * (e.g. the public job application form). Counts reset after `windowMs`.
- * In memory, so it is per server process; enough to slow down form spam.
+ * (e.g. the public job application form). The address is Express's req.ip,
+ * so X-Forwarded-For counts only from proxies the app trusts. At most
+ * `maxKeys` addresses are remembered (the oldest are dropped), and expired
+ * windows are swept on a timer, so made-up addresses cannot grow memory.
  */
-export function rateLimit({ max, windowMs, now = Date.now }) {
-  const hits = new Map(); // ip → { count, resetAt }
+export function rateLimit({ max, windowMs, maxKeys = 10_000, now = Date.now }) {
+  const hits = new Map(); // address → { count, resetAt }, oldest first
 
-  return (req, res, next) => {
+  const sweep = setInterval(() => {
     const time = now();
-    for (const [ip, entry] of hits) if (entry.resetAt <= time) hits.delete(ip); // forget old windows
-    const ip = clientIp(req);
-    const entry = hits.get(ip) ?? { count: 0, resetAt: time + windowMs };
+    for (const [key, entry] of hits) if (entry.resetAt <= time) hits.delete(key);
+  }, Math.min(windowMs, 10 * 60 * 1000));
+  sweep.unref?.(); // never keeps the process (or a test run) alive
+
+  const middleware = (req, res, next) => {
+    const time = now();
+    const key = net.isIP(req.ip ?? "") ? req.ip : "unknown";
+    let entry = hits.get(key);
+    if (!entry || entry.resetAt <= time) {
+      hits.delete(key);
+      if (hits.size >= maxKeys) hits.delete(hits.keys().next().value);
+      entry = { count: 0, resetAt: time + windowMs };
+      hits.set(key, entry);
+    }
     entry.count += 1;
-    hits.set(ip, entry);
     if (entry.count <= max) return next();
     res.set("Retry-After", String(Math.ceil((entry.resetAt - time) / 1000)));
     return res.status(429).json({ success: false, message: t("too_many_requests", req.language) });
   };
+  middleware.size = () => hits.size;
+  return middleware;
 }

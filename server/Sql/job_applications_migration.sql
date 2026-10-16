@@ -24,7 +24,7 @@ CREATE TABLE
         branch_id INT NULL COMMENT 'The circular''s branch',
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-        UNIQUE KEY uq_job_application_phone (circular_id, post_index, phone),
+        UNIQUE KEY uq_job_application_phone (circular_id, post_title_en, phone) COMMENT 'One application per post (by name, so reordering posts does not matter) per mobile',
         INDEX idx_job_applications_status (circular_id, status)
     );
 

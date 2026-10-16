@@ -22,7 +22,7 @@ export function makeJobApplicationController({ useCases }) {
 
     list: handle(async (req, res) => {
       const applications = await useCases.list({ admin: adminOf(req), circularId: req.query.circular_id, status: req.query.status });
-      res.status(200).json({ success: true, data: applications, count: applications.length });
+      res.status(200).json({ success: true, data: applications });
     }),
 
     counts: handle(async (req, res) => {

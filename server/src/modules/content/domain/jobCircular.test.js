@@ -47,6 +47,10 @@ describe("jobCircular", () => {
     [{ ...CIRCULAR, posts: [{ ...POST, vacancies: "1.5" }] }, "job_circular_post_invalid"],
     [{ ...CIRCULAR, posts: [{ ...POST, salary_min: "30000" }] }, "job_circular_salary_invalid"],
     [{ ...CIRCULAR, posts: [{ ...POST, salary_max: "-5" }] }, "job_circular_salary_invalid"],
+    [{ ...CIRCULAR, title_en: "x".repeat(256) }, "job_circular_too_long"],
+    [{ ...CIRCULAR, posts: [{ ...POST, title_bn: "ক".repeat(256) }] }, "job_circular_too_long"],
+    [{ ...CIRCULAR, posts: [{ ...POST, qualification_en: "x".repeat(256) }] }, "job_circular_too_long"],
+    [{ ...CIRCULAR, how_to_apply_bn: "ক".repeat(5001) }, "job_circular_too_long"],
   ])("refuses %o with %s", (input, code) => {
     expect(() => jobCircular.toNew(input)).toThrow(invalid(code));
   });

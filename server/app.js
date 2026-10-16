@@ -14,6 +14,7 @@ import noticeAnnouncementRoutes from "./routes/notice-announcement.routes.js";
 import achievementRoutes from "./routes/achievement.routes.js";
 import jobCircularRoutes from "./routes/jobCircular.routes.js";
 import jobApplicationRoutes from "./routes/jobApplication.routes.js";
+import { parseTrustProxy } from "./src/shared/http/rateLimit.js";
 import branchRoutes from "./routes/branch.routes.js";
 import classRoutes from "./routes/classes.routes.js";
 import eventRoutes from "./routes/event.routes.js";
@@ -37,6 +38,10 @@ dotenv.config();
 
 const app = express();
 
+// Behind a proxy you run (nginx, Caddy, a load balancer), set TRUST_PROXY so
+// req.ip is the visitor's address; unset, X-Forwarded-For is never believed.
+app.set("trust proxy", parseTrustProxy(process.env.TRUST_PROXY));
+
 // Middleware
 app.use(
   cors({
@@ -51,8 +56,20 @@ app.use(bodyParser.json());
 // Language detection – attaches req.language ("en" | "bn"), default "bn"
 app.use(languageMiddleware);
 
-// Serve static files from public directory (for file uploads)
-app.use(express.static("public"));
+// Serve static files from public directory (for file uploads). Uploaded files
+// are never sniffed into another type, and uploaded images are sandboxed, so
+// a disguised file cannot run as a page from the API's address. (PDFs are not
+// sandboxed: browsers' PDF viewers refuse to open sandboxed documents.)
+app.use(
+  express.static("public", {
+    setHeaders: (res, filePath) => {
+      res.set("X-Content-Type-Options", "nosniff");
+      if (/[\\/]uploads[\\/]/.test(filePath) && !/\.pdf$/i.test(filePath)) {
+        res.set("Content-Security-Policy", "sandbox; default-src 'none'; img-src 'self'");
+      }
+    },
+  }),
+);
 
 // Use the routes under /api/
 app.use("/api/admin", adminRouter);

@@ -16,6 +16,8 @@ services:
       - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY:?Set CLOUDINARY_API_KEY in .env}
       - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET:?Set CLOUDINARY_API_SECRET in .env}
       - FRONTEND_URL=http://localhost:5174
+      - TRUST_PROXY=${TRUST_PROXY:-}
+      - JOB_APPLICATIONS_PER_HOUR=${JOB_APPLICATIONS_PER_HOUR:-10}
     volumes:
       # Uploaded files outlive the container: posters and photos (served),
       # applicants' CVs (private, never served).

@@ -488,7 +488,7 @@ CREATE TABLE
         branch_id INT NULL COMMENT 'The circular''s branch',
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-        UNIQUE KEY uq_job_application_phone (circular_id, post_index, phone),
+        UNIQUE KEY uq_job_application_phone (circular_id, post_title_en, phone) COMMENT 'One application per post (by name, so reordering posts does not matter) per mobile',
         INDEX idx_job_applications_status (circular_id, status)
     );
 
@@ -641,7 +641,8 @@ ALTER TABLE JobApplications ADD CONSTRAINT fk_job_applications_branch FOREIGN KE
 ALTER TABLE JobApplications ADD CONSTRAINT fk_job_applications_circular FOREIGN KEY (circular_id) REFERENCES JobCirculars (id) ON DELETE CASCADE;
 
 -- The school's two 2025 circulars, closed (applications were by hand).
--- Added once; an admin may edit, reopen or delete them.
+-- Added when missing (matched by title and date); an admin may edit, reopen or
+-- delete them, though running this script again restores a deleted one.
 INSERT INTO JobCirculars (title_en, title_bn, circular_date, posts, image_url, is_open, is_published, branch_id)
 SELECT 'Urgent recruitment: Accountant', 'জরুরি নিয়োগ বিজ্ঞপ্তি: অ্যাকাউন্টেন্ট', '2025-06-28',
        JSON_ARRAY(JSON_OBJECT('title_en', 'Accountant', 'title_bn', 'অ্যাকাউন্টেন্ট', 'vacancies', 1,

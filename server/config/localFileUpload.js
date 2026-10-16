@@ -40,7 +40,10 @@ export function makeLocalFileUpload({
         cb(null, `${prefix}-${unique}${path.extname(file.originalname).toLowerCase()}`);
       },
     }),
-    limits: { fileSize: maxBytes, files: 1 },
+    // Text fields are kept in memory: cap how many and how big, so one
+    // anonymous request cannot fill the server's memory (busboy allows 1 MB
+    // per field and any number of fields by default).
+    limits: { fileSize: maxBytes, files: 1, fields: 20, fieldSize: 64 * 1024, parts: 25 },
     fileFilter: (_req, file, cb) => {
       const extension = path.extname(file.originalname).toLowerCase();
       const ok = allowed.some((type) => type.extensions.includes(extension) && type.mimetypes.includes(file.mimetype));

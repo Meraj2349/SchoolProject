@@ -5,12 +5,20 @@ import { ValidationError } from "../../../shared/errors/index.js";
 // PDF, kept in image_url). Visitors may apply online while it is open.
 
 const MAX_POSTS = 20;
+const MAX_TITLE = 255; // the columns (and the copy in JobApplications) are VARCHAR(255)
+const MAX_HOW_TO_APPLY = 5000;
 const DAY = /^\d{4}-\d{2}-\d{2}$/;
 
 const text = (value) => (typeof value === "string" ? value.trim() : "");
 const optionalText = (value) => text(value) || null;
 const isFalse = (value) => value === false || value === "false";
 const blank = (value) => value === undefined || value === null || value === "";
+
+/** The text, or a ValidationError when it is longer than `max` characters. */
+function capped(value, max) {
+  if (value && [...value].length > max) throw new ValidationError("job_circular_too_long");
+  return value;
+}
 
 /** "YYYY-MM-DD" when it is a real calendar date, else a ValidationError. */
 function day(value) {
@@ -33,8 +41,8 @@ function salary(value) {
 }
 
 function post(input = {}) {
-  const title_en = text(input.title_en);
-  const title_bn = text(input.title_bn);
+  const title_en = capped(text(input.title_en), MAX_TITLE);
+  const title_bn = capped(text(input.title_bn), MAX_TITLE);
   const vacancies = Number(input.vacancies);
   if (!title_en || !title_bn || !Number.isInteger(vacancies) || vacancies < 1) throw new ValidationError("job_circular_post_invalid");
   const salary_min = salary(input.salary_min);
@@ -44,8 +52,8 @@ function post(input = {}) {
     title_en,
     title_bn,
     vacancies,
-    qualification_en: optionalText(input.qualification_en),
-    qualification_bn: optionalText(input.qualification_bn),
+    qualification_en: capped(optionalText(input.qualification_en), MAX_TITLE),
+    qualification_bn: capped(optionalText(input.qualification_bn), MAX_TITLE),
     salary_min,
     salary_max,
   };
@@ -66,8 +74,8 @@ function posts(value) {
 }
 
 function circularFields(input) {
-  const title_en = text(input.title_en);
-  const title_bn = text(input.title_bn);
+  const title_en = capped(text(input.title_en), MAX_TITLE);
+  const title_bn = capped(text(input.title_bn), MAX_TITLE);
   if (!title_en || !title_bn) throw new ValidationError("job_circular_title_required");
   const circular_date = day(input.circular_date);
   const deadline = optionalDay(input.deadline);
@@ -77,8 +85,8 @@ function circularFields(input) {
     title_bn,
     circular_date,
     deadline,
-    how_to_apply_en: optionalText(input.how_to_apply_en),
-    how_to_apply_bn: optionalText(input.how_to_apply_bn),
+    how_to_apply_en: capped(optionalText(input.how_to_apply_en), MAX_HOW_TO_APPLY),
+    how_to_apply_bn: capped(optionalText(input.how_to_apply_bn), MAX_HOW_TO_APPLY),
     // Stored in a JSON column; mysql2 would expand a plain array into a list.
     posts: JSON.stringify(posts(input.posts)),
     is_open: !isFalse(input.is_open),

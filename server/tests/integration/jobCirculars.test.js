@@ -38,6 +38,10 @@ describe("job circulars", () => {
     expect(row.image_url).toMatch(/^\/uploads\/job-circulars\/circular-.*\.pdf$/);
     expect(fs.existsSync(path.join(PUBLIC_DIR, row.image_url))).toBe(true);
 
+    const served = await request(app).get(row.image_url).expect(200);
+    expect(served.headers["content-type"]).toBe("application/pdf");
+    expect(served.headers["x-content-type-options"]).toBe("nosniff");
+
     await request(app).delete(`/api/job-circulars/${res.body.data.id}`).set(adminA).expect(200);
     expect(fs.existsSync(path.join(PUBLIC_DIR, row.image_url))).toBe(false);
   });
@@ -77,6 +81,9 @@ describe("job circulars", () => {
     expect((await request(app).get(`/api/job-circulars/${shown}`).expect(200)).body.data).toMatchObject({ id: shown, accepting: true, posts: [POST] });
     expect((await request(app).get(`/api/job-circulars/${hidden}`)).status).toBe(404);
     expect((await request(app).get("/api/job-circulars/99999")).status).toBe(404);
+    const bad = await request(app).get("/api/job-circulars/abc").set("Accept-Language", "en");
+    expect(bad.status).toBe(404);
+    expect(bad.body).toEqual({ success: false, message: "Job circular not found." });
   });
 });
 

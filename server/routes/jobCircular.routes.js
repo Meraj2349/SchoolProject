@@ -17,7 +17,7 @@ const router = express.Router();
 
 router.get("/", optionalAuth, circulars.listVisible); // the website: published only
 router.get("/all", authMiddleware, circulars.list);
-router.get("/:id(\\d+)", circulars.getVisible); // a circular's own page
+router.get("/:id", circulars.getVisible); // a circular's own page (a bad id is a translated 404)
 router.post("/", authMiddleware, upload.single("poster"), circulars.create);
 router.put("/:id", authMiddleware, upload.single("poster"), circulars.update);
 router.patch("/:id/publish", authMiddleware, circulars.setVisibility);

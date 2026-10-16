@@ -13,11 +13,14 @@ const cvUpload = makeLocalFileUpload({
   sizeError: "file_too_large",
 });
 const HOUR = 60 * 60 * 1000;
+// Per visitor address (see TRUST_PROXY in .env.example); without a trusted
+// proxy every visitor may share one address, so keep this generous.
+const PER_HOUR = Number(process.env.JOB_APPLICATIONS_PER_HOUR) || 10;
 
 const router = express.Router();
 
 // Public: anyone may apply to an open circular, a few times an hour per address.
-router.post("/", rateLimit({ max: 5, windowMs: HOUR }), cvUpload.single("cv"), applications.submit);
+router.post("/", rateLimit({ max: PER_HOUR, windowMs: HOUR }), cvUpload.single("cv"), applications.submit);
 
 // Admins: a branch admin handles their branch's applications, the super admin all.
 router.get("/", authMiddleware, applications.list);

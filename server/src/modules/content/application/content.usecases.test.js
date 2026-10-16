@@ -1,4 +1,4 @@
-import { describe, expect, it } from "@jest/globals";
+import { describe, expect, it, jest } from "@jest/globals";
 import { ForbiddenError, NotFoundError, ValidationError } from "../../../shared/errors/index.js";
 import { notice } from "../domain/contentKinds.js";
 import { makeContentUseCases } from "./content.usecases.js";
@@ -138,5 +138,16 @@ describe("content use cases", () => {
     await content.remove({ admin: adminA, id: "4" });
 
     expect(seen).toEqual([[4, false]]);
+  });
+
+  it("still reports a delete as done when the cleanup afterwards fails", async () => {
+    const repository = fakeRepository([{ id: 4, branch_id: 1, visible: true }]);
+    const log = jest.spyOn(console, "error").mockImplementation(() => {});
+    const content = makeContentUseCases({ kind: notice, repository, onRemoved: async () => Promise.reject(new Error("disk")) });
+
+    await expect(content.remove({ admin: adminA, id: "4" })).resolves.toMatchObject({ id: 4 });
+    expect(repository.store.has(4)).toBe(false);
+    expect(log).toHaveBeenCalled();
+    log.mockRestore();
   });
 });

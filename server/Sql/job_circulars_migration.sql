@@ -32,7 +32,8 @@ SET @sql := IF(@missing, 'ALTER TABLE JobCirculars ADD CONSTRAINT fk_job_circula
 PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
 
 -- The school's two 2025 circulars, closed (applications were by hand).
--- Added once; an admin may edit, reopen or delete them.
+-- Added when missing (matched by title and date); an admin may edit, reopen or
+-- delete them, though running this script again restores a deleted one.
 INSERT INTO JobCirculars (title_en, title_bn, circular_date, posts, image_url, is_open, is_published, branch_id)
 SELECT 'Urgent recruitment: Accountant', 'জরুরি নিয়োগ বিজ্ঞপ্তি: অ্যাকাউন্টেন্ট', '2025-06-28',
        JSON_ARRAY(JSON_OBJECT('title_en', 'Accountant', 'title_bn', 'অ্যাকাউন্টেন্ট', 'vacancies', 1,

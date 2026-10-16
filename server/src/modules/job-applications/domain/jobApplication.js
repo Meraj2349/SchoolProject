@@ -10,7 +10,7 @@ const BANGLA_DIGITS = "০১২৩৪৫৬৭৮৯";
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const text = (value) => (typeof value === "string" ? value.trim() : "");
-const fits = (field, value) => value.length <= MAX[field];
+const fits = (field, value) => [...value].length <= MAX[field];
 
 /** "01XXXXXXXXX" from what people type: Bangla digits, spaces, dashes, a +880 prefix. */
 function mobile(value) {
@@ -27,8 +27,10 @@ export function toNewJobApplication(input, circular) {
   const full_name = text(input.full_name);
   const education = text(input.education);
   const address = text(input.address);
-  if (!full_name || !education || !address || !fits("full_name", full_name) || !fits("education", education) || !fits("address", address)) {
-    throw new ValidationError("job_application_required");
+  if (!full_name || !education || !address) throw new ValidationError("job_application_required");
+  const experience = text(input.experience) || null;
+  if (!fits("full_name", full_name) || !fits("education", education) || !fits("address", address) || (experience && !fits("experience", experience))) {
+    throw new ValidationError("job_application_too_long");
   }
 
   const raw = text(String(input.post_index ?? ""));
@@ -38,7 +40,6 @@ export function toNewJobApplication(input, circular) {
 
   const email = text(input.email).toLowerCase() || null;
   if (email && (!EMAIL.test(email) || !fits("email", email))) throw new ValidationError("job_application_email_invalid");
-  const experience = text(input.experience).slice(0, MAX.experience) || null;
 
   return {
     circular_id: circular.id,
