@@ -1,4 +1,5 @@
 import { ValidationError } from "../../../shared/errors/index.js";
+import { schoolToday } from "../../../shared/schoolDate.js";
 
 // A job circular (নিয়োগ বিজ্ঞপ্তি): one or more posts, the date it was
 // issued, an optional last date to apply and an optional poster (image or
@@ -94,8 +95,8 @@ function circularFields(input) {
   };
 }
 
-/** Today's date in Bangladesh, "YYYY-MM-DD" (a circular's last date is a Bangladeshi day). */
-export const schoolToday = (now = new Date()) => now.toLocaleDateString("en-CA", { timeZone: "Asia/Dhaka" });
+// A circular's last date is a Bangladeshi day.
+export { schoolToday };
 
 /** Whether visitors may apply online: published, marked open and not past its last date. */
 export const isAcceptingApplications = (circular, today = schoolToday()) =>

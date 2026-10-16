@@ -667,6 +667,62 @@ const i18n = {
     en: "Class name and section are required.",
     bn: "শ্রেণির নাম এবং বিভাগ আবশ্যক।",
   },
+  attendance_saved: {
+    en: "Attendance saved.",
+    bn: "উপস্থিতি সংরক্ষণ হয়েছে।",
+  },
+  attendance_status_invalid: {
+    en: "Status must be Present, Absent, Late or Leave.",
+    bn: "অবস্থা হতে হবে উপস্থিত, অনুপস্থিত, দেরি বা ছুটি।",
+  },
+  attendance_date_invalid: {
+    en: "Give a valid date (YYYY-MM-DD).",
+    bn: "সঠিক তারিখ দিন (YYYY-MM-DD)।",
+  },
+  attendance_date_future: {
+    en: "Attendance cannot be taken for a day that has not come yet.",
+    bn: "যে দিন এখনো আসেনি তার উপস্থিতি নেওয়া যায় না।",
+  },
+  attendance_range_invalid: {
+    en: "Choose a start date on or before the end date, at most one year apart.",
+    bn: "শুরুর তারিখ শেষের তারিখের আগে বা একই দিনে দিন, সর্বোচ্চ এক বছরের ব্যবধানে।",
+  },
+  attendance_entries_required: {
+    en: "Give at least one student's attendance.",
+    bn: "অন্তত একজন শিক্ষার্থীর উপস্থিতি দিন।",
+  },
+  attendance_entries_invalid: {
+    en: "Each entry needs a student and a status.",
+    bn: "প্রতিটি তথ্যে একজন শিক্ষার্থী ও একটি অবস্থা থাকতে হবে।",
+  },
+  attendance_entries_duplicate: {
+    en: "A student appears more than once.",
+    bn: "একজন শিক্ষার্থী একাধিকবার এসেছে।",
+  },
+  attendance_entries_incomplete: {
+    en: "Mark every student of the class.",
+    bn: "শ্রেণির সব শিক্ষার্থীর উপস্থিতি দিন।",
+  },
+  attendance_student_not_in_class: {
+    en: "This student is not in this class.",
+    bn: "এই শিক্ষার্থী এই শ্রেণিতে নেই।",
+  },
+  attendance_taken_at_invalid: {
+    en: "The time the attendance was taken is not valid.",
+    bn: "উপস্থিতি নেওয়ার সময়টি সঠিক নয়।",
+  },
+  attendance_day_locked: {
+    en: "Teachers can take today's attendance only. Ask an admin to correct another day.",
+    bn: "শিক্ষকেরা শুধু আজকের উপস্থিতি নিতে পারেন। অন্য দিনের সংশোধনের জন্য অ্যাডমিনকে বলুন।",
+  },
+  attendance_class_not_found: {
+    en: "Class not found.",
+    bn: "শ্রেণি পাওয়া যায়নি।",
+  },
+  attendance_not_your_class: {
+    en: "You are not the class teacher of this class.",
+    bn: "আপনি এই শ্রেণির শ্রেণিশিক্ষক নন।",
+  },
 
   // ── Routines ──────────────────────────────────────────────────────────────
   routine_created: {
