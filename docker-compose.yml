@@ -18,6 +18,13 @@ services:
       - FRONTEND_URL=http://localhost:5174
       - TRUST_PROXY=${TRUST_PROXY:-}
       - JOB_APPLICATIONS_PER_HOUR=${JOB_APPLICATIONS_PER_HOUR:-10}
+      - TEACHER_APP_LOGINS_PER_15_MINUTES=${TEACHER_APP_LOGINS_PER_15_MINUTES:-20}
+      - ATTENDANCE_SMS_ENABLED=${ATTENDANCE_SMS_ENABLED:-false}
+      - ATTENDANCE_SMS_DELAY_MINUTES=${ATTENDANCE_SMS_DELAY_MINUTES:-15}
+      - SMS_PROVIDER=${SMS_PROVIDER:-log}
+      - SMS_API_URL=${SMS_API_URL:-https://bulksmsbd.net/api/smsapi}
+      - SMS_API_KEY=${SMS_API_KEY:-}
+      - SMS_SENDER_ID=${SMS_SENDER_ID:-}
     volumes:
       # Uploaded files outlive the container: posters and photos (served),
       # applicants' CVs (private, never served).

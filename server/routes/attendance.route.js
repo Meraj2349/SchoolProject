@@ -1,6 +1,7 @@
 import express from "express";
 import authMiddleware, { optionalAuth } from "../middlewares/auth.middleware.js";
 import { attendanceController as attendance } from "../src/modules/attendance/index.js";
+import { absenceSmsController } from "../src/modules/notifications/index.js";
 import { requireWriteBranch } from "../src/shared/http/requireWriteBranch.js";
 
 const router = express.Router();
@@ -22,6 +23,8 @@ router.get("/exists", attendance.exists);
 router.get("/grid", attendance.grid);
 // GET /roster?classId=&date=  a class's students with their status that day
 router.get("/roster", attendance.roster);
+// GET /sms?date=  the day's SMS to parents of absent children
+router.get("/sms", absenceSmsController.list);
 router.get("/summary/class/:classID/date/:date", attendance.classDaySummary);
 router.get("/search/daterange/:startDate/:endDate", attendance.byDateRange);
 router.get("/class/:classID", attendance.byClass);
