@@ -11,7 +11,8 @@ import { sendError } from "./sendError.js";
 export function errorHandler(error, req, res, next) {
   if (res.headersSent) return next(error);
   if (error instanceof multer.MulterError) {
-    const key = error.code === "LIMIT_FILE_SIZE" ? "image_too_large" : "upload_failed";
+    // The upload middleware names its own size message (an image, a CV, ...).
+    const key = error.code === "LIMIT_FILE_SIZE" ? (req.fileTooLargeKey ?? "image_too_large") : "upload_failed";
     return res.status(400).json({ success: false, message: t(key, req.language) });
   }
   return sendError(res, error, req.language);

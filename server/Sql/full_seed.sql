@@ -1,3 +1,6 @@
+-- The file holds Bangla text: read it as UTF-8 whatever the client default.
+SET NAMES utf8mb4;
+
 -- ============================================================
 -- Full Seed: School_Management database
 -- Clears all operational data and re-inserts clean branch-wise
@@ -27,7 +30,7 @@ INSERT INTO Branches (id, name_en, name_bn, address_en, address_bn, is_proposed,
 VALUES
   (1, 'Star Academic School, Natiapara Branch',      'স্টার একাডেমিক স্কুল, নাটিয়াপাড়া শাখা',     'Natiapara, Delduar, Tangail',      'নাটিয়াপাড়া, দেলদুয়ার, টাঙ্গাইল',      0, '2010-01-15'),
   (2, 'Star Academic School, Pakullah Bazar Branch', 'স্টার একাডেমিক স্কুল, পাকুল্লা বাজার শাখা',  'Pakullah Bazar, Delduar, Tangail', 'পাকুল্লা বাজার, দেলদুয়ার, টাঙ্গাইল',  0, '2014-03-10'),
-  (3, 'Star Academic School, Mirjapur Branch',       'স্টার একাডেমিক স্কুল, মির্জাপুর শাখা',        'Mirjapur, Tangail',                'মির্জাপুর, টাঙ্গাইল',                   0, '2020-06-01')
+  (3, 'Star Academic School, Mirzapur Branch',       'স্টার একাডেমিক স্কুল, মির্জাপুর শাখা',        'Mirzapur, Tangail',                'মির্জাপুর, টাঙ্গাইল',                   0, '2020-06-01')
 ON DUPLICATE KEY UPDATE
   name_en = VALUES(name_en), name_bn = VALUES(name_bn),
   address_en = VALUES(address_en), address_bn = VALUES(address_bn),
@@ -72,7 +75,7 @@ INSERT INTO Teachers (TeacherID, FirstName, LastName, Subject, ContactNumber, Em
   (9,  'Harun',      'Or Rashid', 'Science',           '01722000004', 'harun@star.edu',    '2017-04-01', 2),
   (10, 'Lutfun',     'Nahar',     'Religious Studies', '01722000005', 'lutfun@star.edu',   '2018-09-10', 2);
 
--- Branch 3 — Mirjapur
+-- Branch 3 — Mirzapur
 INSERT INTO Teachers (TeacherID, FirstName, LastName, Subject, ContactNumber, Email, JoiningDate, branch_id) VALUES
   (11, 'Anisur',     'Rahman',    'Mathematics',       '01733000001', 'anisur@star.edu',   '2020-06-01', 3),
   (12, 'Sumaiya',    'Islam',     'Bangla',            '01733000002', 'sumaiya@star.edu',  '2020-06-01', 3),
@@ -183,39 +186,39 @@ INSERT INTO Students (StudentID, FirstName, LastName, RollNumber, DateOfBirth, G
 
 -- Branch 3, Class 6/Bangla (ClassID=13)
 INSERT INTO Students (StudentID, FirstName, LastName, RollNumber, DateOfBirth, Gender, ClassID, AdmissionDate, Address, ParentContact, branch_id) VALUES
-  (37, 'Raihan',    'Islam',      '001', '2012-02-28', 'Male',   13, '2022-06-01', 'Mirjapur, Tangail',           '01833300001', 3),
-  (38, 'Sumaiya',   'Ahmed',      '002', '2012-07-13', 'Female', 13, '2022-06-01', 'Mirjapur, Tangail',           '01833300002', 3),
+  (37, 'Raihan',    'Islam',      '001', '2012-02-28', 'Male',   13, '2022-06-01', 'Mirzapur, Tangail',           '01833300001', 3),
+  (38, 'Sumaiya',   'Ahmed',      '002', '2012-07-13', 'Female', 13, '2022-06-01', 'Mirzapur, Tangail',           '01833300002', 3),
   (39, 'Fahim',     'Chowdhury',  '003', '2012-04-22', 'Male',   13, '2022-06-01', 'Tangail Sadar, Tangail',      '01833300003', 3);
 
 -- Branch 3, Class 6/English (ClassID=14)
 INSERT INTO Students (StudentID, FirstName, LastName, RollNumber, DateOfBirth, Gender, ClassID, AdmissionDate, Address, ParentContact, branch_id) VALUES
   (40, 'Farhan',    'Hossain',    '001', '2012-05-19', 'Male',   14, '2022-06-01', 'Tangail Sadar, Tangail',      '01833300004', 3),
-  (41, 'Nadia',     'Rahman',     '002', '2012-10-04', 'Female', 14, '2022-06-01', 'Mirjapur, Tangail',           '01833300005', 3),
-  (42, 'Abrar',     'Hossain',    '003', '2012-01-16', 'Male',   14, '2022-06-01', 'Mirjapur, Tangail',           '01833300006', 3);
+  (41, 'Nadia',     'Rahman',     '002', '2012-10-04', 'Female', 14, '2022-06-01', 'Mirzapur, Tangail',           '01833300005', 3),
+  (42, 'Abrar',     'Hossain',    '003', '2012-01-16', 'Male',   14, '2022-06-01', 'Mirzapur, Tangail',           '01833300006', 3);
 
 -- Branch 3, Class 7/Bangla (ClassID=15)
 INSERT INTO Students (StudentID, FirstName, LastName, RollNumber, DateOfBirth, Gender, ClassID, AdmissionDate, Address, ParentContact, branch_id) VALUES
-  (43, 'Tahsin',    'Akter',      '001', '2011-08-17', 'Male',   15, '2022-06-01', 'Mirjapur, Tangail',           '01833300007', 3),
+  (43, 'Tahsin',    'Akter',      '001', '2011-08-17', 'Male',   15, '2022-06-01', 'Mirzapur, Tangail',           '01833300007', 3),
   (44, 'Anika',     'Begum',      '002', '2011-01-30', 'Female', 15, '2022-06-01', 'Tangail Sadar, Tangail',      '01833300008', 3),
-  (45, 'Sifat',     'Islam',      '003', '2011-05-11', 'Male',   15, '2022-06-01', 'Mirjapur, Tangail',           '01833300009', 3);
+  (45, 'Sifat',     'Islam',      '003', '2011-05-11', 'Male',   15, '2022-06-01', 'Mirzapur, Tangail',           '01833300009', 3);
 
 -- Branch 3, Class 8/English (ClassID=16)
 INSERT INTO Students (StudentID, FirstName, LastName, RollNumber, DateOfBirth, Gender, ClassID, AdmissionDate, Address, ParentContact, branch_id) VALUES
-  (46, 'Rafsan',    'Chowdhury',  '001', '2010-04-06', 'Male',   16, '2021-06-01', 'Mirjapur, Tangail',           '01833300010', 3),
-  (47, 'Lamiya',    'Khatun',     '002', '2010-11-25', 'Female', 16, '2021-06-01', 'Mirjapur, Tangail',           '01833300011', 3),
+  (46, 'Rafsan',    'Chowdhury',  '001', '2010-04-06', 'Male',   16, '2021-06-01', 'Mirzapur, Tangail',           '01833300010', 3),
+  (47, 'Lamiya',    'Khatun',     '002', '2010-11-25', 'Female', 16, '2021-06-01', 'Mirzapur, Tangail',           '01833300011', 3),
   (48, 'Touhid',    'Hasan',      '003', '2010-07-08', 'Male',   16, '2021-06-01', 'Tangail Sadar, Tangail',      '01833300012', 3);
 
 -- Branch 3, Class 9/Bangla (ClassID=17)
 INSERT INTO Students (StudentID, FirstName, LastName, RollNumber, DateOfBirth, Gender, ClassID, AdmissionDate, Address, ParentContact, branch_id) VALUES
-  (49, 'Morsheda',  'Begum',      '001', '2009-03-14', 'Female', 17, '2020-06-01', 'Mirjapur, Tangail',           '01833300013', 3),
+  (49, 'Morsheda',  'Begum',      '001', '2009-03-14', 'Female', 17, '2020-06-01', 'Mirzapur, Tangail',           '01833300013', 3),
   (50, 'Shakib',    'Al Hasan',   '002', '2009-09-28', 'Male',   17, '2020-06-01', 'Tangail Sadar, Tangail',      '01833300014', 3),
-  (51, 'Nusrat',    'Fatema',     '003', '2009-06-03', 'Female', 17, '2020-06-01', 'Mirjapur, Tangail',           '01833300015', 3);
+  (51, 'Nusrat',    'Fatema',     '003', '2009-06-03', 'Female', 17, '2020-06-01', 'Mirzapur, Tangail',           '01833300015', 3);
 
 -- Branch 3, Class 10/English (ClassID=18)
 INSERT INTO Students (StudentID, FirstName, LastName, RollNumber, DateOfBirth, Gender, ClassID, AdmissionDate, Address, ParentContact, branch_id) VALUES
-  (52, 'Asif',      'Iqbal',      '001', '2008-02-19', 'Male',   18, '2019-06-01', 'Mirjapur, Tangail',           '01833300016', 3),
+  (52, 'Asif',      'Iqbal',      '001', '2008-02-19', 'Male',   18, '2019-06-01', 'Mirzapur, Tangail',           '01833300016', 3),
   (53, 'Sabrina',   'Islam',      '002', '2008-07-31', 'Female', 18, '2019-06-01', 'Tangail Sadar, Tangail',      '01833300017', 3),
-  (54, 'Mahfuz',    'Rahman',     '003', '2008-11-13', 'Male',   18, '2019-06-01', 'Mirjapur, Tangail',           '01833300018', 3);
+  (54, 'Mahfuz',    'Rahman',     '003', '2008-11-13', 'Male',   18, '2019-06-01', 'Mirzapur, Tangail',           '01833300018', 3);
 
 -- ── 7. Subjects (90 total, 5 per class) ──────────────────────
 -- SubjectID = (ClassID-1)*5 + offset

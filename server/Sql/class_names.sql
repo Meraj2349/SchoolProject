@@ -1,3 +1,6 @@
+-- The file holds Bangla text: read it as UTF-8 whatever the client default.
+SET NAMES utf8mb4;
+
 -- ============================================================
 -- ClassNames Reference Table
 -- Stores the standard class names shared across all branches.

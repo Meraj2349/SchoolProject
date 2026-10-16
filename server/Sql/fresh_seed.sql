@@ -1,3 +1,6 @@
+-- The file holds Bangla text: read it as UTF-8 whatever the client default.
+SET NAMES utf8mb4;
+
 -- ============================================================
 -- Fresh seed: clear old data, create ClassNames, insert
 -- branch-wise data for all 3 branches.
@@ -21,7 +24,7 @@ TRUNCATE TABLE Teachers;
 -- Clear admins except super_admin
 DELETE FROM Admin WHERE role != 'super_admin';
 
--- ── 2. Branches: keep 1 & 2, add 3 (Mirjapur) ────────────────
+-- ── 2. Branches: keep 1 & 2, add 3 (Mirzapur) ────────────────
 DELETE FROM Branches WHERE id NOT IN (1, 2);
 
 -- Ensure branch 1 & 2 exist with clean names
@@ -34,9 +37,9 @@ ON DUPLICATE KEY UPDATE
   address_en = VALUES(address_en), address_bn = VALUES(address_bn),
   is_proposed = VALUES(is_proposed), established_date = VALUES(established_date);
 
--- Insert Mirjapur branch
+-- Insert Mirzapur branch
 INSERT INTO Branches (id, name_en, name_bn, address_en, address_bn, is_proposed, established_date)
-VALUES (3, 'Star Academic School, Mirjapur Branch', 'স্টার একাডেমিক স্কুল, মির্জাপুর শাখা', 'Mirjapur, Tangail', 'মির্জাপুর, টাঙ্গাইল', 0, '2020-06-01')
+VALUES (3, 'Star Academic School, Mirzapur Branch', 'স্টার একাডেমিক স্কুল, মির্জাপুর শাখা', 'Mirzapur, Tangail', 'মির্জাপুর, টাঙ্গাইল', 0, '2020-06-01')
 ON DUPLICATE KEY UPDATE
   name_en = VALUES(name_en), name_bn = VALUES(name_bn),
   address_en = VALUES(address_en), address_bn = VALUES(address_bn),
@@ -73,7 +76,7 @@ INSERT INTO Teachers (TeacherID, FirstName, LastName, Subject, ContactNumber, Em
   (9,  'Harun',       'Or Rashid', 'Science',           '01722000004', 'harun@star.edu',   '2017-04-01', 2),
   (10, 'Lutfun',      'Nahar',     'Religious Studies', '01722000005', 'lutfun@star.edu',  '2018-09-10', 2);
 
--- Branch 3 — Mirjapur (sections: Bangla, English)
+-- Branch 3 — Mirzapur (sections: Bangla, English)
 INSERT INTO Teachers (TeacherID, FirstName, LastName, Subject, ContactNumber, Email, JoiningDate, branch_id) VALUES
   (11, 'Anisur',      'Rahman',    'Mathematics',       '01733000001', 'anisur@star.edu',  '2020-06-01', 3),
   (12, 'Sumaiya',     'Islam',     'Bangla',            '01733000002', 'sumaiya@star.edu', '2020-06-01', 3),
@@ -137,14 +140,14 @@ INSERT INTO Students (StudentID, FirstName, LastName, RollNumber, DateOfBirth, G
 
 -- Branch 3 students (Class 6-Bangla=14, Class 6-English=15, Class 7-Bangla=16, Class 8-English=17)
 INSERT INTO Students (StudentID, FirstName, LastName, RollNumber, DateOfBirth, Gender, ClassID, AdmissionDate, Address, ParentContact, branch_id) VALUES
-  (19, 'Raihan',   'Islam',     '001', '2010-02-28', 'Male',   14, '2022-06-01', 'Mirjapur, Tangail',   '01833300001', 3),
-  (20, 'Sumaiya',  'Ahmed',     '002', '2010-07-13', 'Female', 14, '2022-06-01', 'Mirjapur, Tangail',   '01833300002', 3),
+  (19, 'Raihan',   'Islam',     '001', '2010-02-28', 'Male',   14, '2022-06-01', 'Mirzapur, Tangail',   '01833300001', 3),
+  (20, 'Sumaiya',  'Ahmed',     '002', '2010-07-13', 'Female', 14, '2022-06-01', 'Mirzapur, Tangail',   '01833300002', 3),
   (21, 'Farhan',   'Hossain',   '001', '2010-05-19', 'Male',   15, '2022-06-01', 'Tangail Sadar',       '01833300003', 3),
-  (22, 'Nadia',    'Rahman',    '002', '2010-10-04', 'Female', 15, '2022-06-01', 'Mirjapur, Tangail',   '01833300004', 3),
-  (23, 'Tahsin',   'Akter',     '001', '2009-08-17', 'Male',   16, '2022-06-01', 'Mirjapur, Tangail',   '01833300005', 3),
+  (22, 'Nadia',    'Rahman',    '002', '2010-10-04', 'Female', 15, '2022-06-01', 'Mirzapur, Tangail',   '01833300004', 3),
+  (23, 'Tahsin',   'Akter',     '001', '2009-08-17', 'Male',   16, '2022-06-01', 'Mirzapur, Tangail',   '01833300005', 3),
   (24, 'Anika',    'Begum',     '002', '2009-01-30', 'Female', 16, '2022-06-01', 'Tangail Sadar',       '01833300006', 3),
-  (25, 'Rafsan',   'Chowdhury', '001', '2008-04-06', 'Male',   17, '2021-06-01', 'Mirjapur, Tangail',   '01833300007', 3),
-  (26, 'Lamiya',   'Khatun',    '002', '2008-11-25', 'Female', 17, '2021-06-01', 'Mirjapur, Tangail',   '01833300008', 3);
+  (25, 'Rafsan',   'Chowdhury', '001', '2008-04-06', 'Male',   17, '2021-06-01', 'Mirzapur, Tangail',   '01833300007', 3),
+  (26, 'Lamiya',   'Khatun',    '002', '2008-11-25', 'Female', 17, '2021-06-01', 'Mirzapur, Tangail',   '01833300008', 3);
 
 -- ── 7. Branch admins ──────────────────────────────────────────
 -- Password for all: "Admin@1234"

@@ -1,4 +1,4 @@
-import { describe, expect, it } from "@jest/globals";
+import { describe, expect, it, jest } from "@jest/globals";
 import { ForbiddenError, NotFoundError, ValidationError } from "../../../shared/errors/index.js";
 import { notice } from "../domain/contentKinds.js";
 import { makeContentUseCases } from "./content.usecases.js";
@@ -17,6 +17,10 @@ function fakeRepository(rows = []) {
     },
     async find(id) {
       return store.get(id) ?? null;
+    },
+    async findVisible(id) {
+      const row = store.get(id);
+      return row?.visible ? row : null;
     },
     async insert(row) {
       const id = nextId++;
@@ -102,5 +106,48 @@ describe("content use cases", () => {
     await expect(content.remove({ admin: adminA, id: "1" })).rejects.toBeInstanceOf(NotFoundError);
     expect(await content.remove({ admin: superOnAll, id: "1" })).toMatchObject({ id: 1 });
     expect(repository.store.size).toBe(0);
+  });
+
+  it("shapes rows with the kind's present() when it has one", async () => {
+    const kind = { ...notice, present: (row) => ({ ...row, shaped: true }) };
+    const content = makeContentUseCases({ kind, repository: fakeRepository([{ id: 1, branch_id: null, visible: true }]) });
+
+    expect(await content.list({ viewer: visitorOfA })).toEqual([{ id: 1, branch_id: null, visible: true, shaped: true }]);
+  });
+
+  it("gets one shown item for visitors, and hides the rest", async () => {
+    const kind = { ...notice, present: (row) => ({ ...row, shaped: true }) };
+    const content = makeContentUseCases({
+      kind,
+      repository: fakeRepository([
+        { id: 1, branch_id: 2, visible: true },
+        { id: 2, branch_id: null, visible: false },
+      ]),
+    });
+
+    expect(await content.getVisible({ id: "1" })).toMatchObject({ id: 1, shaped: true });
+    await expect(content.getVisible({ id: "2" })).rejects.toThrow(new NotFoundError(notice.notFound));
+    await expect(content.getVisible({ id: "abc" })).rejects.toThrow(new NotFoundError(notice.notFound));
+  });
+
+  it("tells onRemoved about a deleted item, after the delete", async () => {
+    const repository = fakeRepository([{ id: 4, branch_id: 1, visible: true }]);
+    const seen = [];
+    const content = makeContentUseCases({ kind: notice, repository, onRemoved: async (row) => seen.push([row.id, repository.store.has(4)]) });
+
+    await content.remove({ admin: adminA, id: "4" });
+
+    expect(seen).toEqual([[4, false]]);
+  });
+
+  it("still reports a delete as done when the cleanup afterwards fails", async () => {
+    const repository = fakeRepository([{ id: 4, branch_id: 1, visible: true }]);
+    const log = jest.spyOn(console, "error").mockImplementation(() => {});
+    const content = makeContentUseCases({ kind: notice, repository, onRemoved: async () => Promise.reject(new Error("disk")) });
+
+    await expect(content.remove({ admin: adminA, id: "4" })).resolves.toMatchObject({ id: 4 });
+    expect(repository.store.has(4)).toBe(false);
+    expect(log).toHaveBeenCalled();
+    log.mockRestore();
   });
 });

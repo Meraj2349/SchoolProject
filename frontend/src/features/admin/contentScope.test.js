@@ -8,6 +8,7 @@ import GalleryPage from "./gallery/AdminPage";
 import MessagesPage from "./messages/AdminPage";
 import NewsPage from "./news/AdminNewsPage";
 import AchievementsPage from "./achievements/AchievementsPage";
+import JobCircularsPage from "./jobCirculars/JobCircularsPage";
 import AnnouncementsPage from "./noticeAnnouncements/AdminNoticeAnnouncementsPage";
 import NoticesPage from "./notices/AdminNoticesPage";
 
@@ -57,6 +58,15 @@ const PAGES = [
     rows: [
       { id: 1, title_en: "Own notice", title_bn: "ক", category: "sports", year: 2025, is_featured: 0, is_published: 1, branch_id: 1 },
       { id: 2, title_en: "School notice", title_bn: "খ", category: "award", year: 2025, is_featured: 0, is_published: 1, branch_id: null },
+    ],
+  },
+  {
+    name: "Job circulars",
+    Page: JobCircularsPage,
+    url: "/job-circulars/all",
+    rows: [
+      { id: 1, title_en: "Own notice", title_bn: "ক", circular_date: "2026-10-01", posts: [], is_open: true, is_published: true, accepting: true, branch_id: 1 },
+      { id: 2, title_en: "School notice", title_bn: "খ", circular_date: "2026-10-01", posts: [], is_open: false, is_published: true, accepting: false, branch_id: null },
     ],
   },
   {

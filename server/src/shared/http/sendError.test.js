@@ -44,4 +44,22 @@ describe("sendError", () => {
     expect(JSON.stringify(res.body)).not.toContain("secret");
     log.mockRestore();
   });
+
+  it("never logs the SQL of a failed query, which can hold people's details", () => {
+    const res = fakeRes();
+    const log = jest.spyOn(console, "error").mockImplementation(() => {});
+    const error = Object.assign(new Error("Data too long for column 'post_title_en'"), {
+      code: "ER_DATA_TOO_LONG",
+      sql: "INSERT INTO JobApplications SET full_name = 'Nusrat Jahan', phone = '01712345678'",
+      sqlMessage: "Data too long",
+    });
+
+    sendError(res, error, "en");
+
+    const logged = log.mock.calls.flat().map((part) => (typeof part === "string" ? part : JSON.stringify(part) + String(part?.stack ?? ""))).join(" ");
+    expect(logged).toContain("ER_DATA_TOO_LONG");
+    expect(logged).not.toContain("01712345678");
+    expect(logged).not.toContain("Nusrat");
+    log.mockRestore();
+  });
 });

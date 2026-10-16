@@ -1,3 +1,6 @@
+-- The file holds Bangla text: read it as UTF-8 whatever the client default.
+SET NAMES utf8mb4;
+
 -- ============================================================
 -- demo_seed.sql  —  School Management System Demo Data
 -- Clears data tables (keeps schema + branches + admin accounts)
@@ -29,23 +32,23 @@ SET FOREIGN_KEY_CHECKS = 1;
 -- ── 2. TEACHERS (15 total — 5 per branch) ──────────────────
 INSERT INTO Teachers (FirstName, LastName, Subject, ContactNumber, Email, JoiningDate, Address, branch_id) VALUES
 -- Branch 1
-('Md. Rafiqul',  'Islam',       'Mathematics',      '01711000001', 'rafiqul.islam@starsikkha.edu.bd',    '2018-01-10', 'Natiapara, Sylhet',   1),
-('Fatema',       'Begum',       'English',          '01711000002', 'fatema.begum@starsikkha.edu.bd',     '2019-03-15', 'Natiapara, Sylhet',   1),
-('Md. Karim',    'Hossain',     'Bangla',           '01711000003', 'karim.hossain@starsikkha.edu.bd',    '2017-06-01', 'Natiapara, Sylhet',   1),
-('Shahanaz',     'Parvin',      'Science',          '01711000004', 'shahanaz.parvin@starsikkha.edu.bd',  '2020-08-20', 'Natiapara, Sylhet',   1),
-('Md. Jahangir', 'Alam',        'Social Studies',   '01711000005', 'jahangir.alam@starsikkha.edu.bd',    '2016-11-05', 'Natiapara, Sylhet',   1),
+('Md. Rafiqul',  'Islam',       'Mathematics',      '01711000001', 'rafiqul.islam@starsikkha.edu.bd',    '2018-01-10', 'Natiapara, Delduar, Tangail',   1),
+('Fatema',       'Begum',       'English',          '01711000002', 'fatema.begum@starsikkha.edu.bd',     '2019-03-15', 'Natiapara, Delduar, Tangail',   1),
+('Md. Karim',    'Hossain',     'Bangla',           '01711000003', 'karim.hossain@starsikkha.edu.bd',    '2017-06-01', 'Natiapara, Delduar, Tangail',   1),
+('Shahanaz',     'Parvin',      'Science',          '01711000004', 'shahanaz.parvin@starsikkha.edu.bd',  '2020-08-20', 'Natiapara, Delduar, Tangail',   1),
+('Md. Jahangir', 'Alam',        'Social Studies',   '01711000005', 'jahangir.alam@starsikkha.edu.bd',    '2016-11-05', 'Natiapara, Delduar, Tangail',   1),
 -- Branch 2
-('Nasrin',       'Sultana',     'Mathematics',      '01711000006', 'nasrin.sultana@starsikkha.edu.bd',   '2018-02-14', 'Pakullah Bazar, Sylhet', 2),
-('Md. Shafiqul', 'Haque',       'English',          '01711000007', 'shafiqul.haque@starsikkha.edu.bd',   '2019-04-10', 'Pakullah Bazar, Sylhet', 2),
-('Rokeya',       'Khatun',      'Bangla',           '01711000008', 'rokeya.khatun@starsikkha.edu.bd',    '2017-07-25', 'Pakullah Bazar, Sylhet', 2),
-('Md. Anisur',   'Rahman',      'Science',          '01711000009', 'anisur.rahman@starsikkha.edu.bd',    '2021-01-03', 'Pakullah Bazar, Sylhet', 2),
-('Halima',       'Akter',       'Religion',         '01711000010', 'halima.akter@starsikkha.edu.bd',     '2020-09-12', 'Pakullah Bazar, Sylhet', 2),
+('Nasrin',       'Sultana',     'Mathematics',      '01711000006', 'nasrin.sultana@starsikkha.edu.bd',   '2018-02-14', 'Pakullah Bazar, Delduar, Tangail', 2),
+('Md. Shafiqul', 'Haque',       'English',          '01711000007', 'shafiqul.haque@starsikkha.edu.bd',   '2019-04-10', 'Pakullah Bazar, Delduar, Tangail', 2),
+('Rokeya',       'Khatun',      'Bangla',           '01711000008', 'rokeya.khatun@starsikkha.edu.bd',    '2017-07-25', 'Pakullah Bazar, Delduar, Tangail', 2),
+('Md. Anisur',   'Rahman',      'Science',          '01711000009', 'anisur.rahman@starsikkha.edu.bd',    '2021-01-03', 'Pakullah Bazar, Delduar, Tangail', 2),
+('Halima',       'Akter',       'Religion',         '01711000010', 'halima.akter@starsikkha.edu.bd',     '2020-09-12', 'Pakullah Bazar, Delduar, Tangail', 2),
 -- Branch 3
-('Md. Belal',    'Hossain',     'Mathematics',      '01711000011', 'belal.hossain@starsikkha.edu.bd',    '2018-03-18', 'Mirjapur, Sylhet',    3),
-('Taslima',      'Khanam',      'English',          '01711000012', 'taslima.khanam@starsikkha.edu.bd',   '2019-05-22', 'Mirjapur, Sylhet',    3),
-('Md. Nurul',    'Islam',       'Bangla',           '01711000013', 'nurul.islam@starsikkha.edu.bd',      '2017-08-08', 'Mirjapur, Sylhet',    3),
-('Morsheda',     'Begum',       'Science',          '01711000014', 'morsheda.begum@starsikkha.edu.bd',   '2021-02-17', 'Mirjapur, Sylhet',    3),
-('Md. Lutfor',   'Rahman',      'Social Studies',   '01711000015', 'lutfor.rahman@starsikkha.edu.bd',    '2016-12-01', 'Mirjapur, Sylhet',    3);
+('Md. Belal',    'Hossain',     'Mathematics',      '01711000011', 'belal.hossain@starsikkha.edu.bd',    '2018-03-18', 'Mirzapur, Tangail',    3),
+('Taslima',      'Khanam',      'English',          '01711000012', 'taslima.khanam@starsikkha.edu.bd',   '2019-05-22', 'Mirzapur, Tangail',    3),
+('Md. Nurul',    'Islam',       'Bangla',           '01711000013', 'nurul.islam@starsikkha.edu.bd',      '2017-08-08', 'Mirzapur, Tangail',    3),
+('Morsheda',     'Begum',       'Science',          '01711000014', 'morsheda.begum@starsikkha.edu.bd',   '2021-02-17', 'Mirzapur, Tangail',    3),
+('Md. Lutfor',   'Rahman',      'Social Studies',   '01711000015', 'lutfor.rahman@starsikkha.edu.bd',    '2016-12-01', 'Mirzapur, Tangail',    3);
 
 -- ── 3. CLASSES (11 classes × 3 sections × 3 branches = 99) ─
 -- Branch 1
@@ -238,7 +241,7 @@ BEGIN
       CONCAT(@roll_prefix, '-01'),
       DATE_SUB(CURDATE(), INTERVAL (CASE WHEN cname = 'Nursery' THEN 5 ELSE 5 + CAST(cname AS UNSIGNED) END) YEAR),
       'Male', cid, DATE_SUB(CURDATE(), INTERVAL 1 YEAR),
-      CONCAT('House ', cid, ', Village Road, Sylhet'),
+      CONCAT('House ', cid, ', Village Road, Tangail'),
       CONCAT('017', LPAD(cbranch * 10000 + cid * 10 + 1, 8, '0')),
       cbranch
     );
@@ -251,7 +254,7 @@ BEGIN
       CONCAT(@roll_prefix, '-02'),
       DATE_SUB(CURDATE(), INTERVAL (CASE WHEN cname = 'Nursery' THEN 5 ELSE 5 + CAST(cname AS UNSIGNED) END) YEAR),
       'Female', cid, DATE_SUB(CURDATE(), INTERVAL 1 YEAR),
-      CONCAT('House ', cid+1, ', College Road, Sylhet'),
+      CONCAT('House ', cid+1, ', College Road, Tangail'),
       CONCAT('018', LPAD(cbranch * 10000 + cid * 10 + 2, 8, '0')),
       cbranch
     );
@@ -264,7 +267,7 @@ BEGIN
       CONCAT(@roll_prefix, '-03'),
       DATE_SUB(CURDATE(), INTERVAL (CASE WHEN cname = 'Nursery' THEN 5 ELSE 5 + CAST(cname AS UNSIGNED) END) YEAR),
       'Male', cid, DATE_SUB(CURDATE(), INTERVAL 1 YEAR),
-      CONCAT('House ', cid+2, ', Station Road, Sylhet'),
+      CONCAT('House ', cid+2, ', Station Road, Tangail'),
       CONCAT('019', LPAD(cbranch * 10000 + cid * 10 + 3, 8, '0')),
       cbranch
     );
@@ -277,7 +280,7 @@ BEGIN
       CONCAT(@roll_prefix, '-04'),
       DATE_SUB(CURDATE(), INTERVAL (CASE WHEN cname = 'Nursery' THEN 5 ELSE 5 + CAST(cname AS UNSIGNED) END) YEAR),
       'Female', cid, DATE_SUB(CURDATE(), INTERVAL 1 YEAR),
-      CONCAT('House ', cid+3, ', Market Road, Sylhet'),
+      CONCAT('House ', cid+3, ', Market Road, Tangail'),
       CONCAT('016', LPAD(cbranch * 10000 + cid * 10 + 4, 8, '0')),
       cbranch
     );
@@ -290,7 +293,7 @@ BEGIN
       CONCAT(@roll_prefix, '-05'),
       DATE_SUB(CURDATE(), INTERVAL (CASE WHEN cname = 'Nursery' THEN 5 ELSE 5 + CAST(cname AS UNSIGNED) END) YEAR),
       'Male', cid, DATE_SUB(CURDATE(), INTERVAL 1 YEAR),
-      CONCAT('House ', cid+4, ', Bank Road, Sylhet'),
+      CONCAT('House ', cid+4, ', Bank Road, Tangail'),
       CONCAT('015', LPAD(cbranch * 10000 + cid * 10 + 5, 8, '0')),
       cbranch
     );

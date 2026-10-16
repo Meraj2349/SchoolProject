@@ -18,6 +18,7 @@ function buildApp(useCases, { files, file, role = "branch_admin", branchId = 1 }
   });
   app.get("/items", controller.list);
   app.get("/items/visible", controller.listVisible);
+  app.get("/items/:id", controller.getVisible);
   app.post("/items", controller.create);
   app.put("/items/:id", controller.update);
   app.put("/items/:id/visibility", controller.setVisibility);
@@ -125,5 +126,20 @@ describe("content controller", () => {
 
     expect(res.body).toEqual({ success: true, message: "Notice deleted successfully." });
     expect(files.discarded).toEqual(["/uploads/x/gone.png"]);
+  });
+
+  it("gets one shown item, or a translated 404", async () => {
+    const { NotFoundError } = await import("../../../shared/errors/index.js");
+    const app = buildApp({
+      getVisible: async ({ id }) => {
+        if (id !== "5") throw new NotFoundError("job_circular_not_found");
+        return { id: 5 };
+      },
+    });
+
+    expect((await request(app).get("/items/5")).body).toEqual({ success: true, data: { id: 5 } });
+    const missing = await request(app).get("/items/6");
+    expect(missing.status).toBe(404);
+    expect(missing.body).toEqual({ success: false, message: "Job circular not found." });
   });
 });

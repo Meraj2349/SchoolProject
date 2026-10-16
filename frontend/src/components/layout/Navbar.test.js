@@ -28,6 +28,8 @@ describe("Navbar (site header)", () => {
     expect(screen.getByRole("link", { name: /01997588476/ })).toHaveAttribute("href", "tel:+8801997588476");
     expect(screen.getByRole("link", { name: /merajislam2349@gmail.com/ })).toHaveAttribute("href", "mailto:merajislam2349@gmail.com");
     expect(screen.getAllByRole("link", { name: "Apply online" })[0]).toHaveAttribute("href", "/apply");
+    expect(screen.getByText(/Govt\. approved · EIIN: 135479 · Code: 306060805/)).toBeInTheDocument();
+    expect(screen.queryByText(/ESTD/)).not.toBeInTheDocument();
   });
 
   it("links to the main pages", () => {
@@ -89,5 +91,7 @@ describe("Navbar (site header)", () => {
     const nav = screen.getByRole("navigation", { name: "প্রধান মেনু" });
     expect(within(nav).getByRole("link", { name: "হোম" })).toBeInTheDocument();
     expect(screen.getAllByText("স্টার শিক্ষা পরিবার").length).toBeGreaterThan(0);
+    expect(screen.getByText(/সরকার অনুমোদিত · EIIN: ১৩৫৪৭৯ · কোড: ৩০৬০৬০৮০৫/)).toBeInTheDocument();
+    expect(screen.queryByText(/স্থাপিত/)).not.toBeInTheDocument();
   });
 });

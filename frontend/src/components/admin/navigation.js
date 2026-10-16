@@ -1,5 +1,6 @@
 import {
   FiAward,
+  FiBriefcase,
   FiBarChart2,
   FiBell,
   FiBook,
@@ -80,7 +81,10 @@ export const NAV_GROUPS = [
   {
     key: "sidebar.groups.admissions",
     icon: FiFileText,
-    items: [{ path: "/admin/applications", key: "sidebar.applications", icon: FiFileText }],
+    items: [
+      { path: "/admin/applications", key: "sidebar.applications", icon: FiFileText },
+      { path: "/admin/job-applications", key: "sidebar.jobApplications", icon: FiBriefcase },
+    ],
   },
   {
     key: "sidebar.groups.website",
@@ -89,6 +93,7 @@ export const NAV_GROUPS = [
       { path: "/admin/notices", key: "sidebar.notice", icon: FiBell },
       { path: "/admin/notice-announcements", key: "sidebar.noticeAnnouncements", icon: FiVolume2 },
       { path: "/admin/achievements", key: "sidebar.achievements", icon: FiAward },
+      { path: "/admin/job-circulars", key: "sidebar.jobCirculars", icon: FiBriefcase },
       { path: "/admin/news", key: "sidebar.news", icon: FiRss },
       { path: "/admin/events", key: "sidebar.events", icon: FiCalendar },
       { path: "/admin/gallery", key: "sidebar.imageGallery", icon: FiImage },

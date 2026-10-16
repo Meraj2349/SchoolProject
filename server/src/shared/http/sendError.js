@@ -18,6 +18,8 @@ export function sendError(res, error, lang, fallbackKey = "internal_server_error
     return res.status(match[1]).json(body);
   }
 
-  console.error(error);
+  // Only the code, message and stack: a mysql2 error also carries the query
+  // with its values (error.sql), which may hold applicants' personal details.
+  console.error(`${error?.code ?? error?.name ?? "Error"}: ${error?.message ?? error}\n${error?.stack?.split("\n").slice(1).join("\n") ?? ""}`);
   return res.status(500).json({ success: false, message: t(fallbackKey, lang) });
 }

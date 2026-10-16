@@ -1,3 +1,6 @@
+-- The file holds Bangla text: read it as UTF-8 whatever the client default.
+SET NAMES utf8mb4;
+
 -- ============================================================
 -- Student Users table — for the Quicker Education student portal.
 -- Self-registered students log in here to take quizzes and track

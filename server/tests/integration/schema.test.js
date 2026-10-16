@@ -40,7 +40,7 @@ describe("fresh database schema", () => {
   });
 
   // Website content and applications: NULL means the whole school.
-  it.each(["Notices", "NoticeAnnouncements", "News", "Messages", "Images", "Applications", "Achievements"])(
+  it.each(["Notices", "NoticeAnnouncements", "News", "Messages", "Images", "Applications", "Achievements", "JobCirculars", "JobApplications"])(
     "gives %s an optional branch that must exist",
     async (table) => {
       const [[column]] = await db.query(

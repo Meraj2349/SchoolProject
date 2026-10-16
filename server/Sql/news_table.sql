@@ -1,3 +1,6 @@
+-- The file holds Bangla text: read it as UTF-8 whatever the client default.
+SET NAMES utf8mb4;
+
 -- News Table for School Management System
 CREATE TABLE
     IF NOT EXISTS News (
@@ -19,8 +22,8 @@ INSERT INTO
     News (title_bn, title_en, date, link, is_active)
 VALUES
     (
-        'সিলেট ক্যান্টনমেন্ট পাবলিক স্কুলে নবীন বরণ অনুষ্ঠান',
-        'Nobin Boron Program held in Sylhet Cantonment Public School',
+        'স্টার একাডেমিক স্কুলে নবীন বরণ অনুষ্ঠান',
+        'Nobin Boron Program held at Star Academic School',
         '2023-10-11',
         '/events',
         TRUE

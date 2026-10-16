@@ -131,6 +131,40 @@ const KINDS = [
     changed: { column: "title_en", value: "Changed" },
   },
   {
+    name: "job circulars",
+    table: "JobCirculars",
+    id: "id",
+    seed: (branchId, extra = {}) =>
+      insert("JobCirculars", {
+        title_en: "Recruitment",
+        title_bn: "নিয়োগ",
+        circular_date: "2026-10-01",
+        posts: JSON.stringify([{ title_en: "Accountant", title_bn: "অ্যাকাউন্টেন্ট", vacancies: 1 }]),
+        branch_id: branchId,
+        ...extra,
+      }),
+    hidden: { is_published: false },
+    create: (r) =>
+      r.post("/api/job-circulars").send({
+        title_en: "Teachers wanted",
+        title_bn: "শিক্ষক নিয়োগ",
+        circular_date: "2026-10-01",
+        posts: [{ title_en: "Assistant Teacher", title_bn: "সহকারি শিক্ষক", vacancies: 2 }],
+      }),
+    publicList: "/api/job-circulars",
+    adminList: "/api/job-circulars/all",
+    update: (r, id) =>
+      r.put(`/api/job-circulars/${id}`).send({
+        title_en: "Changed",
+        title_bn: "নিয়োগ",
+        circular_date: "2026-10-01",
+        posts: [{ title_en: "Accountant", title_bn: "অ্যাকাউন্টেন্ট", vacancies: 1 }],
+      }),
+    toggle: (r, id) => r.patch(`/api/job-circulars/${id}/publish`).send({ is_published: false }),
+    remove: (r, id) => r.delete(`/api/job-circulars/${id}`),
+    changed: { column: "title_en", value: "Changed" },
+  },
+  {
     name: "gallery images",
     table: "Images",
     id: "ImageID",

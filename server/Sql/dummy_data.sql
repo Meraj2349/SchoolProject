@@ -1,3 +1,6 @@
+-- The file holds Bangla text: read it as UTF-8 whatever the client default.
+SET NAMES utf8mb4;
+
 -- ============================================================
 -- Dummy Data for School Management System
 -- Run this AFTER all CREATE TABLE statements have been executed.
