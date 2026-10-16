@@ -3,7 +3,7 @@
 import { fillTemplate } from "@/lib/template";
 import { useTranslations } from "@/store/languageStore";
 import { classLabel } from "./quizText";
-import { CARD, ErrorBox, GREEN, GoldStrip, PRIMARY_BUTTON, pill } from "./quizStyles";
+import { ACCENT, CARD, ErrorBox, GoldStrip, PRIMARY_BUTTON, pill } from "./quizStyles";
 
 export const QUESTION_COUNTS = [5, 10, 15, 20];
 
@@ -14,14 +14,14 @@ export default function QuizSetup({ student, meta, language, subject, onSubject,
   const hasQuestions = (meta?.total ?? 0) > 0;
 
   return (
-    <div className="bg-gradient-to-b from-[#fdf8f0] to-[#f5ede0] min-h-screen py-10">
+    <div className="bg-gradient-to-b from-school-cream to-school-cream-deep py-10">
       <div className="max-w-2xl mx-auto px-5">
         <div className="text-center mb-10">
-          <h1 className="text-[clamp(1.8rem,4vw,2.6rem)] font-extrabold text-[#0d1f3c] mb-2 tracking-tight leading-tight">
+          <h1 className="text-[clamp(1.8rem,4vw,2.6rem)] font-extrabold text-school-navy mb-2 tracking-tight leading-tight">
             {t("pickTitle")}
           </h1>
           {student?.firstName && (
-            <p className="text-[0.95rem] text-[#5a6072]">{fillTemplate(t("welcome"), { name: student.firstName })}</p>
+            <p className="text-[0.95rem] text-school-muted">{fillTemplate(t("welcome"), { name: student.firstName })}</p>
           )}
         </div>
 
@@ -30,11 +30,11 @@ export default function QuizSetup({ student, meta, language, subject, onSubject,
         <div className={CARD}>
           <GoldStrip />
           {!meta ? (
-            <p className="p-6 text-center text-[#5a6072]">{t("loading")}</p>
+            <p className="p-6 text-center text-school-muted">{t("loading")}</p>
           ) : (
             <div className="p-6 space-y-6">
               <div>
-                <p className="text-sm font-semibold text-[#0d1f3c] mb-1">{t("yourClass")}</p>
+                <p className="text-sm font-semibold text-school-navy mb-1">{t("yourClass")}</p>
                 <p className="text-lg font-bold text-[#7a5c1e] m-0">{classLabel(meta.classKey, language) || meta.className}</p>
               </div>
 
@@ -46,14 +46,14 @@ export default function QuizSetup({ student, meta, language, subject, onSubject,
               ) : (
                 <>
                   <div>
-                    <label htmlFor="quiz-subject" className="block text-sm font-semibold text-[#0d1f3c] mb-2">
+                    <label htmlFor="quiz-subject" className="block text-sm font-semibold text-school-navy mb-2">
                       {t("subject")}
                     </label>
                     <select
                       id="quiz-subject"
                       value={subject}
                       onChange={(event) => onSubject(event.target.value)}
-                      className="w-full px-4 py-3 rounded-xl border bg-[#f9f9f9] text-[#0d1f3c] border-[rgba(201,168,76,0.4)] focus:outline-none focus:ring-2 focus:ring-amber-300/40"
+                      className="w-full px-4 py-3 rounded-xl border bg-[#f9f9f9] text-school-navy border-[rgba(201,168,76,0.4)] focus:outline-none focus:ring-2 focus:ring-amber-300/40"
                     >
                       <option value="">{`${t("allSubjects")} (${questions(meta.total)})`}</option>
                       {meta.subjects.map((s) => (
@@ -65,7 +65,7 @@ export default function QuizSetup({ student, meta, language, subject, onSubject,
                   </div>
 
                   <fieldset>
-                    <legend className="block text-sm font-semibold text-[#0d1f3c] mb-2">{t("numberOfQuestions")}</legend>
+                    <legend className="block text-sm font-semibold text-school-navy mb-2">{t("numberOfQuestions")}</legend>
                     <div className="grid grid-cols-4 gap-2">
                       {QUESTION_COUNTS.map((n) => (
                         <button
@@ -87,7 +87,7 @@ export default function QuizSetup({ student, meta, language, subject, onSubject,
                     onClick={onStart}
                     disabled={starting}
                     className={`w-full ${PRIMARY_BUTTON}`}
-                    style={{ background: GREEN, boxShadow: "0 4px 12px rgba(16,185,129,0.3)" }}
+                    style={{ background: ACCENT }}
                   >
                     {starting ? t("starting") : t("start")}
                   </button>

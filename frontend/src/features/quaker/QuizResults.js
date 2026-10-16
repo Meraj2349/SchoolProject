@@ -6,17 +6,17 @@ import { fillTemplate } from "@/lib/template";
 import { useTranslations } from "@/store/languageStore";
 import MathText from "./MathText";
 import { localize } from "./quizText";
-import { CARD, GREEN, GoldStrip, PRIMARY_BUTTON } from "./quizStyles";
+import { ACCENT, CARD, GoldStrip, PRIMARY_BUTTON } from "./quizStyles";
 
 function AnswerLine({ label, letter, text, tone }) {
   return (
-    <div className="text-[#5a6072] flex flex-wrap gap-x-2 items-baseline">
+    <div className="text-school-muted flex flex-wrap gap-x-2 items-baseline">
       <span className="shrink-0">{label}:</span>
       <span className="font-bold" style={{ color: tone }}>
         {letter}
       </span>
       {text && (
-        <MathText as="span" className="text-[#0d1f3c] break-words min-w-0">
+        <MathText as="span" className="text-school-navy break-words min-w-0">
           {text}
         </MathText>
       )}
@@ -31,9 +31,9 @@ export default function QuizResults({ result, questions, questionLanguage, onAga
   const { totalQuestions, correctAnswers, scorePercentage, grade, details } = result;
 
   return (
-    <div className="bg-gradient-to-b from-[#fdf8f0] to-[#f5ede0] min-h-screen py-10">
+    <div className="bg-gradient-to-b from-school-cream to-school-cream-deep py-10">
       <div className="max-w-3xl mx-auto px-5">
-        <div className="relative bg-[#0d1f3c] rounded-2xl overflow-hidden mb-8 text-center px-8 py-10">
+        <div className="relative bg-school-navy rounded-2xl overflow-hidden mb-8 text-center px-8 py-10">
           <p className="text-xs font-bold tracking-[0.18em] uppercase text-[rgba(226,192,122,0.7)] mb-3">{t("complete")}</p>
           <div className="mx-auto w-28 h-28 rounded-full border-2 border-[rgba(201,168,76,0.45)] flex justify-center items-center mb-4">
             <span className="text-4xl font-black text-[#e2c07a]">{grade}</span>
@@ -45,7 +45,7 @@ export default function QuizResults({ result, questions, questionLanguage, onAga
         </div>
 
         <div className="flex gap-3 mb-10">
-          <button type="button" onClick={onAgain} className={`flex-1 ${PRIMARY_BUTTON}`} style={{ background: GREEN }}>
+          <button type="button" onClick={onAgain} className={`flex-1 ${PRIMARY_BUTTON}`} style={{ background: ACCENT }}>
             {t("anotherQuiz")}
           </button>
           <Link
@@ -58,7 +58,7 @@ export default function QuizResults({ result, questions, questionLanguage, onAga
 
         <section aria-labelledby={reviewId} className={CARD}>
           <GoldStrip />
-          <h3 id={reviewId} className="px-6 py-4 border-b border-gray-100 text-lg font-bold text-[#0d1f3c] m-0">
+          <h3 id={reviewId} className="px-6 py-4 border-b border-gray-100 text-lg font-bold text-school-navy m-0">
             {t("review")}
           </h3>
           <ol className="p-4 space-y-3 list-none m-0">
@@ -79,7 +79,7 @@ export default function QuizResults({ result, questions, questionLanguage, onAga
                   }
                 >
                   <div className="flex items-start justify-between gap-3 mb-3">
-                    <p className="text-sm font-semibold text-[#0d1f3c] leading-snug flex gap-2 m-0">
+                    <p className="text-sm font-semibold text-school-navy leading-snug flex gap-2 m-0">
                       <span className="tabular-nums text-[#7a5c1e]">{index + 1}.</span>
                       <MathText as="span" className="break-words">
                         {prompt}

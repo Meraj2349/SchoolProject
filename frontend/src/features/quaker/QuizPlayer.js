@@ -4,7 +4,7 @@ import { fillTemplate } from "@/lib/template";
 import { useTranslations } from "@/store/languageStore";
 import MathText from "./MathText";
 import { hasBangla, localize } from "./quizText";
-import { ErrorBox, GREEN, GoldStrip, PRIMARY_BUTTON, SECONDARY_BUTTON, pill } from "./quizStyles";
+import { ACCENT, ErrorBox, GoldStrip, PRIMARY_BUTTON, SECONDARY_BUTTON, pill } from "./quizStyles";
 
 /** One question at a time, with a question-language switch. */
 export default function QuizPlayer({
@@ -29,11 +29,11 @@ export default function QuizPlayer({
   const englishOnly = questionLanguage === "bn" && !hasBangla(question);
 
   return (
-    <div className="bg-[#f7f4ec] min-h-screen pb-16">
+    <div className="bg-school-cream pb-16">
       <div className="sticky top-0 z-20 bg-white/90 backdrop-blur-md border-b border-[rgba(201,168,76,0.3)]">
         <div className="max-w-4xl mx-auto px-5 py-4">
           <div className="flex flex-wrap items-center justify-between gap-3 mb-2.5">
-            <p className="m-0 text-lg font-extrabold text-[#0d1f3c] tabular-nums">
+            <p className="m-0 text-lg font-extrabold text-school-navy tabular-nums">
               <span className="text-xs font-bold tracking-[0.15em] uppercase text-[#7a5c1e] mr-2">{t("question")}</span>
               {current + 1} / {questions.length}
             </p>
@@ -53,7 +53,7 @@ export default function QuizPlayer({
                   {label}
                 </button>
               ))}
-              <span className="text-xs font-semibold px-2.5 py-1 rounded-full tabular-nums bg-emerald-50 text-emerald-700 border border-emerald-200">
+              <span className="text-xs font-semibold px-2.5 py-1 rounded-full tabular-nums bg-school-cream text-school-navy border border-school-gold/40">
                 {fillTemplate(t("answered"), { count: answeredCount, total: questions.length })}
               </span>
             </div>
@@ -61,7 +61,7 @@ export default function QuizPlayer({
           <div className="h-1.5 bg-[rgba(201,168,76,0.15)] rounded-full overflow-hidden">
             <div
               className="h-full rounded-full transition-[width] duration-500"
-              style={{ width: `${((current + 1) / questions.length) * 100}%`, background: GREEN }}
+              style={{ width: `${((current + 1) / questions.length) * 100}%`, background: ACCENT }}
             />
           </div>
         </div>
@@ -74,7 +74,7 @@ export default function QuizPlayer({
           <GoldStrip />
           <div className="px-6 py-8 sm:px-10 sm:py-10">
             {question.subject && (
-              <span className="inline-block mb-6 px-2.5 py-1 rounded-md text-[11px] font-bold tracking-wide uppercase bg-emerald-50 text-emerald-700 border border-emerald-200">
+              <span className="inline-block mb-6 px-2.5 py-1 rounded-md text-[11px] font-bold tracking-wide uppercase bg-school-cream text-school-navy border border-school-gold/40">
                 {question.subject}
               </span>
             )}
@@ -82,7 +82,7 @@ export default function QuizPlayer({
 
             <MathText
               as="h2"
-              className="text-[1.35rem] sm:text-[1.55rem] font-semibold text-[#0d1f3c] leading-[1.55] mb-8 whitespace-pre-wrap"
+              className="text-[1.35rem] sm:text-[1.55rem] font-semibold text-school-navy leading-[1.55] mb-8 whitespace-pre-wrap"
             >
               {prompt}
             </MathText>
@@ -96,10 +96,10 @@ export default function QuizPlayer({
                     type="button"
                     aria-pressed={isSelected}
                     onClick={() => onAnswer(question.id, letter)}
-                    className="text-left px-5 py-4 rounded-xl border-2 transition-all flex items-start gap-3.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
+                    className="text-left px-5 py-4 rounded-xl border-2 transition-all flex items-start gap-3.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-school-gold"
                     style={
                       isSelected
-                        ? { background: "rgba(16,185,129,0.08)", borderColor: "#10b981" }
+                        ? { background: "var(--color-school-cream)", borderColor: "var(--color-school-gold)" }
                         : { background: "#fcfbf7", borderColor: "rgba(201,168,76,0.25)" }
                     }
                   >
@@ -107,13 +107,13 @@ export default function QuizPlayer({
                       className="shrink-0 inline-flex items-center justify-center w-9 h-9 rounded-lg font-extrabold text-sm"
                       style={
                         isSelected
-                          ? { background: GREEN, color: "#fff" }
+                          ? { background: ACCENT, color: "var(--color-school-gold-soft)" }
                           : { background: "rgba(201,168,76,0.15)", color: "#7a5c1e" }
                       }
                     >
                       {letter}
                     </span>
-                    <MathText as="span" className="text-[1rem] sm:text-[1.05rem] text-[#0d1f3c] leading-relaxed pt-1 min-w-0 break-words">
+                    <MathText as="span" className="text-[1rem] sm:text-[1.05rem] text-school-navy leading-relaxed pt-1 min-w-0 break-words">
                       {text}
                     </MathText>
                   </button>
@@ -128,11 +128,11 @@ export default function QuizPlayer({
             {t("previous")}
           </button>
           {isLast ? (
-            <button type="button" onClick={onSubmit} disabled={submitting} className={`grow ${PRIMARY_BUTTON}`} style={{ background: GREEN }}>
+            <button type="button" onClick={onSubmit} disabled={submitting} className={`grow ${PRIMARY_BUTTON}`} style={{ background: ACCENT }}>
               {submitting ? t("submitting") : t("submit")}
             </button>
           ) : (
-            <button type="button" onClick={onNext} className={`grow ${PRIMARY_BUTTON}`} style={{ background: GREEN }}>
+            <button type="button" onClick={onNext} className={`grow ${PRIMARY_BUTTON}`} style={{ background: ACCENT }}>
               {t("next")}
             </button>
           )}
