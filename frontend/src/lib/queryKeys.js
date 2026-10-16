@@ -116,6 +116,17 @@ export const queryKeys = {
     published: (branchId = null) => ["achievements", "published", { branchId }],
     admin: (branchId = null) => ["achievements", "admin", { branchId }],
   },
+  jobCirculars: {
+    all: ["jobCirculars"],
+    published: (branchId = null) => ["jobCirculars", "published", { branchId }],
+    detail: (id) => ["jobCirculars", "detail", String(id)],
+    admin: (branchId = null) => ["jobCirculars", "admin", { branchId }],
+  },
+  jobApplications: {
+    all: ["jobApplications"],
+    list: (filters = {}, branchId = null) => ["jobApplications", "list", filters, { branchId }],
+    counts: (branchId = null) => ["jobApplications", "counts", { branchId }],
+  },
   images: {
     all: ["images"],
     byType: (type) => ["images", "type", type],
