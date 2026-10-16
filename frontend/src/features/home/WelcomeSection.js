@@ -1,19 +1,17 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
 import Image from "next/image";
 import Link from "next/link";
 import { FiArrowRight, FiBell } from "react-icons/fi";
+import { useChairmanProfile } from "@/hooks/useChairman";
 import { useMessages } from "@/hooks/useMessages";
 import { useNotices } from "@/hooks/useNotices";
 import { isRemoteImage } from "@/lib/assetUrl";
 import { dayAndMonth, localized, visibleNotices } from "@/lib/homePage";
-import { queryKeys } from "@/lib/queryKeys";
-import { chairmanService } from "@/services/chairman.service";
+import { FOUNDER_PHOTO } from "@/lib/schoolInfo";
 import { useLanguageStore, useTranslations } from "@/store/languageStore";
 import SectionHeading from "./SectionHeading";
 
-const CHAIRMAN_PHOTO = "/images/WhatsApp Image 2024-12-07 at 20.48.41_3423f492.jpg";
 const MESSAGE_PREVIEW_CHARS = 600;
 const NOTICES_SHOWN = 6;
 
@@ -21,16 +19,12 @@ function ChairmanMessage() {
   const t = useTranslations();
   const language = useLanguageStore((s) => s.language);
   const { data: messages = [] } = useMessages();
-  const { data: profile } = useQuery({
-    queryKey: queryKeys.chairman.profile,
-    queryFn: chairmanService.getProfile,
-    select: (d) => d?.data ?? d,
-  });
+  const { data: profile } = useChairmanProfile();
   const shown = messages.find((m) => m.Show === 1 || m.Show === true);
   const message = shown?.Messages || t("chairman.defaultMessage");
   const preview = message.length > MESSAGE_PREVIEW_CHARS ? `${message.slice(0, MESSAGE_PREVIEW_CHARS).trimEnd()}…` : message;
   const name = localized(profile, "name", language) || t("chairman.name");
-  const photo = profile?.image_url || CHAIRMAN_PHOTO;
+  const photo = profile?.image_url || FOUNDER_PHOTO;
 
   return (
     <section aria-labelledby="chairman-title" className="min-w-0 lg:col-span-2">

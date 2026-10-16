@@ -34,4 +34,14 @@ describe("AboutPage", () => {
 
     expect(screen.getByRole("heading", { level: 1 }).textContent).not.toBe("About Us");
   });
+
+  it("lists the school's recognition: government approval, EIIN and code", () => {
+    renderWithQuery(<AboutPage />);
+    const details = screen.getByRole("heading", { name: "School details" }).closest("section");
+
+    expect(details).toHaveTextContent("Recognition");
+    expect(details).toHaveTextContent("Government approved");
+    expect(details).toHaveTextContent("EIIN135479");
+    expect(details).toHaveTextContent("School code306060805");
+  });
 });

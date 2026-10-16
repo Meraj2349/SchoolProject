@@ -6,9 +6,9 @@ import { PageHero, PublicPage, SiteImage, SiteLoader } from "@/components/site";
 import { useChairmanProfile } from "@/hooks/useChairman";
 import { useMessages } from "@/hooks/useMessages";
 import { localized } from "@/lib/homePage";
+import { FOUNDER_PHOTO } from "@/lib/schoolInfo";
 import { useLanguageStore, useTranslations } from "@/store/languageStore";
 
-const CHAIRMAN_PHOTO = "/images/WhatsApp Image 2024-12-07 at 20.48.41_3423f492.jpg";
 const isShown = (m) => m.Show === 1 || m.Show === true;
 
 /** The chairman's full message, in the reader's language. */
@@ -33,7 +33,7 @@ export default function ChairmanMessagePage() {
           <div className="grid gap-8 rounded-sm bg-white p-6 shadow-lg md:grid-cols-[220px_1fr] md:p-10">
             <figure className="m-0 text-center">
               <div className="relative mx-auto h-64 w-48 overflow-hidden rounded-sm border-4 border-white shadow-lg ring-2 ring-school-gold">
-                <SiteImage src={profile?.image_url || CHAIRMAN_PHOTO} alt={`${name} – ${title}`} fill sizes="192px" className="object-cover" />
+                <SiteImage src={profile?.image_url || FOUNDER_PHOTO} alt={`${name} – ${title}`} fill sizes="192px" className="object-cover" />
               </div>
               <figcaption className="mt-4">
                 <span className="block break-words font-school-heading text-lg font-bold text-school-navy">{name}</span>

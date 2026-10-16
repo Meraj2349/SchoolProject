@@ -1,6 +1,7 @@
 {
   "schoolName": "Star Shikkha Poribar",
   "eiin": "135479",
+  "schoolCode": "306060805",
   "location": "Natiapara, Delduar, Tangail",
   "nav": {
     "home": "Home",
@@ -46,8 +47,8 @@
     "adminDashboard": "Dashboard",
     "branches": "Branch Management",
     "notice": "Notice",
-    "chairMessage": "Chair Message",
-    "chairmanProfile": "Chairman Profile",
+    "chairMessage": "Founder's Message",
+    "chairmanProfile": "Founding Director Profile",
     "imageGallery": "Image Gallery",
     "routine": "Routine",
     "studentList": "Student List",
@@ -138,7 +139,7 @@
     },
     "chairman": {
       "eyebrow": "Message",
-      "title": "From the Chairman's desk",
+      "title": "From the Founding Director",
       "readMore": "Read the full message"
     },
     "noticeBoard": {
@@ -179,7 +180,7 @@
   },
   "chairmanCard": {
     "viewFullMessage": "View Full Message",
-    "chairmanMessage": "Chairman's Message"
+    "chairmanMessage": "Message from the Founding Director"
   },
   "about": {
     "title": "About Us",
@@ -193,17 +194,22 @@
     "addressValue": "Natiapara, Delduar, Tangail, Bangladesh",
     "phone": "Phone",
     "emailLabel": "Email",
-    "mapTitle": "Map of Star Shikkha Poribar"
+    "mapTitle": "Map of Star Shikkha Poribar",
+    "detailsTitle": "School details",
+    "recognition": "Recognition",
+    "govtApproved": "Government approved",
+    "eiinLabel": "EIIN",
+    "schoolCode": "School code"
   },
   "chairman": {
-    "pageTitle": "Chairman's Message",
-    "loading": "Loading chairman message…",
+    "pageTitle": "Message from the Founding Director",
+    "loading": "Loading the message…",
     "name": "Md. Rashedul Islam",
-    "title": "Chairman",
+    "title": "Founding Director",
     "institution": "Star Shikkha Poribar",
     "bestRegards": "Best regards,",
     "backToHome": "Back to Home",
-    "defaultMessage": "Welcome to our school! We are committed to providing excellent education."
+    "defaultMessage": "By competing with the country's leading educational institutions, we will build Natiapara into a model of modern education for an all-round education system in southern Tangail, Insha'Allah."
   },
   "gallery": {
     "title": "Gallery",
@@ -432,14 +438,14 @@
       "deleteFailed": "Delete failed"
     },
     "messages": {
-      "title": "Chairman's Message",
+      "title": "Founding Director's Message",
       "editMessage": "Edit Message",
       "addMessage": "Add Message",
       "update": "Update",
       "add": "Add",
       "cancel": "Cancel",
       "allMessages": "All Messages",
-      "messagePlaceholder": "Chairman's message…",
+      "messagePlaceholder": "Founding Director's message…",
       "showOnWebsite": "Show on website",
       "messageRequired": "Message content is required",
       "messageUpdated": "Message updated!",
@@ -1395,7 +1401,9 @@
     "menu": "Menu",
     "skipToContent": "Skip to main content",
     "motto": "Education · Discipline · Character",
-    "breadcrumb": "Breadcrumb"
+    "breadcrumb": "Breadcrumb",
+    "govtApproved": "Govt. approved",
+    "codeLabel": "Code"
   },
   "quaker": {
     "badge": "A Quaker Education — Student Portal",

@@ -1,6 +1,9 @@
 // The school's contact details and links, in one place for the header,
 // footer and home page. Text that changes with the language lives in i18n.
 
+/** Md. Rashedul Islam, Founding Director; shown until an admin uploads a photo. */
+export const FOUNDER_PHOTO = "/images/founding-director.jpg";
+
 export const SCHOOL_CONTACT = {
   phone: "01997588476",
   phoneHref: "tel:+8801997588476",

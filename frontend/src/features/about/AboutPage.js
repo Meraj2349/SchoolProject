@@ -16,6 +16,11 @@ export default function AboutPage() {
     { icon: FiPhone, label: t("about.phone"), value: SCHOOL_CONTACT.phone, href: SCHOOL_CONTACT.phoneHref },
     { icon: FiMail, label: t("about.emailLabel"), value: SCHOOL_CONTACT.email, href: `mailto:${SCHOOL_CONTACT.email}` },
   ];
+  const details = [
+    { label: t("about.recognition"), value: t("about.govtApproved") },
+    { label: t("about.eiinLabel"), value: t("eiin") },
+    { label: t("about.schoolCode"), value: t("schoolCode") },
+  ];
 
   return (
     <PublicPage>
@@ -73,6 +78,16 @@ export default function AboutPage() {
                   </li>
                 ))}
               </ul>
+            </SiteCard>
+            <SiteCard title={t("about.detailsTitle")}>
+              <dl className="m-0 grid gap-3">
+                {details.map(({ label, value }) => (
+                  <div key={label} className="flex flex-wrap justify-between gap-x-4 border-b border-school-cream-deep pb-3 last:border-0">
+                    <dt className="text-xs font-bold uppercase tracking-wider text-school-muted">{label}</dt>
+                    <dd className="m-0 font-semibold text-school-navy">{value}</dd>
+                  </div>
+                ))}
+              </dl>
             </SiteCard>
           </div>
         </div>
