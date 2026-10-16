@@ -282,7 +282,10 @@
     "gender": "লিঙ্গ",
     "dateOfBirth": "জন্ম তারিখ",
     "parentContact": "অভিভাবকের যোগাযোগ",
-    "noStudents": "কোনো শিক্ষার্থী পাওয়া যায়নি"
+    "noStudents": "কোনো শিক্ষার্থী পাওয়া যায়নি",
+    "searchTitle": "শিক্ষার্থী খুঁজুন",
+    "selectClass": "শ্রেণি নির্বাচন করুন",
+    "selectSection": "শাখা নির্বাচন করুন"
   },
   "teachers": {
     "pageTitle": "আমাদের শিক্ষকগণ",

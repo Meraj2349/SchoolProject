@@ -46,3 +46,11 @@ export function filterTeachers(teachers = [], classes = [], { search = "", field
       (!className || classTeachers.has(teacher.TeacherID)),
   );
 }
+
+const same = (a, b) => String(a ?? "").trim().toLowerCase() === String(b ?? "").trim().toLowerCase();
+
+/** The students whose first name, roll number, class and section all match exactly (ignoring case and spaces). */
+export const exactStudentMatches = (students = [], { FirstName, RollNumber, ClassName, Section } = {}) =>
+  students.filter(
+    (s) => same(s.FirstName, FirstName) && same(s.RollNumber, RollNumber) && same(s.ClassName, ClassName) && same(s.Section, Section),
+  );

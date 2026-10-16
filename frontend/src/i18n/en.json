@@ -282,7 +282,10 @@
     "gender": "Gender",
     "dateOfBirth": "Date of Birth",
     "parentContact": "Parent Contact",
-    "noStudents": "No students found"
+    "noStudents": "No students found",
+    "searchTitle": "Find a student",
+    "selectClass": "Select class",
+    "selectSection": "Select section"
   },
   "teachers": {
     "pageTitle": "Our Teachers",

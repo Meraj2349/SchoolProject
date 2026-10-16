@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { classesTaughtBy, filterTeachers, fullName, initialsOf, photosBy } from "./people";
+import { classesTaughtBy, exactStudentMatches, filterTeachers, fullName, initialsOf, photosBy } from "./people";
 
 describe("people helpers", () => {
   it("makes initials and full names without crashing on missing parts", () => {
@@ -59,5 +59,13 @@ describe("filterTeachers", () => {
 
   it("shows everyone when nothing is chosen", () => {
     expect(filterTeachers(teachers, classes, {})).toHaveLength(3);
+  });
+});
+
+describe("exactStudentMatches", () => {
+  const rahim = { FirstName: "Rahim", RollNumber: 7, ClassName: "Class 5", Section: "Good" };
+  it("keeps only students matching every field, ignoring case and spaces", () => {
+    const list = [rahim, { ...rahim, FirstName: "Rahima" }, { ...rahim, RollNumber: 17 }, { ...rahim, Section: "Better" }];
+    expect(exactStudentMatches(list, { FirstName: " rahim", RollNumber: "7", ClassName: "class 5", Section: "GOOD" })).toEqual([rahim]);
   });
 });
