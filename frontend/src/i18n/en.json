@@ -362,16 +362,13 @@
   "routine": {
     "pageTitle": "School Routines",
     "searchPlaceholder": "Search routines…",
-    "filters": "Filters",
     "class": "Class",
     "allClasses": "All Classes",
     "section": "Section",
     "allSections": "All Sections",
-    "clearFilters": "Clear Filters",
     "routineFound": "Routine Found",
     "routinesFound": "Routines Found",
     "failedToLoad": "Failed to load routines.",
-    "tryAgain": "Try Again",
     "loadingRoutines": "Loading routines…",
     "noRoutinesFound": "No Routines Found",
     "tryAdjustFilters": "Try adjusting your filters.",
@@ -382,7 +379,14 @@
     "viewPDF": "View PDF",
     "viewImage": "View Image",
     "added": "Added:",
-    "view": "View"
+    "view": "View",
+    "pageSubtitle": "Class routines and exam timetables for every class.",
+    "searchLabel": "Search routines",
+    "pagination": "Routine pages",
+    "fileTypes": {
+      "pdf": "PDF",
+      "image": "Image"
+    }
   },
   "admin": {
     "login": {

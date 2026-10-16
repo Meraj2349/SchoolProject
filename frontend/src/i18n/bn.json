@@ -362,16 +362,13 @@
   "routine": {
     "pageTitle": "স্কুল রুটিন",
     "searchPlaceholder": "রুটিন খুঁজুন…",
-    "filters": "ফিল্টার",
     "class": "শ্রেণি",
     "allClasses": "সব শ্রেণি",
     "section": "বিভাগ",
     "allSections": "সব বিভাগ",
-    "clearFilters": "ফিল্টার মুছুন",
     "routineFound": "টি রুটিন পাওয়া গেছে",
     "routinesFound": "টি রুটিন পাওয়া গেছে",
     "failedToLoad": "রুটিন লোড করতে ব্যর্থ হয়েছে।",
-    "tryAgain": "আবার চেষ্টা করুন",
     "loadingRoutines": "রুটিন লোড হচ্ছে…",
     "noRoutinesFound": "কোনো রুটিন পাওয়া যায়নি",
     "tryAdjustFilters": "ফিল্টার পরিবর্তন করে দেখুন।",
@@ -382,7 +379,14 @@
     "viewPDF": "পিডিএফ দেখুন",
     "viewImage": "ছবি দেখুন",
     "added": "যোগ করা হয়েছে:",
-    "view": "দেখুন"
+    "view": "দেখুন",
+    "pageSubtitle": "প্রতিটি শ্রেণির ক্লাস রুটিন ও পরীক্ষার সময়সূচি।",
+    "searchLabel": "রুটিন খুঁজুন",
+    "pagination": "রুটিনের পাতা",
+    "fileTypes": {
+      "pdf": "পিডিএফ",
+      "image": "ছবি"
+    }
   },
   "admin": {
     "login": {
