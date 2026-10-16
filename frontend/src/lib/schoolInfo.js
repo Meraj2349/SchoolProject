@@ -8,6 +8,12 @@ export const CHAIRMAN = {
   mobileHref: "tel:+8801915680214",
 };
 
+/** Head office numbers printed on job circulars (applications go to the Chairman there). */
+export const HEAD_OFFICE_MOBILES = ["01915-680214", "01717-174064", "01911-968277"].map((display) => ({
+  display,
+  href: `tel:+88${display.replace(/-/g, "")}`,
+}));
+
 export const SCHOOL_CONTACT = {
   phone: "01997588476",
   phoneHref: "tel:+8801997588476",
@@ -40,5 +46,6 @@ export const PUBLIC_NAV = [
   { key: "gallery", path: "/gallery" },
   { key: "events", path: "/events" },
   { key: "branches", path: "/branches" },
+  { key: "jobs", path: "/jobs" },
   { key: "quakerEducation", path: "/quaker" },
 ];
