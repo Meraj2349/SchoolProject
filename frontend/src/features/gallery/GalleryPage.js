@@ -1,383 +1,148 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { motion } from "framer-motion";
-import Image from "next/image";
-import Navbar from "@/components/layout/Navbar";
-import Footer from "@/components/layout/Footer";
-import LatestUpdatesNotice from "@/components/shared/LatestUpdatesNotice";
+import { useRef, useState } from "react";
+import { FiChevronLeft, FiChevronRight, FiImage, FiX } from "react-icons/fi";
+import { EmptyState, ErrorState, PageHero, PublicPage, SiteImage, SiteLoader } from "@/components/site";
+import useDialogFocus from "@/hooks/useDialogFocus";
+import useEscapeKey from "@/hooks/useEscapeKey";
 import { useImages } from "@/hooks/useImages";
-import { useTranslations } from "@/store/languageStore";
+import { formatNumber } from "@/lib/homePage";
+import { useLanguageStore, useTranslations } from "@/store/languageStore";
 
-const CAT_BADGE_STYLES = {
-  school: { bg: "#f0fdf4", color: "#10b981" },
-  student: { bg: "#f0fdf4", color: "#059669" },
-  teacher: { bg: "#f0fdf4", color: "#047857" },
-  event: { bg: "#f8fafc", color: "#374151" },
-  notice: { bg: "#f8fafc", color: "#6b7280" },
-  general: { bg: "#f8f9fa", color: "#495057" },
-};
+// Must match Images.ImageType in the database.
+const CATEGORIES = ["all", "school", "event", "notice", "student", "teacher"];
 
-export default function GalleryPage() {
-  const { data: images = [], isLoading, isError, refetch } = useImages();
-  const [category, setCategory] = useState("all");
-  const [selected, setSelected] = useState(null);
-  const [selectedIdx, setSelectedIdx] = useState(0);
+function PhotoViewer({ photos, index, onMove, onClose }) {
   const t = useTranslations("gallery");
-
-  const CATEGORIES = [
-    { value: "all", label: t("categories.all"), icon: "🖼️" },
-    { value: "general", label: t("categories.general"), icon: "📸" },
-    { value: "school", label: t("categories.school"), icon: "🏫" },
-    { value: "student", label: t("categories.student"), icon: "🎓" },
-    { value: "teacher", label: t("categories.teacher"), icon: "👨‍🏫" },
-    { value: "event", label: t("categories.event"), icon: "🎉" },
-    { value: "notice", label: t("categories.notice"), icon: "📢" },
-  ];
-
-  const filtered =
-    category === "all"
-      ? images
-      : images.filter((i) => i.ImageType === category);
-
-  const openLightbox = (img, idx) => {
-    setSelected(img);
-    setSelectedIdx(idx);
+  const language = useLanguageStore((s) => s.language);
+  const ref = useDialogFocus(true);
+  useEscapeKey(true, onClose);
+  const photo = photos[index];
+  const label = photo.Description || t("photo");
+  const onKeyDown = (event) => {
+    const step = { ArrowRight: 1, ArrowLeft: -1 }[event.key];
+    if (step) onMove(step);
   };
-  const closeLightbox = useCallback(() => setSelected(null), []);
-  const navigate = useCallback(
-    (dir) => {
-      const next =
-        dir === "next"
-          ? (selectedIdx + 1) % filtered.length
-          : (selectedIdx - 1 + filtered.length) % filtered.length;
-      setSelectedIdx(next);
-      setSelected(filtered[next]);
-    },
-    [selectedIdx, filtered],
-  );
-
-  useEffect(() => {
-    const handler = (e) => {
-      if (!selected) return;
-      if (e.key === "Escape") closeLightbox();
-      if (e.key === "ArrowRight") navigate("next");
-      if (e.key === "ArrowLeft") navigate("prev");
-    };
-    document.addEventListener("keydown", handler);
-    return () => document.removeEventListener("keydown", handler);
-  }, [selected, navigate, closeLightbox]);
-
-  const catLabel = (type) =>
-    CATEGORIES.find((c) => c.value === type)?.label ?? type;
-  const catIcon = (type) =>
-    CATEGORIES.find((c) => c.value === type)?.icon ?? "";
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Navbar />
-      <LatestUpdatesNotice />
-
-      {/* Header */}
-      <section
-        className="py-16 text-center relative overflow-hidden"
-        style={{
-          background:
-            "linear-gradient(135deg, #064e3b 0%, #047857 50%, #059669 100%)",
-        }}
+    <div className="fixed inset-0 z-[500] flex items-center justify-center bg-school-navy-deep/90 p-4" onClick={onClose}>
+      <div
+        ref={ref}
+        role="dialog"
+        aria-modal="true"
+        aria-label={label}
+        tabIndex={-1}
+        onKeyDown={onKeyDown}
+        onClick={(event) => event.stopPropagation()}
+        className="relative flex w-full max-w-5xl flex-col gap-3 outline-none"
       >
-        <div
-          className="absolute inset-0 opacity-[0.07]"
-          style={{
-            backgroundImage:
-              "radial-gradient(circle at 20% 50%, white 0%, transparent 60%), radial-gradient(circle at 80% 20%, white 0%, transparent 55%)",
-          }}
-        />
-        <h1
-          className="relative z-[1] font-extrabold text-white m-0 text-shadow"
-          style={{ fontSize: "clamp(1.75rem, 4vw, 2.75rem)" }}
-        >
-          {t("title")}
-        </h1>
-      </section>
-
-      {/* Content */}
-      <section className="py-8">
-        <div className="max-w-[1400px] mx-auto px-8">
-          {/* Filter */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="mb-12 text-center"
-          >
-            <h2 className="text-[1.8rem] font-medium mb-6 text-gray-700">
-              {t("browseByCategory")}
-            </h2>
-            <div className="flex flex-wrap gap-4 justify-center items-center">
-              {CATEGORIES.map((c) => (
-                <button
-                  key={c.value}
-                  onClick={() => setCategory(c.value)}
-                  className={`flex items-center gap-2 px-6 py-3 rounded-full cursor-pointer transition-all duration-300 text-base font-medium border-2 ${
-                    category === c.value
-                      ? "text-white border-transparent -translate-y-0.5"
-                      : "bg-white border-gray-200 text-gray-700 shadow-md hover:-translate-y-0.5 hover:border-emerald-500 hover:text-emerald-500 hover:shadow-lg"
-                  }`}
-                  style={
-                    category === c.value
-                      ? {
-                          background:
-                            "linear-gradient(135deg, #10b981, #059669)",
-                          boxShadow: "0 6px 20px rgba(16,185,129,0.4)",
-                        }
-                      : {}
-                  }
-                >
-                  <span className="text-xl">{c.icon}</span>
-                  <span>{c.label}</span>
-                </button>
-              ))}
-            </div>
-          </motion.div>
-
-          {/* Error */}
-          {isError && (
-            <div className="flex justify-center my-8">
-              <div className="flex items-center gap-4 px-8 py-4 bg-red-50 border border-red-200 rounded-xl text-red-700 font-medium">
-                <span className="text-2xl">⚠️</span>
-                <span>{t("failedToLoad")}</span>
-                <button
-                  onClick={refetch}
-                  className="px-4 py-2 bg-red-700 text-white border-none rounded-lg cursor-pointer font-medium hover:bg-red-800"
-                >
-                  {t("tryAgain")}
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* Loading */}
-          {isLoading ? (
-            <div className="flex items-center justify-center min-h-[300px]">
-              <div className="w-[50px] h-[50px] border-4 border-gray-200 border-t-emerald-500 rounded-full animate-spin" />
-            </div>
-          ) : (
-            <>
-              {/* Stats */}
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.6 }}
-                className="text-center mb-8 p-4 bg-white/90 rounded-xl border border-gray-200 shadow-md"
-              >
-                <p className="m-0 text-[1.1rem] text-gray-700">
-                  {t("showing")} <strong>{filtered.length}</strong>{" "}
-                  {t("images")}
-                  {category !== "all" && (
-                    <>
-                      {" "}
-                      {t("in")} <strong>{catLabel(category)}</strong>
-                    </>
-                  )}
-                </p>
-              </motion.div>
-
-              {/* No images */}
-              {filtered.length === 0 ? (
-                <div className="flex items-center justify-center min-h-[300px]">
-                  <div className="text-center text-gray-500">
-                    <span className="text-6xl block mb-4">📷</span>
-                    <h3 className="text-2xl text-gray-600">{t("noImages")}</h3>
-                  </div>
-                </div>
-              ) : (
-                <motion.div
-                  variants={{
-                    hidden: { opacity: 0 },
-                    visible: {
-                      opacity: 1,
-                      transition: { staggerChildren: 0.1 },
-                    },
-                  }}
-                  initial="hidden"
-                  animate="visible"
-                  className="grid gap-8 mt-8"
-                  style={{
-                    gridTemplateColumns:
-                      "repeat(auto-fill, minmax(320px, 1fr))",
-                  }}
-                >
-                  {filtered.map((img, idx) => (
-                    <motion.div
-                      key={img.ImageID ?? idx}
-                      variants={{
-                        hidden: { opacity: 0, y: 20 },
-                        visible: {
-                          opacity: 1,
-                          y: 0,
-                          transition: { duration: 0.5 },
-                        },
-                      }}
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      className="bg-white rounded-2xl overflow-hidden cursor-pointer shadow-md border border-white/20 hover:-translate-y-2 hover:shadow-xl transition-all duration-300 group"
-                      onClick={() => openLightbox(img, idx)}
-                    >
-                      {/* Image */}
-                      <div className="relative w-full h-[250px] overflow-hidden">
-                        <Image
-                          src={img.ImagePath || img.ImageUrl}
-                          alt={img.Description || "Gallery image"}
-                          fill
-                          sizes="(max-width:768px) 100vw, 33vw"
-                          unoptimized
-                          className="object-cover transition-transform duration-300 group-hover:scale-105"
-                          onError={(e) => {
-                            e.target.style.display = "none";
-                            e.target.nextSibling.style.display = "flex";
-                          }}
-                        />
-                        <div className="hidden absolute inset-0 flex-col items-center justify-center bg-gray-100 text-gray-500">
-                          <span className="text-5xl mb-2">📷</span>
-                          <p className="m-0 text-sm">
-                            {t("imageNotAvailable")}
-                          </p>
-                        </div>
-                        {/* Hover overlay */}
-                        <div
-                          className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 backdrop-blur-[2px]"
-                          style={{
-                            background:
-                              "linear-gradient(135deg, rgba(16,185,129,0.8), rgba(5,150,105,0.8))",
-                          }}
-                        >
-                          <div className="text-center text-white translate-y-5 group-hover:translate-y-0 transition-transform duration-300">
-                            <span className="text-4xl block mb-2">👁️</span>
-                            <p className="m-0 text-[1.1rem] font-medium">
-                              {t("viewImage")}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                      {/* Info */}
-                      <div className="p-6">
-                        <div className="mb-3">
-                          <span
-                            className="inline-flex items-center gap-2 px-4 py-2 rounded-2xl text-[0.9rem] font-medium capitalize"
-                            style={{
-                              background:
-                                CAT_BADGE_STYLES[img.ImageType]?.bg ??
-                                "#f8f9fa",
-                              color:
-                                CAT_BADGE_STYLES[img.ImageType]?.color ??
-                                "#495057",
-                            }}
-                          >
-                            {catIcon(img.ImageType)} {catLabel(img.ImageType)}
-                          </span>
-                        </div>
-                        {img.Description && (
-                          <p className="m-0 mb-3 text-gray-600 leading-relaxed text-[0.95rem]">
-                            {img.Description}
-                          </p>
-                        )}
-                      </div>
-                    </motion.div>
-                  ))}
-                </motion.div>
-              )}
-            </>
-          )}
+        <div className="flex items-center justify-between text-white">
+          <p className="m-0 text-sm">
+            {formatNumber(index + 1, language)} {t("of")} {formatNumber(photos.length, language)}
+          </p>
+          <button type="button" onClick={onClose} aria-label={t("close")} className="inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-white/40 bg-transparent text-white hover:bg-white/10">
+            <FiX aria-hidden="true" />
+          </button>
         </div>
-      </section>
-
-      {/* Lightbox */}
-      {selected && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-black/90 flex items-center justify-center z-[1000] p-8 backdrop-blur-[10px]"
-          onClick={closeLightbox}
-        >
-          <div
-            className="relative max-w-[85vw] max-h-[85vh] flex items-center justify-center mx-20"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Close */}
-            <button
-              className="absolute top-5 right-5 w-[50px] h-[50px] rounded-full border-2 border-white/50 bg-white/90 text-gray-700 text-[1.8rem] flex items-center justify-center cursor-pointer z-10 transition-all duration-300 hover:bg-red-500 hover:text-white hover:border-red-500 hover:rotate-90 hover:scale-110"
-              onClick={closeLightbox}
-            >
-              ✕
-            </button>
-            {/* Nav */}
-            {filtered.length > 1 && (
-              <>
-                <button
-                  className="absolute left-[30px] top-1/2 -translate-y-1/2 w-[60px] h-[60px] rounded-full border-2 border-emerald-500/50 text-white text-3xl flex items-center justify-center cursor-pointer z-10 transition-all duration-300 hover:scale-110"
-                  style={{
-                    background:
-                      "linear-gradient(135deg, rgba(16,185,129,0.9), rgba(5,150,105,0.9))",
-                  }}
-                  onClick={() => navigate("prev")}
-                >
-                  ‹
-                </button>
-                <button
-                  className="absolute right-[30px] top-1/2 -translate-y-1/2 w-[60px] h-[60px] rounded-full border-2 border-emerald-500/50 text-white text-3xl flex items-center justify-center cursor-pointer z-10 transition-all duration-300 hover:scale-110"
-                  style={{
-                    background:
-                      "linear-gradient(135deg, rgba(16,185,129,0.9), rgba(5,150,105,0.9))",
-                  }}
-                  onClick={() => navigate("next")}
-                >
-                  ›
-                </button>
-              </>
-            )}
-            <motion.div
-              key={selected.ImageID}
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ duration: 0.3 }}
-              className="flex flex-col items-center max-w-full max-h-full"
-            >
-              <Image
-                src={selected.ImagePath || selected.ImageUrl}
-                alt={selected.Description || "Gallery"}
-                width={1200}
-                height={800}
-                unoptimized
-                className="max-w-full max-h-[70vh] w-auto h-auto object-contain rounded-xl shadow-2xl"
-              />
-              <div className="bg-white/95 p-6 rounded-xl mt-4 text-center backdrop-blur-[10px] max-w-[600px]">
-                <span
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-2xl text-[0.9rem] font-medium capitalize mb-4"
-                  style={{
-                    background:
-                      CAT_BADGE_STYLES[selected.ImageType]?.bg ?? "#f8f9fa",
-                    color:
-                      CAT_BADGE_STYLES[selected.ImageType]?.color ?? "#495057",
-                  }}
-                >
-                  {catIcon(selected.ImageType)} {catLabel(selected.ImageType)}
-                </span>
-                {selected.Description && (
-                  <p className="text-[1.1rem] m-0 mb-4 text-gray-600 leading-relaxed">
-                    {selected.Description}
-                  </p>
-                )}
-                <div className="text-[0.9rem] text-gray-500 font-medium">
-                  {selectedIdx + 1} {t("of")} {filtered.length}
-                </div>
-              </div>
-            </motion.div>
+        <div className="relative h-[70vh] w-full">
+          <SiteImage src={photo.ImagePath} alt={label} fill sizes="100vw" className="object-contain" />
+        </div>
+        {photo.Description && <p className="m-0 text-center text-white/85">{photo.Description}</p>}
+        {photos.length > 1 && (
+          <div className="flex justify-center gap-3">
+            {[
+              { step: -1, name: t("previous"), Icon: FiChevronLeft },
+              { step: 1, name: t("next"), Icon: FiChevronRight },
+            ].map(({ step, name, Icon }) => (
+              <button key={step} type="button" onClick={() => onMove(step)} aria-label={name} className="inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border-none bg-school-gold text-school-navy hover:bg-school-gold-soft">
+                <Icon aria-hidden="true" />
+              </button>
+            ))}
           </div>
-        </motion.div>
-      )}
-      <Footer />
+        )}
+      </div>
     </div>
+  );
+}
+
+export default function GalleryPage() {
+  const t = useTranslations("gallery");
+  const language = useLanguageStore((s) => s.language);
+  const { data: images = [], isLoading, isError, refetch } = useImages();
+  const [category, setCategory] = useState("all");
+  const [open, setOpen] = useState(null); // index into `photos`, or null
+  // Focus goes back to the photo that opened the viewer (a click does not focus a button in every browser).
+  const openerRef = useRef(null);
+  const close = () => {
+    setOpen(null);
+    openerRef.current?.focus();
+  };
+
+  const photos = images.filter((image) => image.ImagePath && (category === "all" || image.ImageType === category));
+  const move = (step) => setOpen((i) => (i + step + photos.length) % photos.length);
+  const chooseCategory = (value) => {
+    setCategory(value);
+    setOpen(null);
+  };
+
+  return (
+    <PublicPage className="bg-school-cream">
+      <PageHero title={t("title")} subtitle={t("subtitle")} />
+      <div className="mx-auto max-w-7xl px-4 py-12">
+        <div role="group" aria-label={t("browseByCategory")} className="mb-8 flex flex-wrap justify-center gap-2">
+          {CATEGORIES.map((value) => (
+            <button
+              key={value}
+              type="button"
+              aria-pressed={category === value}
+              onClick={() => chooseCategory(value)}
+              className={`cursor-pointer rounded-full border px-4 py-1.5 text-sm font-semibold transition-colors ${
+                category === value ? "border-school-navy bg-school-navy text-white" : "border-school-navy/25 bg-white text-school-navy hover:border-school-navy"
+              }`}
+            >
+              {t(`categories.${value}`)}
+            </button>
+          ))}
+        </div>
+
+        {isLoading ? (
+          <SiteLoader label={t("loading")} />
+        ) : isError ? (
+          <ErrorState message={t("failedToLoad")} onRetry={refetch} />
+        ) : photos.length === 0 ? (
+          <EmptyState title={t("noImages")} icon={FiImage} />
+        ) : (
+          <>
+            <p className="m-0 mb-4 text-sm text-school-muted">
+              {t("showing")} <strong>{formatNumber(photos.length, language)}</strong> {t("images")}
+            </p>
+            <ul className="m-0 grid list-none grid-cols-2 gap-3 p-0 md:grid-cols-3 lg:grid-cols-4">
+              {photos.map((photo, index) => {
+                const label = photo.Description || t("photo");
+                return (
+                  <li key={photo.ImageID ?? index}>
+                    <button
+                      type="button"
+                      aria-label={label}
+                      onClick={(event) => {
+                        openerRef.current = event.currentTarget;
+                        setOpen(index);
+                      }}
+                      className="group relative block aspect-[4/3] w-full cursor-pointer overflow-hidden rounded-sm border-none bg-school-cream-deep p-0"
+                    >
+                      <SiteImage src={photo.ImagePath} alt={label} fill sizes="(min-width: 1024px) 25vw, 50vw" className="object-cover transition-transform duration-500 group-hover:scale-105" />
+                      <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-school-navy-deep/85 to-transparent px-3 py-2 text-left text-xs font-semibold text-white">
+                        {t(`categories.${photo.ImageType}`)}
+                      </span>
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          </>
+        )}
+      </div>
+      {open != null && photos[open] && <PhotoViewer photos={photos} index={open} onMove={move} onClose={close} />}
+    </PublicPage>
   );
 }

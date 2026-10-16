@@ -218,13 +218,17 @@
     "of": "of",
     "categories": {
       "all": "All Images",
-      "general": "General",
       "school": "School Campus",
       "student": "Student Life",
       "teacher": "Faculty",
       "event": "Events",
       "notice": "Notices"
-    }
+    },
+    "subtitle": "Moments from classrooms, campus and celebrations.",
+    "photo": "School photo",
+    "close": "Close",
+    "previous": "Previous photo",
+    "next": "Next photo"
   },
   "events": {
     "upcomingEvents": "Upcoming Events",
@@ -235,11 +239,20 @@
     "checkBackLater": "Check back later for new events.",
     "happeningNow": "HAPPENING NOW",
     "endsIn": "Ends in:",
-    "eventEnded": "⏰ Event has ended",
+    "eventEnded": "Event has ended",
     "days": "Days",
     "hours": "Hours",
     "minutes": "Minutes",
-    "seconds": "Seconds"
+    "seconds": "Seconds",
+    "title": "Events",
+    "subtitle": "Programmes, competitions and celebrations across our school.",
+    "pastEvents": "Past events",
+    "types": {
+      "Academic": "Academic",
+      "Sports": "Sports",
+      "Cultural": "Cultural",
+      "Other": "Other"
+    }
   },
   "students": {
     "pageTitle": "Student Search",
@@ -1231,7 +1244,9 @@
     "selected": "Selected",
     "selectBranch": "Click to select this branch",
     "viewing": "Viewing",
-    "clearSelection": "Clear selection"
+    "clearSelection": "Clear selection",
+    "chooseBranch": "Choose this branch",
+    "branch": "Branch"
   },
   "notFound": {
     "title": "Page Not Found",
