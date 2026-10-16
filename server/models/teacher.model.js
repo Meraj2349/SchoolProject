@@ -30,11 +30,14 @@ const addTeacher = async ({
   return { TeacherID: result.insertId };
 };
 
+// Columns anyone may read: never the attendance app's sign-in details.
+const PUBLIC_COLUMNS = "TeacherID, FirstName, LastName, Subject, ContactNumber, Email, JoiningDate, Address, branch_id";
+
 // Get all teachers (branch-scoped)
 const getAllTeachers = async (branchId = null) => {
   const { clause, params } = branchFilter(branchId);
   const [rows] = await db.query(
-    `SELECT * FROM Teachers WHERE 1=1 ${clause} ORDER BY TeacherID`,
+    `SELECT ${PUBLIC_COLUMNS} FROM Teachers WHERE 1=1 ${clause} ORDER BY TeacherID`,
     params,
   );
   return rows;

@@ -14,13 +14,13 @@ const queryBranchId = (req) => {
 
 /**
  * Verifies an admin JWT. Returns the decoded payload, or null when the token
- * is missing its admin claims — e.g. a quiz student's token, which is signed
- * with the same secret but must never grant admin access.
+ * is missing its admin claims — e.g. a quiz student's or a teacher-app token:
+ * signed with the same secret, they must never grant admin access.
  * Throws when the token is malformed, tampered with or expired.
  */
 const verifyAdminToken = (token) => {
   const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
-  if (decoded.userType === "quiz" || decoded.adminID == null) return null;
+  if (decoded.userType != null || decoded.adminID == null) return null; // quiz and teacher-app tokens
   return decoded;
 };
 

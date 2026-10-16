@@ -87,6 +87,17 @@ describe("authMiddleware", () => {
     expect(findAdmin).not.toHaveBeenCalled();
   });
 
+  it("refuses a teacher-app token, even one that names an admin id", async () => {
+    const findAdmin = stored({ id: 5, role: "super_admin", branchId: null });
+
+    const res = await request(buildApp(findAdmin))
+      .get("/private")
+      .set("Authorization", token({ teacherId: 5, adminID: 5, tokenVersion: 0, userType: "teacher" }));
+
+    expect(res.status).toBe(401);
+    expect(findAdmin).not.toHaveBeenCalled();
+  });
+
   it("answers 500 without details when the lookup fails", async () => {
     const log = jest.spyOn(console, "error").mockImplementation(() => {});
     const findAdmin = jest.fn(async () => {

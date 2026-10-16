@@ -103,7 +103,7 @@ CREATE TABLE
         branch_id INT NOT NULL DEFAULT 1,
         MarkedByType ENUM ('admin', 'teacher') NULL,
         MarkedBy INT NULL COMMENT 'Admin.AdminID or Teachers.TeacherID, by MarkedByType',
-        MarkedAt TIMESTAMP NULL COMMENT 'When the day was taken; a save taken earlier never overwrites it',
+        MarkedAt TIMESTAMP(3) NULL COMMENT 'When the day was taken; a save taken earlier never overwrites it',
         UpdatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         FOREIGN KEY (StudentID) REFERENCES Students (StudentID),
         CONSTRAINT fk_attendance_class FOREIGN KEY (ClassID) REFERENCES Classes (ClassID) ON DELETE SET NULL,

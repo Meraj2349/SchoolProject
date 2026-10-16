@@ -21,3 +21,11 @@ export class ConflictError extends DomainError {}
 // The admin may see the row but not change it (e.g. a branch admin and a
 // whole-school notice).
 export class ForbiddenError extends DomainError {}
+
+// The caller is not signed in, or their sign-in was refused (e.g. a wrong
+// password in the teacher app).
+export class UnauthorizedError extends DomainError {}
+
+// Too many attempts: try again later (e.g. a mobile number locked after
+// repeated wrong passwords).
+export class TooManyRequestsError extends DomainError {}

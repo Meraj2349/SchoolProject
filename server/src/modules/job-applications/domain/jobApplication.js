@@ -1,3 +1,4 @@
+import { normalizeBdMobile } from "../../../shared/bdMobile.js";
 import { ValidationError } from "../../../shared/errors/index.js";
 
 // An application sent online to a job circular. It is filed under the
@@ -6,19 +7,15 @@ import { ValidationError } from "../../../shared/errors/index.js";
 
 export const STATUSES = ["new", "shortlisted", "rejected", "hired"];
 const MAX = { full_name: 150, education: 255, email: 150, address: 1000, experience: 2000 };
-const BANGLA_DIGITS = "০১২৩৪৫৬৭৮৯";
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const text = (value) => (typeof value === "string" ? value.trim() : "");
 const fits = (field, value) => [...value].length <= MAX[field];
 
-/** "01XXXXXXXXX" from what people type: Bangla digits, spaces, dashes, a +880 prefix. */
+/** "01XXXXXXXXX" from what people type. */
 function mobile(value) {
-  const digits = text(value)
-    .replace(/[০-৯]/g, (d) => String(BANGLA_DIGITS.indexOf(d)))
-    .replace(/[\s-]/g, "")
-    .replace(/^\+?880/, "0");
-  if (!/^01[3-9]\d{8}$/.test(digits)) throw new ValidationError("job_application_phone_invalid");
+  const digits = normalizeBdMobile(value);
+  if (!digits) throw new ValidationError("job_application_phone_invalid");
   return digits;
 }
 

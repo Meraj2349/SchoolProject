@@ -41,7 +41,7 @@ SET @missing := (SELECT COUNT(*) = 0 FROM information_schema.COLUMNS
 SET @sql := IF(@missing, 'ALTER TABLE Attendance
   ADD COLUMN MarkedByType ENUM (''admin'', ''teacher'') NULL,
   ADD COLUMN MarkedBy INT NULL COMMENT ''Admin.AdminID or Teachers.TeacherID, by MarkedByType'',
-  ADD COLUMN MarkedAt TIMESTAMP NULL COMMENT ''When the day was taken; a save taken earlier never overwrites it'',
+  ADD COLUMN MarkedAt TIMESTAMP(3) NULL COMMENT ''When the day was taken; a save taken earlier never overwrites it'',
   ADD COLUMN UpdatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP', 'DO 0');
 PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
 
