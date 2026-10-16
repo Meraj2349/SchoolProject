@@ -45,6 +45,7 @@ export const queryKeys = {
   exams: {
     all: (branchId = null) => ["exams", { branchId }],
     byClass: (id, branchId = null) => ["exams", "class", id, { branchId }],
+    publicNames: () => ["exams", "public", "names"],
   },
   results: {
     search: (filters, branchId = null) => ["results", "search", filters, { branchId }],
@@ -54,6 +55,7 @@ export const queryKeys = {
   attendance: {
     all: (branchId = null) => ["attendance", { branchId }],
     byStudent: (id, branchId = null) => ["attendance", "student", id, { branchId }],
+    byClassSection: (cls, sec, branchId = null) => ["attendance", "class", cls, sec, { branchId }],
     stats: (branchId = null) => ["attendance", "statistics", { branchId }],
     grid: (cls, sec, start, end, branchId = null) => ["attendance", "grid", cls, sec, start, end, { branchId }],
   },
@@ -85,6 +87,10 @@ export const queryKeys = {
     all: ["quiz"],
     questions: (filters) => ["quiz", "questions", filters],
     subjects: (classKey) => ["quiz", "subjects", classKey],
+    // Public: the classes of one branch, for the quiz identity form
+    classes: (branchId = null) => ["quiz", "classes", { branchId }],
+    // The verified student's own progress; keyed by quiz token so a new sign-in refetches
+    mine: (token) => ["quiz", "mine", token],
     sessions: (filters, branchId = null) => ["quiz", "sessions", filters, { branchId }],
     leaderboard: (filters, branchId = null) => ["quiz", "leaderboard", filters, { branchId }],
   },

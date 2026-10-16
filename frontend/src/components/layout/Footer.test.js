@@ -24,6 +24,7 @@ describe("Footer", () => {
     const links = screen.getAllByRole("link");
     expect(links.length).toBeGreaterThan(8);
     for (const link of links) expect(link.getAttribute("href")).toMatch(/^(\/|https:\/\/|tel:|mailto:)/);
+    expect(screen.getByRole("link", { name: "Attendance" })).toHaveAttribute("href", "/attendance");
     const board = screen.getByRole("link", { name: /Education Board Results/ });
     expect(board).toHaveAttribute("href", "https://www.educationboardresults.gov.bd");
     expect(board).toHaveAttribute("target", "_blank");

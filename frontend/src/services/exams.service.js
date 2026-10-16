@@ -3,6 +3,9 @@ import httpClient from "@/lib/httpClient";
 export const examsService = {
   getAll: () => httpClient.get("/exams").then((r) => r.data),
 
+  // Exam names for the public results search (no login needed)
+  getPublicNames: () => httpClient.get("/exams/public/names").then((r) => r.data),
+
   getById: (id) => httpClient.get(`/exams/${id}`).then((r) => r.data),
 
   getByClass: (classId) =>

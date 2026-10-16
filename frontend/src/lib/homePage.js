@@ -66,8 +66,8 @@ export function upcomingEvents(events = [], now = new Date(), limit = 4) {
 const NUMBER_LOCALES = { en: "en-IN", bn: "bn-BD" };
 
 /** 1,240 or ১,২৪০. */
-export const formatNumber = (value, language = "en") =>
-  new Intl.NumberFormat(NUMBER_LOCALES[language] ?? NUMBER_LOCALES.en).format(Number(value) || 0);
+export const formatNumber = (value, language = "en", options = {}) =>
+  new Intl.NumberFormat(NUMBER_LOCALES[language] ?? NUMBER_LOCALES.en, options).format(Number(value) || 0);
 
 /** item.<field>_bn or item.<field>_en for the reader's language, falling back to the other. */
 export function localized(item, field, language) {
@@ -91,4 +91,12 @@ export function dayAndMonth(value, language = "en") {
     day: date.toLocaleDateString(locale, { day: "2-digit" }),
     month: date.toLocaleDateString(locale, { month: "short" }),
   };
+}
+
+/** "5 Oct 2026" (or Bangla); "" for a missing or broken date. */
+export function formatDate(value, language = "en", options = { day: "numeric", month: "short", year: "numeric" }) {
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  return date.toLocaleDateString(DATE_LOCALES[language] ?? DATE_LOCALES.en, options);
 }

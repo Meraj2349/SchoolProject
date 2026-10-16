@@ -1,24 +1,25 @@
 "use client";
 
 import Link from "next/link";
+import { PublicPage } from "@/components/site";
 import { useTranslations } from "@/store/languageStore";
 
 export default function NotFound() {
   const t = useTranslations("notFound");
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-100 text-center p-8">
-      <div className="max-w-[600px]">
-        <h1 className="text-9xl m-0 text-red-600">404</h1>
-        <h2 className="text-3xl mt-0">{t("title")}</h2>
-        <p className="text-lg mb-8">{t("subtitle")}</p>
-        <Link
-          href="/"
-          className="inline-block px-6 py-3 bg-blue-600 text-white no-underline rounded-md transition-colors duration-200 hover:bg-blue-700"
-        >
+    <PublicPage>
+      <section className="mx-auto flex max-w-2xl flex-col items-center px-4 py-20 text-center">
+        <p className="m-0 font-school-heading text-8xl font-bold text-school-gold" aria-hidden="true">
+          404
+        </p>
+        <h1 className="site-heading m-0 mt-2 text-3xl">{t("title")}</h1>
+        <span className="site-rule mx-auto" aria-hidden="true" />
+        <p className="m-0 mt-4 mb-8 text-lg text-school-muted">{t("subtitle")}</p>
+        <Link href="/" className="site-cta">
           {t("backHome")}
         </Link>
-      </div>
-    </div>
+      </section>
+    </PublicPage>
   );
 }

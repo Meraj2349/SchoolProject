@@ -47,6 +47,7 @@ const startQuiz = async () => {
   render(<QuizPage />);
   fireEvent.click(await screen.findByRole("button", { name: "Start quiz" }));
   await screen.findByRole("heading", { level: 2 });
+  expect(screen.getAllByRole("heading", { level: 1 })).toHaveLength(1);
 };
 
 describe("QuizPage", () => {
@@ -153,6 +154,7 @@ describe("QuizPage", () => {
 
     expect(await screen.findByText("1 out of 2 correct")).toBeInTheDocument();
     expect(screen.getByText("50.0%")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 1, name: "Quiz complete" })).toBeInTheDocument();
     const review = screen.getByRole("region", { name: "Answer review" });
     expect(within(review).getAllByText("Correct")).toHaveLength(1);
     expect(within(review).getByText("Wrong")).toBeInTheDocument();

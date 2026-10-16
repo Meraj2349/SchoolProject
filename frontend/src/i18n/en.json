@@ -14,7 +14,8 @@
     "events": "Events",
     "branches": "Branches",
     "onlineApply": "Apply online",
-    "quakerEducation": "A Quaker Education"
+    "quakerEducation": "A Quaker Education",
+    "attendance": "Attendance"
   },
   "footer": {
     "contact": "Contact",
@@ -191,7 +192,8 @@
     "address": "Address",
     "addressValue": "Natiapara, Delduar, Tangail, Bangladesh",
     "phone": "Phone",
-    "emailLabel": "Email"
+    "emailLabel": "Email",
+    "mapTitle": "Map of Star Shikkha Poribar"
   },
   "chairman": {
     "pageTitle": "Chairman's Message",
@@ -200,7 +202,7 @@
     "title": "Chairman",
     "institution": "Star Shikkha Poribar",
     "bestRegards": "Best regards,",
-    "backToHome": "← Back to Home",
+    "backToHome": "Back to Home",
     "defaultMessage": "Welcome to our school! We are committed to providing excellent education."
   },
   "gallery": {
@@ -208,38 +210,46 @@
     "browseByCategory": "Browse by Category",
     "showing": "Showing",
     "images": "images",
-    "in": "in",
     "loading": "Loading…",
     "failedToLoad": "Failed to load images",
-    "tryAgain": "Try Again",
     "noImages": "No images found",
-    "imageNotAvailable": "Image not available",
-    "viewImage": "View Image",
     "of": "of",
     "categories": {
       "all": "All Images",
-      "general": "General",
       "school": "School Campus",
       "student": "Student Life",
       "teacher": "Faculty",
       "event": "Events",
       "notice": "Notices"
-    }
+    },
+    "subtitle": "Moments from classrooms, campus and celebrations.",
+    "photo": "School photo",
+    "close": "Close",
+    "previous": "Previous photo",
+    "next": "Next photo"
   },
   "events": {
     "upcomingEvents": "Upcoming Events",
     "loadingEvents": "Loading events…",
     "errorLoadingEvents": "Error Loading Events",
-    "tryAgain": "Try Again",
     "noUpcomingEvents": "No Upcoming Events",
     "checkBackLater": "Check back later for new events.",
     "happeningNow": "HAPPENING NOW",
     "endsIn": "Ends in:",
-    "eventEnded": "⏰ Event has ended",
+    "eventEnded": "Event has ended",
     "days": "Days",
     "hours": "Hours",
     "minutes": "Minutes",
-    "seconds": "Seconds"
+    "seconds": "Seconds",
+    "title": "Events",
+    "subtitle": "Programmes, competitions and celebrations across our school.",
+    "pastEvents": "Past events",
+    "types": {
+      "Academic": "Academic",
+      "Sports": "Sports",
+      "Cultural": "Cultural",
+      "Other": "Other"
+    }
   },
   "students": {
     "pageTitle": "Student Search",
@@ -250,26 +260,25 @@
     "rollNumber": "Roll Number",
     "rollNumberPlaceholder": "Enter roll number",
     "className": "Class Name",
-    "classNamePlaceholder": "Enter class name",
     "section": "Section",
-    "sectionPlaceholder": "Enter section name",
     "searchBtn": "Search Students",
     "searching": "Searching…",
     "resetBtn": "Reset",
     "fillAllFields": "Please fill in all search fields.",
     "noStudentsFound": "No students found matching your exact criteria.",
-    "searchFailed": "Search failed",
     "searchError": "An error occurred while searching",
     "searchResults": "Search Results",
     "studentFound": "student found",
     "studentsFound": "students found",
     "class": "Class",
     "rollNumberLabel": "Roll Number:",
-    "studentIdLabel": "Student ID:",
     "gender": "Gender",
     "dateOfBirth": "Date of Birth",
     "parentContact": "Parent Contact",
-    "noStudents": "No students found"
+    "noStudents": "No students found",
+    "searchTitle": "Find a student",
+    "selectClass": "Select class",
+    "selectSection": "Select section"
   },
   "teachers": {
     "pageTitle": "Our Teachers",
@@ -283,9 +292,16 @@
     "teachersFound": "teachers found",
     "loadingTeachers": "Loading teachers…",
     "failedToFetch": "Failed to fetch teachers",
-    "tryAgain": "Try Again",
     "noTeachersFound": "No teachers found",
-    "joined": "Joined:"
+    "joined": "Joined",
+    "pageSubtitle": "The teachers who guide our students every day.",
+    "searchLabel": "Search teachers",
+    "searchIn": "Search in",
+    "className": "Class",
+    "section": "Section",
+    "allClasses": "All classes",
+    "allSections": "All sections",
+    "classTeacher": "Class teacher"
   },
   "results": {
     "pageTitle": "Student Results",
@@ -295,9 +311,7 @@
     "rollNumber": "Roll Number",
     "rollNumberPlaceholder": "Enter roll number",
     "className": "Class Name",
-    "classNamePlaceholder": "Enter class name",
     "section": "Section",
-    "sectionPlaceholder": "Enter section",
     "examName": "Exam Name (optional)",
     "examNamePlaceholder": "e.g. Annual Exam 2024",
     "searchBtn": "Search Results",
@@ -311,15 +325,18 @@
     "exam": "Exam",
     "marks": "Marks",
     "total": "Total",
-    "grade": "Grade"
+    "grade": "Grade",
+    "searchTitle": "Find a result",
+    "selectClass": "Select class",
+    "selectSection": "Select section",
+    "fillRequired": "Please fill in all required fields.",
+    "searchResults": "Results"
   },
   "attendance": {
     "pageTitle": "Attendance Records",
     "pageSubtitle": "Search attendance by class and section",
     "className": "Class Name",
-    "classNamePlaceholder": "e.g. Class 5",
     "section": "Section",
-    "sectionPlaceholder": "e.g. A",
     "searchBtn": "Search Attendance",
     "searching": "Searching…",
     "totalRecords": "Total Records",
@@ -330,21 +347,28 @@
     "date": "Date",
     "status": "Status",
     "noRecords": "No attendance records found.",
-    "failedToFetch": "Failed to fetch attendance"
+    "failedToFetch": "Failed to fetch attendance",
+    "searchTitle": "Find attendance",
+    "selectClass": "Select class",
+    "selectSection": "Select section",
+    "summary": "Summary",
+    "statuses": {
+      "present": "Present",
+      "absent": "Absent",
+      "late": "Late",
+      "excused": "Excused"
+    }
   },
   "routine": {
     "pageTitle": "School Routines",
     "searchPlaceholder": "Search routines…",
-    "filters": "Filters",
     "class": "Class",
     "allClasses": "All Classes",
     "section": "Section",
     "allSections": "All Sections",
-    "clearFilters": "Clear Filters",
     "routineFound": "Routine Found",
     "routinesFound": "Routines Found",
     "failedToLoad": "Failed to load routines.",
-    "tryAgain": "Try Again",
     "loadingRoutines": "Loading routines…",
     "noRoutinesFound": "No Routines Found",
     "tryAdjustFilters": "Try adjusting your filters.",
@@ -355,7 +379,14 @@
     "viewPDF": "View PDF",
     "viewImage": "View Image",
     "added": "Added:",
-    "view": "View"
+    "view": "View",
+    "pageSubtitle": "Class routines and exam timetables for every class.",
+    "searchLabel": "Search routines",
+    "pagination": "Routine pages",
+    "fileTypes": {
+      "pdf": "PDF",
+      "image": "Image"
+    }
   },
   "admin": {
     "login": {
@@ -1223,7 +1254,6 @@
     "noProposedBranches": "No proposed branches yet",
     "loading": "Loading branches…",
     "failedToLoad": "Failed to load branches",
-    "tryAgain": "Try Again",
     "students": "Students",
     "teachers": "Teachers",
     "classes": "Classes",
@@ -1231,7 +1261,9 @@
     "selected": "Selected",
     "selectBranch": "Click to select this branch",
     "viewing": "Viewing",
-    "clearSelection": "Clear selection"
+    "clearSelection": "Clear selection",
+    "chooseBranch": "Choose this branch",
+    "branch": "Branch"
   },
   "notFound": {
     "title": "Page Not Found",
@@ -1262,7 +1294,10 @@
     "submitAnother": "Submit Another Application",
     "requiredFields": "Please fill in all required fields",
     "submitFailed": "Submission failed. Please try again.",
-    "branch": "Branch (campus)"
+    "branch": "Branch (campus)",
+    "studentDetails": "Student details",
+    "parentDetails": "Parent or guardian",
+    "requiredNote": "Fields marked * are required."
   },
   "common": {
     "loading": "Loading…",
@@ -1359,6 +1394,76 @@
     "closeMenu": "Close menu",
     "menu": "Menu",
     "skipToContent": "Skip to main content",
-    "motto": "Education · Discipline · Character"
+    "motto": "Education · Discipline · Character",
+    "breadcrumb": "Breadcrumb"
+  },
+  "quaker": {
+    "badge": "A Quaker Education — Student Portal",
+    "headline": "Practice smarter.",
+    "headlineAccent": "Learn faster.",
+    "intro": "Thousands of questions from trusted curriculum sources. Pick a subject, take a quiz, and watch your progress climb. Free for every student — no account required.",
+    "startQuiz": "Start Quiz",
+    "checkProgress": "Check My Progress",
+    "heroAlt": "The school gate",
+    "insideTitle": "What's inside",
+    "insideBody": "Everything a student needs to study on their own and do well in exams.",
+    "features": {
+      "bank": {
+        "title": "Huge Question Bank",
+        "body": "Curated questions across Biology, Chemistry, Math, Physics and more."
+      },
+      "grading": {
+        "title": "Instant Grading",
+        "body": "Scored on the server, with a full answer review after every quiz."
+      },
+      "progress": {
+        "title": "Track Progress",
+        "body": "Subject averages, quiz history and leaderboards."
+      }
+    },
+    "readyTitle": "Ready to start?",
+    "readyBody": "No registration needed — just enter your student details and begin.",
+    "startNow": "Start Now",
+    "identity": {
+      "headline": "Prove who you are.",
+      "headlineAccent": "Start learning.",
+      "body": "No account, no password. Your details are checked against the student register, then every quiz is open to you.",
+      "privacy": "Your details are checked against the student register but never stored separately.",
+      "points": {
+        "account": "No account",
+        "access": "Instant access",
+        "secure": "Secure check"
+      }
+    },
+    "progress": {
+      "title": "Your learning journey",
+      "titleFor": "{name}'s learning journey",
+      "subtitle": "All your quizzes and subject results in one place.",
+      "newQuiz": "New Quiz",
+      "totalSessions": "Quizzes taken",
+      "avgScore": "Average score",
+      "correct": "Correct",
+      "totalAnswered": "Questions answered",
+      "bySubject": "Subject breakdown",
+      "history": "Quiz history",
+      "total": "{count} in total",
+      "loading": "Loading…",
+      "none": "No quizzes yet.",
+      "firstQuiz": "Take your first quiz",
+      "session": "quiz",
+      "sessions": "quizzes",
+      "correctOf": "{correct}/{total} correct",
+      "columns": {
+        "when": "When",
+        "subject": "Subject",
+        "class": "Class",
+        "score": "Score",
+        "grade": "Grade",
+        "time": "Time"
+      },
+      "minutes": "{m}m {s}s",
+      "seconds": "{s}s",
+      "failed": "Could not load your progress."
+    }
   }
 }

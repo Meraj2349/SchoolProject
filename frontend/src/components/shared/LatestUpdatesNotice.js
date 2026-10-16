@@ -2,7 +2,6 @@
 
 import { Bell } from "lucide-react";
 import { useNotices } from "@/hooks/useNotices";
-import LottieLoader from "@/components/ui/LottieLoader";
 import { visibleNotices } from "@/lib/homePage";
 import { useTranslations } from "@/store/languageStore";
 
@@ -16,16 +15,7 @@ export default function LatestUpdatesNotice() {
   const animationDuration =
     notices.length > 1 ? `${Math.max(40, notices.length * 15)}s` : null;
 
-  if (isLoading) {
-    return (
-      <LottieLoader
-        size="small"
-        text={t("label")}
-        className="bg-school-navy-deep text-white rounded-none"
-        type="dots"
-      />
-    );
-  }
+  if (isLoading) return null; // the ticker appears once notices arrive
 
   if (isError) {
     return (

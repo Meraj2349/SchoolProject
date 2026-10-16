@@ -1,21 +1,21 @@
 "use client";
 
-import { useEffect, useId, useState } from "react";
+import { useId, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { quizErrorMessage, quizService } from "@/services/quiz.service";
-import { branchService } from "@/services/branch.service";
+import { FiCheck } from "react-icons/fi";
+import { useBranches } from "@/hooks/useBranches";
+import { useQuizClasses } from "@/hooks/useQuizClasses";
+import { useVerifyQuizStudent } from "@/hooks/useQuizStudent";
+import { quizErrorMessage } from "@/services/quiz.service";
 import { useLanguageStore, useTranslations } from "@/store/languageStore";
-import { useQuizSessionStore } from "@/store/quizSessionStore";
+import { ErrorBox } from "./quizStyles";
 import { classesOf, sectionsOf } from "./quizText";
 
 const EMPTY = { branchId: "", firstName: "", lastName: "", className: "", section: "", rollNumber: "" };
+const POINTS = ["account", "access", "secure"];
 
-/* Same input look as LoginPage / RegisterPage */
-const inputClass =
-  "w-full px-4 py-3 rounded-xl border border-white/20 bg-white/10 text-white placeholder-white/50 backdrop-blur-sm transition-all focus:outline-none focus:border-amber-300 focus:bg-white/15 focus:ring-2 focus:ring-amber-300/40 disabled:opacity-50";
-const selectClass = `${inputClass} cursor-pointer appearance-none`;
-const labelClass = "block text-sm font-medium text-white/80 mb-2";
+const branchLabel = (branch, language) => (language === "bn" ? branch.name_bn || branch.name_en : branch.name_en || branch.name_bn) || `#${branch.id}`;
 
 /**
  * A student proves who they are (branch, class, section, name, roll) and gets
@@ -26,39 +26,21 @@ const labelClass = "block text-sm font-medium text-white/80 mb-2";
 export default function IdentityFormPage({ next = "/quaker/quiz", onVerified }) {
   const router = useRouter();
   const t = useTranslations("quiz");
+  const tq = useTranslations("quaker.identity");
   const language = useLanguageStore((s) => s.language);
-  const setSession = useQuizSessionStore((s) => s.setSession);
+  const verify = useVerifyQuizStudent();
   const ids = { branch: useId(), first: useId(), last: useId(), class: useId(), section: useId(), roll: useId() };
 
-  const [branches, setBranches] = useState([]);
-  const [classes, setClasses] = useState([]);
   const [form, setForm] = useState(EMPTY);
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-
-  useEffect(() => {
-    branchService
-      .getAll()
-      .then((data) => setBranches((Array.isArray(data) ? data : []).filter((b) => !b.is_proposed)))
-      .catch(() => setBranches([]));
-  }, []);
+  const { data: allBranches = [] } = useBranches();
+  const branches = allBranches.filter((b) => !b.is_proposed);
+  const { data: classes = [] } = useQuizClasses(form.branchId);
 
   const set = (field) => (event) => setForm((previous) => ({ ...previous, [field]: event.target.value }));
-
   // A new branch has its own classes; a new class its own sections.
-  const chooseBranch = (event) => {
-    const branchId = event.target.value;
-    setForm((previous) => ({ ...previous, branchId, className: "", section: "" }));
-    setClasses([]);
-    if (!branchId) return;
-    quizService
-      .classesOf(branchId)
-      .then((rows) => setClasses(Array.isArray(rows) ? rows : []))
-      .catch(() => setClasses([]));
-  };
+  const chooseBranch = (event) => setForm((previous) => ({ ...previous, branchId: event.target.value, className: "", section: "" }));
   const chooseClass = (event) => setForm((previous) => ({ ...previous, className: event.target.value, section: "" }));
-
-  const branchName = (b) => (language === "bn" ? b.name_bn || b.name_en : b.name_en || b.name_bn) || `#${b.id}`;
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -68,190 +50,87 @@ export default function IdentityFormPage({ next = "/quaker/quiz", onVerified }) 
       setError(t("fillAllFields"));
       return;
     }
-    setLoading(true);
     try {
-      const { token, student } = await quizService.verifyStudent(identity);
-      setSession(token, student);
+      const { student } = await verify.mutateAsync(identity);
       if (onVerified) await onVerified(student);
       else router.push(next);
     } catch (failure) {
       setError(quizErrorMessage(failure, t("verifyFailed")));
-    } finally {
-      setLoading(false);
     }
   };
 
-  return (
-    /* Full-page dark grid — same structure as LoginPage */
-    <div className="min-h-screen grid lg:grid-cols-2 bg-[#0a1628]">
-      {/* ── LEFT HERO PANEL ── */}
-      <div className="relative hidden lg:block overflow-hidden">
-        <Image
-          src="/images/School Gate Picture.jpg"
-          alt="School gate"
-          fill
-          priority
-          sizes="50vw"
-          className="object-cover"
-        />
-        <div className="absolute inset-0 bg-linear-to-br from-[#0a1628]/90 via-[#0a1628]/60 to-transparent" />
-        <div className="relative z-10 h-full flex flex-col justify-between p-12 text-white">
-          {/* Logo mark */}
-          <div className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-xl bg-amber-400 flex items-center justify-center font-bold text-[#0a1628] text-lg shadow-lg">
-              🧠
-            </div>
-            <span className="text-lg font-semibold tracking-tight">
-              Star Shikkha Poribar
-            </span>
-          </div>
-          {/* Headline */}
-          <div>
-            <h1 className="text-5xl font-bold leading-tight mb-4">
-              Prove who you are.
-              <br />
-              <span className="text-amber-300">Start learning.</span>
-            </h1>
-            <p className="text-white/70 text-lg max-w-md">
-              No account, no password. Your identity is verified directly
-              against the student register — instant access to every quiz.
-            </p>
-          </div>
-          <div className="flex gap-6 text-sm text-white/60">
-            <span>◆ No account</span>
-            <span>◆ Instant access</span>
-            <span>◆ Secure verify</span>
-          </div>
-        </div>
-      </div>
-
-      {/* ── RIGHT FORM PANEL ── */}
-      <div className="flex items-center justify-center p-6 sm:p-12 relative">
-        {/* Mobile background image */}
-        <div className="lg:hidden absolute inset-0">
-          <Image
-            src="/images/School Gate Picture.jpg"
-            alt=""
-            fill
-            sizes="100vw"
-            className="object-cover"
-          />
-          <div className="absolute inset-0 bg-[#0a1628]/85" />
-        </div>
-
-        <div className="relative w-full max-w-md">
-          {/* Card — exact same as LoginPage card */}
-          <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-8 shadow-2xl">
-            <div className="mb-6">
-              <h2 className="text-center text-3xl font-bold text-white mb-1">{t("identityTitle")}</h2>
-              <p className="text-center text-sm text-white/60">{t("identityBody")}</p>
-            </div>
-
-            {error && (
-              <div role="alert" className="bg-red-500/10 border border-red-400/30 text-red-200 px-4 py-2.5 rounded-lg mb-5 text-sm">
-                {error}
-              </div>
-            )}
-
-            <form onSubmit={handleSubmit} className="space-y-5" noValidate>
-              <div>
-                <label htmlFor={ids.branch} className={labelClass}>
-                  {t("branch")}
-                </label>
-                <select id={ids.branch} value={form.branchId} onChange={chooseBranch} className={selectClass} style={{ colorScheme: "dark" }}>
-                  <option value="">{t("selectBranch")}</option>
-                  {branches.map((b) => (
-                    <option key={b.id} value={b.id}>
-                      {branchName(b)}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label htmlFor={ids.class} className={labelClass}>
-                    {t("class")}
-                  </label>
-                  <select
-                    id={ids.class}
-                    value={form.className}
-                    onChange={chooseClass}
-                    disabled={!form.branchId}
-                    className={selectClass}
-                    style={{ colorScheme: "dark" }}
-                  >
-                    <option value="">{t("selectClass")}</option>
-                    {classesOf(classes).map((name) => (
-                      <option key={name} value={name}>
-                        {name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label htmlFor={ids.section} className={labelClass}>
-                    {t("section")}
-                  </label>
-                  <select
-                    id={ids.section}
-                    value={form.section}
-                    onChange={set("section")}
-                    disabled={!form.className}
-                    className={selectClass}
-                    style={{ colorScheme: "dark" }}
-                  >
-                    <option value="">{t("selectSection")}</option>
-                    {sectionsOf(classes, form.className).map((section) => (
-                      <option key={section} value={section}>
-                        {section}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label htmlFor={ids.first} className={labelClass}>
-                    {t("firstName")}
-                  </label>
-                  <input id={ids.first} type="text" value={form.firstName} onChange={set("firstName")} className={inputClass} autoComplete="given-name" />
-                </div>
-                <div>
-                  <label htmlFor={ids.last} className={labelClass}>
-                    {t("lastName")}
-                  </label>
-                  <input id={ids.last} type="text" value={form.lastName} onChange={set("lastName")} className={inputClass} autoComplete="family-name" />
-                </div>
-              </div>
-
-              <div>
-                <label htmlFor={ids.roll} className={labelClass}>
-                  {t("rollNumber")}
-                </label>
-                <input id={ids.roll} type="text" value={form.rollNumber} onChange={set("rollNumber")} className={inputClass} />
-              </div>
-
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full py-3.5 bg-amber-400 text-[#0a1628] font-bold text-base rounded-xl cursor-pointer transition-all mt-2 disabled:opacity-60 disabled:cursor-not-allowed hover:bg-amber-300 hover:shadow-lg hover:shadow-amber-400/30"
-              >
-                {loading ? t("verifying") : t("verify")}
-              </button>
-            </form>
-
-            {/* Footer note */}
-            <div className="text-center mt-6 pt-5 border-t border-white/10">
-              <p className="text-white/40 text-xs m-0">
-                Your details are verified against the student register but never
-                stored separately.
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
+  const select = (id, label, value, onChange, placeholder, options, disabled = false) => (
+    <div>
+      <label htmlFor={id} className="site-label">
+        {label}
+      </label>
+      <select id={id} value={value} onChange={onChange} disabled={disabled} className="site-input disabled:opacity-60">
+        <option value="">{placeholder}</option>
+        {options.map(({ value: optionValue, label: optionLabel }) => (
+          <option key={optionValue} value={optionValue}>
+            {optionLabel}
+          </option>
+        ))}
+      </select>
     </div>
+  );
+  const input = (id, label, field, autoComplete) => (
+    <div>
+      <label htmlFor={id} className="site-label">
+        {label}
+      </label>
+      <input id={id} type="text" value={form[field]} onChange={set(field)} autoComplete={autoComplete} className="site-input" />
+    </div>
+  );
+  const plain = (values) => values.map((value) => ({ value, label: value }));
+
+  return (
+    <section className="mx-auto grid max-w-6xl gap-0 px-4 py-12 lg:grid-cols-2">
+      <div className="relative hidden overflow-hidden rounded-l-sm bg-school-navy-deep text-white lg:block">
+        <Image src="/images/School Gate Picture.jpg" alt="" fill sizes="50vw" className="object-cover opacity-30" />
+        <div className="absolute inset-0 bg-linear-to-br from-school-navy-deep via-school-navy/85 to-school-navy/40" aria-hidden="true" />
+        <div className="relative flex h-full flex-col justify-end gap-6 p-10">
+          <p className="m-0 font-school-heading text-4xl font-bold leading-tight">
+            {tq("headline")} <span className="block text-school-gold-soft">{tq("headlineAccent")}</span>
+          </p>
+          <span className="site-rule" aria-hidden="true" />
+          <p className="m-0 max-w-md text-white/80">{tq("body")}</p>
+          <ul className="m-0 flex list-none flex-wrap gap-x-6 gap-y-2 p-0 text-sm text-school-gold-soft">
+            {POINTS.map((point) => (
+              <li key={point} className="inline-flex items-center gap-1.5">
+                <FiCheck aria-hidden="true" />
+                {tq(`points.${point}`)}
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+
+      <div className="rounded-sm border-t-4 border-school-gold bg-white p-6 shadow sm:p-10 lg:rounded-l-none">
+        <h1 className="site-heading m-0 text-3xl">{t("identityTitle")}</h1>
+        <span className="site-rule" aria-hidden="true" />
+        <p className="mb-6 mt-4 text-sm text-school-muted">{t("identityBody")}</p>
+
+        <ErrorBox>{error}</ErrorBox>
+
+        <form onSubmit={handleSubmit} className="space-y-5" noValidate>
+          {select(ids.branch, t("branch"), form.branchId, chooseBranch, t("selectBranch"), branches.map((b) => ({ value: String(b.id), label: branchLabel(b, language) })))}
+          <div className="grid gap-4 sm:grid-cols-2">
+            {select(ids.class, t("class"), form.className, chooseClass, t("selectClass"), plain(classesOf(classes)), !form.branchId)}
+            {select(ids.section, t("section"), form.section, set("section"), t("selectSection"), plain(sectionsOf(classes, form.className)), !form.className)}
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2">
+            {input(ids.first, t("firstName"), "firstName", "given-name")}
+            {input(ids.last, t("lastName"), "lastName", "family-name")}
+          </div>
+          {input(ids.roll, t("rollNumber"), "rollNumber")}
+          <button type="submit" disabled={verify.isPending} className="site-cta w-full disabled:opacity-60">
+            {verify.isPending ? t("verifying") : t("verify")}
+          </button>
+        </form>
+
+        <p className="m-0 mt-6 border-t border-school-cream-deep pt-5 text-center text-xs text-school-muted">{tq("privacy")}</p>
+      </div>
+    </section>
   );
 }
