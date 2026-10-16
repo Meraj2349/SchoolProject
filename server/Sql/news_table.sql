@@ -1,3 +1,6 @@
+-- The file holds Bangla text: read it as UTF-8 whatever the client default.
+SET NAMES utf8mb4;
+
 -- News Table for School Management System
 CREATE TABLE
     IF NOT EXISTS News (

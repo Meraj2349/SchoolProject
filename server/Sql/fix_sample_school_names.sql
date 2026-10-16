@@ -1,3 +1,6 @@
+-- The file holds Bangla text: read it as UTF-8 whatever the client default.
+SET NAMES utf8mb4;
+
 -- Data fix for existing databases (idempotent, MySQL 8):
 -- 1. The sample news item from database.sql named another school
 --    (Sylhet Cantonment Public School); it now names Star Academic School.

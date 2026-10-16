@@ -1,3 +1,6 @@
+-- The file holds Bangla text: read it as UTF-8 whatever the client default.
+SET NAMES utf8mb4;
+
 -- ============================================================
 -- Full Seed: School_Management database
 -- Clears all operational data and re-inserts clean branch-wise

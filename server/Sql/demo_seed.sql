@@ -1,3 +1,6 @@
+-- The file holds Bangla text: read it as UTF-8 whatever the client default.
+SET NAMES utf8mb4;
+
 -- ============================================================
 -- demo_seed.sql  —  School Management System Demo Data
 -- Clears data tables (keeps schema + branches + admin accounts)

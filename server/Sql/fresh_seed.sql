@@ -1,3 +1,6 @@
+-- The file holds Bangla text: read it as UTF-8 whatever the client default.
+SET NAMES utf8mb4;
+
 -- ============================================================
 -- Fresh seed: clear old data, create ClassNames, insert
 -- branch-wise data for all 3 branches.
