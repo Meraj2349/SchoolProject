@@ -45,6 +45,7 @@ export const queryKeys = {
   exams: {
     all: (branchId = null) => ["exams", { branchId }],
     byClass: (id, branchId = null) => ["exams", "class", id, { branchId }],
+    publicNames: (branchId = null) => ["exams", "public", "names", { branchId }],
   },
   results: {
     search: (filters, branchId = null) => ["results", "search", filters, { branchId }],

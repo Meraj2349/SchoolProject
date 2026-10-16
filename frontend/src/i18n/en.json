@@ -319,9 +319,7 @@
     "rollNumber": "Roll Number",
     "rollNumberPlaceholder": "Enter roll number",
     "className": "Class Name",
-    "classNamePlaceholder": "Enter class name",
     "section": "Section",
-    "sectionPlaceholder": "Enter section",
     "examName": "Exam Name (optional)",
     "examNamePlaceholder": "e.g. Annual Exam 2024",
     "searchBtn": "Search Results",
@@ -335,7 +333,12 @@
     "exam": "Exam",
     "marks": "Marks",
     "total": "Total",
-    "grade": "Grade"
+    "grade": "Grade",
+    "searchTitle": "Find a result",
+    "selectClass": "Select class",
+    "selectSection": "Select section",
+    "fillRequired": "Please fill in all required fields.",
+    "searchResults": "Results"
   },
   "attendance": {
     "pageTitle": "Attendance Records",

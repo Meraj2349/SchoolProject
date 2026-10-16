@@ -319,9 +319,7 @@
     "rollNumber": "রোল নম্বর",
     "rollNumberPlaceholder": "রোল নম্বর লিখুন",
     "className": "শ্রেণির নাম",
-    "classNamePlaceholder": "শ্রেণির নাম লিখুন",
     "section": "বিভাগ",
-    "sectionPlaceholder": "বিভাগ লিখুন",
     "examName": "পরীক্ষার নাম (ঐচ্ছিক)",
     "examNamePlaceholder": "যেমন: বার্ষিক পরীক্ষা ২০২৪",
     "searchBtn": "ফলাফল খুঁজুন",
@@ -335,7 +333,12 @@
     "exam": "পরীক্ষা",
     "marks": "নম্বর",
     "total": "মোট",
-    "grade": "গ্রেড"
+    "grade": "গ্রেড",
+    "searchTitle": "ফলাফল খুঁজুন",
+    "selectClass": "শ্রেণি নির্বাচন করুন",
+    "selectSection": "শাখা নির্বাচন করুন",
+    "fillRequired": "অনুগ্রহ করে সব আবশ্যক ঘর পূরণ করুন।",
+    "searchResults": "ফলাফল"
   },
   "attendance": {
     "pageTitle": "উপস্থিতির রেকর্ড",
