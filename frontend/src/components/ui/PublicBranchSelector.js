@@ -1,250 +1,125 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { FiCheck, FiChevronDown, FiGitBranch } from "react-icons/fi";
+import { useBranches } from "@/hooks/useBranches";
+import { localized } from "@/lib/homePage";
 import { useBranchStore } from "@/store/branchStore";
-import { branchService } from "@/services/branch.service";
-import { useTranslations } from "@/store/languageStore";
-import { FiGitBranch, FiChevronDown } from "react-icons/fi";
+import { useLanguageStore, useTranslations } from "@/store/languageStore";
+
+const isActive = (branch) => !(branch.is_proposed === true || branch.is_proposed === 1);
+
+function BranchOption({ selected, label, onSelect }) {
+  return (
+    <li role="presentation">
+      <button
+        type="button"
+        role="option"
+        aria-selected={selected}
+        onClick={onSelect}
+        className={`flex w-full items-center gap-2 px-3 py-2 text-left text-sm border-none cursor-pointer ${
+          selected ? "bg-school-cream font-semibold text-school-navy" : "bg-white text-school-ink hover:bg-school-cream"
+        }`}
+      >
+        <span className="flex-1">{label}</span>
+        {selected && <FiCheck aria-hidden="true" className="text-school-gold" />}
+      </button>
+    </li>
+  );
+}
 
 /**
- * PublicBranchSelector — lets any public visitor narrow the view to a specific
- * branch.  Reads/writes the same `useBranchStore` that every data hook uses, so
- * switching the branch here automatically re-fetches teachers, classes, events,
- * and every other branch-scoped query on the page.
- *
- * Renders as a compact pill in the Navbar's main navigation bar.
+ * Lets a visitor narrow the whole site to one branch. Every data hook reads
+ * the same branch store, so switching here reloads the page's data for it.
+ * `tone` matches the background it sits on.
  */
-export default function PublicBranchSelector() {
+export default function PublicBranchSelector({ tone = "dark" }) {
   const { currentBranchId, currentBranchName, setBranch } = useBranchStore();
-  const [branches, setBranches] = useState([]);
-  const [open, setOpen] = useState(false);
+  const language = useLanguageStore((s) => s.language);
   const t = useTranslations("branchSelector");
+  const { data: branches = [] } = useBranches();
+  const [open, setOpen] = useState(false);
+  const buttonRef = useRef(null);
+  const listRef = useRef(null);
 
+  // Close when clicking anywhere else.
   useEffect(() => {
-    branchService
-      .getAll()
-      .then((data) => {
-        const list = Array.isArray(data) ? data : [];
-        // Only show active branches to public visitors
-        setBranches(list.filter((b) => !b.is_proposed && b.is_proposed !== 1));
-      })
-      .catch(() => setBranches([]));
-  }, []);
-
-  const handleSelect = (branchId, branchName) => {
-    setBranch(branchId, branchName);
-    setOpen(false);
-  };
-
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    if (!open) return;
-    const handler = (e) => {
-      if (!e.target.closest("[data-branch-selector]")) setOpen(false);
+    if (!open) return undefined;
+    const handler = (event) => {
+      if (!event.target.closest?.("[data-branch-selector]")) setOpen(false);
     };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
   }, [open]);
 
-  const displayName = currentBranchId ? currentBranchName : t("allBranches");
+  // On opening, focus the chosen branch (or "All branches").
+  useEffect(() => {
+    if (open) (listRef.current?.querySelector('[aria-selected="true"]') ?? listRef.current?.querySelector('[role="option"]'))?.focus();
+  }, [open]);
+
+  const close = () => {
+    setOpen(false);
+    buttonRef.current?.focus();
+  };
+
+  // Escape closes only this list (not a menu around it); arrows, Home and End move between branches.
+  const onKeyDown = (event) => {
+    if (!open) return;
+    if (event.key === "Escape") {
+      event.stopPropagation();
+      close();
+      return;
+    }
+    const options = [...(listRef.current?.querySelectorAll('[role="option"]') ?? [])];
+    const at = options.indexOf(document.activeElement);
+    const next = { ArrowDown: at + 1, ArrowUp: at - 1, Home: 0, End: options.length - 1 }[event.key];
+    if (next === undefined || options.length === 0) return;
+    event.preventDefault();
+    options[(next + options.length) % options.length].focus();
+  };
+
+  const active = branches.filter(isActive);
+  const nameOf = (branch) => localized(branch, "name", language) || `#${branch.id}`;
+  const current = active.find((b) => b.id === currentBranchId);
+  // Until the list loads, show the saved name rather than "All branches".
+  const label = current ? nameOf(current) : currentBranchId != null && currentBranchName ? currentBranchName : t("allBranches");
+  const choose = (branch) => {
+    setBranch(branch?.id ?? null, branch ? branch.name_en || branch.name_bn : null);
+    close();
+  };
+
+  const buttonTone =
+    tone === "dark" ? "border-white/30 text-white hover:bg-white/10" : "border-school-navy/30 text-school-navy hover:bg-school-navy/5";
 
   return (
-    <div
-      data-branch-selector
-      style={{
-        position: "relative",
-        display: "inline-flex",
-        alignItems: "center",
-      }}
-    >
+    <div data-branch-selector className="relative inline-flex" onKeyDown={onKeyDown}>
       <button
+        ref={buttonRef}
+        type="button"
         onClick={() => setOpen((o) => !o)}
-        title={t("switchBranch")}
-        style={{
-          display: "inline-flex",
-          alignItems: "center",
-          gap: 6,
-          padding: "6px 12px",
-          borderRadius: 20,
-          border: currentBranchId
-            ? "1.5px solid #10b981"
-            : "1.5px solid #d1d5db",
-          background: currentBranchId
-            ? "linear-gradient(135deg,#ecfdf5 0%,#d1fae5 100%)"
-            : "#f9fafb",
-          color: currentBranchId ? "#065f46" : "#6b7280",
-          fontSize: 13,
-          fontWeight: 600,
-          cursor: "pointer",
-          whiteSpace: "nowrap",
-          transition: "all 0.2s ease",
-          maxWidth: 160,
-          overflow: "hidden",
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.borderColor = "#10b981";
-          e.currentTarget.style.background =
-            "linear-gradient(135deg,#ecfdf5 0%,#d1fae5 100%)";
-          e.currentTarget.style.color = "#065f46";
-        }}
-        onMouseLeave={(e) => {
-          if (!currentBranchId) {
-            e.currentTarget.style.borderColor = "#d1d5db";
-            e.currentTarget.style.background = "#f9fafb";
-            e.currentTarget.style.color = "#6b7280";
-          }
-        }}
         aria-label={t("switchBranch")}
         aria-expanded={open}
         aria-haspopup="listbox"
+        title={t("switchBranch")}
+        className={`inline-flex items-center gap-1.5 max-w-44 rounded-full border bg-transparent px-3 py-1 text-xs font-semibold cursor-pointer ${buttonTone}`}
       >
-        <FiGitBranch style={{ flexShrink: 0, fontSize: 13 }} />
-        <span
-          style={{
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            whiteSpace: "nowrap",
-            maxWidth: 100,
-          }}
-        >
-          {displayName}
-        </span>
-        <FiChevronDown
-          style={{
-            flexShrink: 0,
-            fontSize: 12,
-            transition: "transform 0.2s",
-            transform: open ? "rotate(180deg)" : "rotate(0deg)",
-          }}
-        />
+        <FiGitBranch aria-hidden="true" className="shrink-0" />
+        <span className="truncate">{label}</span>
+        <FiChevronDown aria-hidden="true" className={`shrink-0 transition-transform ${open ? "rotate-180" : ""}`} />
       </button>
 
       {open && (
-        <div
+        <ul
+          ref={listRef}
           role="listbox"
           aria-label={t("selectBranch")}
-          style={{
-            position: "absolute",
-            top: "calc(100% + 6px)",
-            right: 0,
-            minWidth: 180,
-            background: "#fff",
-            border: "1px solid #e5e7eb",
-            borderRadius: 12,
-            boxShadow: "0 8px 32px rgba(0,0,0,0.12)",
-            zIndex: 9999,
-            overflow: "hidden",
-            animation: "fadeIn 0.15s ease-out",
-          }}
+          className="absolute right-0 top-[calc(100%+6px)] z-[200] m-0 min-w-48 list-none overflow-hidden rounded-md border border-school-gold/40 bg-white p-0 shadow-lg"
         >
-          {/* "All Branches" option */}
-          <button
-            role="option"
-            aria-selected={currentBranchId === null}
-            onClick={() => handleSelect(null, "All Branches")}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 8,
-              width: "100%",
-              padding: "10px 14px",
-              border: "none",
-              background: currentBranchId === null ? "#ecfdf5" : "transparent",
-              color: currentBranchId === null ? "#065f46" : "#374151",
-              fontSize: 13,
-              fontWeight: currentBranchId === null ? 600 : 400,
-              cursor: "pointer",
-              textAlign: "left",
-              transition: "background 0.15s",
-              borderBottom: "1px solid #f3f4f6",
-            }}
-            onMouseEnter={(e) => {
-              if (currentBranchId !== null)
-                e.currentTarget.style.background = "#f9fafb";
-            }}
-            onMouseLeave={(e) => {
-              if (currentBranchId !== null)
-                e.currentTarget.style.background = "transparent";
-            }}
-          >
-            <FiGitBranch style={{ fontSize: 13, color: "#9ca3af" }} />
-            {t("allBranches")}
-            {currentBranchId === null && (
-              <span
-                style={{ marginLeft: "auto", color: "#10b981", fontSize: 12 }}
-              >
-                ✓
-              </span>
-            )}
-          </button>
-
-          {/* Individual branch options */}
-          {branches.map((b) => {
-            const name = b.name_en || b.name_bn || `Branch ${b.id}`;
-            const isSelected = currentBranchId === b.id;
-            return (
-              <button
-                key={b.id}
-                role="option"
-                aria-selected={isSelected}
-                onClick={() => handleSelect(b.id, name)}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 8,
-                  width: "100%",
-                  padding: "10px 14px",
-                  border: "none",
-                  background: isSelected ? "#ecfdf5" : "transparent",
-                  color: isSelected ? "#065f46" : "#374151",
-                  fontSize: 13,
-                  fontWeight: isSelected ? 600 : 400,
-                  cursor: "pointer",
-                  textAlign: "left",
-                  transition: "background 0.15s",
-                  borderBottom: "1px solid #f3f4f6",
-                }}
-                onMouseEnter={(e) => {
-                  if (!isSelected) e.currentTarget.style.background = "#f9fafb";
-                }}
-                onMouseLeave={(e) => {
-                  if (!isSelected)
-                    e.currentTarget.style.background = "transparent";
-                }}
-              >
-                <span
-                  style={{
-                    width: 7,
-                    height: 7,
-                    borderRadius: "50%",
-                    background: "#10b981",
-                    flexShrink: 0,
-                  }}
-                />
-                <span
-                  style={{
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  {name}
-                </span>
-                {isSelected && (
-                  <span
-                    style={{
-                      marginLeft: "auto",
-                      color: "#10b981",
-                      fontSize: 12,
-                    }}
-                  >
-                    ✓
-                  </span>
-                )}
-              </button>
-            );
-          })}
-        </div>
+          <BranchOption selected={currentBranchId == null} label={t("allBranches")} onSelect={() => choose(null)} />
+          {active.map((branch) => (
+            <BranchOption key={branch.id} selected={branch.id === currentBranchId} label={nameOf(branch)} onSelect={() => choose(branch)} />
+          ))}
+        </ul>
       )}
     </div>
   );

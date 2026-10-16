@@ -105,6 +105,11 @@ export const queryKeys = {
     all: ["noticeAnnouncements"],
     published: ["noticeAnnouncements", "published"],
   },
+  achievements: {
+    all: ["achievements"],
+    published: (branchId = null) => ["achievements", "published", { branchId }],
+    admin: (branchId = null) => ["achievements", "admin", { branchId }],
+  },
   images: {
     all: ["images"],
     byType: (type) => ["images", "type", type],

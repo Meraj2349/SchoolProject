@@ -241,9 +241,9 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── FEATURES — LeadershipSection card style on light background ── */}
+      {/* ── FEATURES — cards on a light background ── */}
       <section className="relative bg-gradient-to-b from-[#fdf8f0] to-[#f5ede0] py-20 overflow-hidden">
-        {/* Gold strip top — identical to LeadershipSection */}
+        {/* Gold strip top */}
         <div
           className="absolute top-0 left-0 right-0 h-[3px] pointer-events-none"
           style={{
@@ -253,7 +253,7 @@ export default function LandingPage() {
         />
 
         <div className="max-w-[1200px] mx-auto px-5">
-          {/* Section header — star-rule pattern from ClassStatistics / LeadershipSection */}
+          {/* Section header — star-rule pattern from ClassStatistics */}
           <div className="text-center mb-14">
             <div className="inline-flex items-center gap-[14px] mb-4">
               <span className="block w-14 h-px bg-gradient-to-r from-transparent to-[rgba(201,168,76,0.6)]" />
@@ -273,7 +273,7 @@ export default function LandingPage() {
             </div>
           </div>
 
-          {/* Feature cards — QuickLinks card radius/shadow style */}
+          {/* Feature cards */}
           <div className="grid sm:grid-cols-3 gap-6">
             {FEATURES.map((f) => (
               <div
@@ -289,7 +289,7 @@ export default function LandingPage() {
                   }}
                 />
                 <div className="p-6">
-                  {/* Icon circle — QuickLinks icon circle style */}
+                  {/* Icon circle */}
                   <div
                     className="w-12 h-12 rounded-xl flex items-center justify-center text-xl text-white mb-4 shadow-md"
                     style={{

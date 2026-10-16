@@ -1,126 +1,123 @@
 "use client";
 
-import useScrollReveal from "@/hooks/useScrollReveal";
-import { useTranslations } from "@/store/languageStore";
 import Image from "next/image";
+import Link from "next/link";
+import { FiExternalLink, FiMail, FiMapPin, FiPhone } from "react-icons/fi";
+import { useBranches } from "@/hooks/useBranches";
+import { localized } from "@/lib/homePage";
+import { EDUCATION_LINKS, PUBLIC_NAV, SCHOOL_CONTACT } from "@/lib/schoolInfo";
+import { useLanguageStore, useTranslations } from "@/store/languageStore";
 
-const QUICK_LINKS = [
-  "DSHE",
-  "BANBEIS",
-  "BD National Portal",
-  "Ministry of Education",
-  "Sylhet Board",
-];
+const isActive = (branch) => !(branch.is_proposed === true || branch.is_proposed === 1);
+const EXPLORE = [...PUBLIC_NAV.flatMap((item) => item.children ?? [item]), { key: "onlineApply", path: "/apply" }];
 
+function FooterHeading({ id, children }) {
+  return (
+    <h2 id={id} className="m-0 mb-4 font-school-heading text-lg text-school-gold-soft">
+      {children}
+      <span className="site-rule" aria-hidden="true" />
+    </h2>
+  );
+}
+
+const linkClass = "text-white/80 no-underline hover:text-school-gold-soft hover:underline";
+
+/** The public site footer: about, pages, branches, education links and contact. */
 export default function Footer() {
   const t = useTranslations();
-  const footerRef = useScrollReveal(0.05);
+  const language = useLanguageStore((s) => s.language);
+  const { data: branches = [] } = useBranches();
+  const activeBranches = branches.filter(isActive);
 
   return (
-    <footer
-      ref={footerRef}
-      className="relative overflow-hidden mt-auto w-full border-t-[3px] border-[#4b2e83] bg-gray-100 text-gray-700"
-    >
-      {/* Top accent gradient */}
-      <div
-        className="absolute top-0 left-0 right-0 h-1"
-        style={{
-          background:
-            "linear-gradient(90deg, #4b2e83 0%, #7c3aed 40%, #10b981 70%, #059669 100%)",
-        }}
-      />
-
-      {/* Main grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-[2fr_3fr_1.5fr] gap-8 max-w-300 mx-auto px-5 py-10">
-        {/* School info */}
-        <div className="flex flex-col items-start gap-4 max-md:items-center max-md:text-center">
-          <div className="relative inline-block">
-            <Image
-              src="/images/logo1.png"
-              alt="School Logo"
-              width={80}
-              height={80}
-              className="object-contain rounded-lg shadow-md transition-transform duration-300 hover:scale-110 hover:-rotate-2"
-            />
+    <footer className="mt-auto bg-school-navy font-school-body text-white/85">
+      <div className="h-1 bg-gradient-to-r from-school-gold via-school-gold-soft to-school-gold" />
+      <div className="mx-auto grid max-w-7xl gap-10 px-4 py-12 sm:grid-cols-2 lg:grid-cols-4">
+        <section aria-labelledby="footer-about">
+          <div className="mb-4 flex items-center gap-3">
+            <Image src="/images/logo1.png" alt={`${t("schoolName")} logo`} width={56} height={56} />
+            <h2 id="footer-about" className="m-0 font-school-heading text-xl text-white">
+              {t("schoolName")}
+            </h2>
           </div>
+          <p className="m-0 text-sm leading-relaxed">{t("footer.about")}</p>
+        </section>
 
-          <h3 className="text-[#4b2e83] text-2xl font-bold m-0 leading-snug">
-            {t("schoolName")}
-          </h3>
-
-          <div className="flex flex-col gap-1.5">
-            {[
-              { icon: "📞", label: t("footer.contact"), value: "01997588476" },
-              {
-                icon: "✉️",
-                label: t("footer.email"),
-                value: "merajislam2349@gmail.com",
-              },
-              { icon: "📍", label: null, value: t("location") },
-            ].map((item, i) => (
-              <p
-                key={i}
-                className="m-0 text-gray-500 text-[0.9rem] flex items-start gap-1.5"
-              >
-                <span className="shrink-0">{item.icon}</span>
-                {item.label && (
-                  <strong className="text-gray-700 mr-0.5">
-                    {item.label}:
-                  </strong>
-                )}
-                {item.value}
-              </p>
+        <section aria-labelledby="footer-explore">
+          <FooterHeading id="footer-explore">{t("footer.explore")}</FooterHeading>
+          <ul className="m-0 grid list-none grid-cols-2 gap-x-4 gap-y-2 p-0 text-sm">
+            {EXPLORE.map((item) => (
+              <li key={item.path}>
+                <Link href={item.path} className={linkClass}>
+                  {t(`nav.${item.key}`)}
+                </Link>
+              </li>
             ))}
-          </div>
-        </div>
+          </ul>
+        </section>
 
-        {/* Quick links */}
-        <div className="flex flex-col gap-4">
-          <h4 className="text-[#4b2e83] text-xl font-semibold m-0 mb-4 border-b-2 border-[#4b2e83] pb-2 max-md:text-center">
-            {t("footer.quickLinks")}
-          </h4>
-          <ul className="list-none p-0 m-0 grid grid-cols-1 md:grid-cols-2 gap-2.5">
-            {QUICK_LINKS.map((link) => (
-              <li key={link}>
-                <a
-                  href="#"
-                  className="text-gray-500 no-underline text-[0.9rem] px-3 py-2 rounded-md transition-all duration-300 inline-block w-full box-border relative overflow-hidden hover:text-[#4b2e83] hover:bg-[rgba(75,46,131,0.1)] hover:translate-x-1 hover:shadow-md focus:outline-[#4b2e83] focus:outline-2 focus:outline-offset-2 before:content-['▶'] before:text-[0.7rem] before:mr-2 before:text-[#4b2e83]"
-                >
-                  {link}
+        <section aria-labelledby="footer-branches">
+          <FooterHeading id="footer-branches">{t("footer.ourBranches")}</FooterHeading>
+          <ul aria-labelledby="footer-branches" className="m-0 mb-6 list-none space-y-2 p-0 text-sm">
+            {activeBranches.map((branch) => (
+              <li key={branch.id}>
+                <Link href="/branches" className={linkClass}>
+                  {localized(branch, "name", language)}
+                </Link>
+              </li>
+            ))}
+          </ul>
+          <FooterHeading id="footer-links">{t("footer.educationLinks")}</FooterHeading>
+          <ul aria-labelledby="footer-links" className="m-0 list-none space-y-2 p-0 text-sm">
+            {EDUCATION_LINKS.map((link) => (
+              <li key={link.key}>
+                <a href={link.href} target="_blank" rel="noopener noreferrer" className={`${linkClass} inline-flex items-center gap-1.5`}>
+                  {t(`footer.links.${link.key}`)}
+                  <FiExternalLink aria-hidden="true" className="text-xs" />
+                  <span className="sr-only">{t("footer.opensNewTab")}</span>
                 </a>
               </li>
             ))}
           </ul>
-        </div>
+        </section>
 
-        {/* Maintained by */}
-        <div className="flex flex-col items-center text-center gap-4 max-md:-order-1">
-          <h4 className="text-[#4b2e83] text-xl font-semibold m-0">
-            {t("footer.maintainedBy")}
-          </h4>
-          <Image
-            src="/images/sustLogo.png"
-            alt="SUST Logo"
-            width={140}
-            height={140}
-            className="object-contain rounded-lg shadow-md transition-transform duration-300 hover:scale-105"
-          />
-        </div>
+        <section aria-labelledby="footer-contact">
+          <FooterHeading id="footer-contact">{t("footer.contactUs")}</FooterHeading>
+          <address className="space-y-3 text-sm not-italic">
+            <p className="m-0 flex items-start gap-2">
+              <FiMapPin aria-hidden="true" className="mt-1 shrink-0 text-school-gold" />
+              <span>
+                <span className="sr-only">{t("footer.address")}: </span>
+                {t("location")}
+              </span>
+            </p>
+            <p className="m-0 flex items-center gap-2">
+              <FiPhone aria-hidden="true" className="shrink-0 text-school-gold" />
+              <a href={SCHOOL_CONTACT.phoneHref} className={linkClass}>
+                <span className="sr-only">{t("footer.phone")}: </span>
+                {SCHOOL_CONTACT.phone}
+              </a>
+            </p>
+            <p className="m-0 flex items-center gap-2">
+              <FiMail aria-hidden="true" className="shrink-0 text-school-gold" />
+              <a href={`mailto:${SCHOOL_CONTACT.email}`} className={`${linkClass} break-all`}>
+                {SCHOOL_CONTACT.email}
+              </a>
+            </p>
+          </address>
+          <div className="mt-6 flex items-center gap-3">
+            <Image src="/images/sustLogo.png" alt={t("footer.sustLogo")} width={48} height={48} className="rounded bg-white p-1" />
+            <span className="text-xs text-white/70">{t("footer.maintainedBy")}</span>
+          </div>
+        </section>
       </div>
-
-      {/* Bottom bar */}
-      <div
-        className="flex justify-between items-center flex-wrap gap-4 px-5 py-5 text-white max-md:flex-col max-md:text-center"
-        style={{
-          background: "linear-gradient(135deg, #4b2e83 0%, #3b1f6e 100%)",
-        }}
-      >
-        <p className="m-0 text-[0.9rem] font-medium text-white">
-          {t("footer.developedBy")}
-        </p>
-        <p className="m-0 text-[0.9rem] font-bold text-yellow-400">
-          {t("footer.helpline")}
-        </p>
+      <div className="border-t border-white/10 bg-school-navy-deep">
+        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-2 px-4 py-4 text-xs text-white/70 sm:flex-row">
+          <p className="m-0">
+            © {new Date().getFullYear()} {t("schoolName")}. {t("footer.rights")}
+          </p>
+          <p className="m-0">{t("footer.developedBy")}</p>
+        </div>
       </div>
     </footer>
   );

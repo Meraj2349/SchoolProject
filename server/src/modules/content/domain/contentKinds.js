@@ -43,10 +43,19 @@ export const message = {
   toVisibility: (input) => ({ Show: requireBoolean(input.show, "invalid_show_value") }),
 };
 
+// A page of this site ("/events", not "//other.host") or a web address.
+const SAFE_LINK = /^(\/(?!\/)|https?:\/\/)/i;
+
+function newsLink(value) {
+  const link = text(value) || "/events";
+  if (!SAFE_LINK.test(link)) throw new ValidationError("news_link_invalid");
+  return link;
+}
+
 function newsFields(input) {
   const fields = { title_bn: text(input.title_bn), title_en: text(input.title_en), date: text(input.date) };
   if (!fields.title_bn || !fields.title_en || !fields.date) throw new ValidationError("news_required_fields");
-  return { ...fields, link: text(input.link) || "/events", is_active: flag(input.is_active) };
+  return { ...fields, link: newsLink(input.link), is_active: flag(input.is_active) };
 }
 
 export const news = {

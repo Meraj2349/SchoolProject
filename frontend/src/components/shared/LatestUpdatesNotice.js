@@ -3,15 +3,14 @@
 import { Bell } from "lucide-react";
 import { useNotices } from "@/hooks/useNotices";
 import LottieLoader from "@/components/ui/LottieLoader";
+import { visibleNotices } from "@/lib/homePage";
 import { useTranslations } from "@/store/languageStore";
 
 export default function LatestUpdatesNotice() {
   const { data: allNotices = [], isLoading, isError } = useNotices();
   const t = useTranslations("latestUpdates");
 
-  const notices = allNotices
-    .filter((n) => n.Show === true || n.Show === 1)
-    .sort((a, b) => new Date(b.CreatedAt) - new Date(a.CreatedAt));
+  const notices = visibleNotices(allNotices);
 
   const loopedNotices = notices.length > 1 ? [...notices, notices[0]] : notices;
   const animationDuration =
@@ -22,7 +21,7 @@ export default function LatestUpdatesNotice() {
       <LottieLoader
         size="small"
         text={t("label")}
-        className="bg-gradient-to-br from-green-600 via-green-700 to-green-900 text-white rounded-none"
+        className="bg-school-navy-deep text-white rounded-none"
         type="dots"
       />
     );
@@ -30,7 +29,7 @@ export default function LatestUpdatesNotice() {
 
   if (isError) {
     return (
-      <div className="bg-green-800 text-white p-3 shadow-lg">
+      <div className="bg-school-navy-deep text-white p-3 shadow-lg">
         <div className="flex items-center justify-between max-w-7xl mx-auto">
           <div className="flex items-center">
             <Bell className="h-4 w-4 mr-2" />
@@ -58,29 +57,27 @@ export default function LatestUpdatesNotice() {
           white-space: nowrap;
         }
         .notice-marquee:hover { animation-play-state: paused; }
+        @media (prefers-reduced-motion: reduce) {
+          .notice-marquee { animation: none; padding-left: 0; white-space: normal; }
+        }
       `}</style>
       <div
-        className="relative overflow-hidden border-b border-white/15 transition-all duration-300 hover:-translate-y-0.5"
-        style={{
-          background:
-            "linear-gradient(135deg, #10b981 0%, #059669 25%, #047857 75%, #064e3b 100%)",
-          boxShadow: "0 6px 24px rgba(16,185,129,0.3)",
-        }}
+        className="relative overflow-hidden border-b-2 border-school-gold bg-school-navy-deep font-school-body"
       >
-        <div className="relative px-6 py-3.5 bg-white/[0.06] z-[2]">
+        <div className="relative px-4 py-2.5 z-[2]">
           <div className="flex items-center justify-between max-w-[1200px] mx-auto gap-4">
             {/* Left section */}
             <div className="flex items-center flex-shrink-0">
-              <div className="bg-white/20 p-2.5 rounded-full mr-3.5 flex items-center justify-center border border-white/25 transition-all duration-300 hover:scale-105 hover:bg-white/30">
-                <Bell className="h-5 w-5 text-white" />
+              <div className="bg-school-gold p-2 rounded-full mr-3 flex items-center justify-center">
+                <Bell className="h-4 w-4 text-school-navy" aria-hidden="true" />
               </div>
-              <span className="hidden md:inline font-bold text-base text-white mr-3 tracking-wide uppercase">
+              <span className="hidden md:inline font-bold text-sm text-school-gold-soft mr-3 tracking-wide uppercase">
                 {t("label")}
               </span>
-              <span className="md:hidden font-bold text-sm text-white tracking-wide uppercase">
+              <span className="md:hidden font-bold text-sm text-school-gold-soft tracking-wide uppercase">
                 {t("labelMobile")}
               </span>
-              <div className="h-6 w-0.5 bg-white/50 mx-4 rounded-sm" />
+              <div className="h-6 w-0.5 bg-school-gold/50 mx-3 rounded-sm" />
             </div>
 
             {/* Scrolling content */}

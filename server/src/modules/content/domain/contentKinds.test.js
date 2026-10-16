@@ -57,6 +57,14 @@ describe("news", () => {
     expect(news.toChanges({ ...input, is_active: "false" }).is_active).toBe(false);
   });
 
+  it("links only to a page of this site or a web address", () => {
+    expect(news.toNew({ ...input, link: "/events" }).link).toBe("/events");
+    expect(news.toNew({ ...input, link: "https://dshe.gov.bd/notice" }).link).toBe("https://dshe.gov.bd/notice");
+    for (const link of ["//evil.example", "javascript:alert(1)", "events", "ftp://x.test"]) {
+      expect(() => news.toNew({ ...input, link })).toThrow(invalid("news_link_invalid"));
+    }
+  });
+
   it("needs both titles and a date", () => {
     expect(() => news.toNew({ ...input, title_bn: "" })).toThrow(invalid("news_required_fields"));
   });

@@ -29,6 +29,13 @@ describe("AdminSidebar", () => {
     expect(screen.getByRole("link", { name: "Settings" })).toBeInTheDocument();
   });
 
+  it("lists the Achievements page under Website", () => {
+    render(<AdminSidebar />);
+    fireEvent.click(screen.getByRole("button", { name: "Website" }));
+
+    expect(screen.getByRole("link", { name: "Achievements" })).toHaveAttribute("href", "/admin/achievements");
+  });
+
   it("marks the current page and opens its group", () => {
     render(<AdminSidebar />);
 

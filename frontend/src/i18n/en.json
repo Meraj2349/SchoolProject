@@ -3,13 +3,17 @@
   "establishedYear": "135479",
   "location": "Natiapara, Delduar, Tangail",
   "nav": {
-    "home": "HOME",
-    "about": "ABOUT",
-    "gallery": "GALLERY",
-    "events": "EVENTS",
-    "students": "STUDENTS",
-    "branches": "BRANCH",
-    "onlineApply": "Online Apply",
+    "home": "Home",
+    "about": "About",
+    "academics": "Academics",
+    "students": "Students",
+    "teachers": "Teachers",
+    "routine": "Class routine",
+    "results": "Results",
+    "gallery": "Gallery",
+    "events": "Events",
+    "branches": "Branches",
+    "onlineApply": "Apply online",
     "quakerEducation": "A Quaker Education"
   },
   "footer": {
@@ -18,7 +22,24 @@
     "quickLinks": "Quick Links",
     "maintainedBy": "Maintained By",
     "developedBy": "Developed By: Md.Meraj Mridha",
-    "helpline": "Helpline: +88 019 97588476"
+    "helpline": "Helpline: +88 019 97588476",
+    "about": "A family of schools in Natiapara, Delduar, Tangail, giving every child a sound education, discipline and good character.",
+    "explore": "Explore",
+    "ourBranches": "Our branches",
+    "educationLinks": "Education links",
+    "contactUs": "Contact us",
+    "address": "Address",
+    "phone": "Phone",
+    "links": {
+      "dshe": "Directorate of Secondary and Higher Education",
+      "banbeis": "BANBEIS",
+      "boardResults": "Education Board Results",
+      "ministry": "Ministry of Education",
+      "nationalPortal": "Bangladesh National Portal"
+    },
+    "rights": "All rights reserved.",
+    "opensNewTab": "(opens in a new tab)",
+    "sustLogo": "SUST logo"
   },
   "sidebar": {
     "adminDashboard": "Dashboard",
@@ -61,7 +82,8 @@
     "admins": "Admins",
     "quizQuestions": "Question bank",
     "quizResults": "Quiz results",
-    "quizLeaderboard": "Leaderboard"
+    "quizLeaderboard": "Leaderboard",
+    "achievements": "Achievements"
   },
   "latestUpdates": {
     "label": "Latest Updates",
@@ -69,36 +91,90 @@
     "loadingError": "Failed to load latest updates"
   },
   "home": {
-    "loading": "Loading…",
-    "leadershipTitle": "Leadership & Updates",
-    "leadershipSubtitle": "From our chairman, upcoming events, and latest news",
     "studentStatistics": "Student Statistics",
     "classWiseStudents": "Class wise Students",
     "loadingClassStats": "Loading class wise students…",
     "failedClassStats": "Failed to load class statistics",
-    "noClasses": "No classes found"
-  },
-  "quickLinks": {
-    "students": "Students",
-    "teachers": "Teachers",
-    "attendance": "Attendance",
-    "result": "Result",
-    "routine": "Routine",
-    "quaker": "Quaker Education",
-    "selectClass": "Select Class",
-    "selectSection": "Select Section",
-    "classLabel": "Class",
-    "sectionLabel": "Section"
-  },
-  "eventNews": {
-    "events": "EVENTS",
-    "news": "NEWS",
-    "viewAllEvents": "View All Events →",
-    "viewAllNews": "View All News →",
-    "newsLoading": "Loading news…",
-    "newsError": "Failed to load news",
-    "eventsLoading": "Loading events…",
-    "eventsError": "Failed to load events"
+    "noClasses": "No classes found",
+    "hero": {
+      "welcome": "Welcome to",
+      "gateAlt": "The school gate",
+      "apply": "Apply for admission",
+      "results": "Check results",
+      "slides": "School photos",
+      "previous": "Previous photo",
+      "next": "Next photo",
+      "slide": "Photo {n} of {total}",
+      "pause": "Pause slideshow",
+      "play": "Play slideshow"
+    },
+    "glance": {
+      "title": "At a glance",
+      "students": "Students",
+      "teachers": "Teachers",
+      "classes": "Classes",
+      "branches": "Branches"
+    },
+    "honours": {
+      "eyebrow": "Our pride",
+      "title": "Honours Board",
+      "subtitle": "Board results, prizes and awards our students have earned.",
+      "featured": "Featured",
+      "resultsTitle": "Board exam results",
+      "passRate": "pass rate",
+      "gpa5": "GPA-5",
+      "examinees": "{count} examinees",
+      "filter": "Show achievements",
+      "all": "All",
+      "tabs": {
+        "board_result": "Board results",
+        "academic": "Academic",
+        "sports": "Sports",
+        "cultural": "Cultural",
+        "competition": "Competitions",
+        "award": "Awards"
+      }
+    },
+    "chairman": {
+      "eyebrow": "Message",
+      "title": "From the Chairman's desk",
+      "readMore": "Read the full message"
+    },
+    "noticeBoard": {
+      "title": "Notice Board",
+      "empty": "No notices right now."
+    },
+    "events": {
+      "title": "Upcoming events",
+      "empty": "No upcoming events.",
+      "all": "All events"
+    },
+    "news": {
+      "title": "Latest news",
+      "empty": "No news yet."
+    },
+    "announcements": {
+      "eyebrow": "Notices",
+      "title": "Announcements",
+      "subtitle": "Admission, exam and other notices from the school.",
+      "categories": {
+        "Admission": "Admission",
+        "Exam": "Exam",
+        "Notice": "Notice",
+        "Event": "Event"
+      }
+    },
+    "gallery": {
+      "eyebrow": "Campus life",
+      "title": "From our gallery",
+      "all": "View the gallery"
+    },
+    "admission": {
+      "title": "Admission is open",
+      "body": "Give your child a strong start. Apply online in a few minutes, or call us to visit the school.",
+      "apply": "Apply online",
+      "call": "Call {phone}"
+    }
   },
   "chairmanCard": {
     "viewFullMessage": "View Full Message",
@@ -1087,6 +1163,52 @@
       "noLeaderboard": "No results yet",
       "allSubjectsShort": "Mixed",
       "readOnlyNote": "Only super admins can add or change questions."
+    },
+    "achievements": {
+      "title": "Achievements",
+      "subtitle": "The honours board on the website: board results, prizes and awards.",
+      "addAchievement": "Add achievement",
+      "editAchievement": "Edit achievement",
+      "allAchievements": "All achievements",
+      "noAchievements": "No achievements yet",
+      "title_en": "Title (English)",
+      "title_bn": "Title (Bangla)",
+      "category": "Category",
+      "chooseCategory": "Choose a category",
+      "year": "Year",
+      "boardResult": "Board exam result",
+      "examName": "Exam",
+      "examNameHelp": "For example SSC, JSC or PEC",
+      "examinees": "Examinees",
+      "passed": "Passed",
+      "gpa5": "GPA-5",
+      "passRatePreview": "Pass rate: {rate}%",
+      "descriptionEn": "Description (English)",
+      "descriptionBn": "Description (Bangla)",
+      "photo": "Photo",
+      "photoHelp": "JPEG, PNG, GIF or WEBP, up to 5 MB",
+      "photoKeepHelp": "Leave empty to keep the current photo",
+      "featured": "Featured",
+      "featuredHelp": "Shown large at the top of the honours board",
+      "published": "Published",
+      "publishedHelp": "Show on the website",
+      "hidden": "Hidden",
+      "result": "Result",
+      "branch": "Branch",
+      "actions": "Actions",
+      "edit": "Edit",
+      "delete": "Delete",
+      "deleteConfirm": "Delete this achievement?",
+      "deleteConfirmBody": "It will be removed from the website.",
+      "save": "Save",
+      "cancel": "Cancel",
+      "added": "Achievement added.",
+      "updated": "Achievement updated.",
+      "deleted": "Achievement deleted.",
+      "operationFailed": "Something went wrong. Please try again.",
+      "required": "Required",
+      "invalidYear": "Enter a year between 1950 and next year",
+      "resultNumbers": "Check the numbers: passed cannot exceed examinees, and GPA-5 cannot exceed passed"
     }
   },
   "branches": {
@@ -1215,5 +1337,28 @@
     "fillAllFields": "Please fill in all fields.",
     "verifyFailed": "Could not check your details. Please try again.",
     "sessionExpired": "Your quiz session has ended. Please enter your details again."
+  },
+  "achievements": {
+    "categories": {
+      "board_result": "Board result",
+      "academic": "Academic",
+      "sports": "Sports",
+      "cultural": "Cultural",
+      "competition": "Competition",
+      "award": "Award"
+    },
+    "passRate": "{rate}% pass",
+    "gpa5": "{count} GPA-5"
+  },
+  "site": {
+    "call": "Call",
+    "email": "Email",
+    "estd": "ESTD",
+    "mainNavigation": "Main navigation",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "menu": "Menu",
+    "skipToContent": "Skip to main content",
+    "motto": "Education · Discipline · Character"
   }
 }

@@ -11,6 +11,7 @@ import attendanceRoutes from "./routes/attendance.route.js";
 import applicationRoutes from "./routes/application.routes.js";
 import newsRoutes from "./routes/news.routes.js";
 import noticeAnnouncementRoutes from "./routes/notice-announcement.routes.js";
+import achievementRoutes from "./routes/achievement.routes.js";
 import branchRoutes from "./routes/branch.routes.js";
 import classRoutes from "./routes/classes.routes.js";
 import eventRoutes from "./routes/event.routes.js";
@@ -28,6 +29,7 @@ import quizRoutes from "./routes/quiz.routes.js";
 import subjectRoutes from "./routes/subjects.routes.js";
 import teacherRoutes from "./routes/teacher.routes.js";
 import adminsRoutes from "./routes/admins.routes.js";
+import { errorHandler } from "./src/shared/http/errorHandler.js";
 
 dotenv.config();
 
@@ -70,9 +72,13 @@ app.use("/api/branches", branchRoutes);
 app.use("/api/applications", applicationRoutes);
 app.use("/api/news", newsRoutes);
 app.use("/api/notice-announcements", noticeAnnouncementRoutes);
+app.use("/api/achievements", achievementRoutes);
 app.use("/api/quiz", quizRoutes);
 app.use("/api/fees", feeRoutes);
 app.use("/api/dashboard", dashboardRoutes);
+
+// Errors raised outside controllers (e.g. a refused upload) → JSON, translated.
+app.use(errorHandler);
 
 // Handle root URL (Welcome message)
 app.get("/", (req, res) => {

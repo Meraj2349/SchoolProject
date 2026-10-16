@@ -10,7 +10,7 @@ import { authService } from "@/services/auth.service";
 import { useAuthStore } from "@/store/authStore";
 import { useBranchStore } from "@/store/branchStore";
 import { useTranslations } from "@/store/languageStore";
-import useEscapeKey from "../ui/useEscapeKey";
+import useEscapeKey from "@/hooks/useEscapeKey";
 import { breadcrumbsFor } from "../navigation";
 
 function Breadcrumbs({ pathname, t }) {

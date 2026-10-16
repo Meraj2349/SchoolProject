@@ -115,6 +115,22 @@ const KINDS = [
     changed: { column: "title_en", value: "Changed" },
   },
   {
+    name: "achievements",
+    table: "Achievements",
+    id: "id",
+    seed: (branchId, extra = {}) =>
+      insert("Achievements", { title_en: "Win", title_bn: "জয়", category: "sports", year: 2025, branch_id: branchId, ...extra }),
+    hidden: { is_published: false },
+    create: (r) =>
+      r.post("/api/achievements").send({ title_en: "Debate champions", title_bn: "বিতর্ক চ্যাম্পিয়ন", category: "competition", year: 2025 }),
+    publicList: "/api/achievements",
+    adminList: "/api/achievements/all",
+    update: (r, id) => r.put(`/api/achievements/${id}`).send({ title_en: "Changed", title_bn: "জয়", category: "sports", year: 2025 }),
+    toggle: (r, id) => r.patch(`/api/achievements/${id}/publish`).send({ is_published: false }),
+    remove: (r, id) => r.delete(`/api/achievements/${id}`),
+    changed: { column: "title_en", value: "Changed" },
+  },
+  {
     name: "gallery images",
     table: "Images",
     id: "ImageID",
