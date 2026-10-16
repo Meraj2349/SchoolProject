@@ -32,7 +32,7 @@ export function useSaveAttendanceDay() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: ({ classId, date, entries }) => attendanceService.saveDay(classId, date, entries),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["attendance"] }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.attendance.prefix }),
   });
 }
 

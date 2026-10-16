@@ -11,7 +11,15 @@ let sender;
 let clock;
 
 const build = (overrides = {}) =>
-  makeAbsenceSmsUseCases({ repository, sender, clock: { now: () => clock.now() }, enabled: true, delayMinutes: 15, ...overrides });
+  makeAbsenceSmsUseCases({
+    repository,
+    sender,
+    clock: { now: () => clock.now() },
+    enabled: true,
+    delayMinutes: 15,
+    signature: "স্টার শিক্ষা পরিবার",
+    ...overrides,
+  });
 
 beforeEach(() => {
   repository = makeFakeAbsenceSmsRepository({
@@ -69,7 +77,7 @@ describe("sending", () => {
     clock.now = () => minutesAfter(40);
     await sms.sendDue();
 
-    expect(sender.sent).toEqual([{ to: "01711000001", text: expect.stringContaining("Rahim Uddin") }]);
+    expect(sender.sent).toEqual([{ to: "01711000001", text: expect.stringMatching(/Rahim Uddin .* — স্টার শিক্ষা পরিবার$/) }]);
     expect(repository.state.messages[0]).toMatchObject({ status: "sent", phone: "01711000001", providerRef: "ref-1", sentAt: minutesAfter(15) });
   });
 
@@ -121,6 +129,32 @@ describe("sending", () => {
     await sms.sendDue();
 
     expect(repository.state.messages[0]).toMatchObject({ status: "failed", attempts: 3, error: "gateway down" });
+  });
+
+  it("gives up on a message left half-sent by a crash, rather than risk sending it twice", async () => {
+    const sms = build();
+    await saveDay(sms, [{ studentId: 1, status: "Absent" }]);
+    Object.assign(repository.state.messages[0], { status: "sending", stale: true });
+    clock.now = () => minutesAfter(30);
+
+    await sms.sendDue();
+
+    expect(repository.state.messages[0]).toMatchObject({ status: "failed", error: "interrupted" });
+    expect(sender.sent).toEqual([]);
+  });
+
+  it("goes on with the other messages when one breaks", async () => {
+    const sms = build();
+    await saveDay(sms, [{ studentId: 1, status: "Absent" }, { studentId: 3, status: "Absent" }]);
+    repository.state.students[2].statusOn[TODAY] = "Absent";
+    const details = repository.details;
+    repository.details = async (id) => (id === 1 ? Promise.reject(new Error("lost connection")) : details(id));
+    jest.spyOn(console, "error").mockImplementation(() => {});
+    clock.now = () => minutesAfter(15);
+
+    await sms.sendDue();
+
+    expect(sender.sent.map((m) => m.to)).toEqual(["01711000003"]);
   });
 
   it("never sends the same message twice when two runs overlap", async () => {

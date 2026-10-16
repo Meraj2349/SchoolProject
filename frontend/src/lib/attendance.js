@@ -43,3 +43,7 @@ export function formatSchoolTime(value, language = "en") {
 /** The days that count: weekdays, plus any weekend day on which attendance was taken. */
 export const schoolDaysOf = (days, students, isWeekend) =>
   days.filter((day) => !isWeekend(day) || students.some((s) => s.attendance?.[day]));
+
+/** Today's date ("YYYY-MM-DD") in Bangladesh: the day the server counts, whatever the browser's time zone. */
+export const schoolToday = (now = new Date()) =>
+  new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Dhaka" }).format(now);

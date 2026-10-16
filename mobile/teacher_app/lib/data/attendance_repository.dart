@@ -85,6 +85,9 @@ class AttendanceRepository {
 
   String language = 'bn';
 
+  /// The school day on the phone's clock: right even after a night offline.
+  String _today() => schoolToday(_now());
+
   Future<bool> isSignedIn() async => await _session.token() != null && await _session.serverUrl() != null;
 
   Future<String?> lastServerUrl() => _session.serverUrl();
@@ -153,18 +156,20 @@ class AttendanceRepository {
     } on OfflineException {
       final cached = await _store.profile();
       if (cached == null) rethrow;
-      return Loaded(cached, fresh: false);
+      return Loaded(cached.forDay(_today()), fresh: false);
     }
   }
 
-  /// The class's day. Offline: the phone's copy, with any unsent save of that day applied.
+  /// The class's day. Offline: the phone's copy of that day, or else the last
+  /// list it has of the class, with nobody marked (a new day after a night offline).
   Future<Loaded<Roster>> roster(int classId, String date) async {
     try {
       final roster = await _signedIn((api) => api.roster(classId, date));
       await _store.saveRoster(roster);
       return Loaded(roster, fresh: true);
     } on OfflineException {
-      final cached = await _store.roster(classId, date);
+      final cached = await _store.roster(classId, date) ??
+          (await _store.latestRoster(classId))?.blankFor(date, editable: date == _today());
       if (cached == null) rethrow;
       return Loaded(cached, fresh: false);
     }
@@ -185,7 +190,15 @@ class AttendanceRepository {
         ],
       );
 
-  /// Saves the class's day: at once when online, otherwise on the phone until [syncPending].
+  Future<SaveResult> _keepForLater(Roster roster, PendingDay day) async {
+    await _store.putPending(day);
+    final local = _withStatuses(roster, day.entries);
+    await _store.saveRoster(local);
+    return SaveResult(synced: false, roster: local);
+  }
+
+  /// Saves the class's day: at once when the server can take it, otherwise on
+  /// the phone until [syncPending]. A revoked sign-in keeps the day too.
   Future<SaveResult> saveDay(Roster roster, Map<int, AttendanceStatus> entries) async {
     final day = PendingDay(
       clientRef: _newClientRef(),
@@ -201,10 +214,13 @@ class AttendanceRepository {
       await _store.saveRoster(saved.roster);
       return SaveResult(synced: true, roster: saved.roster, kept: saved.kept);
     } on OfflineException {
-      await _store.putPending(day);
-      final local = _withStatuses(roster, entries);
-      await _store.saveRoster(local);
-      return SaveResult(synced: false, roster: local);
+      return _keepForLater(roster, day);
+    } on ApiException catch (e) {
+      if (!canRetryLater(e.statusCode)) rethrow;
+      return _keepForLater(roster, day);
+    } on SignedOutException {
+      await _keepForLater(roster, day);
+      rethrow;
     }
   }
 
@@ -225,7 +241,7 @@ class AttendanceRepository {
       } on OfflineException {
         return SyncReport(sent: sent, refused: refused, offline: true);
       } on ApiException catch (e) {
-        if (syncOutcomeOf(e.statusCode) == SyncOutcome.retryLater) {
+        if (canRetryLater(e.statusCode)) {
           return SyncReport(sent: sent, refused: refused, offline: true);
         }
         final marked = day.refused(e.message);

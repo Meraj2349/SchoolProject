@@ -66,6 +66,9 @@ export function makeAttendanceUseCases({ repository, absenceAlerts, clock }) {
       .filter((s) => s.markedAt != null)
       .every((s) => s.markedByType === "teacher" && s.markedBy === actor.id && new Date(s.markedAt).getTime() === takenAt.getTime());
 
+  const keepStudentsOf = (entries, rosterIds) =>
+    Array.isArray(entries) ? entries.filter((e) => rosterIds.includes(Number(e?.studentId))) : entries;
+
   /**
    * Checks a save without writing anything, so a batch of days can be checked
    * as a whole before any of it is saved.
@@ -76,10 +79,14 @@ export function makeAttendanceUseCases({ repository, absenceAlerts, clock }) {
     const now = clock.now();
     const taken = takenAtFor(actor, day, takenAt, now);
     const roster = await repository.roster(cls.id, day);
-    if (actor.kind === "teacher" && day < schoolToday(now) && !isFirstSyncOf(roster, actor, taken)) {
-      throw new ForbiddenError("attendance_day_locked");
-    }
-    const dayEntries = toDayEntries(entries, roster.map((s) => s.studentId), { complete });
+    const rosterIds = roster.map((s) => s.studentId);
+    const catchUp = actor.kind === "teacher" && day < schoolToday(now);
+    if (catchUp && !isFirstSyncOf(roster, actor, taken)) throw new ForbiddenError("attendance_day_locked");
+    // A day taken offline is saved even if the class changed before it synced:
+    // students who joined since are left unmarked, students who left are dropped.
+    const dayEntries = catchUp
+      ? toDayEntries(keepStudentsOf(entries, rosterIds), rosterIds, { complete: false })
+      : toDayEntries(entries, rosterIds, { complete });
     return { actor, cls, date: day, entries: dayEntries, takenAt: taken, now };
   }
 

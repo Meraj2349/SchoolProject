@@ -10,7 +10,7 @@ export function makeAbsenceSmsController({ useCases }) {
         const date = req.query.date || schoolToday();
         if (!isDay(date)) throw new ValidationError("attendance_date_invalid");
         const messages = await useCases.list({ branchId: req.branchId ?? null, date });
-        res.status(200).json({ success: true, data: messages, count: messages.length });
+        res.status(200).json({ success: true, data: messages });
       } catch (error) {
         sendError(res, error, req.language);
       }

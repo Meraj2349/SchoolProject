@@ -6,8 +6,7 @@ import { Badge, Box, Button, ChooseBranchNotice, Field, Input, PageHeader, Selec
 import { useAbsenceSms, useAttendanceRoster, useSaveAttendanceDay } from "@/hooks/useAttendance";
 import { useClassNames, useClasses, useDistinctClasses } from "@/hooks/useClasses";
 import { useWriteBranch } from "@/hooks/useWriteBranch";
-import { ATTENDANCE_STATUSES, attendanceTotals, formatSchoolTime } from "@/lib/attendance";
-import { localDateString } from "@/lib/dates";
+import { ATTENDANCE_STATUSES, attendanceTotals, formatSchoolTime, schoolToday } from "@/lib/attendance";
 import { fillTemplate } from "@/lib/template";
 import { useLanguageStore, useTranslations } from "@/store/languageStore";
 
@@ -162,7 +161,7 @@ function RosterBox({ classId, day, canSave }) {
 export default function AdminPage() {
   const t = useTranslations("admin.attendance");
   const { needsBranch } = useWriteBranch();
-  const [filter, setFilter] = useState({ className: "", section: "", date: localDateString() });
+  const [filter, setFilter] = useState({ className: "", section: "", date: schoolToday() });
 
   const { data: classNames = [] } = useClassNames();
   const { data: distinctClasses = [] } = useDistinctClasses();
@@ -216,7 +215,7 @@ export default function AdminPage() {
                 {...a11y}
                 type="date"
                 value={filter.date}
-                max={localDateString()}
+                max={schoolToday()}
                 onChange={(e) => setFilter((f) => ({ ...f, date: e.target.value }))}
               />
             )}

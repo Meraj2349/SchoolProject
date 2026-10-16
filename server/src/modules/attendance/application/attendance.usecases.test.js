@@ -194,6 +194,18 @@ describe("saveDay", () => {
     expect(repository.state.records.map((r) => r.status)).toEqual(["Present", "Absent"]);
   });
 
+  it("still accepts an offline day after the class list changed: a new student is left out, one who left is dropped", async () => {
+    repository.state.students.push({ id: 103, firstName: "Nadia", classId: 10, branchId: 1, roll: "3" }); // joined after
+    const takenAt = "2026-03-09T04:30:00Z";
+
+    await useCases.saveDay({
+      actor: teacher, classId: 10, date: "2026-03-09", takenAt,
+      entries: [...wholeDay("Present", "Absent"), { studentId: 150, status: "Absent" }], // 150 has left the class
+    });
+
+    expect(repository.state.records.map((r) => [r.studentId, r.status])).toEqual([[101, "Present"], [102, "Absent"]]);
+  });
+
   it("refuses an earlier day from a phone once the office has marked it", async () => {
     await useCases.saveDay({ actor: adminA, classId: 10, date: "2026-03-09", entries: wholeDay("Present", "Leave") });
 
@@ -269,6 +281,19 @@ describe("recordMany (the old bulk save)", () => {
     expect(repository.state.saves).toEqual([]);
   });
 
+  it("treats the same class written as a number or a string as one day", async () => {
+    const saved = await useCases.recordMany({
+      actor: adminA,
+      records: [
+        { studentID: 101, classID: 10, classDate: "2026-03-01", status: "Present" },
+        { studentID: "102", classID: "10", classDate: "2026-03-01", status: "Late" },
+      ],
+    });
+
+    expect(saved).toBe(2);
+    expect(repository.state.saves).toHaveLength(1);
+  });
+
   it("refuses an empty list", async () => {
     await expectRejects(useCases.recordMany({ actor: adminA, records: [] }), ValidationError, "attendance_entries_required");
   });
@@ -286,6 +311,18 @@ describe("updateRecord and removeRecord", () => {
     await useCases.updateRecord({ actor: adminA, id: recordId(), status: "leave" });
 
     expect(repository.state.records[0]).toMatchObject({ status: "Leave", markedBy: 2 });
+  });
+
+  it("tells the absence alerts when today's record changes or goes", async () => {
+    clock.now = () => NOW;
+    await useCases.markStudent({ actor: adminA, studentId: 102, date: TODAY, status: "Absent" });
+    const today = repository.state.records.find((r) => r.date === TODAY);
+    alerts.calls.length = 0;
+
+    await useCases.updateRecord({ actor: adminA, id: today.id, status: "Present" });
+    await useCases.removeRecord({ actor: adminA, id: today.id });
+
+    expect(alerts.calls.map((c) => c.students)).toEqual([[{ studentId: 102, status: "Present" }], [{ studentId: 102, status: null }]]);
   });
 
   it("hides another branch's record", async () => {

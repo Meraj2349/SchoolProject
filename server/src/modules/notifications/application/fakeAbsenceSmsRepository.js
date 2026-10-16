@@ -23,6 +23,11 @@ export function makeFakeAbsenceSmsRepository({ students = [] } = {}) {
       }
     },
 
+    // Messages a test marked `stale` stand for ones left "sending" by a crash long ago.
+    async failInterrupted() {
+      for (const m of state.messages) if (m.status === "sending" && m.stale) Object.assign(m, { status: "failed", error: "interrupted" });
+    },
+
     async dueIds(now, limit) {
       return state.messages
         .filter((m) => m.status === "pending" && m.dueAt <= now)

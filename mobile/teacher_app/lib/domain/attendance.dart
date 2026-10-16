@@ -51,15 +51,10 @@ class DayCounts {
   final int leave;
 }
 
-/// What to do with a saved day after the server answered with [statusCode].
-enum SyncOutcome { done, refused, retryLater, signedOut }
-
-SyncOutcome syncOutcomeOf(int statusCode) {
-  if (statusCode >= 200 && statusCode < 300) return SyncOutcome.done;
-  if (statusCode == 401) return SyncOutcome.signedOut;
-  if (statusCode == 429 || statusCode >= 500) return SyncOutcome.retryLater;
-  return SyncOutcome.refused; // the day is locked, not the teacher's class, ...
-}
+/// The server is busy or broken ([statusCode] 429 or 5xx): keep the day and
+/// send it later. Any other refusal (the day is locked, not the teacher's
+/// class...) will not change by sending it again.
+bool canRetryLater(int statusCode) => statusCode == 429 || statusCode >= 500;
 
 class Teacher {
   const Teacher({required this.id, required this.firstName, required this.lastName, required this.phone});
@@ -131,6 +126,19 @@ class Profile {
   final Teacher teacher;
   final String today;
   final List<SchoolClass> classes;
+
+  /// This profile on [day]: the classes as not taken yet (the phone cannot
+  /// know otherwise while offline).
+  Profile forDay(String day) => day == today
+      ? this
+      : Profile(
+          teacher: teacher,
+          today: day,
+          classes: [
+            for (final c in classes)
+              SchoolClass(id: c.id, name: c.name, section: c.section, students: c.students, taken: false),
+          ],
+        );
 
   Map<String, dynamic> toJson() => {
         'teacher': teacher.toJson(),
@@ -204,6 +212,18 @@ class Roster {
   final String? takenByType;
   final DateTime? takenAt;
 
+  /// The same students on [day], nobody marked yet.
+  Roster blankFor(String day, {required bool editable}) => Roster(
+        classId: classId,
+        className: className,
+        section: section,
+        date: day,
+        editable: editable,
+        students: [
+          for (final s in students) RosterStudent(id: s.id, firstName: s.firstName, lastName: s.lastName, roll: s.roll),
+        ],
+      );
+
   Map<String, dynamic> toJson() => {
         'class': {'id': classId, 'name': className, 'section': section},
         'date': date,
@@ -217,6 +237,7 @@ class Roster {
 
 /// A class's day saved on the phone, waiting to reach the server.
 class PendingDay {
+  /// [clientRef] tells saved days apart on the phone.
   const PendingDay({
     required this.clientRef,
     required this.classId,
@@ -275,7 +296,6 @@ class PendingDay {
           for (final e in entries.entries) {'studentId': e.key, 'status': e.value.apiValue},
         ],
         'takenAt': takenAt.toUtc().toIso8601String(),
-        'clientRef': clientRef,
       };
 
   Map<String, dynamic> toJson() => {

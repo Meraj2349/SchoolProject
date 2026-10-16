@@ -31,11 +31,11 @@ class _TeacherAppState extends State<TeacherApp> with WidgetsBindingObserver {
     super.dispose();
   }
 
-  /// Back in the app: send what was saved while away.
+  /// Back in the app (perhaps the next morning): reload the day and send what was saved while away.
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed && widget.controller.phase == AppPhase.signedIn) {
-      unawaited(widget.controller.sync());
+      unawaited(widget.controller.refresh());
     }
   }
 

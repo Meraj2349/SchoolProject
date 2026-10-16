@@ -8,6 +8,7 @@ import { makeAbsenceSmsController } from "./interface/absenceSms.controller.js";
 //   ATTENDANCE_SMS_DELAY_MINUTES=15    wait this long after a save
 //   SMS_PROVIDER=log|bulksmsbd         log only, or send through BulkSMSBD
 //   SMS_API_URL, SMS_API_KEY, SMS_SENDER_ID   the provider's settings
+//   SMS_SIGNATURE                      who the SMS is from (default স্টার শিক্ষা পরিবার)
 
 const WORKER_INTERVAL_MS = 60_000;
 
@@ -29,6 +30,7 @@ export const absenceSms = makeAbsenceSmsUseCases({
   clock: { now: () => new Date() },
   enabled: process.env.ATTENDANCE_SMS_ENABLED === "true",
   delayMinutes: Number.isFinite(delay) && delay >= 0 ? delay : 15,
+  signature: process.env.SMS_SIGNATURE ?? "স্টার শিক্ষা পরিবার",
 });
 
 export const absenceSmsController = makeAbsenceSmsController({ useCases: absenceSms });

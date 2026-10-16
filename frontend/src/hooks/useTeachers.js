@@ -56,6 +56,6 @@ export function useSetTeacherAppAccess() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: ({ id, data }) => teachersService.setAppAccess(id, data),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["teachers", "app-access"] }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.teachers.appAccessPrefix }),
   });
 }

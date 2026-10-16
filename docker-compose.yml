@@ -25,6 +25,7 @@ services:
       - SMS_API_URL=${SMS_API_URL:-https://bulksmsbd.net/api/smsapi}
       - SMS_API_KEY=${SMS_API_KEY:-}
       - SMS_SENDER_ID=${SMS_SENDER_ID:-}
+      - SMS_SIGNATURE=${SMS_SIGNATURE:-স্টার শিক্ষা পরিবার}
     volumes:
       # Uploaded files outlive the container: posters and photos (served),
       # applicants' CVs (private, never served).

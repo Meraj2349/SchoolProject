@@ -29,6 +29,7 @@ export const queryKeys = {
     all: (branchId = null) => ["teachers", { branchId }],
     search: (q, className = "", branchId = null) => ["teachers", "search", q, className, { branchId }],
     appAccess: (branchId = null) => ["teachers", "app-access", { branchId }],
+    appAccessPrefix: ["teachers", "app-access"],
   },
   classes: {
     all: (branchId = null) => ["classes", { branchId }],
@@ -54,6 +55,8 @@ export const queryKeys = {
     byExam: (id, branchId = null) => ["results", "exam", id, { branchId }],
   },
   attendance: {
+    // Every attendance query: invalidate after a save.
+    prefix: ["attendance"],
     all: (branchId = null) => ["attendance", { branchId }],
     byStudent: (id, branchId = null) => ["attendance", "student", id, { branchId }],
     byClassSection: (cls, sec, branchId = null) => ["attendance", "class", cls, sec, { branchId }],

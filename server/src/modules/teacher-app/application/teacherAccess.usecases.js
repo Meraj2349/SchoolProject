@@ -36,7 +36,8 @@ export function makeTeacherAccessUseCases({ repository, passwordHasher }) {
     async setAccess({ admin, teacherId, input = {} }) {
       const account = await accountFor(admin, teacherId);
       const enabled = isTrue(input.enabled);
-      const phone = given(input.phone) ? parseAppPhone(input.phone) : account.phone;
+      // An empty number clears it (with access off); a missing one keeps it.
+      const phone = given(input.phone) ? parseAppPhone(input.phone) : input.phone === undefined ? account.phone : null;
       const password = given(input.password) ? parsePassword(input.password) : null;
       if (enabled && !phone) throw new ValidationError("teacher_app_phone_invalid");
       if (enabled && !password && !account.passwordHash) throw new ValidationError("teacher_app_password_required");

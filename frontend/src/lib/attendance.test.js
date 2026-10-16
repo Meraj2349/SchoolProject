@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { ATTENDANCE_STATUSES, attendanceTotals, formatSchoolTime, schoolDaysOf, statusCode } from "./attendance";
+import { ATTENDANCE_STATUSES, attendanceTotals, formatSchoolTime, schoolDaysOf, schoolToday, statusCode } from "./attendance";
 
 describe("attendance statuses", () => {
   it("are Present, Absent, Late and Leave", () => {
@@ -49,5 +49,12 @@ describe("schoolDaysOf", () => {
       "2026-10-07",
       "2026-10-08",
     ]);
+  });
+});
+
+describe("schoolToday", () => {
+  it("is the date in Bangladesh, whatever the browser's time zone", () => {
+    expect(schoolToday(new Date("2026-03-01T17:59:00Z"))).toBe("2026-03-01");
+    expect(schoolToday(new Date("2026-03-01T18:00:00Z"))).toBe("2026-03-02");
   });
 });

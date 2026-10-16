@@ -4,6 +4,9 @@ import { branchFilter } from "../../../../utils/branchFilter.js";
 // MySQL adapter for the absence SMS port (see application/fakeAbsenceSmsRepository.js).
 // AttendanceSms holds at most one message per student per day.
 
+/** A send takes seconds; a message "sending" for this long was interrupted. */
+const STALE_SENDING_MINUTES = 10;
+
 const OUTCOME_COLUMNS = { status: "status", phone: "phone", providerRef: "provider_ref", sentAt: "sent_at", error: "error", dueAt: "due_at" };
 
 export const mysqlAbsenceSmsRepository = {
@@ -31,6 +34,17 @@ export const mysqlAbsenceSmsRepository = {
     await db.query(
       "UPDATE AttendanceSms SET status = 'cancelled' WHERE class_date = ? AND student_id IN (?) AND status = 'pending'",
       [date, studentIds],
+    );
+  },
+
+  /**
+   * Messages still "sending" long after a run took them (the process stopped
+   * mid-send). Both times are the database's own clock.
+   */
+  async failInterrupted() {
+    await db.query(
+      `UPDATE AttendanceSms SET status = 'failed', error = 'interrupted'
+        WHERE status = 'sending' AND updated_at < NOW() - INTERVAL ${STALE_SENDING_MINUTES} MINUTE`,
     );
   },
 

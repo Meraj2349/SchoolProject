@@ -5,8 +5,14 @@ const NOW = new Date("2026-03-10T04:00:00Z");
 
 describe("absence SMS", () => {
   it("tells the parent in Bangla, with the date in Bangla digits", () => {
-    expect(absenceMessage({ name: "Rahim Uddin", date: "2026-03-10" })).toBe(
+    expect(absenceMessage({ name: "Rahim Uddin", date: "2026-03-10", signature: "স্টার শিক্ষা পরিবার" })).toBe(
       "প্রিয় অভিভাবক, আপনার সন্তান Rahim Uddin আজ ১০-০৩-২০২৬ তারিখে বিদ্যালয়ে অনুপস্থিত। — স্টার শিক্ষা পরিবার",
+    );
+  });
+
+  it("can go without a signature", () => {
+    expect(absenceMessage({ name: "Rahim", date: "2026-03-10", signature: "" })).toBe(
+      "প্রিয় অভিভাবক, আপনার সন্তান Rahim আজ ১০-০৩-২০২৬ তারিখে বিদ্যালয়ে অনুপস্থিত।",
     );
   });
 

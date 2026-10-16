@@ -30,15 +30,13 @@ void main() {
     });
   });
 
-  group('syncOutcomeOf', () {
-    test('tells a day to drop, keep for later, or sign out', () {
-      expect(syncOutcomeOf(200), SyncOutcome.done);
-      expect(syncOutcomeOf(401), SyncOutcome.signedOut);
-      for (final refused in [400, 403, 404, 409]) {
-        expect(syncOutcomeOf(refused), SyncOutcome.refused);
-      }
+  group('canRetryLater', () {
+    test('is true when the server is busy or broken, false when it refused the day', () {
       for (final later in [429, 500, 502, 503]) {
-        expect(syncOutcomeOf(later), SyncOutcome.retryLater);
+        expect(canRetryLater(later), isTrue);
+      }
+      for (final refused in [400, 403, 404, 409]) {
+        expect(canRetryLater(refused), isFalse);
       }
     });
   });
@@ -64,7 +62,6 @@ void main() {
           {'studentId': 102, 'status': 'Absent'},
         ],
         'takenAt': '2026-03-10T03:15:00.000Z',
-        'clientRef': 'r1',
       });
     });
 

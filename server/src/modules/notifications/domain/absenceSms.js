@@ -7,10 +7,11 @@ export const MAX_ATTEMPTS = 3;
 const BANGLA_DIGITS = "০১২৩৪৫৬৭৮৯";
 const toBanglaDigits = (text) => text.replace(/\d/g, (d) => BANGLA_DIGITS[Number(d)]);
 
-/** "প্রিয় অভিভাবক, ... অনুপস্থিত।" for `name` on `date` ("YYYY-MM-DD"). */
-export function absenceMessage({ name, date }) {
+/** "প্রিয় অভিভাবক, ... অনুপস্থিত। — {signature}" for `name` on `date` ("YYYY-MM-DD"). */
+export function absenceMessage({ name, date, signature }) {
   const [y, m, d] = date.split("-");
-  return `প্রিয় অভিভাবক, আপনার সন্তান ${name} আজ ${toBanglaDigits(`${d}-${m}-${y}`)} তারিখে বিদ্যালয়ে অনুপস্থিত। — স্টার শিক্ষা পরিবার`;
+  const text = `প্রিয় অভিভাবক, আপনার সন্তান ${name} আজ ${toBanglaDigits(`${d}-${m}-${y}`)} তারিখে বিদ্যালয়ে অনুপস্থিত।`;
+  return signature ? `${text} — ${signature}` : text;
 }
 
 /** After a save: absent students to queue (due after the delay), everyone else to cancel. */

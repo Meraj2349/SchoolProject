@@ -80,6 +80,15 @@ describe("app access, set by an admin", () => {
     expect(repository.state.accounts[0]).toMatchObject({ tokenVersion: before + 1, failedLogins: 0, lockedUntil: null });
   });
 
+  it("clears the number when an admin empties it with access off, and refuses an empty number with access on", async () => {
+    await enable();
+
+    await expectRejects(enable(7, { phone: "", enabled: true }), ValidationError, "teacher_app_phone_invalid");
+    const view = await enable(7, { phone: "", enabled: false });
+
+    expect(view).toMatchObject({ phone: null, enabled: false });
+  });
+
   it("refuses a number another teacher signs in with", async () => {
     await enable();
     await expectRejects(enable(8), ConflictError, "teacher_app_phone_taken");

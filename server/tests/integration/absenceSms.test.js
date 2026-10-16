@@ -79,6 +79,17 @@ describe("absence SMS to parents", () => {
     ]);
   });
 
+  it("gives up on a message a crash left half-sent, so it is never sent twice", async () => {
+    await saveDay("Absent", "Present");
+    await db.query("UPDATE AttendanceSms SET status = 'sending', updated_at = NOW() - INTERVAL 20 MINUTE");
+
+    await worker.sendDue();
+
+    const [rows] = await db.query("SELECT status, error FROM AttendanceSms");
+    expect(rows).toEqual([{ status: "failed", error: "interrupted" }]);
+    expect(sender.sent).toEqual([]);
+  });
+
   it("shows admins the day's messages of their own branch only", async () => {
     await saveDay("Absent", "Present");
 

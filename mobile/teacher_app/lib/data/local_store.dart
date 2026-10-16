@@ -10,6 +10,9 @@ abstract class LocalStore {
   Future<Profile?> profile();
   Future<void> saveProfile(Profile profile);
   Future<Roster?> roster(int classId, String date);
+
+  /// The class's list as last saved, whatever its day.
+  Future<Roster?> latestRoster(int classId);
   Future<void> saveRoster(Roster roster);
 
   /// Oldest first.
@@ -37,6 +40,8 @@ class SqfliteLocalStore implements LocalStore {
       path,
       options: OpenDatabaseOptions(
         version: _version,
+        // Each in-memory store (tests) is its own database, never a shared one.
+        singleInstance: path != inMemoryDatabasePath,
         onCreate: (db, _) async {
           await db.execute('CREATE TABLE cache (key TEXT PRIMARY KEY, json TEXT NOT NULL)');
           await db.execute('''
@@ -80,7 +85,16 @@ class SqfliteLocalStore implements LocalStore {
   }
 
   @override
-  Future<void> saveRoster(Roster roster) => _cache(_rosterKey(roster.classId, roster.date), roster.toJson());
+  Future<Roster?> latestRoster(int classId) async {
+    final json = await _cached('roster-latest:$classId');
+    return json == null ? null : Roster.fromJson(json);
+  }
+
+  @override
+  Future<void> saveRoster(Roster roster) async {
+    await _cache(_rosterKey(roster.classId, roster.date), roster.toJson());
+    await _cache('roster-latest:${roster.classId}', roster.toJson());
+  }
 
   @override
   Future<List<PendingDay>> pendingDays() async {

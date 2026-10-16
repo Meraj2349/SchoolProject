@@ -89,7 +89,7 @@ export function makeAttendanceController({ useCases, reads }) {
       res.status(201).json({ success: true, message: t("attendance_recorded", req.language), data: { attendanceID: mark.attendanceId } });
     }),
 
-    /** { attendanceRecords: [{ studentID, classID, classDate, status }] }, all or nothing checked. */
+    /** { attendanceRecords: [{ studentID, classID, classDate, status }] }: every record is checked before any is saved. */
     bulk: handle(async (req, res) => {
       const recordsCreated = await useCases.recordMany({ actor: actorOf(req), records: req.body?.attendanceRecords });
       res.status(201).json({ success: true, message: t("attendance_recorded", req.language), data: { recordsCreated } });

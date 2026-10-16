@@ -19,8 +19,9 @@ const MAX_ERROR_LENGTH = 255;
  * @param {{ now: () => Date }} deps.clock
  * @param {boolean} deps.enabled    false: queue nothing (ATTENDANCE_SMS_ENABLED)
  * @param {number} deps.delayMinutes
+ * @param {string} deps.signature   who the SMS is from, at its end (SMS_SIGNATURE)
  */
-export function makeAbsenceSmsUseCases({ repository, sender, clock, enabled, delayMinutes }) {
+export function makeAbsenceSmsUseCases({ repository, sender, clock, enabled, delayMinutes, signature }) {
   async function sendOne(id, now) {
     const message = await repository.details(id);
     if (message.date !== schoolToday(now)) return repository.finish(id, { status: "skipped", error: "day_over" });
@@ -29,7 +30,7 @@ export function makeAbsenceSmsUseCases({ repository, sender, clock, enabled, del
     if (!phone) return repository.finish(id, { status: "skipped", error: "no_parent_phone" });
 
     try {
-      const { ref } = await sender.send({ to: phone, text: absenceMessage({ name: message.name, date: message.date }) });
+      const { ref } = await sender.send({ to: phone, text: absenceMessage({ name: message.name, date: message.date, signature }) });
       return repository.finish(id, { status: "sent", phone, providerRef: ref ?? null, sentAt: now, error: null });
     } catch (error) {
       const reason = String(error?.message ?? error).slice(0, MAX_ERROR_LENGTH);
@@ -47,11 +48,21 @@ export function makeAbsenceSmsUseCases({ repository, sender, clock, enabled, del
       if (cancel.length) await repository.cancel({ studentIds: cancel, date });
     },
 
-    /** Sends every message that is due. Overlapping runs never send one twice (claim is atomic). */
+    /**
+     * Sends every message that is due. Overlapping runs never send one twice
+     * (claim is atomic). A message left "sending" by a crash is given up, not
+     * retried: it may already have reached the parent. One broken message
+     * does not hold up the others.
+     */
     async sendDue() {
+      await repository.failInterrupted();
       const now = clock.now();
       for (const id of await repository.dueIds(now, BATCH_SIZE)) {
-        if (await repository.claim(id)) await sendOne(id, now);
+        try {
+          if (await repository.claim(id)) await sendOne(id, now);
+        } catch (error) {
+          console.error(`Absence SMS ${id}: ${error?.code ?? ""} ${error?.message ?? error}`);
+        }
       }
     },
 

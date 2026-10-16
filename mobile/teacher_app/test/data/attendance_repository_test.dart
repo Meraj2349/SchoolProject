@@ -10,7 +10,7 @@ import '../support/fake_school_server.dart';
 
 const _server = 'https://school.test';
 // 10:00 in Dhaka on 2026-03-10.
-final _now = DateTime.utc(2026, 3, 10, 4);
+final _start = DateTime.utc(2026, 3, 10, 4);
 
 void main() {
   sqfliteFfiInit();
@@ -19,9 +19,11 @@ void main() {
   late MemorySessionStore session;
   late LocalStore store;
   late AttendanceRepository repository;
+  late DateTime now;
   var refs = 0;
 
   setUp(() async {
+    now = _start;
     school = FakeSchoolServer();
     session = MemorySessionStore();
     store = await SqfliteLocalStore.open(databaseFactoryFfiNoIsolate, inMemoryDatabasePath);
@@ -29,7 +31,7 @@ void main() {
       store: store,
       session: session,
       client: school.client,
-      now: () => _now,
+      now: () => now,
       newClientRef: () => 'ref-${++refs}',
     );
   });
@@ -88,10 +90,25 @@ void main() {
 
       expect(result.synced, isFalse);
       final pending = await repository.pendingDays();
-      expect(pending.single.takenAt, _now);
+      expect(pending.single.takenAt, _start);
       expect(pending.single.entries, day(AttendanceStatus.absent, AttendanceStatus.present));
       final cached = (await repository.roster(10, '2026-03-10')).value;
       expect(cached.students.map((s) => s.status), [AttendanceStatus.absent, AttendanceStatus.present]);
+    });
+
+    test('after a night offline, shows today with nothing taken and lets the teacher take it from yesterday\'s list', () async {
+      now = _start.add(const Duration(days: 1)); // 10:00 the next morning, still no connection
+
+      final profile = (await repository.profile()).value;
+      final roster = (await repository.roster(10, profile.today)).value;
+      await repository.saveDay(roster, day(AttendanceStatus.present, AttendanceStatus.absent));
+
+      expect(profile.today, '2026-03-11');
+      expect(profile.classes.single.taken, isFalse);
+      expect(roster.date, '2026-03-11');
+      expect(roster.editable, isTrue);
+      expect(roster.students.map((s) => s.status), [null, null]);
+      expect((await repository.pendingDays()).single.date, '2026-03-11');
     });
 
     test('keeps only the newest save of a class\'s day', () async {
@@ -152,6 +169,27 @@ void main() {
 
       await repository.discard(pending.single.clientRef);
       expect(await repository.pendingDays(), isEmpty);
+    });
+
+    test('keeps the day for later when the server cannot take it right now', () async {
+      final roster = (await repository.roster(10, '2026-03-10')).value;
+      school.refuseNextSave = 503;
+
+      final result = await repository.saveDay(roster, day(AttendanceStatus.absent, AttendanceStatus.present));
+
+      expect(result.synced, isFalse);
+      expect(await repository.pendingDays(), hasLength(1));
+    });
+
+    test('keeps the day when the sign-in was revoked meanwhile, then signs out', () async {
+      final roster = (await repository.roster(10, '2026-03-10')).value;
+      school.token = 'reset-by-admin';
+
+      await expectLater(
+        repository.saveDay(roster, day(AttendanceStatus.absent, AttendanceStatus.present)),
+        throwsA(isA<SignedOutException>()),
+      );
+      expect(await repository.pendingDays(), hasLength(1));
     });
 
     test('saves straight away when online', () async {
