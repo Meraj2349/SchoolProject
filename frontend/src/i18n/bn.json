@@ -14,7 +14,8 @@
     "events": "ইভেন্ট",
     "branches": "শাখা",
     "onlineApply": "অনলাইনে আবেদন",
-    "quakerEducation": "একটি কোয়েকার শিক্ষা"
+    "quakerEducation": "একটি কোয়েকার শিক্ষা",
+    "attendance": "উপস্থিতি"
   },
   "footer": {
     "contact": "যোগাযোগ",
@@ -344,9 +345,7 @@
     "pageTitle": "উপস্থিতির রেকর্ড",
     "pageSubtitle": "শ্রেণি এবং বিভাগ দিয়ে উপস্থিতি অনুসন্ধান করুন",
     "className": "শ্রেণির নাম",
-    "classNamePlaceholder": "যেমন: শ্রেণি ৫",
     "section": "বিভাগ",
-    "sectionPlaceholder": "যেমন: ক",
     "searchBtn": "উপস্থিতি খুঁজুন",
     "searching": "খোঁজা হচ্ছে…",
     "totalRecords": "মোট রেকর্ড",
@@ -357,7 +356,17 @@
     "date": "তারিখ",
     "status": "অবস্থা",
     "noRecords": "কোনো উপস্থিতির রেকর্ড পাওয়া যায়নি।",
-    "failedToFetch": "উপস্থিতি আনতে ব্যর্থ হয়েছে"
+    "failedToFetch": "উপস্থিতি আনতে ব্যর্থ হয়েছে",
+    "searchTitle": "উপস্থিতি খুঁজুন",
+    "selectClass": "শ্রেণি নির্বাচন করুন",
+    "selectSection": "শাখা নির্বাচন করুন",
+    "summary": "সারসংক্ষেপ",
+    "statuses": {
+      "present": "উপস্থিত",
+      "absent": "অনুপস্থিত",
+      "late": "দেরিতে",
+      "excused": "ছুটিপ্রাপ্ত"
+    }
   },
   "routine": {
     "pageTitle": "স্কুল রুটিন",

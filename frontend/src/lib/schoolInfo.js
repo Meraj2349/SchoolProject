@@ -27,6 +27,7 @@ export const PUBLIC_NAV = [
       { key: "teachers", path: "/teachers" },
       { key: "routine", path: "/routine" },
       { key: "results", path: "/result" },
+      { key: "attendance", path: "/attendance" },
     ],
   },
   { key: "gallery", path: "/gallery" },

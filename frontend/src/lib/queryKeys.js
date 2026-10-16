@@ -55,6 +55,7 @@ export const queryKeys = {
   attendance: {
     all: (branchId = null) => ["attendance", { branchId }],
     byStudent: (id, branchId = null) => ["attendance", "student", id, { branchId }],
+    byClassSection: (cls, sec, branchId = null) => ["attendance", "class", cls, sec, { branchId }],
     stats: (branchId = null) => ["attendance", "statistics", { branchId }],
     grid: (cls, sec, start, end, branchId = null) => ["attendance", "grid", cls, sec, start, end, { branchId }],
   },

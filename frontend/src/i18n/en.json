@@ -14,7 +14,8 @@
     "events": "Events",
     "branches": "Branches",
     "onlineApply": "Apply online",
-    "quakerEducation": "A Quaker Education"
+    "quakerEducation": "A Quaker Education",
+    "attendance": "Attendance"
   },
   "footer": {
     "contact": "Contact",
@@ -344,9 +345,7 @@
     "pageTitle": "Attendance Records",
     "pageSubtitle": "Search attendance by class and section",
     "className": "Class Name",
-    "classNamePlaceholder": "e.g. Class 5",
     "section": "Section",
-    "sectionPlaceholder": "e.g. A",
     "searchBtn": "Search Attendance",
     "searching": "Searching…",
     "totalRecords": "Total Records",
@@ -357,7 +356,17 @@
     "date": "Date",
     "status": "Status",
     "noRecords": "No attendance records found.",
-    "failedToFetch": "Failed to fetch attendance"
+    "failedToFetch": "Failed to fetch attendance",
+    "searchTitle": "Find attendance",
+    "selectClass": "Select class",
+    "selectSection": "Select section",
+    "summary": "Summary",
+    "statuses": {
+      "present": "Present",
+      "absent": "Absent",
+      "late": "Late",
+      "excused": "Excused"
+    }
   },
   "routine": {
     "pageTitle": "School Routines",
