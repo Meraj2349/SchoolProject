@@ -1,427 +1,150 @@
 "use client";
 
-import { useState } from "react";
-import Navbar from "@/components/layout/Navbar";
-import Footer from "@/components/layout/Footer";
-import LatestUpdatesNotice from "@/components/shared/LatestUpdatesNotice";
-import LottieLoader from "@/components/ui/LottieLoader";
+import { useMemo, useState } from "react";
+import { FiBookOpen, FiCalendar, FiMail, FiPhone, FiUserCheck } from "react-icons/fi";
+import { EmptyState, ErrorState, PageHero, PersonAvatar, PublicPage, SiteLoader } from "@/components/site";
+import { useClasses, useClassNames } from "@/hooks/useClasses";
+import { useImages } from "@/hooks/useImages";
 import { useTeachers } from "@/hooks/useTeachers";
-import { useImagesByTeacher } from "@/hooks/useImages";
-import { useBranchStore } from "@/store/branchStore";
-import { useTranslations } from "@/store/languageStore";
-import Image from "next/image";
-import { useClassNames, useStandardSections } from "@/hooks/useClasses";
+import { formatDate, formatNumber } from "@/lib/homePage";
+import { classesTaughtBy, filterTeachers, fullName, photosBy } from "@/lib/people";
+import { useLanguageStore, useTranslations } from "@/store/languageStore";
 
-const NAVY = "#1a2744";
-const NAVY_DARK = "#111b33";
-const NAVY_MID = "#243156";
-const GOLD = "#c9a84c";
-const GOLD_LIGHT = "#e8c97a";
+const EMPTY_FILTERS = { search: "", field: "all", className: "", section: "" };
 
-const COLORS = [
-  "#FF6B6B",
-  "#4ECDC4",
-  "#45B7D1",
-  "#96CEB4",
-  "#FFEAA7",
-  "#DDA0DD",
-  "#98D8C8",
-  "#F7DC6F",
-  "#BB8FCE",
-  "#85C1E9",
-];
-
-function avatar(fn, ln) {
-  const initials = `${fn.charAt(0)}${ln.charAt(0)}`.toUpperCase();
-  const color = COLORS[(fn.charCodeAt(0) + ln.charCodeAt(0)) % COLORS.length];
-  return { initials, color };
-}
-
-function TeacherCard({ teacher }) {
-  const { data: images = [] } = useImagesByTeacher(teacher.TeacherID);
+function TeacherCard({ teacher, photo, classes }) {
   const t = useTranslations("teachers");
-  const [imgError, setImgError] = useState(false);
-  const img = images[0];
-  const av = avatar(teacher.FirstName, teacher.LastName);
-  const showImage = img && !imgError;
+  const language = useLanguageStore((s) => s.language);
+  const joined = formatDate(teacher.JoiningDate, language);
+  const details = [
+    teacher.Email && { icon: FiMail, value: teacher.Email, href: `mailto:${teacher.Email}` },
+    teacher.ContactNumber && { icon: FiPhone, value: teacher.ContactNumber, href: `tel:${teacher.ContactNumber}` },
+    joined && { icon: FiCalendar, value: `${t("joined")} ${joined}` },
+  ].filter(Boolean);
 
   return (
-    <div
-      className="bg-white rounded-[18px] overflow-hidden border border-gray-200 transition-all duration-[350ms] hover:-translate-y-2 hover:shadow-2xl relative"
-      style={{ boxShadow: "0 4px 20px rgba(26,39,68,0.1)" }}
-      onMouseEnter={(e) => (e.currentTarget.style.borderColor = GOLD)}
-      onMouseLeave={(e) => (e.currentTarget.style.borderColor = "#e2e6f0")}
-    >
-      {/* Card header */}
-      <div
-        className="relative overflow-hidden px-5 py-7 text-center"
-        style={{
-          background: `linear-gradient(135deg, ${NAVY_DARK} 0%, ${NAVY} 60%, ${NAVY_MID} 100%)`,
-          borderBottom: `3px solid ${GOLD}`,
-        }}
-      >
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            background:
-              "radial-gradient(ellipse 80% 60% at 50% 0%, rgba(201,168,76,0.12) 0%, transparent 70%)",
-          }}
-        />
-        <div className="relative w-[88px] h-[88px] mx-auto z-[1]">
-          {showImage ? (
-            <Image
-              src={img.ImagePath}
-              alt={`${teacher.FirstName} ${teacher.LastName}`}
-              width={88}
-              height={88}
-              className="w-full h-full object-cover rounded-full transition-transform duration-300 hover:scale-105"
-              style={{
-                border: `3px solid ${GOLD}`,
-                boxShadow: "0 4px 16px rgba(0,0,0,0.25)",
-              }}
-              onError={() => setImgError(true)}
-            />
-          ) : null}
-          <div
-            className="absolute top-0 left-0 w-full h-full rounded-full flex items-center justify-center text-3xl font-extrabold text-white"
-            style={{
-              backgroundColor: av.color,
-              border: `3px solid ${GOLD}`,
-              boxShadow: "0 4px 16px rgba(0,0,0,0.2)",
-              display: showImage ? "none" : "flex",
-            }}
-          >
-            {av.initials}
-          </div>
-        </div>
-      </div>
-
-      {/* Card body */}
-      <div className="px-5.5 py-5" style={{ padding: "20px 22px" }}>
-        <h3
-          className="font-bold text-[1.15rem] text-center m-0 mb-3.5"
-          style={{ color: NAVY }}
-        >
-          {teacher.FirstName} {teacher.LastName}
-        </h3>
-        <div className="flex flex-col gap-2 mb-3.5">
-          {[
-            {
-              value: teacher.Subject,
-              cls: "font-bold text-[0.9rem]",
-              style: { color: NAVY },
-            },
-            {
-              value: teacher.Email,
-              cls: "text-gray-500 text-[0.88rem] break-all",
-            },
-            {
-              value: teacher.ContactNumber,
-              cls: "text-gray-500 text-[0.88rem]",
-            },
-          ].map((item, i) =>
-            item.value ? (
-              <div
-                key={i}
-                className="flex items-center gap-2.5 px-3 py-2 bg-gray-50 rounded-lg border border-gray-200 transition-colors hover:bg-[#eef0f8]"
-              >
-                <span className={item.cls} style={item.style}>
-                  {item.value}
-                </span>
-              </div>
-            ) : null,
-          )}
-        </div>
-        <div className="pt-3 border-t border-gray-200 flex items-center justify-center gap-1.5 text-gray-400 text-[0.82rem]">
-          {t("joined")} {new Date(teacher.JoiningDate).toLocaleDateString()}
-        </div>
-      </div>
-    </div>
+    <article className="flex flex-col items-center rounded-sm border-t-4 border-school-gold bg-white p-6 text-center shadow">
+      <PersonAvatar person={teacher} photo={photo} />
+      <h3 className="site-heading m-0 mt-4 break-words text-lg">{fullName(teacher)}</h3>
+      {teacher.Subject && (
+        <p className="m-0 mt-1 inline-flex items-center gap-1.5 text-sm font-semibold text-school-gold">
+          <FiBookOpen aria-hidden="true" />
+          {teacher.Subject}
+        </p>
+      )}
+      {classes.length > 0 && (
+        <p className="m-0 mt-2 inline-flex items-center gap-1.5 rounded-full bg-school-cream px-3 py-1 text-xs font-semibold text-school-navy">
+          <FiUserCheck aria-hidden="true" />
+          {t("classTeacher")}: {classes.map((c) => `${c.ClassName} – ${c.Section}`).join(", ")}
+        </p>
+      )}
+      {details.length > 0 && (
+        <ul className="m-0 mt-4 w-full list-none space-y-1.5 border-t border-school-cream-deep p-0 pt-4 text-left text-sm">
+          {details.map(({ icon: Icon, value, href }) => (
+            <li key={value} className="flex min-w-0 items-center gap-2 text-school-muted">
+              <Icon aria-hidden="true" className="shrink-0 text-school-gold" />
+              {href ? (
+                <a href={href} className="break-all text-school-ink no-underline hover:underline">
+                  {value}
+                </a>
+              ) : (
+                <span>{value}</span>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
+    </article>
   );
 }
 
-const NavyHeader = ({ children }) => (
-  <div
-    className="text-center flex flex-col items-center justify-center px-6 py-14 relative overflow-hidden"
-    style={{
-      background: `linear-gradient(135deg, ${NAVY_DARK} 0%, ${NAVY} 50%, ${NAVY_MID} 100%)`,
-    }}
-  >
-    <div
-      className="absolute inset-0 pointer-events-none"
-      style={{
-        background: `radial-gradient(ellipse 60% 50% at 20% 50%, rgba(201,168,76,0.15) 0%, transparent 70%),
-                   radial-gradient(ellipse 40% 60% at 80% 20%, rgba(201,168,76,0.1) 0%, transparent 60%)`,
-      }}
-    />
-    <div
-      className="absolute bottom-0 left-0 right-0 h-[4px]"
-      style={{
-        background: `linear-gradient(90deg, transparent, ${GOLD}, ${GOLD_LIGHT}, ${GOLD}, transparent)`,
-      }}
-    />
-    {children}
-  </div>
-);
-
 export default function TeacherListPage() {
-  const { data: teachers = [], isLoading, isError, refetch } = useTeachers();
-  const [search, setSearch] = useState("");
-  const [filterBy, setFilterBy] = useState("all");
-  const [selectedClass, setSelectedClass] = useState("");
-  const [selectedSection, setSelectedSection] = useState("");
   const t = useTranslations("teachers");
-  const { currentBranchId, currentBranchName } = useBranchStore();
-
+  const language = useLanguageStore((s) => s.language);
+  const { data: teachers = [], isLoading, isError, refetch } = useTeachers();
+  const { data: classes = [] } = useClasses();
   const { data: classNames = [] } = useClassNames();
-  const { data: sections = [] } = useStandardSections();
+  const { data: images = [] } = useImages();
+  const [filters, setFilters] = useState(EMPTY_FILTERS);
 
-  const handleClassChange = (e) => {
-    setSelectedClass(e.target.value);
-    setSelectedSection("");
-  };
-
-  const filtered = teachers.filter((teacher) => {
-    if (!search.trim()) return true;
-    const s = search.toLowerCase();
-    const full = `${teacher.FirstName} ${teacher.LastName}`.toLowerCase();
-    if (filterBy === "name") return full.includes(s);
-    if (filterBy === "subject")
-      return teacher.Subject?.toLowerCase().includes(s);
-    if (filterBy === "email") return teacher.Email?.toLowerCase().includes(s);
-    return (
-      full.includes(s) ||
-      teacher.Subject?.toLowerCase().includes(s) ||
-      teacher.Email?.toLowerCase().includes(s)
-    );
-  });
-
-  const selectStyle = {
-    padding: "10px 14px",
-    borderRadius: 8,
-    border: `1.5px solid #e2e6f0`,
-    fontSize: 14,
-    background: "#f8f9fc",
-    color: NAVY,
-    cursor: "pointer",
-    outline: "none",
-    width: "100%",
-  };
-
-  if (isLoading)
-    return (
-      <div className="min-h-screen bg-[#f0f2f8] font-sans">
-        <Navbar />
-        <div className="flex justify-center items-center min-h-[60vh]">
-          <LottieLoader size="medium" text={t("loadingTeachers")} />
-        </div>
-        <Footer />
-      </div>
-    );
-
-  if (isError)
-    return (
-      <div className="min-h-screen bg-[#f0f2f8] font-sans">
-        <Navbar />
-        <div className="text-center px-6 py-12 bg-white rounded-2xl shadow-lg max-w-[500px] mx-auto mt-10 border border-gray-200">
-          <p className="text-red-700 text-[1.1rem] mb-5">
-            {t("failedToFetch")}
-          </p>
-          <button
-            onClick={refetch}
-            className="border-none px-7 py-3 rounded-full cursor-pointer text-[0.95rem] font-bold text-white transition-all duration-200 hover:-translate-y-0.5"
-            style={{ background: NAVY }}
-          >
-            {t("tryAgain")}
-          </button>
-        </div>
-        <Footer />
-      </div>
-    );
+  const photos = useMemo(() => photosBy(images, "TeacherID"), [images]);
+  const sections = [...new Set(classes.filter((c) => c.ClassName === filters.className).map((c) => c.Section))].sort();
+  const shown = filterTeachers(teachers, classes, filters);
+  const change = (field) => (event) =>
+    setFilters((previous) => ({ ...previous, [field]: event.target.value, ...(field === "className" && { section: "" }) }));
 
   return (
-    <div className="min-h-screen bg-[#f0f2f8] font-sans">
-      <Navbar />
-      <LatestUpdatesNotice />
-
-      <NavyHeader>
-        <h1
-          className="relative z-[1] text-white font-extrabold m-0 mb-2 tracking-tight"
-          style={{
-            fontSize: "clamp(1.8rem, 4vw, 2.8rem)",
-            letterSpacing: "-0.02em",
-          }}
-        >
-          {t("pageTitle")}
-        </h1>
-        {currentBranchId != null && (
-          <div
-            className="relative z-[1] inline-flex items-center gap-1.5 mt-3.5 px-4 py-1.5 rounded-full text-xs font-semibold"
-            style={{
-              background: "rgba(201,168,76,0.18)",
-              border: "1.5px solid rgba(201,168,76,0.5)",
-              color: GOLD_LIGHT,
-            }}
-          >
-            <span>🏫</span>
-            <span>{currentBranchName}</span>
-          </div>
-        )}
-      </NavyHeader>
-
-      {/* Class & Section filter bar */}
-      <div
-        className="max-w-[920px] mx-auto -mt-px grid grid-cols-1 sm:grid-cols-2 gap-5 px-7 py-5.5 bg-white rounded-b-2xl"
-        style={{
-          padding: "22px 28px",
-          borderTop: `3px solid ${GOLD}`,
-          boxShadow: "0 6px 24px rgba(26,39,68,0.12)",
-        }}
-      >
-        {[
-          {
-            label: t("className") || "Class",
-            value: selectedClass,
-            onChange: handleClassChange,
-            disabled: false,
-            options: classNames,
-            placeholder: t("allClasses") || "All Classes",
-          },
-          {
-            label: t("section") || "Section",
-            value: selectedSection,
-            onChange: (e) => setSelectedSection(e.target.value),
-            disabled: !selectedClass,
-            options: sections,
-            placeholder: t("allSections") || "All Sections",
-          },
-        ].map((field, i) => (
-          <div key={i} className="flex flex-col gap-1.5">
-            <label
-              className="text-xs font-bold uppercase tracking-[0.06em]"
-              style={{ color: NAVY }}
-            >
-              {field.label}
+    <PublicPage className="bg-school-cream">
+      <PageHero title={t("pageTitle")} subtitle={t("pageSubtitle")} />
+      <div className="mx-auto max-w-7xl px-4 py-12">
+        <form role="search" onSubmit={(e) => e.preventDefault()} className="mb-8 grid gap-4 rounded-sm bg-white p-5 shadow md:grid-cols-[2fr_1fr_1fr_1fr_auto] md:items-end">
+          <div>
+            <label htmlFor="teacher-search" className="site-label">
+              {t("searchLabel")}
             </label>
-            <select
-              value={field.value}
-              onChange={field.onChange}
-              disabled={field.disabled}
-              style={{
-                ...selectStyle,
-                opacity: field.disabled ? 0.5 : 1,
-                cursor: field.disabled ? "not-allowed" : "pointer",
-              }}
-              onFocus={(e) => {
-                e.target.style.borderColor = GOLD;
-                e.target.style.boxShadow = "0 0 0 3px rgba(201,168,76,0.15)";
-              }}
-              onBlur={(e) => {
-                e.target.style.borderColor = "#e2e6f0";
-                e.target.style.boxShadow = "";
-              }}
-            >
-              <option value="">{field.placeholder}</option>
-              {field.options.map((o) => (
-                <option key={o} value={o}>
-                  {o}
+            <input id="teacher-search" type="search" value={filters.search} onChange={change("search")} placeholder={t("searchPlaceholder")} className="site-input" />
+          </div>
+          <div>
+            <label htmlFor="teacher-field" className="site-label">
+              {t("searchIn")}
+            </label>
+            <select id="teacher-field" value={filters.field} onChange={change("field")} className="site-input">
+              <option value="all">{t("allFields")}</option>
+              <option value="name">{t("name")}</option>
+              <option value="subject">{t("subject")}</option>
+              <option value="email">{t("email")}</option>
+            </select>
+          </div>
+          <div>
+            <label htmlFor="teacher-class" className="site-label">
+              {t("className")}
+            </label>
+            <select id="teacher-class" value={filters.className} onChange={change("className")} className="site-input">
+              <option value="">{t("allClasses")}</option>
+              {classNames.map((name) => (
+                <option key={name} value={name}>
+                  {name}
                 </option>
               ))}
             </select>
           </div>
-        ))}
-      </div>
-
-      {/* Search section */}
-      <div
-        className="max-w-[920px] mx-auto my-7 bg-white px-7 py-6 rounded-2xl border border-gray-200"
-        style={{ boxShadow: "0 6px 24px rgba(26,39,68,0.1)" }}
-      >
-        <div className="flex gap-3 items-center flex-wrap mb-3.5 max-sm:flex-col max-sm:items-stretch">
-          <div className="relative flex-1 min-w-[220px]">
-            <input
-              type="text"
-              placeholder={t("searchPlaceholder")}
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full px-4 py-3 border-[1.5px] border-gray-200 rounded-full text-[0.95rem] bg-gray-50 transition-all duration-200 focus:outline-none focus:bg-white"
-              style={{ color: NAVY }}
-              onFocus={(e) => {
-                e.target.style.borderColor = GOLD;
-                e.target.style.boxShadow = "0 0 0 3px rgba(201,168,76,0.15)";
-              }}
-              onBlur={(e) => {
-                e.target.style.borderColor = "#e2e6f0";
-                e.target.style.boxShadow = "";
-              }}
-            />
+          <div>
+            <label htmlFor="teacher-section" className="site-label">
+              {t("section")}
+            </label>
+            <select id="teacher-section" value={filters.section} onChange={change("section")} disabled={!filters.className} className="site-input disabled:opacity-60">
+              <option value="">{t("allSections")}</option>
+              {sections.map((section) => (
+                <option key={section} value={section}>
+                  {section}
+                </option>
+              ))}
+            </select>
           </div>
-          <select
-            value={filterBy}
-            onChange={(e) => setFilterBy(e.target.value)}
-            className="px-4 py-3 border-[1.5px] border-gray-200 rounded-full text-[0.95rem] bg-gray-50 cursor-pointer min-w-[140px]"
-            style={{ color: NAVY }}
-            onFocus={(e) => {
-              e.target.style.borderColor = GOLD;
-            }}
-            onBlur={(e) => {
-              e.target.style.borderColor = "#e2e6f0";
-            }}
-          >
-            <option value="all">{t("allFields")}</option>
-            <option value="name">{t("name")}</option>
-            <option value="subject">{t("subject")}</option>
-            <option value="email">{t("email")}</option>
-          </select>
-          {search && (
-            <button
-              onClick={() => setSearch("")}
-              className="border-none px-5 py-3 rounded-full cursor-pointer text-sm font-bold text-white transition-all duration-200 hover:-translate-y-0.5 max-sm:w-full"
-              style={{ background: NAVY }}
-            >
-              {t("clear")}
-            </button>
-          )}
-        </div>
-        <div className="text-right pt-2.5 border-t border-gray-200">
-          <span
-            className="text-[0.82rem] font-bold px-3.5 py-1.5 rounded-full inline-block"
-            style={{ background: NAVY, color: GOLD_LIGHT }}
-          >
-            {filtered.length}{" "}
-            {filtered.length !== 1 ? t("teachersFound") : t("teacherFound")}
-          </span>
-        </div>
+          <button type="button" onClick={() => setFilters(EMPTY_FILTERS)} className="site-cta">
+            {t("clear")}
+          </button>
+        </form>
+
+        {isLoading ? (
+          <SiteLoader label={t("loadingTeachers")} />
+        ) : isError ? (
+          <ErrorState message={t("failedToFetch")} onRetry={refetch} />
+        ) : shown.length === 0 ? (
+          <EmptyState title={t("noTeachersFound")} />
+        ) : (
+          <>
+            <p className="m-0 mb-4 text-sm text-school-muted" aria-live="polite">
+              {formatNumber(shown.length, language)} {shown.length === 1 ? t("teacherFound") : t("teachersFound")}
+            </p>
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {shown.map((teacher) => (
+                <TeacherCard key={teacher.TeacherID} teacher={teacher} photo={photos.get(teacher.TeacherID)} classes={classesTaughtBy(classes, teacher.TeacherID)} />
+              ))}
+            </div>
+          </>
+        )}
       </div>
-
-      {/* Grid or empty state */}
-      {filtered.length === 0 ? (
-        <div
-          className="text-center px-6 py-12 bg-white rounded-2xl shadow-md mx-auto mb-12 max-w-[480px] border border-gray-200"
-          style={{ margin: "0 auto 48px" }}
-        >
-          <div className="text-[3.5rem] mb-3.5 opacity-55">🔍</div>
-          <h3
-            className="font-semibold text-[1.2rem] m-0"
-            style={{ color: NAVY }}
-          >
-            {t("noTeachersFound")}
-          </h3>
-        </div>
-      ) : (
-        <div
-          className="grid gap-6 max-w-[1300px] mx-auto mb-12 px-6"
-          style={{
-            gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
-          }}
-        >
-          {filtered.map((teacher) => (
-            <TeacherCard key={teacher.TeacherID} teacher={teacher} />
-          ))}
-        </div>
-      )}
-
-      <Footer />
-    </div>
+    </PublicPage>
   );
 }

@@ -298,7 +298,15 @@
     "failedToFetch": "শিক্ষক আনতে ব্যর্থ হয়েছে",
     "tryAgain": "আবার চেষ্টা করুন",
     "noTeachersFound": "কোনো শিক্ষক পাওয়া যায়নি",
-    "joined": "যোগদান:"
+    "joined": "যোগদান",
+    "pageSubtitle": "যাঁরা প্রতিদিন আমাদের শিক্ষার্থীদের পথ দেখান।",
+    "searchLabel": "শিক্ষক খুঁজুন",
+    "searchIn": "যেখানে খুঁজবেন",
+    "className": "শ্রেণি",
+    "section": "শাখা",
+    "allClasses": "সব শ্রেণি",
+    "allSections": "সব শাখা",
+    "classTeacher": "শ্রেণি শিক্ষক"
   },
   "results": {
     "pageTitle": "শিক্ষার্থীর ফলাফল",

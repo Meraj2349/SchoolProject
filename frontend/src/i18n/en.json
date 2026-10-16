@@ -298,7 +298,15 @@
     "failedToFetch": "Failed to fetch teachers",
     "tryAgain": "Try Again",
     "noTeachersFound": "No teachers found",
-    "joined": "Joined:"
+    "joined": "Joined",
+    "pageSubtitle": "The teachers who guide our students every day.",
+    "searchLabel": "Search teachers",
+    "searchIn": "Search in",
+    "className": "Class",
+    "section": "Section",
+    "allClasses": "All classes",
+    "allSections": "All sections",
+    "classTeacher": "Class teacher"
   },
   "results": {
     "pageTitle": "Student Results",
