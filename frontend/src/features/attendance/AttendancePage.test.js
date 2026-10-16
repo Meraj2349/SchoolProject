@@ -17,6 +17,7 @@ const RECORDS = [
   { AttendanceID: 1, FirstName: "Rahim", LastName: "Uddin", ClassDate: "2026-10-05", Status: "Present" },
   { AttendanceID: 2, FirstName: "Karima", LastName: null, ClassDate: "2026-10-05", Status: "Absent" },
   { AttendanceID: 3, StudentID: 9, ClassDate: "2026-10-05", Status: "Late" },
+  { AttendanceID: 4, FirstName: "Nadia", ClassDate: "2026-10-05", Status: "Leave" },
 ];
 
 async function search() {
@@ -42,14 +43,14 @@ describe("AttendancePage", () => {
 
     const rows = within(await screen.findByRole("table")).getAllByRole("row");
     expect(attendance.getByClassSection).toHaveBeenCalledWith("Class 5", "Good");
-    expect(rows).toHaveLength(4);
+    expect(rows).toHaveLength(5);
     expect(within(rows[2]).getByText("Karima")).toBeInTheDocument();
     expect(within(rows[3]).getByText("9")).toBeInTheDocument();
     expect(screen.queryByText(/undefined/)).not.toBeInTheDocument();
     expect(within(rows[1]).getByText("5 Oct 2026")).toBeInTheDocument();
 
     const summary = screen.getByRole("list", { name: "Summary" });
-    expect(within(summary).getByText("33.3%")).toBeInTheDocument();
+    expect(within(summary).getByText("66.7%")).toBeInTheDocument();
     expect(within(summary).getByText("Absent").previousSibling).toHaveTextContent("1");
   });
 
@@ -65,6 +66,7 @@ describe("AttendancePage", () => {
 
     const rows = within(await screen.findByRole("table")).getAllByRole("row");
     expect(within(rows[3]).getByText("দেরিতে")).toBeInTheDocument();
+    expect(within(rows[4]).getByText("ছুটি")).toBeInTheDocument();
   });
 
   it("shows its own message when the search fails", async () => {

@@ -13,7 +13,7 @@ import { attendanceSummary, statusKey } from "./attendanceSummary";
 const STATUS_TONES = {
   present: "bg-school-navy text-school-gold-soft",
   late: "bg-school-gold-soft text-school-navy-deep",
-  excused: "bg-school-cream-deep text-school-ink",
+  leave: "bg-school-cream-deep text-school-ink",
   absent: "bg-red-100 text-red-800",
 };
 
@@ -67,7 +67,7 @@ function AttendanceResults({ className, section }) {
                     <td className="px-4 py-3 font-semibold text-school-navy">{studentName(record)}</td>
                     <td className="px-4 py-3">{formatDate(record.AttendanceDate || record.ClassDate, language) || "–"}</td>
                     <td className="px-4 py-3">
-                      <span className={`inline-block min-w-20 rounded-full px-3 py-1 text-center text-xs font-bold ${STATUS_TONES[key] ?? STATUS_TONES.excused}`}>
+                      <span className={`inline-block min-w-20 rounded-full px-3 py-1 text-center text-xs font-bold ${STATUS_TONES[key] ?? STATUS_TONES.leave}`}>
                         {key ? t(`statuses.${key}`) : record.Status || "–"}
                       </span>
                     </td>

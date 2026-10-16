@@ -4,6 +4,7 @@ import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { attendanceService } from "@/services/attendance.service";
 import { classesService } from "@/services/classes.service";
+import { attendanceTotals, statusCode } from "@/lib/attendance";
 import { localDateString } from "@/lib/dates";
 import { queryKeys } from "@/lib/queryKeys";
 import { useTranslations } from "@/store/languageStore";
@@ -59,6 +60,12 @@ const STATUS_CONFIG = {
     cell: "bg-amber-100 hover:bg-amber-200 text-amber-700 border-amber-200",
     badge: "bg-amber-100 text-amber-700",
     count: "text-amber-600",
+  },
+  Leave: {
+    label: "Lv",
+    cell: "bg-sky-100 hover:bg-sky-200 text-sky-700 border-sky-200",
+    badge: "bg-sky-100 text-sky-700",
+    count: "text-sky-600",
   },
 };
 
@@ -255,37 +262,20 @@ export default function AdminAttendanceGridPage() {
       ? students.filter((s) => s.attendance?.[todayStr] === "Absent").length
       : null;
 
-    // Monthly average: total present school-day records / (students × school days)
-    let totalPresent = 0;
-    for (const s of students) {
-      for (const d of schoolDays) {
-        if (s.attendance?.[d] === "Present") totalPresent++;
-      }
-    }
-    const avgPct =
-      schoolDays.length > 0
-        ? Math.round(
-            (totalPresent / (students.length * schoolDays.length)) * 100,
-          )
-        : null;
+    // Monthly average over the days marked: late students came, students on leave were not expected.
+    const avgPct = attendanceTotals(
+      students.flatMap((s) => schoolDays.map((d) => s.attendance?.[d])),
+    ).rate;
 
     return { presentToday, absentToday, avgPct };
   }, [students, todayStr, startDate, endDate, schoolDays]);
 
   // ── Per-student summary ───────────────────────────────────────────────
   const studentSummary = (student) => {
-    const present = schoolDays.filter(
-      (d) => student.attendance?.[d] === "Present",
-    ).length;
-    const absent = schoolDays.filter(
-      (d) => student.attendance?.[d] === "Absent",
-    ).length;
-    const late = schoolDays.filter(
-      (d) => student.attendance?.[d] === "Late",
-    ).length;
-    const marked = present + absent + late;
-    const pct = marked > 0 ? Math.round((present / marked) * 100) : null;
-    return { present, absent, late, marked, pct };
+    const { rate, ...totals } = attendanceTotals(
+      schoolDays.map((d) => student.attendance?.[d]),
+    );
+    return { ...totals, pct: rate };
   };
 
   // ── Handlers ──────────────────────────────────────────────────────────
@@ -350,6 +340,7 @@ export default function AdminAttendanceGridPage() {
       "Present",
       "Absent",
       "Late",
+      "Leave",
       "Marked Days",
       "Attendance %",
     ];
@@ -357,10 +348,9 @@ export default function AdminAttendanceGridPage() {
     const rows = filteredStudents.map((s, i) => {
       const cells = allDays.map((d) => {
         if (isWeekend(d)) return "WE";
-        const status = s.attendance?.[d];
-        return status ? status.charAt(0) : "–";
+        return statusCode(s.attendance?.[d]);
       });
-      const { present, absent, late, marked, pct } = studentSummary(s);
+      const { present, absent, late, leave, marked, pct } = studentSummary(s);
       return [
         i + 1,
         s.RollNumber,
@@ -369,6 +359,7 @@ export default function AdminAttendanceGridPage() {
         present,
         absent,
         late,
+        leave,
         marked,
         pct !== null ? `${pct}%` : "–",
       ];
@@ -382,6 +373,7 @@ export default function AdminAttendanceGridPage() {
       { wch: 10 },
       { wch: 24 },
       ...allDays.map(() => ({ wch: 5 })),
+      { wch: 8 },
       { wch: 8 },
       { wch: 8 },
       { wch: 8 },
@@ -412,7 +404,7 @@ export default function AdminAttendanceGridPage() {
 
     const rowsHtml = filteredStudents
       .map((s, i) => {
-        const { present, absent, late, pct } = studentSummary(s);
+        const { present, absent, late, leave, pct } = studentSummary(s);
         const isLow = pct !== null && pct < 75;
         const cellsHtml = allDays
           .map((d) => {
@@ -423,7 +415,8 @@ export default function AdminAttendanceGridPage() {
             else if (status === "Present") bg = "#d1fae5";
             else if (status === "Absent") bg = "#fee2e2";
             else if (status === "Late") bg = "#fef3c7";
-            const label = we ? "–" : status ? status.charAt(0) : "–";
+            else if (status === "Leave") bg = "#e0f2fe";
+            const label = we ? "–" : statusCode(status);
             return `<td style="background:${bg};text-align:center;font-size:9px;padding:2px;${we ? "color:#9ca3af" : ""}">${label}</td>`;
           })
           .join("");
@@ -436,6 +429,7 @@ export default function AdminAttendanceGridPage() {
             <td style="text-align:center;font-size:9px;color:#059669;font-weight:600">${present}</td>
             <td style="text-align:center;font-size:9px;color:#dc2626;font-weight:600">${absent}</td>
             <td style="text-align:center;font-size:9px;color:#d97706;font-weight:600">${late}</td>
+            <td style="text-align:center;font-size:9px;color:#0284c7;font-weight:600">${leave}</td>
             <td style="text-align:center;font-size:9px;font-weight:700;${isLow ? "color:red" : pct >= 85 ? "color:#059669" : "color:#d97706"}">
               ${pct !== null ? pct + "%" : "–"}
             </td>
@@ -471,13 +465,14 @@ export default function AdminAttendanceGridPage() {
             <th style="padding:4px 3px;font-size:9px;background:#d1fae5;min-width:20px;text-align:center">P</th>
             <th style="padding:4px 3px;font-size:9px;background:#fee2e2;min-width:20px;text-align:center">A</th>
             <th style="padding:4px 3px;font-size:9px;background:#fef3c7;min-width:20px;text-align:center">L</th>
+            <th style="padding:4px 3px;font-size:9px;background:#e0f2fe;min-width:20px;text-align:center">Lv</th>
             <th style="padding:4px 3px;font-size:9px;background:#f8fafc;min-width:32px;text-align:center">%</th>
           </tr>
         </thead>
         <tbody>${rowsHtml}</tbody>
       </table>
       <p class="legend">
-        P = Present &nbsp;|&nbsp; A = Absent &nbsp;|&nbsp; L = Late &nbsp;|&nbsp;
+        P = Present &nbsp;|&nbsp; A = Absent &nbsp;|&nbsp; L = Late &nbsp;|&nbsp; Lv = Leave &nbsp;|&nbsp;
         – = No record &nbsp;|&nbsp; WE = Weekend (shaded) &nbsp;|&nbsp;
         Red % = below 75% attendance
       </p>
@@ -792,6 +787,9 @@ export default function AdminAttendanceGridPage() {
                   <th className="table-header text-center bg-amber-50 min-w-10 font-bold text-amber-600">
                     L
                   </th>
+                  <th className="table-header text-center bg-sky-50 min-w-10 font-bold text-sky-600">
+                    Lv
+                  </th>
                   <th className="table-header text-center bg-slate-50 min-w-16">
                     %
                   </th>
@@ -800,7 +798,7 @@ export default function AdminAttendanceGridPage() {
 
               <tbody className="divide-y divide-slate-100">
                 {filteredStudents.map((student, i) => {
-                  const { present, absent, late, pct } =
+                  const { present, absent, late, leave, pct } =
                     studentSummary(student);
                   const isLow = pct !== null && pct < 75;
 
@@ -886,6 +884,11 @@ export default function AdminAttendanceGridPage() {
                       <td className="table-cell text-center bg-amber-50/30">
                         <span className="font-semibold text-amber-600">
                           {late}
+                        </span>
+                      </td>
+                      <td className="table-cell text-center bg-sky-50/30">
+                        <span className="font-semibold text-sky-600">
+                          {leave}
                         </span>
                       </td>
                       <td className="table-cell text-center">

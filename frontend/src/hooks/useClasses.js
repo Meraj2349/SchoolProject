@@ -20,6 +20,16 @@ export function useClasses() {
   });
 }
 
+/** The branch's (ClassName, Section) pairs, for section pickers. */
+export function useDistinctClasses() {
+  const branchId = useBranchStore((s) => s.currentBranchId);
+  return useQuery({
+    queryKey: queryKeys.classes.distinct(branchId),
+    queryFn: classesService.getDistinct,
+    select: (data) => data?.data ?? data ?? [],
+  });
+}
+
 // Returns the 11 standard class names (Nursery, 1-10) from ClassNames table
 export function useClassNames() {
   return useQuery({

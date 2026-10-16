@@ -28,6 +28,7 @@ export const queryKeys = {
   teachers: {
     all: (branchId = null) => ["teachers", { branchId }],
     search: (q, className = "", branchId = null) => ["teachers", "search", q, className, { branchId }],
+    appAccess: (branchId = null) => ["teachers", "app-access", { branchId }],
   },
   classes: {
     all: (branchId = null) => ["classes", { branchId }],
@@ -58,6 +59,8 @@ export const queryKeys = {
     byClassSection: (cls, sec, branchId = null) => ["attendance", "class", cls, sec, { branchId }],
     stats: (branchId = null) => ["attendance", "statistics", { branchId }],
     grid: (cls, sec, start, end, branchId = null) => ["attendance", "grid", cls, sec, start, end, { branchId }],
+    roster: (classId, date, branchId = null) => ["attendance", "roster", classId, date, { branchId }],
+    sms: (date, branchId = null) => ["attendance", "sms", date, { branchId }],
   },
   routines: {
     all: (branchId = null) => ["routines", { branchId }],

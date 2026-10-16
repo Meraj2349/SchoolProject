@@ -7,12 +7,14 @@ import {
   useCreateTeacher,
   useUpdateTeacher,
   useDeleteTeacher,
+  useTeacherAppAccess,
 } from "@/hooks/useTeachers";
 import { subjectsService } from "@/services/subjects.service";
 import { queryKeys } from "@/lib/queryKeys";
 import { useTranslations } from "@/store/languageStore";
 import { useBranchStore } from "@/store/branchStore";
-import { ChooseBranchNotice } from "@/components/admin/ui";
+import { Badge, ChooseBranchNotice } from "@/components/admin/ui";
+import AppAccessDrawer from "./AppAccessDrawer";
 import { useWriteBranch } from "@/hooks/useWriteBranch";
 import {
   FiEdit2,
@@ -21,6 +23,7 @@ import {
   FiUsers,
   FiSearch,
   FiX,
+  FiSmartphone,
 } from "react-icons/fi";
 
 const EMPTY = {
@@ -46,6 +49,9 @@ export default function AdminPage() {
   const [editId, setEditId] = useState(null);
   const [status, setStatus] = useState({ error: null, success: null });
   const [filters, setFilters] = useState(FILTER_EMPTY);
+  const [appAccessFor, setAppAccessFor] = useState(null);
+  const { data: appAccess = [] } = useTeacherAppAccess();
+  const accessOf = (teacherId) => appAccess.find((a) => a.teacherId === teacherId) ?? null;
 
   // Load subjects so we can map subject->class for the class filter
   const { data: subjects = [] } = useQuery({
@@ -162,6 +168,7 @@ export default function AdminPage() {
     t("subject"),
     t("email"),
     t("contact"),
+    t("appAccess"),
     t("actions"),
   ];
 
@@ -392,6 +399,22 @@ export default function AdminPage() {
                       {teacher.ContactNumber}
                     </td>
                     <td className="table-cell">
+                      <div className="flex items-center gap-2">
+                        <Badge tone={accessOf(teacher.TeacherID)?.enabled ? "success" : "default"}>
+                          {accessOf(teacher.TeacherID)?.enabled ? t("appOn") : t("appOff")}
+                        </Badge>
+                        <button
+                          type="button"
+                          onClick={() => setAppAccessFor(teacher)}
+                          className="btn-icon edit"
+                          title={t("appAccess")}
+                          aria-label={t("appAccess")}
+                        >
+                          <FiSmartphone />
+                        </button>
+                      </div>
+                    </td>
+                    <td className="table-cell">
                       {!needsBranch && (
                         <div className="flex items-center gap-1">
                           <button
@@ -428,6 +451,14 @@ export default function AdminPage() {
           </div>
         )}
       </div>
+
+      {appAccessFor && (
+        <AppAccessDrawer
+          teacher={appAccessFor}
+          access={accessOf(appAccessFor.TeacherID)}
+          onClose={() => setAppAccessFor(null)}
+        />
+      )}
     </div>
   );
 }

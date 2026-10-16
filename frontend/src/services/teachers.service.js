@@ -14,6 +14,13 @@ export const teachersService = {
   update: (id, data) =>
     httpClient.put(`/teachers/updateTeacher/${id}`, data).then((r) => r.data),
 
+  // Sign-in to the attendance app: [{ teacherId, phone, enabled, hasPassword, lastLoginAt }]
+  getAppAccess: () => httpClient.get("/teachers/app-access").then((r) => r.data),
+
+  // { phone, password?, enabled }: a missing password keeps the current one
+  setAppAccess: (id, data) =>
+    httpClient.put(`/teachers/${id}/app-access`, data).then((r) => r.data),
+
   remove: (id) =>
     httpClient.delete(`/teachers/deleteTeacher/${id}`).then((r) => r.data),
 };

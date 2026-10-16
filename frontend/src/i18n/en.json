@@ -366,7 +366,7 @@
       "present": "Present",
       "absent": "Absent",
       "late": "Late",
-      "excused": "Excused"
+      "leave": "Leave"
     }
   },
   "routine": {
@@ -532,7 +532,22 @@
       "teacherUpdated": "Teacher updated!",
       "deleted": "Deleted.",
       "deleteConfirm": "Delete this teacher?",
-      "operationFailed": "Operation failed"
+      "operationFailed": "Operation failed",
+      "appAccess": "App access",
+      "appAccessTitle": "Attendance app: {name}",
+      "appAccessHint": "The class teacher signs in to the phone app with this mobile number and password, and takes their own class's attendance for today.",
+      "appPhone": "Mobile number",
+      "appPassword": "Password",
+      "appPasswordNew": "New password (leave empty to keep the current one)",
+      "appPasswordHelp": "At least 8 characters. Tell it to the teacher in person.",
+      "appEnabled": "Allow this teacher to use the app",
+      "appOn": "On",
+      "appOff": "Off",
+      "appLastSignIn": "Last sign-in: {time}",
+      "appNeverSignedIn": "Has not signed in yet",
+      "appSave": "Save app access",
+      "appSaved": "App access saved",
+      "appSignOutNote": "A new password, a new number or switching access off signs the teacher out on every phone."
     },
     "classes": {
       "title": "Class Teacher Management",
@@ -699,7 +714,35 @@
       "noStudentsLoaded": "No students loaded",
       "attendanceSaved": "Attendance saved!",
       "loadFailed": "Failed to load students",
-      "saveFailed": "Failed to save attendance"
+      "saveFailed": "Failed to save attendance",
+      "subtitle": "Take a class's attendance for one day. Class teachers can also take it in the phone app.",
+      "leave": "Leave",
+      "notTaken": "Not taken yet for this day.",
+      "takenBy": "Taken by {name} ({role}) at {time}",
+      "byTeacher": "class teacher",
+      "byAdmin": "admin",
+      "summary": "{present} present · {absent} absent · {late} late · {leave} on leave",
+      "allPresent": "Mark all present",
+      "keptNewer": "{count} students were changed later by someone else, so their newer status was kept.",
+      "noStudents": "No students in this class.",
+      "classNotFound": "This class and section does not exist in this branch.",
+      "pickClass": "Choose a class, a section and a day.",
+      "readOnly": "You can look at this day but not change it.",
+      "smsTitle": "SMS to parents",
+      "smsHint": "Parents of absent children get one SMS a day, a little while after the attendance is saved.",
+      "smsNone": "No SMS for this class on this day.",
+      "smsStatuses": {
+        "pending": "Waiting",
+        "sending": "Sending",
+        "sent": "Sent",
+        "failed": "Failed",
+        "cancelled": "Not needed",
+        "skipped": "Not sent"
+      },
+      "smsSkippedReasons": {
+        "no_parent_phone": "no valid parent number",
+        "day_over": "the day was over"
+      }
     },
     "gallery": {
       "title": "Image Gallery",
