@@ -57,6 +57,7 @@ describe("StudentListPage", () => {
     expect(students.search).toHaveBeenCalledWith({ FirstName: "rahim", RollNumber: "7", ClassName: "Class 5", Section: "Good" });
     expect(screen.queryByRole("heading", { level: 3, name: /Rahima/ })).not.toBeInTheDocument();
     expect(screen.getByText("1 student found")).toBeInTheDocument();
+    expect(screen.getByText("Class 5 – Section Good")).toBeInTheDocument();
     expect(screen.getByText("9 May 2014")).toBeInTheDocument();
     expect(await screen.findByRole("img", { name: "Rahim Uddin" })).toHaveAttribute("data-src", "http://localhost:3000/uploads/students/rahim.png");
     expect(images.getByStudent).not.toHaveBeenCalled();

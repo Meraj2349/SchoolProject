@@ -36,7 +36,7 @@ function StudentCard({ student, photo }) {
         <div className="min-w-0">
           <h3 className="site-heading m-0 break-words text-xl">{fullName(student)}</h3>
           <p className="m-0 mt-1 font-semibold text-school-gold">
-            {t("class")} {student.ClassName} – {t("section")} {student.Section}
+            {student.ClassName} – {t("section")} {student.Section}
           </p>
           <p className="m-0 mt-1 text-sm text-school-muted">
             {t("rollNumberLabel")} {formatNumber(student.RollNumber, language)}
