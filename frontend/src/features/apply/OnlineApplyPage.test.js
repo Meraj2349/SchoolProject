@@ -13,6 +13,7 @@ vi.mock("@/services/branch.service", () => ({
 vi.mock("@/components/layout/Navbar", () => ({ default: () => null }));
 vi.mock("@/components/layout/Footer", () => ({ default: () => null }));
 vi.mock("@/components/shared/LatestUpdatesNotice", () => ({ default: () => null }));
+vi.mock("next/navigation", () => ({ usePathname: () => "/apply" }));
 
 const fill = (label, value) => fireEvent.change(screen.getByLabelText(new RegExp(label)), { target: { value } });
 
@@ -72,5 +73,46 @@ describe("OnlineApplyPage", () => {
     fireEvent.change(screen.getByLabelText(/Branch/), { target: { value: "1" } });
 
     expect(screen.getByLabelText(/Branch/)).toHaveValue("1");
+  });
+
+  it("has one page heading and marks the missing fields", async () => {
+    renderWithQuery(<OnlineApplyPage />);
+
+    expect(screen.getAllByRole("heading", { level: 1 })).toHaveLength(1);
+    expect(screen.getByRole("heading", { level: 1, name: "Online Admission" })).toBeInTheDocument();
+    expect(screen.getByRole("navigation", { name: "Breadcrumb" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /submit/i }));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(/fill in all required fields/i);
+    expect(screen.getByLabelText(/Student Full Name/)).toHaveAttribute("aria-invalid", "true");
+    expect(screen.getByLabelText(/Previous School/)).not.toHaveAttribute("aria-invalid");
+  });
+
+  it("shows the server's message, or its own, when sending fails, never the raw error", async () => {
+    useBranchStore.setState({ currentBranchId: 1 });
+    submit.mockRejectedValueOnce(Object.assign(new Error("Network Error 10.0.0.5"), {}));
+    renderWithQuery(<OnlineApplyPage />);
+    await screen.findByRole("option", { name: "Main" });
+    fillRequired();
+    fireEvent.click(screen.getByRole("button", { name: /submit/i }));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent("Submission failed. Please try again.");
+    expect(screen.queryByText(/10\.0\.0\.5/)).not.toBeInTheDocument();
+
+    submit.mockRejectedValueOnce({ response: { data: { message: "Branch not found" } } });
+    fireEvent.click(screen.getByRole("button", { name: /submit/i }));
+    expect(await screen.findByText("Branch not found")).toBeInTheDocument();
+  });
+
+  it("thanks the family once the application is sent", async () => {
+    useBranchStore.setState({ currentBranchId: 1 });
+    renderWithQuery(<OnlineApplyPage />);
+    await screen.findByRole("option", { name: "Main" });
+    fillRequired();
+    fireEvent.click(screen.getByRole("button", { name: /submit/i }));
+
+    expect(await screen.findByRole("heading", { name: "Application Submitted!" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Submit Another Application" }));
+    expect(screen.getByLabelText(/Student Full Name/)).toHaveValue("");
   });
 });

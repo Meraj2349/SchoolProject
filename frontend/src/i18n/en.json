@@ -1304,7 +1304,10 @@
     "submitAnother": "Submit Another Application",
     "requiredFields": "Please fill in all required fields",
     "submitFailed": "Submission failed. Please try again.",
-    "branch": "Branch (campus)"
+    "branch": "Branch (campus)",
+    "studentDetails": "Student details",
+    "parentDetails": "Parent or guardian",
+    "requiredNote": "Fields marked * are required."
   },
   "common": {
     "loading": "Loading…",
