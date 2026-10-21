@@ -252,8 +252,8 @@ describe("buildOverview", () => {
           ...bathuli,
           totals: { classes: 2, taken: 1, notTaken: 1, students: 5, present: 2, absent: 1, late: 0, leave: 0 },
           classes: [
-            { id: 10, name: "Class 5", section: "Good", students: 3, classTeacher: nasima, takenBy, counts: { present: 2, absent: 1, late: 0, leave: 0 } },
-            { id: 11, name: "Class 6", section: "Good", students: 2, classTeacher: null, takenBy: null, counts: { present: 0, absent: 0, late: 0, leave: 0 } },
+            { id: 10, name: "Class 5", section: "Good", students: 3, classTeacher: nasima, taken: true, takenBy, counts: { present: 2, absent: 1, late: 0, leave: 0 } },
+            { id: 11, name: "Class 6", section: "Good", students: 2, classTeacher: null, taken: false, takenBy: null, counts: { present: 0, absent: 0, late: 0, leave: 0 } },
           ],
         },
       ],
@@ -279,5 +279,12 @@ describe("buildOverview", () => {
     });
 
     expect(overview.branches[0].totals).toMatchObject({ taken: 1, notTaken: 0, late: 1, leave: 2 });
+    expect(overview.branches[0].classes[0]).toMatchObject({ taken: true, takenBy: null });
+  });
+
+  it("says a class nobody has marked is not taken", () => {
+    const overview = buildOverview({ date: "2026-03-10", branches: [bathuli], classes: [class5], marks: [] });
+
+    expect(overview.branches[0].classes[0]).toMatchObject({ taken: false, takenBy: null });
   });
 });

@@ -28,6 +28,7 @@ describe("attendance overview", () => {
   let teacherId;
   let class5;
   let kg;
+  let mina;
   let northClass;
 
   beforeEach(async () => {
@@ -39,7 +40,8 @@ describe("attendance overview", () => {
     const rahim = await seedStudent({ branchId: BRANCH_A, className: "Class 5", roll: "1", firstName: "Rahim" });
     const karim = await seedStudent({ branchId: BRANCH_A, className: "Class 5", roll: "2", firstName: "Karim" });
     class5 = rahim.classId;
-    kg = (await seedStudent({ branchId: BRANCH_A, className: "KG", roll: "1", firstName: "Mina" })).classId;
+    mina = await seedStudent({ branchId: BRANCH_A, className: "KG", roll: "1", firstName: "Mina" });
+    kg = mina.classId;
     northClass = (await seedStudent({ branchId: BRANCH_B, className: "Class 5", roll: "1", firstName: "Nadia" })).classId;
     await db.query("UPDATE Classes SET TeacherID = ? WHERE ClassID = ?", [teacherId, class5]);
 
@@ -66,13 +68,14 @@ describe("attendance overview", () => {
     expect(main.totals).toEqual({ classes: 2, taken: 1, notTaken: 1, students: 3, ...ZERO, present: 1, late: 1 });
     // Class names in school order: KG before Class 5.
     expect(main.classes).toEqual([
-      { id: kg, name: "KG", section: "Good", students: 1, classTeacher: null, takenBy: null, counts: ZERO },
+      { id: kg, name: "KG", section: "Good", students: 1, classTeacher: null, taken: false, takenBy: null, counts: ZERO },
       {
         id: class5,
         name: "Class 5",
         section: "Good",
         students: 2,
         classTeacher: { id: teacherId, name: "Nasima Akter", appAccess: true },
+        taken: true,
         takenBy: { type: "admin", name: "fixture-a", at: expect.any(String) },
         counts: { ...ZERO, present: 1, late: 1 },
       },
@@ -86,6 +89,16 @@ describe("attendance overview", () => {
       totals: { classes: 0, taken: 0, notTaken: 0, students: 0, ...ZERO },
       classes: [],
     });
+  });
+
+  it("counts a day saved before anyone was recorded as taking it (older data) as taken", async () => {
+    await insert("Attendance", { StudentID: mina.studentId, ClassID: kg, ClassDate: DAY, Status: "Present", branch_id: BRANCH_A });
+
+    const res = await overview(adminA);
+
+    const kgDay = res.body.data.branches[0].classes.find((c) => c.id === kg);
+    expect(kgDay).toMatchObject({ taken: true, takenBy: null, counts: { ...ZERO, present: 1 } });
+    expect(res.body.data.branches[0].totals).toMatchObject({ taken: 2, notTaken: 0 });
   });
 
   it("shows a super admin only the branch they picked", async () => {

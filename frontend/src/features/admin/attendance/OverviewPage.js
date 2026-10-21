@@ -18,11 +18,12 @@ const COUNT_KEYS = ["present", "absent", "late", "leave"];
 export const markPageHref = (classId, date) =>
   `/admin/attendance?${new URLSearchParams({ classId: String(classId), date })}`;
 
-/** "Taken 09:15" and by whom, or a red "Not taken". */
-function TakenState({ takenBy }) {
+/** "Taken 09:15" and by whom, or a red "Not taken". Older days name no one: just "Taken". */
+function TakenState({ taken, takenBy }) {
   const t = useTranslations("admin.attendance");
   const language = useLanguageStore((s) => s.language);
-  if (!takenBy) return <Badge tone="danger">{t("notTakenShort")}</Badge>;
+  if (!taken) return <Badge tone="danger">{t("notTakenShort")}</Badge>;
+  if (!takenBy) return <Badge tone="success">{t("takenShort")}</Badge>;
   return (
     <span className="flex flex-col items-start gap-0.5">
       <Badge tone="success">{fillTemplate(t("takenAt"), { time: formatSchoolTime(takenBy.at, language) })}</Badge>
@@ -75,7 +76,7 @@ function ClassesTable({ classes, date }) {
                   <ClassTeacher classTeacher={c.classTeacher} />
                 </td>
                 <td data-label={t("status")} className={CELL}>
-                  <TakenState takenBy={c.takenBy} />
+                  <TakenState taken={c.taken} takenBy={c.takenBy} />
                 </td>
                 {COUNT_KEYS.map((key) => (
                   <td
@@ -83,7 +84,7 @@ function ClassesTable({ classes, date }) {
                     data-label={t(key)}
                     className={`${COUNT_CELL} ${key === "absent" && c.counts?.absent ? "font-semibold text-red-600" : ""}`}
                   >
-                    {c.takenBy ? number(c.counts?.[key]) : "—"}
+                    {c.taken ? number(c.counts?.[key]) : "—"}
                   </td>
                 ))}
                 <td className={`${CELL_BASE} col-span-4 block px-5 py-2`}>

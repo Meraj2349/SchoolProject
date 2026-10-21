@@ -108,7 +108,8 @@ CREATE TABLE
         FOREIGN KEY (StudentID) REFERENCES Students (StudentID),
         CONSTRAINT fk_attendance_class FOREIGN KEY (ClassID) REFERENCES Classes (ClassID) ON DELETE SET NULL,
         CONSTRAINT uq_attendance_student_day UNIQUE (StudentID, ClassDate),
-        INDEX idx_attendance_class_day (ClassID, ClassDate)
+        INDEX idx_attendance_class_day (ClassID, ClassDate),
+        INDEX idx_attendance_day (ClassDate) -- the overview of one day (attendance_day_index_migration.sql)
     );
 
 -- Exams Table

@@ -143,18 +143,14 @@ const countsOf = (mark) => Object.fromEntries(COUNT_KEYS.map((key) => [key, Numb
 
 const isTaken = (counts) => COUNT_KEYS.some((key) => counts[key] > 0);
 
-const classOverview = ({ id, name, section, students, classTeacher }, mark) => ({
-  id,
-  name,
-  section,
-  students,
-  classTeacher,
-  takenBy: mark?.takenBy ?? null,
-  counts: countsOf(mark),
-});
+// "taken" comes from the counts: days saved before MarkedAt existed name no one.
+const classOverview = ({ id, name, section, students, classTeacher }, mark) => {
+  const counts = countsOf(mark);
+  return { id, name, section, students, classTeacher, taken: isTaken(counts), takenBy: mark?.takenBy ?? null, counts };
+};
 
 function totalsOf(classes) {
-  const taken = classes.filter((cls) => isTaken(cls.counts)).length;
+  const taken = classes.filter((cls) => cls.taken).length;
   const sum = (pick) => classes.reduce((total, cls) => total + pick(cls), 0);
   return {
     classes: classes.length,

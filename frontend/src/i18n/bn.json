@@ -757,6 +757,7 @@
       "appOn": "অ্যাপ চালু",
       "appOff": "অ্যাপ বন্ধ",
       "notTakenShort": "নেওয়া হয়নি",
+      "takenShort": "নেওয়া হয়েছে",
       "takenAt": "নেওয়া হয়েছে {time}",
       "takenByTeacher": "শ্রেণি শিক্ষক নিয়েছেন",
       "takenByAdmin": "অ্যাডমিন নিয়েছেন",

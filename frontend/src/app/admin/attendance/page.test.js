@@ -18,6 +18,14 @@ describe("mark attendance route", () => {
     expect(page.props).toEqual({ initialClassId: null, initialDate: null });
   });
 
+  it("starts afresh when the link changes, e.g. the menu's plain link after a class link", async () => {
+    const opened = await render({ classId: "10", date: "2026-10-15" });
+    const other = await render({ classId: "11", date: "2026-10-15" });
+    const plain = await render({});
+
+    expect(new Set([opened.key, other.key, plain.key]).size).toBe(3);
+  });
+
   it("takes the first value of a repeated parameter", async () => {
     const page = await render({ classId: ["10", "11"] });
 

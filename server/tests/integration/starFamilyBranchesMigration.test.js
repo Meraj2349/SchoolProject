@@ -84,6 +84,17 @@ describe("star_family_branches_migration.sql", () => {
     ]);
   });
 
+  it("matches a branch's name as a whole word, not inside another place's name", async () => {
+    await insert("Branches", { name_en: "Abdullapur Branch", name_bn: "আবদুল্যাপুর শাখা" });
+    await insert("Branches", { name_en: "Southdelduar Point", name_bn: "দক্ষিণদেলদুয়ার" });
+
+    await runMigration();
+
+    const names = (await addedBranches()).map((b) => b.name_en);
+    expect(names).toContain("Dulla Branch");
+    expect(names).toContain("Delduar Branch");
+  });
+
   it("recognises the older seed names of the head office, Pakulla and Mirzapur", async () => {
     await insert("Branches", { name_en: "Star Academic School, Natiapara Branch", name_bn: "স্টার একাডেমিক স্কুল, নাটিয়াপাড়া শাখা" });
     await insert("Branches", { name_en: "Star Academic School, Pakullah Bazar Branch", name_bn: "স্টার একাডেমিক স্কুল, পাকুল্লা বাজার শাখা" });

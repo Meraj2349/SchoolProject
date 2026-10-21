@@ -413,10 +413,11 @@ describe("overview", () => {
         section: "Good",
         students: 2,
         classTeacher: { id: 7, name: "Nasima Akter", appAccess: true },
+        taken: true,
         takenBy: { type: "admin", name: "admin#2", at: later(5) },
         counts: { ...ZERO, present: 1, late: 1 },
       },
-      { id: 30, name: "Class 6", section: "Good", students: 0, classTeacher: null, takenBy: null, counts: ZERO },
+      { id: 30, name: "Class 6", section: "Good", students: 0, classTeacher: null, taken: false, takenBy: null, counts: ZERO },
     ]);
     expect(bathuli.totals).toEqual({ classes: 2, taken: 1, notTaken: 1, students: 2, ...ZERO, present: 1, late: 1 });
   });

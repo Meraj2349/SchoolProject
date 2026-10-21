@@ -757,6 +757,7 @@
       "appOn": "App on",
       "appOff": "App off",
       "notTakenShort": "Not taken",
+      "takenShort": "Taken",
       "takenAt": "Taken {time}",
       "takenByTeacher": "by class teacher",
       "takenByAdmin": "by admin",

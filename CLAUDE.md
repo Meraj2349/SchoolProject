@@ -76,7 +76,8 @@ real API, and builds the APK (artifact `teacher-app-apk`).
   admin sees every branch, a branch (sub) admin only theirs and turns on app
   access for their own teachers. Rosters carry `branch` and `classTeacher`;
   `GET /api/attendance/overview?date=` lists each branch's classes, class
-  teacher and whether the day is taken. The app shows the teacher's branch
+  teacher and whether the day is taken (counts follow each student's current
+  class, like the roster; index: `attendance_day_index_migration.sql`). The app shows the teacher's branch
   (`teacher.branch` from `/login` and `/me`). Poster branches:
   `server/Sql/star_family_branches_migration.sql`.
 - Absence SMS: `server/src/modules/notifications`, one per child per day, after

@@ -25,6 +25,7 @@ const mainCampus = () => ({
       section: "Good",
       students: 35,
       classTeacher: { id: 7, name: "Nasima Akter", appAccess: true },
+      taken: true,
       takenBy: { type: "teacher", name: "Nasima Akter", at: "2026-10-15T03:15:00.000Z" },
       counts: { present: 30, absent: 3, late: 1, leave: 1 },
     },
@@ -34,6 +35,7 @@ const mainCampus = () => ({
       section: "Rose",
       students: 35,
       classTeacher: null,
+      taken: false,
       takenBy: null,
       counts: { present: 0, absent: 0, late: 0, leave: 0 },
     },
@@ -108,6 +110,18 @@ describe("attendance by branch page", () => {
     expect(within(row).getByText("No class teacher")).toBeInTheDocument();
     expect(within(row).getByText("Not taken")).toBeInTheDocument();
     expect(within(row).queryByText("App on")).not.toBeInTheDocument();
+  });
+
+  it("shows a day saved before anyone was recorded as taking it as taken, with its counts", async () => {
+    const branch = mainCampus();
+    branch.classes[1] = { ...branch.classes[1], taken: true, counts: { present: 20, absent: 2, late: 0, leave: 0 } };
+    attendance.getOverview.mockResolvedValue(overview([branch]));
+    renderWithQuery(<OverviewPage />);
+
+    const row = rowOf(await branchBox("Main Campus"), "Class 6 — Rose");
+    expect(within(row).getByText("Taken")).toBeInTheDocument();
+    expect(within(row).queryByText("Not taken")).not.toBeInTheDocument();
+    expect(within(row).getByRole("cell", { name: "20" })).toBeInTheDocument();
   });
 
   it("says so when a branch has no classes", async () => {
