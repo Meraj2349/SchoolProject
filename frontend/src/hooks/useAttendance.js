@@ -46,3 +46,14 @@ export function useAbsenceSms(date) {
     select: (data) => data?.data ?? [],
   });
 }
+
+/** Admin — every branch's classes on one day: taken or not, by whom, and the counts. */
+export function useAttendanceOverview(date) {
+  const branchId = useBranchStore((s) => s.currentBranchId);
+  return useQuery({
+    queryKey: queryKeys.attendance.overview(date, branchId),
+    queryFn: () => attendanceService.getOverview(date),
+    enabled: !!date,
+    select: (data) => data?.data ?? null,
+  });
+}

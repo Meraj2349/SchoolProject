@@ -10,14 +10,30 @@ typedef Json = Map<String, dynamic>;
 
 DateTime? _time(Object? value) => value == null ? null : DateTime.parse(value as String).toUtc();
 
+Branch branchFromJson(Json json) => Branch(
+      id: json['id'] as int,
+      nameBn: json['nameBn'] as String? ?? '',
+      nameEn: json['nameEn'] as String? ?? '',
+    );
+
+Json branchToJson(Branch b) => {'id': b.id, 'nameBn': b.nameBn, 'nameEn': b.nameEn};
+
+/// `branch` is missing from older servers and from profiles the phone kept before branches.
 Teacher teacherFromJson(Json json) => Teacher(
       id: json['id'] as int,
       firstName: json['firstName'] as String? ?? '',
       lastName: json['lastName'] as String? ?? '',
       phone: json['phone'] as String? ?? '',
+      branch: json['branch'] == null ? null : branchFromJson(json['branch'] as Json),
     );
 
-Json teacherToJson(Teacher t) => {'id': t.id, 'firstName': t.firstName, 'lastName': t.lastName, 'phone': t.phone};
+Json teacherToJson(Teacher t) => {
+      'id': t.id,
+      'firstName': t.firstName,
+      'lastName': t.lastName,
+      'phone': t.phone,
+      'branch': t.branch == null ? null : branchToJson(t.branch!),
+    };
 
 SchoolClass schoolClassFromJson(Json json) => SchoolClass(
       id: json['id'] as int,

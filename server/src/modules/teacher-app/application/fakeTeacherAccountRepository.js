@@ -1,6 +1,7 @@
 // In-memory stand-in for the MySQL teacher account repository, for use-case tests.
 
-export function makeFakeTeacherAccountRepository(teachers = []) {
+// `branches` ({ id, nameBn, nameEn }) are joined onto the accounts as `branch`, as in MySQL.
+export function makeFakeTeacherAccountRepository(teachers = [], { branches = [] } = {}) {
   const state = {
     accounts: teachers.map((t) => ({
       phone: null,
@@ -15,22 +16,22 @@ export function makeFakeTeacherAccountRepository(teachers = []) {
     })),
   };
   const byId = (id) => state.accounts.find((a) => a.id === Number(id));
+  const branchOf = (branchId) => branches.find((b) => b.id === branchId) ?? null;
+  const withBranch = (account) => (account ? { ...account, branch: branchOf(account.branchId) } : null);
 
   return {
     state,
 
     async findAccount(id) {
-      const account = byId(id);
-      return account ? { ...account } : null;
+      return withBranch(byId(id));
     },
 
     async findAccountByPhone(phone) {
-      const account = state.accounts.find((a) => a.phone === phone);
-      return account ? { ...account } : null;
+      return withBranch(state.accounts.find((a) => a.phone === phone));
     },
 
     async listAccess(branchId) {
-      return state.accounts.filter((a) => branchId == null || a.branchId === branchId).map((a) => ({ ...a }));
+      return state.accounts.filter((a) => branchId == null || a.branchId === branchId).map(withBranch);
     },
 
     async updateAccess(id, { phone, passwordHash, enabled, signOut }) {

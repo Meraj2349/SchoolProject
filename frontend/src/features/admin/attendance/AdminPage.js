@@ -7,11 +7,31 @@ import { useAbsenceSms, useAttendanceRoster, useSaveAttendanceDay } from "@/hook
 import { useClassNames, useClasses, useDistinctClasses } from "@/hooks/useClasses";
 import { useWriteBranch } from "@/hooks/useWriteBranch";
 import { ATTENDANCE_STATUSES, attendanceTotals, formatSchoolTime, schoolToday } from "@/lib/attendance";
+import { branchName } from "@/lib/branches";
 import { fillTemplate } from "@/lib/template";
 import { useLanguageStore, useTranslations } from "@/store/languageStore";
+import { ClassTeacher } from "./ClassTeacher";
 
 const STATUS_KEYS = { Present: "present", Absent: "absent", Late: "late", Leave: "leave" };
 const SMS_TONES = { pending: "info", sending: "info", sent: "success", failed: "danger", cancelled: "default", skipped: "warning" };
+const isDay = (value) => typeof value === "string" && /^\d{4}-\d{2}-\d{2}$/.test(value);
+
+/** "Main Campus · Class teacher: Nasima Akter [App on]", under the class title. */
+function ClassContext({ branch, classTeacher }) {
+  const language = useLanguageStore((s) => s.language);
+  const name = branchName(branch, language);
+  return (
+    <p className="mt-0 mb-3 flex flex-wrap items-center gap-1.5 text-sm text-slate-600">
+      {name && (
+        <>
+          <span className="font-medium text-slate-700">{name}</span>
+          <span aria-hidden>·</span>
+        </>
+      )}
+      <ClassTeacher classTeacher={classTeacher} labelled />
+    </p>
+  );
+}
 
 /** "Taken by Nasima Akter (class teacher) at 09:15", or that nobody has taken the day yet. */
 function TakenBy({ takenBy }) {
@@ -31,10 +51,10 @@ function TakenBy({ takenBy }) {
 }
 
 /** The day's SMS to parents of absent children in this class. */
-function AbsenceSmsBox({ date, className, section }) {
+function AbsenceSmsBox({ date, classId }) {
   const t = useTranslations("admin.attendance");
   const { data: messages = [] } = useAbsenceSms(date);
-  const ofClass = messages.filter((m) => m.className === className && m.section === section);
+  const ofClass = messages.filter((m) => m.classId === classId);
 
   return (
     <Box title={t("smsTitle")}>
@@ -102,6 +122,7 @@ function RosterBox({ classId, day, canSave }) {
         )
       }
     >
+      <ClassContext branch={day.branch} classTeacher={day.classTeacher} />
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
         <TakenBy takenBy={day.takenBy} />
         <p className="m-0 text-sm font-medium text-slate-700">{fillTemplate(t("summary"), totals)}</p>
@@ -158,30 +179,45 @@ function RosterBox({ classId, day, canSave }) {
   );
 }
 
-export default function AdminPage() {
+/**
+ * `initialClassId` / `initialDate` (from ?classId=&date=, e.g. the attendance
+ * by branch page) open one class and day; picking another class goes back to
+ * choosing by class name and section.
+ */
+export default function AdminPage({ initialClassId = null, initialDate = null }) {
   const t = useTranslations("admin.attendance");
   const { needsBranch } = useWriteBranch();
-  const [filter, setFilter] = useState({ className: "", section: "", date: schoolToday() });
+  const [filter, setFilter] = useState(() => ({
+    classId: initialClassId ? String(initialClassId) : null,
+    className: "",
+    section: "",
+    date: isDay(initialDate) ? initialDate : schoolToday(),
+  }));
 
   const { data: classNames = [] } = useClassNames();
   const { data: distinctClasses = [] } = useDistinctClasses();
   const { data: classes = [] } = useClasses();
 
+  // A class opened by id: its name and section fill the selects.
+  const opened = filter.classId ? classes.find((c) => String(c.ClassID) === filter.classId) : null;
+  const className = opened?.ClassName ?? filter.className;
+  const section = opened?.Section ?? filter.section;
+
   const sections = useMemo(
-    () => distinctClasses.filter((c) => c.ClassName === filter.className).map((c) => c.Section).sort(),
-    [distinctClasses, filter.className],
+    () => distinctClasses.filter((c) => c.ClassName === className).map((c) => c.Section).sort(),
+    [distinctClasses, className],
   );
 
   // On "All branches" one class name and section can exist in several branches.
-  const matches = classes.filter((c) => c.ClassName === filter.className && c.Section === filter.section);
+  const matches = opened ? [opened] : classes.filter((c) => c.ClassName === className && c.Section === section);
   const classId = matches.length === 1 ? matches[0].ClassID : null;
-  const chosen = Boolean(filter.className && filter.section && filter.date);
+  const chosen = Boolean(className && section && filter.date);
 
   const { data: day, isFetching, isError, error } = useAttendanceRoster(classId, filter.date);
 
   const chooseClass = (className) => {
     const options = distinctClasses.filter((c) => c.ClassName === className).map((c) => c.Section);
-    setFilter((f) => ({ ...f, className, section: options.length === 1 ? options[0] : "" }));
+    setFilter((f) => ({ ...f, classId: null, className, section: options.length === 1 ? options[0] : "" }));
   };
 
   return (
@@ -194,18 +230,18 @@ export default function AdminPage() {
         <div className="grid gap-x-4 sm:grid-cols-3">
           <Field label={t("className")}>
             {(a11y) => (
-              <Select {...a11y} value={filter.className} onChange={(e) => chooseClass(e.target.value)} placeholder={t("className")} options={classNames} />
+              <Select {...a11y} value={className} onChange={(e) => chooseClass(e.target.value)} placeholder={t("className")} options={classNames} />
             )}
           </Field>
           <Field label={t("section")}>
             {(a11y) => (
               <Select
                 {...a11y}
-                value={filter.section}
-                onChange={(e) => setFilter((f) => ({ ...f, section: e.target.value }))}
+                value={section}
+                onChange={(e) => setFilter((f) => ({ ...f, classId: null, className, section: e.target.value }))}
                 placeholder={t("section")}
                 options={sections}
-                disabled={!filter.className}
+                disabled={!className}
               />
             )}
           </Field>
@@ -233,7 +269,7 @@ export default function AdminPage() {
         // min-w-0: let the columns shrink so a wide table scrolls inside its box, not the page.
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_20rem] [&>*]:min-w-0">
           <RosterBox key={`${classId}-${day.date}`} classId={classId} day={day} canSave={!needsBranch} />
-          <AbsenceSmsBox date={day.date} className={filter.className} section={filter.section} />
+          <AbsenceSmsBox date={day.date} classId={day.class.id} />
         </div>
       )}
     </div>

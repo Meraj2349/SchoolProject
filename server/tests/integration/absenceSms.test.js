@@ -97,7 +97,7 @@ describe("absence SMS to parents", () => {
     const other = await request(app).get(`/api/attendance/sms?date=${TODAY}`).set(adminB);
 
     expect(own.status).toBe(200);
-    expect(own.body.data).toEqual([expect.objectContaining({ studentName: "Rahim Uddin", status: "pending" })]);
+    expect(own.body.data).toEqual([expect.objectContaining({ studentName: "Rahim Uddin", status: "pending", classId: expect.any(Number) })]);
     expect(other.body.data).toEqual([]);
   });
 

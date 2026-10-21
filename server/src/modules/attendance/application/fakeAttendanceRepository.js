@@ -2,8 +2,12 @@
 // It keeps the same rule as the real one: a save replaces a student's day only
 // when it was taken at or after the time the stored day was taken.
 
-export function makeFakeAttendanceRepository({ classes = [], students = [], records = [] } = {}) {
+// `teachers` hold the class teachers' app sign-in: { id, firstName, lastName,
+// appEnabled, appPhone, appPasswordHash }.
+export function makeFakeAttendanceRepository({ branches = [], teachers = [], classes = [], students = [], records = [] } = {}) {
   const state = {
+    branches: [...branches],
+    teachers: [...teachers],
     classes: classes.map((c) => ({ teacherId: null, ...c })),
     students: [...students],
     records: records.map((r) => ({ ...r })),
@@ -13,11 +17,31 @@ export function makeFakeAttendanceRepository({ classes = [], students = [], reco
 
   const recordOf = (studentId, date) => state.records.find((r) => r.studentId === studentId && r.date === date);
 
+  const branchOf = (id) => state.branches.find((b) => b.id === id) ?? null;
+
+  const inScope = (id, branchId) => branchId == null || id === branchId;
+
+  const classesInScope = (branchId) =>
+    state.classes.filter((c) => inScope(c.branchId, branchId)).sort((a, b) => a.branchId - b.branchId);
+
+  // The class's students of the class's own branch, as the MySQL roster joins them.
+  const studentsOf = (cls) => state.students.filter((s) => s.classId === cls.id && s.branchId === cls.branchId);
+
+  const markerNameOf = (record) => `${record.markedByType}#${record.markedBy}`;
+
+  function classTeacherOf(teacherId) {
+    const teacher = state.teachers.find((t) => t.id === teacherId);
+    if (!teacher) return null;
+    const appAccess = Boolean(teacher.appEnabled) && teacher.appPhone != null && teacher.appPasswordHash != null;
+    return { id: teacher.id, name: [teacher.firstName, teacher.lastName].filter(Boolean).join(" "), appAccess };
+  }
+
   return {
     state,
 
     async findClass(classId) {
-      return state.classes.find((c) => c.id === Number(classId)) ?? null;
+      const cls = state.classes.find((c) => c.id === Number(classId));
+      return cls ? { ...cls, branch: branchOf(cls.branchId), classTeacher: classTeacherOf(cls.teacherId) } : null;
     },
 
     async findStudent(studentId, branchId) {
@@ -27,22 +51,56 @@ export function makeFakeAttendanceRepository({ classes = [], students = [], reco
     },
 
     async roster(classId, date) {
-      const cls = state.classes.find((c) => c.id === classId);
-      return state.students
-        .filter((s) => s.classId === classId && s.branchId === cls.branchId)
-        .map((s) => {
-          const record = recordOf(s.id, date);
+      return studentsOf(state.classes.find((c) => c.id === classId)).map((s) => {
+        const record = recordOf(s.id, date);
+        return {
+          studentId: s.id,
+          firstName: s.firstName,
+          lastName: s.lastName ?? "",
+          roll: s.roll ?? String(s.id),
+          attendanceId: record?.id ?? null,
+          status: record?.status ?? null,
+          markedByType: record?.markedByType ?? null,
+          markedBy: record?.markedBy ?? null,
+          markedByName: record ? markerNameOf(record) : null,
+          markedAt: record?.markedAt ?? null,
+        };
+      });
+    },
+
+    async branchesIn(branchId) {
+      return state.branches
+        .filter((b) => inScope(b.id, branchId))
+        .sort((a, b) => a.id - b.id)
+        .map((b) => ({ ...b }));
+    },
+
+    async classesIn(branchId) {
+      return classesInScope(branchId).map((c) => ({
+        id: c.id,
+        name: c.name,
+        section: c.section,
+        branchId: c.branchId,
+        students: studentsOf(c).length,
+        classTeacher: classTeacherOf(c.teacherId),
+      }));
+    },
+
+    /** The day's counts and latest mark of each class in scope that has any. */
+    async classDays({ branchId, date }) {
+      return classesInScope(branchId)
+        .map((c) => ({ classId: c.id, records: studentsOf(c).map((s) => recordOf(s.id, date)).filter(Boolean) }))
+        .filter(({ records }) => records.length > 0)
+        .map(({ classId, records }) => {
+          const latest = records.reduce((last, r) => (r.markedAt > last.markedAt ? r : last));
+          const counted = (status) => records.filter((r) => r.status === status).length;
           return {
-            studentId: s.id,
-            firstName: s.firstName,
-            lastName: s.lastName ?? "",
-            roll: s.roll ?? String(s.id),
-            attendanceId: record?.id ?? null,
-            status: record?.status ?? null,
-            markedByType: record?.markedByType ?? null,
-            markedBy: record?.markedBy ?? null,
-            markedByName: record ? `${record.markedByType}#${record.markedBy}` : null,
-            markedAt: record?.markedAt ?? null,
+            classId,
+            present: counted("Present"),
+            absent: counted("Absent"),
+            late: counted("Late"),
+            leave: counted("Leave"),
+            takenBy: { type: latest.markedByType, name: markerNameOf(latest), at: latest.markedAt },
           };
         });
     },

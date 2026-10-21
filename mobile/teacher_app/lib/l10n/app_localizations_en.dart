@@ -72,8 +72,14 @@ class AppLocalizationsEn extends AppLocalizations {
       'You are not the class teacher of any class yet. Ask the school admin.';
 
   @override
-  String classStudents(String count) {
-    return '$count students';
+  String classStudents(int n, String count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$count students',
+      one: '$count student',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -255,6 +261,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get account => 'Account';
+
+  @override
+  String get branch => 'Branch';
 
   @override
   String get security => 'Security';

@@ -71,6 +71,23 @@ class SettingsView extends StatelessWidget {
                         children: [
                           Text(teacher!.fullName, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
                           Text(teacher!.phone, style: const TextStyle(color: AdminColors.textMuted)),
+                          if (teacher!.branch != null)
+                            Padding(
+                              padding: const EdgeInsets.only(top: 2),
+                              child: Row(
+                                children: [
+                                  Tooltip(
+                                    message: t.branch,
+                                    child: const Icon(Icons.store_outlined, size: 16, color: AdminColors.textMuted),
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Expanded(
+                                    child: Text(teacher!.branch!.nameIn(vm.language),
+                                        style: const TextStyle(color: AdminColors.textMuted)),
+                                  ),
+                                ],
+                              ),
+                            ),
                         ],
                       ),
                     ),

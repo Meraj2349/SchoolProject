@@ -54,22 +54,40 @@ class _TodayViewState extends State<TodayView> with WidgetsBindingObserver {
     if (sent > 0) {
       messenger
         ..hideCurrentSnackBar()
-        ..showSnackBar(SnackBar(content: Text(t.synced(formatCount(sent, widget.deps.app.language)))));
+        ..showSnackBar(
+          SnackBar(
+            content: Text(
+              t.synced(formatCount(sent, widget.deps.app.language)),
+            ),
+          ),
+        );
     }
   }
 
   Future<void> _openClass(ClassToday cls, String date) async {
-    await Navigator.of(context).push(MaterialPageRoute<void>(
-      builder: (_) => TakeAttendanceView(deps: widget.deps, schoolClass: cls.schoolClass, date: date),
-    ));
+    await Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => TakeAttendanceView(
+          deps: widget.deps,
+          schoolClass: cls.schoolClass,
+          date: date,
+        ),
+      ),
+    );
     await widget.viewModel.load();
   }
 
   void _openSettings() {
     final teacher = widget.viewModel.overview?.profile.teacher;
-    Navigator.of(context).push(MaterialPageRoute<void>(
-      builder: (_) => SettingsView(deps: widget.deps, teacher: teacher, waiting: widget.viewModel.overview?.waiting ?? 0),
-    ));
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => SettingsView(
+          deps: widget.deps,
+          teacher: teacher,
+          waiting: widget.viewModel.overview?.waiting ?? 0,
+        ),
+      ),
+    );
   }
 
   @override
@@ -78,10 +96,12 @@ class _TodayViewState extends State<TodayView> with WidgetsBindingObserver {
     final vm = widget.viewModel;
     final overview = vm.overview;
     final locale = widget.deps.app.language;
+    final branchName = overview?.profile.teacher.branch?.nameIn(locale);
     return Scaffold(
       appBar: AppBar(title: Text(t.appTitle)),
       drawer: AdminSidebar(
         teacherName: overview?.profile.teacher.fullName ?? '',
+        branchName: branchName,
         online: vm.online,
         current: SidebarItem.today,
         onSelected: (item) {
@@ -97,10 +117,26 @@ class _TodayViewState extends State<TodayView> with WidgetsBindingObserver {
           children: [
             ContentHeader(
               title: t.navToday,
-              subtitle: overview == null ? null : t.todayIs(formatSchoolDay(overview.today, locale)),
+              subtitle: overview == null
+                  ? null
+                  : _subtitle(
+                      branchName,
+                      t.todayIs(formatSchoolDay(overview.today, locale)),
+                    ),
             ),
-            if (overview == null && vm.loading) const Center(child: Padding(padding: EdgeInsets.all(32), child: CircularProgressIndicator())),
-            if (overview == null && vm.offlineWithoutCopy) Callout(tone: Tone.warning, icon: Icons.cloud_off, text: t.offlineSignIn),
+            if (overview == null && vm.loading)
+              const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(32),
+                  child: CircularProgressIndicator(),
+                ),
+              ),
+            if (overview == null && vm.offlineWithoutCopy)
+              Callout(
+                tone: Tone.warning,
+                icon: Icons.cloud_off,
+                text: t.offlineSignIn,
+              ),
             if (overview != null) ..._dashboard(context, t, overview, locale),
           ],
         ),
@@ -108,12 +144,29 @@ class _TodayViewState extends State<TodayView> with WidgetsBindingObserver {
     );
   }
 
-  List<Widget> _dashboard(BuildContext context, AppLocalizations t, TodayOverview overview, String locale) {
+  /// "Mirzapur Branch · Today is March 10, 2026", or only the day when the branch is not known.
+  String _subtitle(String? branchName, String day) =>
+      branchName == null || branchName.trim().isEmpty
+      ? day
+      : '$branchName · $day';
+
+  List<Widget> _dashboard(
+    BuildContext context,
+    AppLocalizations t,
+    TodayOverview overview,
+    String locale,
+  ) {
     final vm = widget.viewModel;
     String n(int v) => formatCount(v, locale);
-    int count(ClassDayState s) => overview.classes.where((c) => c.state == s).length;
+    int count(ClassDayState s) =>
+        overview.classes.where((c) => c.state == s).length;
     return [
-      if (!overview.online) Callout(tone: Tone.warning, icon: Icons.cloud_off, text: t.offlineBanner),
+      if (!overview.online)
+        Callout(
+          tone: Tone.warning,
+          icon: Icons.cloud_off,
+          text: t.offlineBanner,
+        ),
       for (final day in overview.refused) _refusedCallout(t, day, locale),
       GridView.count(
         crossAxisCount: 2,
@@ -123,10 +176,29 @@ class _TodayViewState extends State<TodayView> with WidgetsBindingObserver {
         mainAxisSpacing: 10,
         childAspectRatio: 2.3,
         children: [
-          InfoBox(icon: Icons.class_outlined, label: t.statClasses, value: n(overview.classes.length)),
-          InfoBox(icon: Icons.check_circle_outline, label: t.statTaken, value: n(count(ClassDayState.taken)), tone: Tone.success),
-          InfoBox(icon: Icons.pending_actions, label: t.statNotTaken, value: n(count(ClassDayState.notTaken)), tone: Tone.danger),
-          InfoBox(icon: Icons.schedule_send, label: t.statWaiting, value: n(overview.waiting), tone: Tone.warning),
+          InfoBox(
+            icon: Icons.class_outlined,
+            label: t.statClasses,
+            value: n(overview.classes.length),
+          ),
+          InfoBox(
+            icon: Icons.check_circle_outline,
+            label: t.statTaken,
+            value: n(count(ClassDayState.taken)),
+            tone: Tone.success,
+          ),
+          InfoBox(
+            icon: Icons.pending_actions,
+            label: t.statNotTaken,
+            value: n(count(ClassDayState.notTaken)),
+            tone: Tone.danger,
+          ),
+          InfoBox(
+            icon: Icons.schedule_send,
+            label: t.statWaiting,
+            value: n(overview.waiting),
+            tone: Tone.warning,
+          ),
         ],
       ),
       const SizedBox(height: 16),
@@ -136,7 +208,10 @@ class _TodayViewState extends State<TodayView> with WidgetsBindingObserver {
           icon: Icons.schedule_send,
           text: t.pendingBanner(n(overview.waiting)),
           action: vm.syncing
-              ? Padding(padding: const EdgeInsets.all(8), child: Text(t.sending))
+              ? Padding(
+                  padding: const EdgeInsets.all(8),
+                  child: Text(t.sending),
+                )
               : FilledButton(
                   style: FilledButton.styleFrom(minimumSize: const Size(0, 36)),
                   onPressed: _sync,
@@ -147,7 +222,10 @@ class _TodayViewState extends State<TodayView> with WidgetsBindingObserver {
         title: t.myClasses,
         padding: EdgeInsets.zero,
         child: overview.classes.isEmpty
-            ? Padding(padding: const EdgeInsets.all(14), child: Text(t.noClasses))
+            ? Padding(
+                padding: const EdgeInsets.all(14),
+                child: Text(t.noClasses),
+              )
             : Column(
                 children: [
                   for (final (i, cls) in overview.classes.indexed) ...[
@@ -160,15 +238,29 @@ class _TodayViewState extends State<TodayView> with WidgetsBindingObserver {
     ];
   }
 
-  Widget _classRow(AppLocalizations t, ClassToday cls, String today, String locale) {
+  Widget _classRow(
+    AppLocalizations t,
+    ClassToday cls,
+    String today,
+    String locale,
+  ) {
     final badge = switch (cls.state) {
       ClassDayState.taken => AdminBadge(
-          tone: Tone.success,
-          icon: Icons.check,
-          label: cls.takenAt == null ? t.statTaken : formatSchoolTime(cls.takenAt!, locale),
-        ),
-      ClassDayState.waiting => AdminBadge(tone: Tone.warning, icon: Icons.schedule_send, label: t.waitingToSync),
-      ClassDayState.notTaken => AdminBadge(tone: Tone.danger, label: t.notTaken),
+        tone: Tone.success,
+        icon: Icons.check,
+        label: cls.takenAt == null
+            ? t.statTaken
+            : formatSchoolTime(cls.takenAt!, locale),
+      ),
+      ClassDayState.waiting => AdminBadge(
+        tone: Tone.warning,
+        icon: Icons.schedule_send,
+        label: t.waitingToSync,
+      ),
+      ClassDayState.notTaken => AdminBadge(
+        tone: Tone.danger,
+        label: t.notTaken,
+      ),
     };
     return InkWell(
       onTap: () => _openClass(cls, today),
@@ -179,7 +271,10 @@ class _TodayViewState extends State<TodayView> with WidgetsBindingObserver {
             Container(
               width: 40,
               height: 40,
-              decoration: const BoxDecoration(color: AdminColors.primary, borderRadius: adminRadius),
+              decoration: const BoxDecoration(
+                color: AdminColors.primary,
+                borderRadius: adminRadius,
+              ),
               child: const Icon(Icons.groups_outlined, color: Colors.white),
             ),
             const SizedBox(width: 12),
@@ -187,7 +282,14 @@ class _TodayViewState extends State<TodayView> with WidgetsBindingObserver {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(cls.schoolClass.label, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: AdminColors.text)),
+                  Text(
+                    cls.schoolClass.label,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: AdminColors.text,
+                    ),
+                  ),
                   const SizedBox(height: 3),
                   Wrap(
                     spacing: 8,
@@ -195,8 +297,16 @@ class _TodayViewState extends State<TodayView> with WidgetsBindingObserver {
                     crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
                       badge,
-                      Text(t.classStudents(formatCount(cls.schoolClass.students, locale)),
-                          style: const TextStyle(color: AdminColors.textMuted, fontSize: 13)),
+                      Text(
+                        t.classStudents(
+                          cls.schoolClass.students,
+                          formatCount(cls.schoolClass.students, locale),
+                        ),
+                        style: const TextStyle(
+                          color: AdminColors.textMuted,
+                          fontSize: 13,
+                        ),
+                      ),
                     ],
                   ),
                 ],
@@ -209,11 +319,18 @@ class _TodayViewState extends State<TodayView> with WidgetsBindingObserver {
     );
   }
 
-  Widget _refusedCallout(AppLocalizations t, PendingDay day, String locale) => Callout(
+  Widget _refusedCallout(AppLocalizations t, PendingDay day, String locale) =>
+      Callout(
         tone: Tone.danger,
         icon: Icons.error_outline,
-        title: t.refusedTitle('${day.className} — ${day.section}', formatSchoolDay(day.date, locale)),
+        title: t.refusedTitle(
+          '${day.className} — ${day.section}',
+          formatSchoolDay(day.date, locale),
+        ),
         text: day.refusal ?? '',
-        action: TextButton(onPressed: () => widget.viewModel.discard(day), child: Text(t.discard)),
+        action: TextButton(
+          onPressed: () => widget.viewModel.discard(day),
+          child: Text(t.discard),
+        ),
       );
 }

@@ -72,8 +72,13 @@ class AppLocalizationsBn extends AppLocalizations {
       'আপনি এখনো কোনো শ্রেণির শ্রেণিশিক্ষক নন। বিদ্যালয়ের অ্যাডমিনকে বলুন।';
 
   @override
-  String classStudents(String count) {
-    return '$count জন শিক্ষার্থী';
+  String classStudents(int n, String count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$count জন শিক্ষার্থী',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -254,6 +259,9 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get account => 'অ্যাকাউন্ট';
+
+  @override
+  String get branch => 'শাখা';
 
   @override
   String get security => 'নিরাপত্তা';

@@ -1,10 +1,34 @@
+/// A branch (শাখা) of the school family; each teacher belongs to one.
+class Branch {
+  const Branch({required this.id, required this.nameBn, required this.nameEn});
+
+  final int id;
+  final String nameBn;
+  final String nameEn;
+
+  /// The name in [languageCode] ('bn' or 'en'), else the other one.
+  String nameIn(String languageCode) {
+    final (wanted, other) = languageCode == 'en' ? (nameEn, nameBn) : (nameBn, nameEn);
+    return wanted.trim().isNotEmpty ? wanted : other;
+  }
+
+  @override
+  bool operator ==(Object other) => other is Branch && other.id == id && other.nameBn == nameBn && other.nameEn == nameEn;
+
+  @override
+  int get hashCode => Object.hash(id, nameBn, nameEn);
+}
+
 class Teacher {
-  const Teacher({required this.id, required this.firstName, required this.lastName, required this.phone});
+  const Teacher({required this.id, required this.firstName, required this.lastName, required this.phone, this.branch});
 
   final int id;
   final String firstName;
   final String lastName;
   final String phone;
+
+  /// Null from older servers and from profiles kept on the phone before branches.
+  final Branch? branch;
 
   String get fullName => [firstName, lastName].where((p) => p.isNotEmpty).join(' ');
 }

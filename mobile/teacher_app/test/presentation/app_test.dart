@@ -19,12 +19,13 @@ void main() {
   late FakeSchoolServer school;
   late MemorySessionStore session;
 
-  Future<void> launch(WidgetTester tester, {String language = 'en'}) async {
+  Future<void> launch(WidgetTester tester, {String language = 'en', bool branch = true}) async {
     // A phone screen: 360 × 780.
     tester.view.physicalSize = const Size(1080, 2340);
     tester.view.devicePixelRatio = 3;
     addTearDown(tester.view.reset);
     school = FakeSchoolServer();
+    if (!branch) school.branch = null;
     session = MemorySessionStore(language: language);
     final repository = TeacherAppRepository(
       store: await SqfliteLocalStore.open(databaseFactoryFfiNoIsolate, inMemoryDatabasePath),
@@ -80,6 +81,46 @@ void main() {
     expect(find.text("Today's attendance"), findsOneWidget);
     expect(find.text('Class 5 — Good'), findsOneWidget);
     expect(find.text('Not taken'), findsWidgets);
+  });
+
+  testWidgets('shows the school family\'s name on the sign-in page', (tester) async {
+    await launch(tester);
+
+    expect(find.text('Star Shiksha Paribar'), findsOneWidget);
+  });
+
+  testWidgets('shows the teacher\'s branch with the date on Today, under their name in the menu, and in the settings', (tester) async {
+    await launch(tester);
+    await signIn(tester);
+
+    expect(find.text('Mirzapur Branch · Today is March 10, 2026'), findsOneWidget);
+
+    await tester.tap(find.byTooltip('Open navigation menu'));
+    await tester.pumpAndSettle();
+    expect(find.descendant(of: find.byType(Drawer), matching: find.text('Nasima Akter')), findsOneWidget);
+    expect(find.descendant(of: find.byType(Drawer), matching: find.text('Mirzapur Branch')), findsOneWidget);
+    expect(find.descendant(of: find.byType(Drawer), matching: find.text('Online')), findsOneWidget);
+    expect(find.descendant(of: find.byType(Drawer), matching: find.text('Star Shiksha Paribar')), findsOneWidget);
+
+    await tester.tap(find.text('Settings'));
+    await tester.pumpAndSettle();
+    expect(find.text('Mirzapur Branch'), findsOneWidget);
+    expect(find.byTooltip('Branch'), findsOneWidget);
+  });
+
+  testWidgets('shows the branch\'s Bangla name in Bangla', (tester) async {
+    await launch(tester, language: 'bn');
+    expect(find.text('স্টার শিক্ষা পরিবার'), findsOneWidget);
+    await signIn(tester, phone: 'মোবাইল নম্বর', password: 'পাসওয়ার্ড', button: 'সাইন ইন');
+
+    expect(find.textContaining('মির্জাপুর শাখা · আজ'), findsOneWidget);
+  });
+
+  testWidgets('shows only the date on Today when an older server sends no branch', (tester) async {
+    await launch(tester, branch: false);
+    await signIn(tester);
+
+    expect(find.text('Today is March 10, 2026'), findsOneWidget);
   });
 
   testWidgets('shows the server\'s reason for a wrong password', (tester) async {

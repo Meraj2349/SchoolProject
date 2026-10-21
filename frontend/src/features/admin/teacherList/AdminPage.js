@@ -11,7 +11,9 @@ import {
 } from "@/hooks/useTeachers";
 import { subjectsService } from "@/services/subjects.service";
 import { queryKeys } from "@/lib/queryKeys";
-import { useTranslations } from "@/store/languageStore";
+import { useBranches } from "@/hooks/useBranches";
+import { branchName } from "@/lib/branches";
+import { useLanguageStore, useTranslations } from "@/store/languageStore";
 import { useBranchStore } from "@/store/branchStore";
 import { Badge, ChooseBranchNotice } from "@/components/admin/ui";
 import AppAccessDrawer from "./AppAccessDrawer";
@@ -44,6 +46,11 @@ export default function AdminPage() {
   const t = useTranslations("admin.teachers");
   const branchId = useBranchStore((s) => s.currentBranchId);
   const { needsBranch } = useWriteBranch();
+  // A super admin on "All branches" sees every branch's teachers: say whose they are.
+  const showBranch = needsBranch;
+  const language = useLanguageStore((s) => s.language);
+  const { data: branches = [] } = useBranches();
+  const branchOf = (teacher) => branchName(branches.find((b) => b.id === teacher.branch_id), language);
 
   const [form, setForm] = useState(EMPTY);
   const [editId, setEditId] = useState(null);
@@ -165,6 +172,7 @@ export default function AdminPage() {
 
   const TABLE_HEADERS = [
     t("name"),
+    ...(showBranch ? [t("branch")] : []),
     t("subject"),
     t("email"),
     t("contact"),
@@ -387,6 +395,9 @@ export default function AdminPage() {
                         </span>
                       </div>
                     </td>
+                    {showBranch && (
+                      <td className="table-cell text-slate-600">{branchOf(teacher)}</td>
+                    )}
                     <td className="table-cell">
                       <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-purple-50 text-purple-700 text-xs font-medium">
                         {teacher.Subject}

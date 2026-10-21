@@ -92,7 +92,7 @@ export const mysqlAbsenceSmsRepository = {
     const scope = branchFilter(branchId, "m");
     const [rows] = await db.query(
       `SELECT m.id, m.student_id AS studentId, CONCAT_WS(' ', s.FirstName, s.LastName) AS studentName,
-              s.RollNumber AS roll, c.ClassName AS className, c.Section AS section, m.class_date AS date,
+              s.RollNumber AS roll, c.ClassID AS classId, c.ClassName AS className, c.Section AS section, m.class_date AS date,
               m.status, m.phone, m.attempts, m.due_at AS dueAt, m.sent_at AS sentAt, m.error
          FROM AttendanceSms m
          JOIN Students s ON s.StudentID = m.student_id

@@ -58,6 +58,7 @@ void main() {
     // Sign in (Bangla digits work) while online: the class list is kept on the phone.
     final profile = await repository.signIn(serverUrl: _apiUrl!, phone: '০১৭১১০০০০০৭', password: 'class5-secret');
     expect(profile.classes.map((c) => c.id), [10]);
+    expect(profile.teacher.branch?.nameIn('bn'), 'নাটিয়াপাড়া');
     final today = profile.today;
 
     // Offline: take the day, two absent.

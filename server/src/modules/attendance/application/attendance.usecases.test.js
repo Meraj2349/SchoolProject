@@ -21,9 +21,19 @@ let useCases;
 
 beforeEach(() => {
   repository = makeFakeAttendanceRepository({
+    branches: [
+      { id: 1, nameBn: "বাথুলী শাখা", nameEn: "Bathuli Branch" },
+      { id: 2, nameBn: "দুল্যা শাখা", nameEn: "Dulla Branch" },
+      { id: 3, nameBn: "দেলদুয়ার শাখা", nameEn: "Delduar Branch" },
+    ],
+    teachers: [
+      { id: 7, firstName: "Nasima", lastName: "Akter", appEnabled: true, appPhone: "01711000001", appPasswordHash: "hash" },
+      { id: 9, firstName: "Kamal", lastName: "Hossain", appEnabled: true, appPhone: "01711000002", appPasswordHash: null },
+    ],
     classes: [
       { id: 10, name: "Class 5", section: "Good", branchId: 1, teacherId: 7 },
       { id: 20, name: "Class 5", section: "Good", branchId: 2, teacherId: 9 },
+      { id: 30, name: "Class 6", section: "Good", branchId: 1, teacherId: null },
     ],
     students: [
       { id: 101, firstName: "Rahim", classId: 10, branchId: 1, roll: "1" },
@@ -83,6 +93,25 @@ describe("getRoster", () => {
     await expectRejects(useCases.getRoster({ actor: teacher, classId: 20 }), NotFoundError, "attendance_class_not_found");
   });
 
+  it("shows the class's branch and its class teacher, with whether the teacher can use the app", async () => {
+    const roster = await useCases.getRoster({ actor: adminA, classId: 10 });
+
+    expect(roster.branch).toEqual({ id: 1, nameBn: "বাথুলী শাখা", nameEn: "Bathuli Branch" });
+    expect(roster.classTeacher).toEqual({ id: 7, name: "Nasima Akter", appAccess: true });
+  });
+
+  it("says a class teacher without a password cannot use the app", async () => {
+    const roster = await useCases.getRoster({ actor: superAdmin, classId: 20 });
+
+    expect(roster.classTeacher).toEqual({ id: 9, name: "Kamal Hossain", appAccess: false });
+  });
+
+  it("has no class teacher for a class without one", async () => {
+    const roster = await useCases.getRoster({ actor: adminA, classId: 30 });
+
+    expect(roster.classTeacher).toBeNull();
+  });
+
   it("gives a super admin any branch's class", async () => {
     expect((await useCases.getRoster({ actor: superAdmin, classId: 20 })).students).toHaveLength(1);
   });
@@ -96,6 +125,8 @@ describe("saveDay", () => {
     expect(repository.state.saves[0]).toMatchObject({ classId: 10, branchId: 1, date: TODAY, marker: { type: "teacher", id: 7 }, takenAt: NOW });
     expect(day.students.map((s) => s.status)).toEqual(["Present", "Leave"]);
     expect(day.kept).toEqual([]);
+    expect(day.branch).toEqual({ id: 1, nameBn: "বাথুলী শাখা", nameEn: "Bathuli Branch" });
+    expect(day.classTeacher).toEqual({ id: 7, name: "Nasima Akter", appAccess: true });
   });
 
   it("is harmless to repeat", async () => {
@@ -335,5 +366,71 @@ describe("updateRecord and removeRecord", () => {
     await useCases.removeRecord({ actor: adminA, id: recordId() });
 
     expect(repository.state.records).toEqual([]);
+  });
+});
+
+describe("overview", () => {
+  const ZERO = { present: 0, absent: 0, late: 0, leave: 0 };
+  const branchIds = (overview) => overview.branches.map((b) => b.id);
+
+  it("gives a super admin with no branch picked every branch, by id, even one without classes", async () => {
+    const overview = await useCases.overview({ actor: superAdmin, date: TODAY });
+
+    expect(branchIds(overview)).toEqual([1, 2, 3]);
+    expect(overview.branches[2]).toEqual({
+      id: 3,
+      nameBn: "দেলদুয়ার শাখা",
+      nameEn: "Delduar Branch",
+      totals: { classes: 0, taken: 0, notTaken: 0, students: 0, ...ZERO },
+      classes: [],
+    });
+  });
+
+  it("gives a super admin only the branch they picked", async () => {
+    const overview = await useCases.overview({ actor: { ...superAdmin, branchId: 2 }, date: TODAY });
+
+    expect(branchIds(overview)).toEqual([2]);
+  });
+
+  it("gives a branch admin only their own branch", async () => {
+    const overview = await useCases.overview({ actor: adminB, date: TODAY });
+
+    expect(branchIds(overview)).toEqual([2]);
+    expect(overview.branches[0].classes.map((c) => c.id)).toEqual([20]);
+  });
+
+  it("counts each class's day and names whoever took it last", async () => {
+    await useCases.saveDay({ actor: teacher, classId: 10, date: TODAY, entries: wholeDay("Present", "Absent") });
+    clock.now = () => later(5);
+    await useCases.markStudent({ actor: adminA, studentId: 102, date: TODAY, status: "Late" });
+
+    const [bathuli] = (await useCases.overview({ actor: adminA, date: TODAY })).branches;
+
+    expect(bathuli.classes).toEqual([
+      {
+        id: 10,
+        name: "Class 5",
+        section: "Good",
+        students: 2,
+        classTeacher: { id: 7, name: "Nasima Akter", appAccess: true },
+        takenBy: { type: "admin", name: "admin#2", at: later(5) },
+        counts: { ...ZERO, present: 1, late: 1 },
+      },
+      { id: 30, name: "Class 6", section: "Good", students: 0, classTeacher: null, takenBy: null, counts: ZERO },
+    ]);
+    expect(bathuli.totals).toEqual({ classes: 2, taken: 1, notTaken: 1, students: 2, ...ZERO, present: 1, late: 1 });
+  });
+
+  it("only counts the asked day", async () => {
+    await useCases.saveDay({ actor: adminA, classId: 10, date: "2026-03-09", entries: wholeDay("Absent", "Absent") });
+
+    const [bathuli] = (await useCases.overview({ actor: adminA, date: TODAY })).branches;
+
+    expect(bathuli.totals).toMatchObject({ taken: 0, absent: 0 });
+  });
+
+  it("reads today when no day is given, and refuses a date that is not a day", async () => {
+    expect((await useCases.overview({ actor: adminA })).date).toBe(TODAY);
+    await expectRejects(useCases.overview({ actor: adminA, date: "2026-02-30" }), ValidationError, "attendance_date_invalid");
   });
 });

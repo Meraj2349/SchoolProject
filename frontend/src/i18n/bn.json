@@ -55,12 +55,13 @@
     "studentList": "শিক্ষার্থী তালিকা",
     "teacherList": "শিক্ষক তালিকা",
     "classTeacher": "শ্রেণি শিক্ষক",
-    "classesSections": "শ্রেণি ও শাখা",
+    "classesSections": "শ্রেণি ও বিভাগ",
     "subject": "বিষয়",
     "results": "ফলাফল",
     "exams": "পরীক্ষা",
     "events": "ইভেন্ট",
     "attendance": "উপস্থিতি চিহ্নিত করুন",
+    "attendanceOverview": "শাখা অনুযায়ী উপস্থিতি",
     "attendanceGrid": "উপস্থিতি গ্রিড",
     "settings": "সেটিংস",
     "logout": "লগ আউট",
@@ -308,9 +309,9 @@
     "searchLabel": "শিক্ষক খুঁজুন",
     "searchIn": "যেখানে খুঁজবেন",
     "className": "শ্রেণি",
-    "section": "শাখা",
+    "section": "বিভাগ",
     "allClasses": "সব শ্রেণি",
-    "allSections": "সব শাখা",
+    "allSections": "সব বিভাগ",
     "classTeacher": "শ্রেণি শিক্ষক"
   },
   "results": {
@@ -496,7 +497,7 @@
       "deleteConfirmBody": "তার উপস্থিতি ও ফলাফলও মুছে যাবে। এটি ফেরানো যাবে না।",
       "required": "এই ঘরটি পূরণ করা আবশ্যক",
       "invalidGender": "ছেলে বা মেয়ে বেছে নিন",
-      "rollTaken": "এই শ্রেণি ও শাখায় এই রোল নম্বর আগে থেকেই আছে",
+      "rollTaken": "এই শ্রেণি ও বিভাগে এই রোল নম্বর আগে থেকেই আছে",
       "selectClass": "শ্রেণি বেছে নিন",
       "selectSection": "শাখা বেছে নিন",
       "allClasses": "সকল শ্রেণি",
@@ -547,7 +548,8 @@
       "appNeverSignedIn": "এখনো সাইন ইন করেননি",
       "appSave": "অ্যাপের অনুমতি সংরক্ষণ",
       "appSaved": "অ্যাপের অনুমতি সংরক্ষণ হয়েছে",
-      "appSignOutNote": "নতুন পাসওয়ার্ড, নতুন নম্বর বা অনুমতি বন্ধ করলে শিক্ষক সব ফোন থেকে সাইন আউট হয়ে যান।"
+      "appSignOutNote": "নতুন পাসওয়ার্ড, নতুন নম্বর বা অনুমতি বন্ধ করলে শিক্ষক সব ফোন থেকে সাইন আউট হয়ে যান।",
+      "branch": "শাখা"
     },
     "classes": {
       "title": "শ্রেণি শিক্ষক ব্যবস্থাপনা",
@@ -742,7 +744,25 @@
       "smsSkippedReasons": {
         "no_parent_phone": "অভিভাবকের সঠিক নম্বর নেই",
         "day_over": "দিন শেষ হয়ে গিয়েছিল"
-      }
+      },
+      "overviewTitle": "শাখা অনুযায়ী উপস্থিতি",
+      "overviewSubtitle": "শাখা অনুযায়ী কোন কোন শ্রেণির দিনের উপস্থিতি নেওয়া হয়েছে।",
+      "overviewTotals": "শ্রেণি {classes}টি · নেওয়া হয়েছে {taken} / {classes} · শিক্ষার্থী {students} জন · অনুপস্থিত {absent} জন",
+      "overviewNoBranches": "দেখানোর মতো কোনো শাখা নেই।",
+      "overviewNoClasses": "এই শাখায় কোনো শ্রেণি নেই।",
+      "overviewLoadFailed": "উপস্থিতির সারসংক্ষেপ লোড করা যায়নি",
+      "classTeacher": "শ্রেণি শিক্ষক",
+      "classTeacherIs": "শ্রেণি শিক্ষক: {name}",
+      "noClassTeacher": "শ্রেণি শিক্ষক নেই",
+      "appOn": "অ্যাপ চালু",
+      "appOff": "অ্যাপ বন্ধ",
+      "notTakenShort": "নেওয়া হয়নি",
+      "takenAt": "নেওয়া হয়েছে {time}",
+      "takenByTeacher": "শ্রেণি শিক্ষক নিয়েছেন",
+      "takenByAdmin": "অ্যাডমিন নিয়েছেন",
+      "open": "খুলুন",
+      "openClass": "{class} খুলুন",
+      "branch": "শাখা"
     },
     "gallery": {
       "title": "ছবির গ্যালারি",

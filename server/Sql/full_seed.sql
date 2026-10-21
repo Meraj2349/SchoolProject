@@ -30,7 +30,11 @@ INSERT INTO Branches (id, name_en, name_bn, address_en, address_bn, is_proposed,
 VALUES
   (1, 'Star Academic School, Natiapara Branch',      'স্টার একাডেমিক স্কুল, নাটিয়াপাড়া শাখা',     'Natiapara, Delduar, Tangail',      'নাটিয়াপাড়া, দেলদুয়ার, টাঙ্গাইল',      0, '2010-01-15'),
   (2, 'Star Academic School, Pakullah Bazar Branch', 'স্টার একাডেমিক স্কুল, পাকুল্লা বাজার শাখা',  'Pakullah Bazar, Delduar, Tangail', 'পাকুল্লা বাজার, দেলদুয়ার, টাঙ্গাইল',  0, '2014-03-10'),
-  (3, 'Star Academic School, Mirzapur Branch',       'স্টার একাডেমিক স্কুল, মির্জাপুর শাখা',        'Mirzapur, Tangail',                'মির্জাপুর, টাঙ্গাইল',                   0, '2020-06-01')
+  (3, 'Star Academic School, Mirzapur Branch',       'স্টার একাডেমিক স্কুল, মির্জাপুর শাখা',        'Mirzapur, Tangail',                'মির্জাপুর, টাঙ্গাইল',                   0, '2020-06-01'),
+  -- The rest of Star Shiksha Paribar (existing databases: star_family_branches_migration.sql)
+  (4, 'Bathuli Branch', 'বাথুলী শাখা', 'Bathuli, Delduar, Tangail', 'বাথুলী, দেলদুয়ার, টাঙ্গাইল', 0, NULL),
+  (5, 'Delduar Branch', 'দেলদুয়ার শাখা', 'Next to the Upazila gate, Delduar, Tangail', 'উপজেলা গেইট সংলগ্ন, দেলদুয়ার, টাঙ্গাইল', 0, NULL),
+  (6, 'Dulla Branch', 'দুল্যা শাখা', 'Dulla Bazar, Delduar, Tangail', 'দুল্যা বাজার, দেলদুয়ার, টাঙ্গাইল', 0, NULL)
 ON DUPLICATE KEY UPDATE
   name_en = VALUES(name_en), name_bn = VALUES(name_bn),
   address_en = VALUES(address_en), address_bn = VALUES(address_bn),

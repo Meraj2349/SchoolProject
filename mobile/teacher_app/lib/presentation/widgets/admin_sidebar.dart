@@ -5,18 +5,22 @@ import '../theme/admin_theme.dart';
 
 enum SidebarItem { today, settings }
 
-/// The website admin's dark sidebar as the app's menu: the teacher with an
-/// online/offline dot, then the pages.
+/// The website admin's dark sidebar as the app's menu: the teacher, their
+/// branch and an online/offline dot, then the pages.
 class AdminSidebar extends StatelessWidget {
   const AdminSidebar({
     super.key,
     required this.teacherName,
+    this.branchName,
     required this.online,
     required this.current,
     required this.onSelected,
   });
 
   final String teacherName;
+
+  /// The teacher's branch in the app's language; not shown when unknown.
+  final String? branchName;
   final bool online;
   final SidebarItem current;
   final ValueChanged<SidebarItem> onSelected;
@@ -66,6 +70,10 @@ class AdminSidebar extends StatelessWidget {
                         Text(teacherName,
                             overflow: TextOverflow.ellipsis,
                             style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
+                        if (branchName != null && branchName!.trim().isNotEmpty)
+                          Text(branchName!,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(color: AdminColors.sidebarText, fontSize: 13)),
                         Row(
                           children: [
                             Icon(Icons.circle, size: 10, color: online ? AdminColors.success : AdminColors.warning),

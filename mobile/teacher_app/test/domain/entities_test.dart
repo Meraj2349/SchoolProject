@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:teacher_app/domain/entities/attendance_status.dart';
 import 'package:teacher_app/domain/entities/school_day.dart';
+import 'package:teacher_app/domain/entities/teacher.dart';
 import 'package:teacher_app/domain/errors.dart';
 
 import '../support/fake_repositories.dart';
@@ -61,5 +62,29 @@ void main() {
 
     expect(day.isRefused, isTrue);
     expect(day.refusal, 'Teachers can take today only.');
+  });
+
+  group('Branch', () {
+    const mirzapur = Branch(id: 3, nameBn: 'মির্জাপুর শাখা', nameEn: 'Mirzapur Branch');
+
+    test('gives its name in the app\'s language', () {
+      expect(mirzapur.nameIn('bn'), 'মির্জাপুর শাখা');
+      expect(mirzapur.nameIn('en'), 'Mirzapur Branch');
+    });
+
+    test('falls back to the other language when a name is missing', () {
+      expect(const Branch(id: 3, nameBn: 'মির্জাপুর শাখা', nameEn: '').nameIn('en'), 'মির্জাপুর শাখা');
+      expect(const Branch(id: 3, nameBn: ' ', nameEn: 'Mirzapur Branch').nameIn('bn'), 'Mirzapur Branch');
+    });
+
+    test('is equal to a branch with the same id and names', () {
+      expect(mirzapur, const Branch(id: 3, nameBn: 'মির্জাপুর শাখা', nameEn: 'Mirzapur Branch'));
+      expect(mirzapur.hashCode, const Branch(id: 3, nameBn: 'মির্জাপুর শাখা', nameEn: 'Mirzapur Branch').hashCode);
+      expect(mirzapur == const Branch(id: 4, nameBn: 'মির্জাপুর শাখা', nameEn: 'Mirzapur Branch'), isFalse);
+    });
+  });
+
+  test('the test teacher belongs to a branch', () {
+    expect(nasima.branch?.nameIn('en'), 'Mirzapur Branch');
   });
 }

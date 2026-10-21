@@ -6,7 +6,9 @@ import 'package:teacher_app/domain/errors.dart';
 import 'package:teacher_app/domain/repositories/attendance_repository.dart';
 import 'package:teacher_app/domain/repositories/session_repository.dart';
 
-const nasima = Teacher(id: 7, firstName: 'Nasima', lastName: 'Akter', phone: '01711000001');
+const mirzapur = Branch(id: 3, nameBn: 'মির্জাপুর শাখা', nameEn: 'Mirzapur Branch');
+
+const nasima = Teacher(id: 7, firstName: 'Nasima', lastName: 'Akter', phone: '01711000001', branch: mirzapur);
 
 Profile profileOn(String today, {bool taken = false, DateTime? takenAt}) => Profile(
       teacher: nasima,

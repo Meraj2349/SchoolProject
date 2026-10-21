@@ -96,21 +96,31 @@ export function attendanceRate({ Present = 0, Absent = 0, Late = 0 } = {}) {
   return expected ? roundTo2((came / expected) * 100) : null;
 }
 
+const byRoll = (a, b) => String(a.RollNumber).localeCompare(String(b.RollNumber), undefined, { numeric: true });
+
+const branchOfRow = (row) => ({ id: row.BranchID, nameBn: row.BranchNameBn, nameEn: row.BranchNameEn });
+
 /**
  * The students × days grid from rows of students left-joined to their
- * attendance: every student (ordered by roll number, numerically) with a
- * { day: status } map, and the days that have any record.
+ * attendance: every student (by branch, then by roll number, numerically)
+ * with their branch and a { day: status } map, the days that have any
+ * record, and the branches of the students (by id) — "all branches" can mix
+ * the same class and section of several branches.
  */
 export function buildGrid(rows) {
   const students = new Map();
+  const branches = new Map();
   const days = new Set();
   for (const row of rows) {
     if (!students.has(row.StudentID)) {
+      const branch = branchOfRow(row);
+      branches.set(branch.id, branch);
       students.set(row.StudentID, {
         StudentID: row.StudentID,
         FirstName: row.FirstName,
         LastName: row.LastName,
         RollNumber: row.RollNumber,
+        branch,
         attendance: {},
       });
     }
@@ -120,9 +130,55 @@ export function buildGrid(rows) {
     }
   }
   return {
-    students: [...students.values()].sort((a, b) =>
-      String(a.RollNumber).localeCompare(String(b.RollNumber), undefined, { numeric: true }),
-    ),
+    students: [...students.values()].sort((a, b) => a.branch.id - b.branch.id || byRoll(a, b)),
     dates: [...days].sort(),
+    branches: [...branches.values()].sort((a, b) => a.id - b.id),
+  };
+}
+
+// The overview's count keys: present, absent, late, leave.
+const COUNT_KEYS = STATUSES.map((status) => status.toLowerCase());
+
+const countsOf = (mark) => Object.fromEntries(COUNT_KEYS.map((key) => [key, Number(mark?.[key] ?? 0)]));
+
+const isTaken = (counts) => COUNT_KEYS.some((key) => counts[key] > 0);
+
+const classOverview = ({ id, name, section, students, classTeacher }, mark) => ({
+  id,
+  name,
+  section,
+  students,
+  classTeacher,
+  takenBy: mark?.takenBy ?? null,
+  counts: countsOf(mark),
+});
+
+function totalsOf(classes) {
+  const taken = classes.filter((cls) => isTaken(cls.counts)).length;
+  const sum = (pick) => classes.reduce((total, cls) => total + pick(cls), 0);
+  return {
+    classes: classes.length,
+    taken,
+    notTaken: classes.length - taken,
+    students: sum((cls) => cls.students),
+    ...Object.fromEntries(COUNT_KEYS.map((key) => [key, sum((cls) => cls.counts[key])])),
+  };
+}
+
+/**
+ * One day across branches: each branch (in the given order) with its classes
+ * (in the given order), each class's counts and who took it, and the branch's
+ * totals. A class is taken when it has any status that day. `marks` are the
+ * day's { classId, present, absent, late, leave, takenBy } of the classes that
+ * have any; a branch without classes is still listed.
+ */
+export function buildOverview({ date, branches, classes, marks }) {
+  const markOf = new Map(marks.map((mark) => [mark.classId, mark]));
+  return {
+    date,
+    branches: branches.map(({ id, nameBn, nameEn }) => {
+      const rows = classes.filter((cls) => cls.branchId === id).map((cls) => classOverview(cls, markOf.get(cls.id)));
+      return { id, nameBn, nameEn, totals: totalsOf(rows), classes: rows };
+    }),
   };
 }

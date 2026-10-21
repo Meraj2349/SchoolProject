@@ -209,8 +209,8 @@ abstract class AppLocalizations {
   /// No description provided for @classStudents.
   ///
   /// In bn, this message translates to:
-  /// **'{count} জন শিক্ষার্থী'**
-  String classStudents(String count);
+  /// **'{n, plural, other{{count} জন শিক্ষার্থী}}'**
+  String classStudents(int n, String count);
 
   /// No description provided for @notTaken.
   ///
@@ -523,6 +523,12 @@ abstract class AppLocalizations {
   /// In bn, this message translates to:
   /// **'অ্যাকাউন্ট'**
   String get account;
+
+  /// A branch of the school family; the teacher's branch is shown on Today, in the menu and in the settings.
+  ///
+  /// In bn, this message translates to:
+  /// **'শাখা'**
+  String get branch;
 
   /// No description provided for @security.
   ///

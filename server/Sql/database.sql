@@ -400,6 +400,7 @@ CREATE INDEX idx_notice_announcements_category ON NoticeAnnouncements (category)
 
 -- Ensure upload directory exists (run manually): mkdir -p server/public/uploads/notice-announcements
 -- Branches Table for School Management System
+-- Star Shiksha Paribar's branches (existing databases): star_family_branches_migration.sql
 CREATE TABLE
     IF NOT EXISTS Branches (
         id INT PRIMARY KEY AUTO_INCREMENT,

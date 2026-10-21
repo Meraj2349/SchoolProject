@@ -10,6 +10,7 @@ import {
   branchAdminToken,
   count,
   db,
+  insert,
   resetDb,
   seedStudent,
   superAdminToken,
@@ -58,6 +59,22 @@ describe("attendance", () => {
     expect(read.status).toBe(200);
     expect(read.body.data.takenBy).toMatchObject({ type: "admin", name: "fixture-a" });
     expect(read.body.data.students.map((s) => [s.firstName, s.status])).toEqual([["Rahim", "Present"], ["Karim", "Leave"]]);
+  });
+
+  it("shows the class's branch and class teacher on the roster and after a save", async () => {
+    const before = await roster(rahim.classId, TODAY);
+    const teacherId = await insert("Teachers", {
+      FirstName: "Nasima", LastName: "Akter", branch_id: BRANCH_A, AppEnabled: 1, AppPhone: "01711000001", AppPasswordHash: "x",
+    });
+    await db.query("UPDATE Classes SET TeacherID = ? WHERE ClassID = ?", [teacherId, rahim.classId]);
+
+    const saved = await saveDay(rahim.classId, TODAY, day("Present", "Present"));
+
+    expect(before.body.data.branch).toEqual({ id: BRANCH_A, nameBn: "প্রধান", nameEn: "Main" });
+    expect(before.body.data.classTeacher).toBeNull();
+    expect(saved.body.data.branch).toEqual({ id: BRANCH_A, nameBn: "প্রধান", nameEn: "Main" });
+    expect(saved.body.data.classTeacher).toEqual({ id: teacherId, name: "Nasima Akter", appAccess: true });
+    expect(saved.body.data.class).toEqual({ id: rahim.classId, name: "Class 5", section: "Good", branchId: BRANCH_A });
   });
 
   it("keeps one row per student and day however often the day is saved, even at the same moment", async () => {
@@ -140,6 +157,23 @@ describe("attendance", () => {
     });
     expect(grid.body.data.dates).toEqual(["2026-02-02", "2026-02-03"]);
     expect(grid.body.data.students[1].attendance).toEqual({ "2026-02-02": "Leave", "2026-02-03": "Absent" });
+  });
+
+  it("groups an all-branches grid by branch and shows each student's branch", async () => {
+    const grid = (query, auth) =>
+      request(app).get(`/api/attendance/grid?className=Class 5&section=Good&startDate=2026-02-01&endDate=2026-02-28${query}`).set(auth);
+    const MAIN = { id: BRANCH_A, nameBn: "প্রধান", nameEn: "Main" };
+    const NORTH = { id: BRANCH_B, nameBn: "উত্তর", nameEn: "North" };
+
+    const all = await grid("", superAdmin);
+    const north = await grid(`&branch_id=${BRANCH_B}`, superAdmin);
+    const own = await grid(`&branch_id=${BRANCH_B}`, adminA);
+
+    expect(all.body.data.students.map((s) => [s.FirstName, s.branch])).toEqual([["Rahim", MAIN], ["Karim", MAIN], ["Nadia", NORTH]]);
+    expect(all.body.data.branches).toEqual([MAIN, NORTH]);
+    expect(north.body.data.students.map((s) => s.FirstName)).toEqual(["Nadia"]);
+    expect(north.body.data.branches).toEqual([NORTH]);
+    expect(own.body.data.branches).toEqual([MAIN]);
   });
 
   it("shows Leave to a parent looking a student up", async () => {

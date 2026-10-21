@@ -52,6 +52,23 @@ void main() {
       expect(await repository.isSignedIn(), isTrue);
     });
 
+    test('keeps the teacher\'s branch from the login and /me, also on the phone for offline days', () async {
+      final profile = await signIn();
+
+      expect(profile.teacher.branch, const Branch(id: 3, nameBn: 'মির্জাপুর শাখা', nameEn: 'Mirzapur Branch'));
+      expect((await store.profile())!.teacher.branch, profile.teacher.branch);
+      expect((await repository.profile()).value.teacher.branch, profile.teacher.branch); // GET /me
+    });
+
+    test('signs in to an older server that sends no branch', () async {
+      school.branch = null;
+
+      final profile = await signIn();
+
+      expect(profile.teacher.branch, isNull);
+      expect(profile.teacher.fullName, 'Nasima Akter');
+    });
+
     test('passes on the server\'s reason for a wrong password', () async {
       await expectLater(
         repository.signIn(serverUrl: _server, phone: '01711000001', password: 'wrong'),
@@ -80,6 +97,7 @@ void main() {
 
       expect(profile.fresh, isFalse);
       expect(profile.value.classes.single.name, 'Class 5');
+      expect(profile.value.teacher.branch?.nameEn, 'Mirzapur Branch');
       expect(roster.fresh, isFalse);
       expect(roster.value.students.map((s) => s.fullName), ['Rahim Uddin', 'Karim Uddin']);
     });

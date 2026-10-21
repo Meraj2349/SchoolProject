@@ -31,7 +31,7 @@ Dependencies point inwards only: `presentation → domain ← data`, and
 
 ```
 lib/domain         no Flutter, no HTTP, no database
-  entities/        Teacher, SchoolClass, Profile, Roster, PendingDay, AttendanceStatus,
+  entities/        Teacher, Branch, SchoolClass, Profile, Roster, PendingDay, AttendanceStatus,
                    TodayOverview, ClassDay, schoolToday, parseServerUrl
   repositories/    SessionRepository, AttendanceRepository (contracts)
   usecases/        SignIn, RestoreSession, ChangePassword, SignOut, ChangeLanguage,

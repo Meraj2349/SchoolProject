@@ -89,10 +89,14 @@ describe("attendance reads", () => {
     expect(repository.statusCounts).toHaveBeenCalledWith({ branchId: 1, classId: 10, date: "2026-03-01" });
   });
 
-  it("builds the grid with Leave days", async () => {
+  it("builds the grid with Leave days and the students' branch", async () => {
+    const MAIN = { id: 1, nameBn: "প্রধান", nameEn: "Main" };
     const repository = repositoryWith({
       gridRows: jest.fn(async () => [
-        { StudentID: 1, FirstName: "Rahim", LastName: "R", RollNumber: "1", ClassDate: "2026-03-01", Status: "Leave" },
+        {
+          StudentID: 1, FirstName: "Rahim", LastName: "R", RollNumber: "1", ClassDate: "2026-03-01", Status: "Leave",
+          BranchID: 1, BranchNameBn: "প্রধান", BranchNameEn: "Main",
+        },
       ]),
     });
 
@@ -101,8 +105,9 @@ describe("attendance reads", () => {
     });
 
     expect(grid).toEqual({
-      students: [{ StudentID: 1, FirstName: "Rahim", LastName: "R", RollNumber: "1", attendance: { "2026-03-01": "Leave" } }],
+      students: [{ StudentID: 1, FirstName: "Rahim", LastName: "R", RollNumber: "1", branch: MAIN, attendance: { "2026-03-01": "Leave" } }],
       dates: ["2026-03-01"],
+      branches: [MAIN],
       className: "Class 5",
       section: "Good",
     });

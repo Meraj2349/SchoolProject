@@ -32,9 +32,12 @@
     }
   },
   "noClasses": "আপনি এখনো কোনো শ্রেণির শ্রেণিশিক্ষক নন। বিদ্যালয়ের অ্যাডমিনকে বলুন।",
-  "classStudents": "{count} জন শিক্ষার্থী",
+  "classStudents": "{n, plural, other{{count} জন শিক্ষার্থী}}",
   "@classStudents": {
     "placeholders": {
+      "n": {
+        "type": "int"
+      },
       "count": {
         "type": "String"
       }
@@ -183,6 +186,10 @@
   "statWaiting": "পাঠানো বাকি",
   "studentsBox": "শিক্ষার্থী",
   "account": "অ্যাকাউন্ট",
+  "branch": "শাখা",
+  "@branch": {
+    "description": "A branch of the school family; the teacher's branch is shown on Today, in the menu and in the settings."
+  },
   "security": "নিরাপত্তা",
   "settingsSubtitle": "ভাষা, পাসওয়ার্ড ও সাইন আউট",
   "sending": "পাঠানো হচ্ছে…",

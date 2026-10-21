@@ -117,6 +117,18 @@ describe("teacher app", () => {
       expect(res.body.data.token).toEqual(expect.any(String));
     });
 
+    it("shows the teacher's branch on sign-in and on their profile, without the bare branch id", async () => {
+      const MAIN = { id: BRANCH_A, nameBn: "প্রধান", nameEn: "Main" };
+      await giveAccess().expect(200);
+
+      const res = await login();
+      const me = await request(app).get(`${API}/me`).set(bearer(res.body.data.token));
+
+      expect(res.body.data.teacher).toEqual({ id: teacherId, firstName: "Nasima", lastName: "Akter", phone: PHONE, branch: MAIN });
+      expect(me.status).toBe(200);
+      expect(me.body.data.teacher).toEqual({ id: teacherId, firstName: "Nasima", lastName: "Akter", phone: PHONE, branch: MAIN });
+    });
+
     it("refuses a wrong password, an unknown number and a teacher whose access is off, all alike", async () => {
       await giveAccess().expect(200);
       await giveAccess(otherTeacherId, { phone: "01711000002", password: PASSWORD, enabled: false }).expect(200);

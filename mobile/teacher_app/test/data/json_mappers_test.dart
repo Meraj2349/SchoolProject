@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:teacher_app/data/models/json_mappers.dart';
 import 'package:teacher_app/domain/entities/attendance_status.dart';
 import 'package:teacher_app/domain/entities/pending_day.dart';
+import 'package:teacher_app/domain/entities/teacher.dart';
 
 void main() {
   test('a saved day survives a round trip through JSON, and the request carries the entries and when it was taken', () {
@@ -59,5 +60,43 @@ void main() {
     expect(profile.teacher.fullName, 'Nasima Akter');
     expect(profile.classes.single.label, 'Class 5 — Good');
     expect(profileToJson(profileFromJson(profileToJson(profile))), profileToJson(profile));
+  });
+
+  test('reads the teacher\'s branch, and keeps it through the phone\'s copy of the profile', () {
+    final profile = profileFromJson({
+      'teacher': {
+        'id': 7,
+        'firstName': 'Nasima',
+        'lastName': 'Akter',
+        'phone': '01711000001',
+        'branch': {'id': 3, 'nameBn': 'মির্জাপুর শাখা', 'nameEn': 'Mirzapur Branch'},
+      },
+      'today': '2026-03-10',
+      'classes': [],
+    });
+
+    expect(profile.teacher.branch, const Branch(id: 3, nameBn: 'মির্জাপুর শাখা', nameEn: 'Mirzapur Branch'));
+    expect(profileFromJson(profileToJson(profile)).teacher.branch, profile.teacher.branch);
+  });
+
+  test('a branch without one of its names reads it as empty', () {
+    final teacher = teacherFromJson({
+      'id': 7,
+      'branch': {'id': 3, 'nameBn': 'মির্জাপুর শাখা', 'nameEn': null},
+    });
+
+    expect(teacher.branch?.nameIn('en'), 'মির্জাপুর শাখা');
+  });
+
+  test('a profile kept on the phone before branches, or from an older server, still loads without one', () {
+    final cached = {
+      'teacher': {'id': 7, 'firstName': 'Nasima', 'lastName': 'Akter', 'phone': '01711000001'},
+      'today': '2026-03-10',
+      'classes': [],
+    };
+
+    expect(profileFromJson(cached).teacher.branch, isNull);
+    expect(profileFromJson({...cached, 'teacher': {...cached['teacher'] as Json, 'branch': null}}).teacher.branch, isNull);
+    expect(profileFromJson(profileToJson(profileFromJson(cached))).teacher.branch, isNull);
   });
 }

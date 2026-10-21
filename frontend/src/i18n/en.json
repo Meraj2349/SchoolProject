@@ -61,6 +61,7 @@
     "exams": "Exams",
     "events": "Events",
     "attendance": "Mark Attendance",
+    "attendanceOverview": "Attendance by branch",
     "attendanceGrid": "Attendance Grid",
     "settings": "Settings",
     "logout": "Log Out",
@@ -547,7 +548,8 @@
       "appNeverSignedIn": "Has not signed in yet",
       "appSave": "Save app access",
       "appSaved": "App access saved",
-      "appSignOutNote": "A new password, a new number or switching access off signs the teacher out on every phone."
+      "appSignOutNote": "A new password, a new number or switching access off signs the teacher out on every phone.",
+      "branch": "Branch"
     },
     "classes": {
       "title": "Class Teacher Management",
@@ -742,7 +744,25 @@
       "smsSkippedReasons": {
         "no_parent_phone": "no valid parent number",
         "day_over": "the day was over"
-      }
+      },
+      "overviewTitle": "Attendance by branch",
+      "overviewSubtitle": "Which classes have taken the day's attendance, branch by branch.",
+      "overviewTotals": "Classes: {classes} · Taken: {taken} of {classes} · Students: {students} · Absent: {absent}",
+      "overviewNoBranches": "No branches to show.",
+      "overviewNoClasses": "No classes in this branch.",
+      "overviewLoadFailed": "Failed to load the attendance overview",
+      "classTeacher": "Class teacher",
+      "classTeacherIs": "Class teacher: {name}",
+      "noClassTeacher": "No class teacher",
+      "appOn": "App on",
+      "appOff": "App off",
+      "notTakenShort": "Not taken",
+      "takenAt": "Taken {time}",
+      "takenByTeacher": "by class teacher",
+      "takenByAdmin": "by admin",
+      "open": "Open",
+      "openClass": "Open {class}",
+      "branch": "Branch"
     },
     "gallery": {
       "title": "Image Gallery",
