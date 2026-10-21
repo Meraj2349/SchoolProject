@@ -5,6 +5,7 @@ import {
   adminTakenAt,
   attendanceRate,
   buildGrid,
+  buildOverview,
   parseDay,
   parseStatus,
   teacherTakenAt,
@@ -190,21 +191,100 @@ describe("attendanceRate", () => {
 });
 
 describe("buildGrid", () => {
-  it("lists every student (by roll, numerically) with their status per day, and the days that have any record", () => {
+  const main = { BranchID: 1, BranchNameBn: "প্রধান", BranchNameEn: "Main" };
+  const north = { BranchID: 2, BranchNameBn: "উত্তর", BranchNameEn: "North" };
+  const MAIN = { id: 1, nameBn: "প্রধান", nameEn: "Main" };
+  const NORTH = { id: 2, nameBn: "উত্তর", nameEn: "North" };
+
+  it("lists every student (by roll, numerically) with their branch and status per day, and the days that have any record", () => {
     const rows = [
-      { StudentID: 2, FirstName: "Karim", LastName: "K", RollNumber: "10", ClassDate: "2026-03-02", Status: "Leave" },
-      { StudentID: 1, FirstName: "Rahim", LastName: "R", RollNumber: "2", ClassDate: "2026-03-01", Status: "Present" },
-      { StudentID: 1, FirstName: "Rahim", LastName: "R", RollNumber: "2", ClassDate: "2026-03-02", Status: "Absent" },
-      { StudentID: 3, FirstName: "Nadia", LastName: "N", RollNumber: "3", ClassDate: null, Status: null },
+      { StudentID: 2, FirstName: "Karim", LastName: "K", RollNumber: "10", ClassDate: "2026-03-02", Status: "Leave", ...main },
+      { StudentID: 1, FirstName: "Rahim", LastName: "R", RollNumber: "2", ClassDate: "2026-03-01", Status: "Present", ...main },
+      { StudentID: 1, FirstName: "Rahim", LastName: "R", RollNumber: "2", ClassDate: "2026-03-02", Status: "Absent", ...main },
+      { StudentID: 3, FirstName: "Nadia", LastName: "N", RollNumber: "3", ClassDate: null, Status: null, ...main },
     ];
 
     expect(buildGrid(rows)).toEqual({
       students: [
-        { StudentID: 1, FirstName: "Rahim", LastName: "R", RollNumber: "2", attendance: { "2026-03-01": "Present", "2026-03-02": "Absent" } },
-        { StudentID: 3, FirstName: "Nadia", LastName: "N", RollNumber: "3", attendance: {} },
-        { StudentID: 2, FirstName: "Karim", LastName: "K", RollNumber: "10", attendance: { "2026-03-02": "Leave" } },
+        { StudentID: 1, FirstName: "Rahim", LastName: "R", RollNumber: "2", branch: MAIN, attendance: { "2026-03-01": "Present", "2026-03-02": "Absent" } },
+        { StudentID: 3, FirstName: "Nadia", LastName: "N", RollNumber: "3", branch: MAIN, attendance: {} },
+        { StudentID: 2, FirstName: "Karim", LastName: "K", RollNumber: "10", branch: MAIN, attendance: { "2026-03-02": "Leave" } },
       ],
       dates: ["2026-03-01", "2026-03-02"],
+      branches: [MAIN],
     });
+  });
+
+  it("orders students by branch, then roll, and lists each branch once, by id", () => {
+    const rows = [
+      { StudentID: 5, FirstName: "Nadia", RollNumber: "1", ClassDate: null, Status: null, ...north },
+      { StudentID: 2, FirstName: "Karim", RollNumber: "2", ClassDate: null, Status: null, ...main },
+      { StudentID: 1, FirstName: "Rahim", RollNumber: "1", ClassDate: null, Status: null, ...main },
+    ];
+
+    const grid = buildGrid(rows);
+
+    expect(grid.students.map((s) => [s.StudentID, s.branch.id])).toEqual([[1, 1], [2, 1], [5, 2]]);
+    expect(grid.branches).toEqual([MAIN, NORTH]);
+  });
+});
+
+describe("buildOverview", () => {
+  const bathuli = { id: 1, nameBn: "বাথুলী শাখা", nameEn: "Bathuli Branch" };
+  const dulla = { id: 2, nameBn: "দুল্যা শাখা", nameEn: "Dulla Branch" };
+  const nasima = { id: 7, name: "Nasima Akter", appAccess: true };
+  const class5 = { id: 10, name: "Class 5", section: "Good", branchId: 1, students: 3, classTeacher: nasima };
+  const class6 = { id: 11, name: "Class 6", section: "Good", branchId: 1, students: 2, classTeacher: null };
+  const takenBy = { type: "teacher", name: "Nasima Akter", at: NOW };
+
+  it("lists each branch's classes with the day's counts and who took it", () => {
+    const overview = buildOverview({
+      date: "2026-03-10",
+      branches: [bathuli],
+      classes: [class5, class6],
+      marks: [{ classId: 10, present: 2, absent: 1, late: 0, leave: 0, takenBy }],
+    });
+
+    expect(overview).toEqual({
+      date: "2026-03-10",
+      branches: [
+        {
+          ...bathuli,
+          totals: { classes: 2, taken: 1, notTaken: 1, students: 5, present: 2, absent: 1, late: 0, leave: 0 },
+          classes: [
+            { id: 10, name: "Class 5", section: "Good", students: 3, classTeacher: nasima, taken: true, takenBy, counts: { present: 2, absent: 1, late: 0, leave: 0 } },
+            { id: 11, name: "Class 6", section: "Good", students: 2, classTeacher: null, taken: false, takenBy: null, counts: { present: 0, absent: 0, late: 0, leave: 0 } },
+          ],
+        },
+      ],
+    });
+  });
+
+  it("shows a branch without classes with zero totals", () => {
+    const overview = buildOverview({ date: "2026-03-10", branches: [bathuli, dulla], classes: [class5], marks: [] });
+
+    expect(overview.branches[1]).toEqual({
+      ...dulla,
+      totals: { classes: 0, taken: 0, notTaken: 0, students: 0, present: 0, absent: 0, late: 0, leave: 0 },
+      classes: [],
+    });
+  });
+
+  it("counts a day as taken even when no one is named as having taken it", () => {
+    const overview = buildOverview({
+      date: "2026-03-10",
+      branches: [bathuli],
+      classes: [class5],
+      marks: [{ classId: 10, present: 0, absent: 0, late: 1, leave: 2, takenBy: null }],
+    });
+
+    expect(overview.branches[0].totals).toMatchObject({ taken: 1, notTaken: 0, late: 1, leave: 2 });
+    expect(overview.branches[0].classes[0]).toMatchObject({ taken: true, takenBy: null });
+  });
+
+  it("says a class nobody has marked is not taken", () => {
+    const overview = buildOverview({ date: "2026-03-10", branches: [bathuli], classes: [class5], marks: [] });
+
+    expect(overview.branches[0].classes[0]).toMatchObject({ taken: false, takenBy: null });
   });
 });

@@ -23,6 +23,7 @@ mysql_cli() { mysql -h"$HOST" -P"$PORT_DB" -u"$USER" -p"$PASSWORD" "$@"; }
 mysql_cli -e "DROP DATABASE IF EXISTS \`$DB\`; CREATE DATABASE \`$DB\` CHARACTER SET utf8mb4;" 2>/dev/null
 mysql_cli "$DB" < "$SERVER_DIR/Sql/database.sql" 2>/dev/null
 mysql_cli "$DB" < "$APP_DIR/tool/live_api_seed.sql" 2>/dev/null
+mysql_cli "$DB" < "$SERVER_DIR/Sql/star_family_branches_migration.sql" 2>/dev/null
 
 LOG="$(mktemp)"
 (cd "$SERVER_DIR" && DB_HOST="$HOST" DB_PORT="$PORT_DB" DB_USER="$USER" DB_PASSWORD="$PASSWORD" DB_NAME="$DB" \

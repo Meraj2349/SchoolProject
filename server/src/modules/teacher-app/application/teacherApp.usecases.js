@@ -28,6 +28,7 @@ export function makeTeacherAppUseCases({ repository, attendance, passwordHasher,
     firstName: account.firstName,
     lastName: account.lastName,
     phone: account.phone,
+    branch: account.branch,
   });
 
   async function profile(teacher) {

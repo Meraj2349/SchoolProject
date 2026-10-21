@@ -39,6 +39,14 @@ describe("admin navigation", () => {
       expect(findNavItem("/admin/attendance/grid").item.path).toBe("/admin/attendance/grid");
     });
 
+    it("lists the attendance by branch page in the Attendance group, for every admin", () => {
+      expect(findNavItem("/admin/attendance/overview")).toMatchObject({
+        group: { key: "sidebar.groups.attendance" },
+        item: { path: "/admin/attendance/overview", key: "sidebar.attendanceOverview" },
+      });
+      expect(paths(visibleNavigation("branch_admin"))).toContain("/admin/attendance/overview");
+    });
+
     it("matches a sub-page to its closest menu item", () => {
       expect(findNavItem("/admin/studentList/42").item.path).toBe("/admin/studentList");
     });

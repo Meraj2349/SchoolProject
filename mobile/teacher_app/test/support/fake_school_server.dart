@@ -5,13 +5,16 @@ import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 
 /// A stand-in for the school server's teacher app API, enough for the app's
-/// tests: one teacher (01711000001 / class5-secret) with Class 5 Good.
+/// tests: one teacher (01711000001 / class5-secret) of Mirzapur Branch with Class 5 Good.
 /// [offline] makes every request fail as if there were no connection.
 class FakeSchoolServer {
   FakeSchoolServer({this.today = '2026-03-10'});
 
   final String today;
   bool offline = false;
+
+  /// The teacher's branch in login and /me; null as from an older server.
+  Map<String, dynamic>? branch = {'id': 3, 'nameBn': 'মির্জাপুর শাখা', 'nameEn': 'Mirzapur Branch'};
   String token = 'token-1';
 
   /// Saved days: "classId:date" → { studentId: status }.
@@ -29,7 +32,13 @@ class FakeSchoolServer {
   late final http.Client client = MockClient(_handle);
 
   Map<String, dynamic> get _profile => {
-        'teacher': {'id': 7, 'firstName': 'Nasima', 'lastName': 'Akter', 'phone': '01711000001'},
+        'teacher': {
+          'id': 7,
+          'firstName': 'Nasima',
+          'lastName': 'Akter',
+          'phone': '01711000001',
+          if (branch != null) 'branch': branch,
+        },
         'today': today,
         'classes': [
           {'id': 10, 'name': 'Class 5', 'section': 'Good', 'students': 2, 'taken': saved.containsKey('10:$today'), 'takenAt': null},

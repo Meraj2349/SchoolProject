@@ -72,8 +72,13 @@ class AppLocalizationsBn extends AppLocalizations {
       'আপনি এখনো কোনো শ্রেণির শ্রেণিশিক্ষক নন। বিদ্যালয়ের অ্যাডমিনকে বলুন।';
 
   @override
-  String classStudents(String count) {
-    return '$count জন শিক্ষার্থী';
+  String classStudents(int n, String count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$count জন শিক্ষার্থী',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -218,4 +223,64 @@ class AppLocalizationsBn extends AppLocalizations {
   String signedInAs(String name, String phone) {
     return '$name ($phone)';
   }
+
+  @override
+  String get mainNavigation => 'প্রধান মেনু';
+
+  @override
+  String get navToday => 'আজকের উপস্থিতি';
+
+  @override
+  String get statusOnline => 'অনলাইন';
+
+  @override
+  String get statusOffline => 'অফলাইন';
+
+  @override
+  String get signInBoxMessage => 'উপস্থিতি নিতে সাইন ইন করুন';
+
+  @override
+  String get myClasses => 'আমার শ্রেণি';
+
+  @override
+  String get statClasses => 'শ্রেণি';
+
+  @override
+  String get statTaken => 'নেওয়া হয়েছে';
+
+  @override
+  String get statNotTaken => 'বাকি';
+
+  @override
+  String get statWaiting => 'পাঠানো বাকি';
+
+  @override
+  String get studentsBox => 'শিক্ষার্থী';
+
+  @override
+  String get account => 'অ্যাকাউন্ট';
+
+  @override
+  String get branch => 'শাখা';
+
+  @override
+  String get security => 'নিরাপত্তা';
+
+  @override
+  String get settingsSubtitle => 'ভাষা, পাসওয়ার্ড ও সাইন আউট';
+
+  @override
+  String get sending => 'পাঠানো হচ্ছে…';
+
+  @override
+  String get signOutHint =>
+      'এই ফোন থেকে সাইন আউট হলে ফোনে রাখা সব তথ্য মুছে যাবে।';
+
+  @override
+  String roll(String roll) {
+    return 'রোল $roll';
+  }
+
+  @override
+  String get openNavigation => 'মেনু খুলুন';
 }

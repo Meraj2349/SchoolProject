@@ -24,15 +24,38 @@ Bangla is the default language; English is in Settings.
 - Turning access off or setting a new password signs the teacher out on every
   phone.
 
-## Code
+## Code: Clean Architecture + MVVM
+
+Dependencies point inwards only: `presentation → domain ← data`, and
+`app/di.dart` is the only place that wires them together.
 
 ```
-lib/domain   statuses, classes, rosters, days waiting to be sent (no Flutter)
-lib/data     TeacherApi (HTTP), LocalStore (sqflite), SessionStore (secure storage),
-             AttendanceRepository (online/offline, the send queue)
-lib/ui       AppController (state) and the screens: sign in, today, take attendance, settings
-lib/l10n     app_bn.arb (default) and app_en.arb → generated AppLocalizations
+lib/domain         no Flutter, no HTTP, no database
+  entities/        Teacher, Branch, SchoolClass, Profile, Roster, PendingDay, AttendanceStatus,
+                   TodayOverview, ClassDay, schoolToday, parseServerUrl
+  repositories/    SessionRepository, AttendanceRepository (contracts)
+  usecases/        SignIn, RestoreSession, ChangePassword, SignOut, ChangeLanguage,
+                   LoadToday, OpenClassDay, SaveClassDay, SyncPendingDays, DiscardPendingDay
+  errors.dart      ApiException, OfflineException, SignedOutException
+lib/data
+  datasources/     TeacherApi (HTTP), LocalStore (sqflite), SessionStore (secure storage)
+  models/          JSON ⇄ entities
+  repositories/    TeacherAppRepository: implements both contracts, the offline queue
+lib/presentation
+  viewmodels/      one ChangeNotifier per screen (App, SignIn, Today, TakeAttendance, Settings);
+                   they call use cases and expose state and outcomes, never widgets
+  views/           the screens: they only read view-model state and call its methods
+  widgets/         the website admin's classic kit: AdminBox, InfoBox, CountTile, AdminBadge,
+                   Callout, ContentHeader, StatusButtonGroup, AdminSidebar
+  theme/           the admin palette (AdminLTE: #3c8dbc header, #ecf0f5 page, #222d32 sidebar)
+lib/app/di.dart    composition root
+lib/l10n           app_bn.arb (default) and app_en.arb → generated AppLocalizations
 ```
+
+Tests follow the layers: `test/domain` (entities, use cases with in-memory
+repositories), `test/data` (the repository against a fake server, JSON),
+`test/presentation` (view models; widget tests of the screens at phone size),
+`test/integration` (the real server, see below).
 
 ## Develop
 

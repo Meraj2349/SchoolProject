@@ -7,7 +7,8 @@ import { classesService } from "@/services/classes.service";
 import { attendanceTotals, schoolDaysOf, statusCode } from "@/lib/attendance";
 import { localDateString } from "@/lib/dates";
 import { queryKeys } from "@/lib/queryKeys";
-import { useTranslations } from "@/store/languageStore";
+import { branchName } from "@/lib/branches";
+import { useLanguageStore, useTranslations } from "@/store/languageStore";
 import { useBranchStore } from "@/store/branchStore";
 import {
   FiSearch,
@@ -102,7 +103,198 @@ function getDayAbbr(dateStr) {
 }
 
 
+/** A weekend day with no record for this student: shaded, not "not marked". */
+const isOffDay = (d, status) => isWeekend(d) && !status;
+
+/** On several branches: the students of each branch, in the server's branch order. */
+const groupByBranch = (students, branches) =>
+  branches
+    .map((branch) => ({ branch, students: students.filter((s) => s.branch?.id === branch.id) }))
+    .filter((group) => group.students.length > 0);
+
 // ─── Sub-components ───────────────────────────────────────────────────────────
+
+/** The students × days table, with each student's totals. */
+function GridTable({ students, allDays, summaryOf }) {
+  return (
+    <div className="overflow-x-auto">
+      <table
+        className="border-collapse text-xs"
+        style={{ minWidth: "max-content" }}
+      >
+        <thead>
+          <tr className="bg-slate-50 border-b border-slate-200">
+            {/* Fixed columns */}
+            <th className="table-header sticky left-0 z-20 bg-slate-50 text-center w-8 min-w-8">
+              #
+            </th>
+            <th className="table-header sticky left-8 z-20 bg-slate-50 min-w-44 text-left">
+              Student
+            </th>
+            <th className="table-header z-10 bg-slate-50 min-w-12 text-center">
+              Roll
+            </th>
+
+            {/* Day columns */}
+            {allDays.map((d) => {
+              const we = isWeekend(d);
+              return (
+                <th
+                  key={d}
+                  className={`table-header text-center px-0.5 min-w-8 ${we ? "bg-slate-200" : "bg-slate-50"}`}
+                  title={we ? `${d} (Weekend)` : d}
+                >
+                  <div className="font-bold">
+                    {new Date(d + "T00:00:00").getDate()}
+                  </div>
+                  <div
+                    className={`text-[10px] font-normal ${we ? "text-slate-500" : "text-slate-400"}`}
+                  >
+                    {getDayAbbr(d)}
+                  </div>
+                </th>
+              );
+            })}
+
+            {/* Summary columns */}
+            <th className="table-header text-center bg-emerald-50 min-w-10 font-bold text-emerald-700">
+              P
+            </th>
+            <th className="table-header text-center bg-red-50 min-w-10 font-bold text-red-600">
+              A
+            </th>
+            <th className="table-header text-center bg-amber-50 min-w-10 font-bold text-amber-600">
+              L
+            </th>
+            <th className="table-header text-center bg-sky-50 min-w-10 font-bold text-sky-600">
+              Lv
+            </th>
+            <th className="table-header text-center bg-slate-50 min-w-16">
+              %
+            </th>
+          </tr>
+        </thead>
+
+        <tbody className="divide-y divide-slate-100">
+          {students.map((student, i) => {
+            const { present, absent, late, leave, pct } =
+              summaryOf(student);
+            const isLow = pct !== null && pct < 75;
+
+            return (
+              <tr
+                key={student.StudentID}
+                className={`transition-colors ${i % 2 === 0 ? "" : "bg-slate-50/40"} hover:bg-indigo-50/30`}
+              >
+                {/* Row # */}
+                <td className="table-cell text-center text-slate-400 sticky left-0 bg-inherit z-10">
+                  {i + 1}
+                </td>
+
+                {/* Student name */}
+                <td className="table-cell sticky left-8 bg-inherit z-10">
+                  <div className="flex items-center gap-2">
+                    <div className="w-6 h-6 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold text-xs shrink-0">
+                      {student.FirstName?.charAt(0)?.toUpperCase()}
+                    </div>
+                    <span className="font-medium text-slate-800 truncate max-w-32">
+                      {student.FirstName} {student.LastName}
+                    </span>
+                    {isLow && (
+                      <FiAlertTriangle
+                        className="text-red-500 text-xs shrink-0"
+                        title={`Below 75% attendance (${pct}%)`}
+                      />
+                    )}
+                  </div>
+                </td>
+
+                {/* Roll */}
+                <td className="table-cell text-center text-slate-500 font-mono bg-inherit">
+                  {student.RollNumber}
+                </td>
+
+                {/* Day cells */}
+                {allDays.map((date) => {
+                  const status = student.attendance?.[date] ?? null;
+                  const we = isOffDay(date, status);
+
+                  if (we) {
+                    return (
+                      <td
+                        key={date}
+                        className="px-0.5 py-1 text-center bg-slate-100/80"
+                      >
+                        <span className="inline-flex w-7 h-7 items-center justify-center rounded border text-[10px] font-medium bg-slate-200 text-slate-400 border-slate-300 select-none">
+                          –
+                        </span>
+                      </td>
+                    );
+                  }
+
+                  const cfg = status ? STATUS_CONFIG[status] : null;
+                  return (
+                    <td key={date} className="px-0.5 py-1 text-center">
+                      <span
+                        title={`${student.FirstName} ${student.LastName} — ${date}: ${status ?? "not marked"}`}
+                        className={`inline-flex w-7 h-7 items-center justify-center rounded border text-xs font-bold select-none ${
+                          cfg
+                            ? cfg.cell.replace(/ hover:\S+/g, "")
+                            : "bg-white text-slate-300 border-slate-200"
+                        }`}
+                      >
+                        {cfg ? cfg.label : "–"}
+                      </span>
+                    </td>
+                  );
+                })}
+
+                {/* Summary cells */}
+                <td className="table-cell text-center bg-emerald-50/30">
+                  <span className="font-semibold text-emerald-700">
+                    {present}
+                  </span>
+                </td>
+                <td className="table-cell text-center bg-red-50/30">
+                  <span className="font-semibold text-red-600">
+                    {absent}
+                  </span>
+                </td>
+                <td className="table-cell text-center bg-amber-50/30">
+                  <span className="font-semibold text-amber-600">
+                    {late}
+                  </span>
+                </td>
+                <td className="table-cell text-center bg-sky-50/30">
+                  <span className="font-semibold text-sky-600">
+                    {leave}
+                  </span>
+                </td>
+                <td className="table-cell text-center">
+                  {pct !== null ? (
+                    <span
+                      className={`text-xs font-semibold px-1.5 py-0.5 rounded ${
+                        isLow
+                          ? "bg-red-100 text-red-700"
+                          : pct >= 85
+                            ? "bg-emerald-100 text-emerald-700"
+                            : "bg-amber-100 text-amber-700"
+                      }`}
+                    >
+                      {pct}%
+                    </span>
+                  ) : (
+                    <span className="text-slate-300 text-xs">–</span>
+                  )}
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+  );
+}
 
 function StatCard({
   icon: Icon,
@@ -164,6 +356,7 @@ function TableSkeleton() {
 
 export default function AdminAttendanceGridPage() {
   const t = useTranslations("admin.attendance");
+  const language = useLanguageStore((s) => s.language);
   const branchId = useBranchStore((s) => s.currentBranchId);
 
   const todayStr = localDateString();
@@ -234,10 +427,11 @@ export default function AdminAttendanceGridPage() {
   });
 
   const students = useMemo(() => data?.students ?? [], [data]);
+  // The grid can span branches (a super admin on "All branches").
+  const branches = useMemo(() => data?.branches ?? [], [data]);
+  const multiBranch = branches.length > 1;
   // Weekdays, plus any Friday or Saturday on which attendance was taken.
   const schoolDays = useMemo(() => schoolDaysOf(allDays, students, isWeekend), [allDays, students]);
-  // A weekend day with no record for this student: shaded, not "not marked".
-  const isOffDay = (d, status) => isWeekend(d) && !status;
 
   // ── Filtered student list (name / roll search) ────────────────────────
   const filteredStudents = useMemo(() => {
@@ -249,6 +443,13 @@ export default function AdminAttendanceGridPage() {
         (s.RollNumber ?? "").toLowerCase().includes(q),
     );
   }, [students, nameSearch]);
+
+  // One section per branch when the grid spans several; the export follows the same order.
+  const groups = useMemo(
+    () => (multiBranch ? groupByBranch(filteredStudents, branches) : [{ branch: branches[0] ?? null, students: filteredStudents }]),
+    [multiBranch, filteredStudents, branches],
+  );
+  const listedStudents = useMemo(() => groups.flatMap((g) => g.students), [groups]);
 
   // ── Summary stats (top cards) ─────────────────────────────────────────
   const summaryStats = useMemo(() => {
@@ -336,6 +537,7 @@ export default function AdminAttendanceGridPage() {
       "#",
       "Roll",
       "Student Name",
+      ...(multiBranch ? [t("branch")] : []),
       ...dayHeaders,
       "Present",
       "Absent",
@@ -345,7 +547,7 @@ export default function AdminAttendanceGridPage() {
       "Attendance %",
     ];
 
-    const rows = filteredStudents.map((s, i) => {
+    const rows = listedStudents.map((s, i) => {
       const cells = allDays.map((d) => {
         if (isOffDay(d, s.attendance?.[d])) return "WE";
         return statusCode(s.attendance?.[d]);
@@ -355,6 +557,7 @@ export default function AdminAttendanceGridPage() {
         i + 1,
         s.RollNumber,
         `${s.FirstName} ${s.LastName}`,
+        ...(multiBranch ? [branchName(s.branch, language)] : []),
         ...cells,
         present,
         absent,
@@ -372,6 +575,7 @@ export default function AdminAttendanceGridPage() {
       { wch: 4 },
       { wch: 10 },
       { wch: 24 },
+      ...(multiBranch ? [{ wch: 20 }] : []),
       ...allDays.map(() => ({ wch: 5 })),
       { wch: 8 },
       { wch: 8 },
@@ -703,6 +907,12 @@ export default function AdminAttendanceGridPage() {
               <span className="font-semibold text-slate-800">
                 {submitted.className} &mdash; Section {submitted.section}
               </span>
+              {!multiBranch && branches[0] && (
+                <span className="ml-2 text-sm font-medium text-slate-600">
+                  <span aria-hidden>&bull; </span>
+                  <span>{branchName(branches[0], language)}</span>
+                </span>
+              )}
               <span className="ml-2 text-sm text-slate-400">
                 &bull; {MONTH_NAMES[month]} {year} &bull;{" "}
                 {filteredStudents.length !== students.length
@@ -737,183 +947,18 @@ export default function AdminAttendanceGridPage() {
             </div>
           </div>
 
-          {/* Scrollable table */}
-          <div className="overflow-x-auto">
-            <table
-              className="border-collapse text-xs"
-              style={{ minWidth: "max-content" }}
-            >
-              <thead>
-                <tr className="bg-slate-50 border-b border-slate-200">
-                  {/* Fixed columns */}
-                  <th className="table-header sticky left-0 z-20 bg-slate-50 text-center w-8 min-w-8">
-                    #
-                  </th>
-                  <th className="table-header sticky left-8 z-20 bg-slate-50 min-w-44 text-left">
-                    Student
-                  </th>
-                  <th className="table-header z-10 bg-slate-50 min-w-12 text-center">
-                    Roll
-                  </th>
-
-                  {/* Day columns */}
-                  {allDays.map((d) => {
-                    const we = isWeekend(d);
-                    return (
-                      <th
-                        key={d}
-                        className={`table-header text-center px-0.5 min-w-8 ${we ? "bg-slate-200" : "bg-slate-50"}`}
-                        title={we ? `${d} (Weekend)` : d}
-                      >
-                        <div className="font-bold">
-                          {new Date(d + "T00:00:00").getDate()}
-                        </div>
-                        <div
-                          className={`text-[10px] font-normal ${we ? "text-slate-500" : "text-slate-400"}`}
-                        >
-                          {getDayAbbr(d)}
-                        </div>
-                      </th>
-                    );
-                  })}
-
-                  {/* Summary columns */}
-                  <th className="table-header text-center bg-emerald-50 min-w-10 font-bold text-emerald-700">
-                    P
-                  </th>
-                  <th className="table-header text-center bg-red-50 min-w-10 font-bold text-red-600">
-                    A
-                  </th>
-                  <th className="table-header text-center bg-amber-50 min-w-10 font-bold text-amber-600">
-                    L
-                  </th>
-                  <th className="table-header text-center bg-sky-50 min-w-10 font-bold text-sky-600">
-                    Lv
-                  </th>
-                  <th className="table-header text-center bg-slate-50 min-w-16">
-                    %
-                  </th>
-                </tr>
-              </thead>
-
-              <tbody className="divide-y divide-slate-100">
-                {filteredStudents.map((student, i) => {
-                  const { present, absent, late, leave, pct } =
-                    studentSummary(student);
-                  const isLow = pct !== null && pct < 75;
-
-                  return (
-                    <tr
-                      key={student.StudentID}
-                      className={`transition-colors ${i % 2 === 0 ? "" : "bg-slate-50/40"} hover:bg-indigo-50/30`}
-                    >
-                      {/* Row # */}
-                      <td className="table-cell text-center text-slate-400 sticky left-0 bg-inherit z-10">
-                        {i + 1}
-                      </td>
-
-                      {/* Student name */}
-                      <td className="table-cell sticky left-8 bg-inherit z-10">
-                        <div className="flex items-center gap-2">
-                          <div className="w-6 h-6 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold text-xs shrink-0">
-                            {student.FirstName?.charAt(0)?.toUpperCase()}
-                          </div>
-                          <span className="font-medium text-slate-800 truncate max-w-32">
-                            {student.FirstName} {student.LastName}
-                          </span>
-                          {isLow && (
-                            <FiAlertTriangle
-                              className="text-red-500 text-xs shrink-0"
-                              title={`Below 75% attendance (${pct}%)`}
-                            />
-                          )}
-                        </div>
-                      </td>
-
-                      {/* Roll */}
-                      <td className="table-cell text-center text-slate-500 font-mono bg-inherit">
-                        {student.RollNumber}
-                      </td>
-
-                      {/* Day cells */}
-                      {allDays.map((date) => {
-                        const status = student.attendance?.[date] ?? null;
-                        const we = isOffDay(date, status);
-
-                        if (we) {
-                          return (
-                            <td
-                              key={date}
-                              className="px-0.5 py-1 text-center bg-slate-100/80"
-                            >
-                              <span className="inline-flex w-7 h-7 items-center justify-center rounded border text-[10px] font-medium bg-slate-200 text-slate-400 border-slate-300 select-none">
-                                –
-                              </span>
-                            </td>
-                          );
-                        }
-
-                        const cfg = status ? STATUS_CONFIG[status] : null;
-                        return (
-                          <td key={date} className="px-0.5 py-1 text-center">
-                            <span
-                              title={`${student.FirstName} ${student.LastName} — ${date}: ${status ?? "not marked"}`}
-                              className={`inline-flex w-7 h-7 items-center justify-center rounded border text-xs font-bold select-none ${
-                                cfg
-                                  ? cfg.cell.replace(/ hover:\S+/g, "")
-                                  : "bg-white text-slate-300 border-slate-200"
-                              }`}
-                            >
-                              {cfg ? cfg.label : "–"}
-                            </span>
-                          </td>
-                        );
-                      })}
-
-                      {/* Summary cells */}
-                      <td className="table-cell text-center bg-emerald-50/30">
-                        <span className="font-semibold text-emerald-700">
-                          {present}
-                        </span>
-                      </td>
-                      <td className="table-cell text-center bg-red-50/30">
-                        <span className="font-semibold text-red-600">
-                          {absent}
-                        </span>
-                      </td>
-                      <td className="table-cell text-center bg-amber-50/30">
-                        <span className="font-semibold text-amber-600">
-                          {late}
-                        </span>
-                      </td>
-                      <td className="table-cell text-center bg-sky-50/30">
-                        <span className="font-semibold text-sky-600">
-                          {leave}
-                        </span>
-                      </td>
-                      <td className="table-cell text-center">
-                        {pct !== null ? (
-                          <span
-                            className={`text-xs font-semibold px-1.5 py-0.5 rounded ${
-                              isLow
-                                ? "bg-red-100 text-red-700"
-                                : pct >= 85
-                                  ? "bg-emerald-100 text-emerald-700"
-                                  : "bg-amber-100 text-amber-700"
-                            }`}
-                          >
-                            {pct}%
-                          </span>
-                        ) : (
-                          <span className="text-slate-300 text-xs">–</span>
-                        )}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+          {multiBranch ? (
+            groups.map(({ branch, students: ofBranch }) => (
+              <section key={branch.id} aria-labelledby={`grid-branch-${branch.id}`} className="border-t border-slate-100">
+                <h3 id={`grid-branch-${branch.id}`} className="m-0 bg-slate-50 px-6 py-2 text-sm font-semibold text-slate-700">
+                  {branchName(branch, language)}
+                </h3>
+                <GridTable students={ofBranch} allDays={allDays} summaryOf={studentSummary} />
+              </section>
+            ))
+          ) : (
+            <GridTable students={filteredStudents} allDays={allDays} summaryOf={studentSummary} />
+          )}
 
           {/* Search no-match state */}
           {filteredStudents.length === 0 && nameSearch && (

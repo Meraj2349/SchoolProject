@@ -6,27 +6,39 @@ import { ConflictError } from "../../../shared/errors/index.js";
 // application/fakeTeacherAccountRepository.js). The sign-in columns live on
 // Teachers (attendance_v2_migration.sql).
 
-const ACCOUNT_COLUMNS = `TeacherID AS id, FirstName AS firstName, LastName AS lastName, branch_id AS branchId,
-  AppPhone AS phone, AppPasswordHash AS passwordHash, AppEnabled AS enabled, TokenVersion AS tokenVersion,
-  LastLoginAt AS lastLoginAt, FailedLogins AS failedLogins, LockedUntil AS lockedUntil`;
+const ACCOUNT_COLUMNS = `t.TeacherID AS id, t.FirstName AS firstName, t.LastName AS lastName, t.branch_id AS branchId,
+  t.AppPhone AS phone, t.AppPasswordHash AS passwordHash, t.AppEnabled AS enabled, t.TokenVersion AS tokenVersion,
+  t.LastLoginAt AS lastLoginAt, t.FailedLogins AS failedLogins, t.LockedUntil AS lockedUntil,
+  b.name_bn AS branchNameBn, b.name_en AS branchNameEn`;
 
-const toAccount = (row) => (row ? { ...row, enabled: Boolean(row.enabled) } : null);
+// Teachers (t) with their branch (b).
+const ACCOUNTS = "Teachers t LEFT JOIN Branches b ON b.id = t.branch_id";
+
+function toAccount(row) {
+  if (!row) return null;
+  const { branchNameBn, branchNameEn, ...account } = row;
+  return {
+    ...account,
+    enabled: Boolean(account.enabled),
+    branch: { id: account.branchId, nameBn: branchNameBn, nameEn: branchNameEn },
+  };
+}
 
 export const mysqlTeacherAccountRepository = {
   async findAccount(id) {
-    const [[row]] = await db.query(`SELECT ${ACCOUNT_COLUMNS} FROM Teachers WHERE TeacherID = ?`, [id]);
+    const [[row]] = await db.query(`SELECT ${ACCOUNT_COLUMNS} FROM ${ACCOUNTS} WHERE t.TeacherID = ?`, [id]);
     return toAccount(row);
   },
 
   async findAccountByPhone(phone) {
-    const [[row]] = await db.query(`SELECT ${ACCOUNT_COLUMNS} FROM Teachers WHERE AppPhone = ?`, [phone]);
+    const [[row]] = await db.query(`SELECT ${ACCOUNT_COLUMNS} FROM ${ACCOUNTS} WHERE t.AppPhone = ?`, [phone]);
     return toAccount(row);
   },
 
   async listAccess(branchId) {
-    const scope = branchFilter(branchId);
+    const scope = branchFilter(branchId, "t");
     const [rows] = await db.query(
-      `SELECT ${ACCOUNT_COLUMNS} FROM Teachers WHERE 1=1 ${scope.clause} ORDER BY FirstName, LastName, TeacherID`,
+      `SELECT ${ACCOUNT_COLUMNS} FROM ${ACCOUNTS} WHERE 1=1 ${scope.clause} ORDER BY t.FirstName, t.LastName, t.TeacherID`,
       scope.params,
     );
     return rows.map(toAccount);

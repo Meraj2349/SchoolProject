@@ -24,7 +24,7 @@ TRUNCATE TABLE Teachers;
 -- Clear admins except super_admin
 DELETE FROM Admin WHERE role != 'super_admin';
 
--- ── 2. Branches: keep 1 & 2, add 3 (Mirzapur) ────────────────
+-- ── 2. Branches: keep 1 & 2, add 3-6 ─────────────────────────
 DELETE FROM Branches WHERE id NOT IN (1, 2);
 
 -- Ensure branch 1 & 2 exist with clean names
@@ -37,9 +37,14 @@ ON DUPLICATE KEY UPDATE
   address_en = VALUES(address_en), address_bn = VALUES(address_bn),
   is_proposed = VALUES(is_proposed), established_date = VALUES(established_date);
 
--- Insert Mirzapur branch
+-- Insert Mirzapur branch and the rest of Star Shiksha Paribar's branches
+-- (existing databases: star_family_branches_migration.sql)
 INSERT INTO Branches (id, name_en, name_bn, address_en, address_bn, is_proposed, established_date)
-VALUES (3, 'Star Academic School, Mirzapur Branch', 'স্টার একাডেমিক স্কুল, মির্জাপুর শাখা', 'Mirzapur, Tangail', 'মির্জাপুর, টাঙ্গাইল', 0, '2020-06-01')
+VALUES
+  (3, 'Star Academic School, Mirzapur Branch', 'স্টার একাডেমিক স্কুল, মির্জাপুর শাখা', 'Mirzapur, Tangail', 'মির্জাপুর, টাঙ্গাইল', 0, '2020-06-01'),
+  (4, 'Bathuli Branch', 'বাথুলী শাখা', 'Bathuli, Delduar, Tangail', 'বাথুলী, দেলদুয়ার, টাঙ্গাইল', 0, NULL),
+  (5, 'Delduar Branch', 'দেলদুয়ার শাখা', 'Next to the Upazila gate, Delduar, Tangail', 'উপজেলা গেইট সংলগ্ন, দেলদুয়ার, টাঙ্গাইল', 0, NULL),
+  (6, 'Dulla Branch', 'দুল্যা শাখা', 'Dulla Bazar, Delduar, Tangail', 'দুল্যা বাজার, দেলদুয়ার, টাঙ্গাইল', 0, NULL)
 ON DUPLICATE KEY UPDATE
   name_en = VALUES(name_en), name_bn = VALUES(name_bn),
   address_en = VALUES(address_en), address_bn = VALUES(address_bn),

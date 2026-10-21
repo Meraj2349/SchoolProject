@@ -1,6 +1,6 @@
 import { ForbiddenError, NotFoundError, ValidationError } from "../../../shared/errors/index.js";
 import { schoolToday } from "../../../shared/schoolDate.js";
-import { adminTakenAt, parseDay, parseStatus, teacherTakenAt, toDayEntries } from "../domain/attendance.js";
+import { adminTakenAt, buildOverview, parseDay, parseStatus, teacherTakenAt, toDayEntries } from "../domain/attendance.js";
 
 /**
  * Taking and correcting class attendance.
@@ -35,6 +35,8 @@ export function makeAttendanceUseCases({ repository, absenceAlerts, clock }) {
   const takenAtFor = (actor, date, takenAt, now) =>
     actor.kind === "teacher" ? teacherTakenAt({ date, takenAt, now }) : adminTakenAt({ date, now });
 
+  const dayOrToday = (date, now) => (date == null || date === "" ? schoolToday(now) : parseDay(date));
+
   const isEditable = (actor, date, now) => {
     const today = schoolToday(now);
     return actor.kind === "teacher" ? date === today : date <= today;
@@ -50,6 +52,8 @@ export function makeAttendanceUseCases({ repository, absenceAlerts, clock }) {
 
   const dayView = (actor, cls, date, students, now) => ({
     class: { id: cls.id, name: cls.name, section: cls.section, branchId: cls.branchId },
+    branch: cls.branch,
+    classTeacher: cls.classTeacher,
     date,
     students,
     takenBy: takenByOf(students),
@@ -130,9 +134,26 @@ export function makeAttendanceUseCases({ repository, absenceAlerts, clock }) {
     /** The class's students and their status on `date` (default today); null before it is taken. */
     async getRoster({ actor, classId, date }) {
       const now = clock.now();
-      const day = date == null || date === "" ? schoolToday(now) : parseDay(date);
+      const day = dayOrToday(date, now);
       const cls = await classFor(actor, classId);
       return dayView(actor, cls, day, await repository.roster(cls.id, day), now);
+    },
+
+    /**
+     * Every class of the branches in view on `date` (default today): its
+     * counts, class teacher and who took it, with each branch's totals. An
+     * admin sees the branch they work in (`actor.branchId`: a branch admin's
+     * own, or the one a super admin picked), or every branch when it is null.
+     */
+    async overview({ actor, date }) {
+      const day = dayOrToday(date, clock.now());
+      const branchId = actor.branchId ?? null;
+      const [branches, classes, marks] = await Promise.all([
+        repository.branchesIn(branchId),
+        repository.classesIn(branchId),
+        repository.classDays({ branchId, date: day }),
+      ]);
+      return buildOverview({ date: day, branches, classes, marks });
     },
 
     /**

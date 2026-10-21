@@ -1,7 +1,7 @@
 import { describe, expect, it, jest } from "@jest/globals";
 import express from "express";
 import request from "supertest";
-import { ForbiddenError } from "../../../shared/errors/index.js";
+import { ForbiddenError, ValidationError } from "../../../shared/errors/index.js";
 import { makeAttendanceController } from "./attendance.controller.js";
 
 function buildApp({ useCases = {}, reads = {} } = {}) {
@@ -16,6 +16,7 @@ function buildApp({ useCases = {}, reads = {} } = {}) {
   app.get("/count", controller.count);
   app.get("/exists", controller.exists);
   app.get("/roster", controller.roster);
+  app.get("/overview", controller.overview);
   app.put("/class/:classId/date/:date", controller.saveDay);
   app.post("/cell", controller.markStudent);
   app.post("/bulk", controller.bulk);
@@ -54,6 +55,27 @@ describe("attendance controller", () => {
     expect(res.status).toBe(200);
     expect(res.body.data).toEqual({ date: "2026-03-01", students: [] });
     expect(getRoster).toHaveBeenCalledWith({ actor: ADMIN, classId: "10", date: "2026-03-01" });
+  });
+
+  it("gives the day's overview of the admin's own branch, whatever branch the query asks for", async () => {
+    const data = { date: "2026-03-01", branches: [{ id: 1, classes: [] }] };
+    const overview = jest.fn(async () => data);
+
+    const res = await request(buildApp({ useCases: { overview } })).get("/overview?date=2026-03-01&branch_id=2&branchId=2");
+
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual({ success: true, data });
+    expect(overview).toHaveBeenCalledWith({ actor: ADMIN, date: "2026-03-01" });
+  });
+
+  it("translates a bad overview date", async () => {
+    const overview = async () => Promise.reject(new ValidationError("attendance_date_invalid"));
+
+    const res = await request(buildApp({ useCases: { overview } })).get("/overview?date=nope");
+
+    expect(res.status).toBe(400);
+    expect(res.body.success).toBe(false);
+    expect(res.body.message).toBeTruthy();
   });
 
   it("saves a class's whole day in one request", async () => {

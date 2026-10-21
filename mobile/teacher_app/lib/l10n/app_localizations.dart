@@ -209,8 +209,8 @@ abstract class AppLocalizations {
   /// No description provided for @classStudents.
   ///
   /// In bn, this message translates to:
-  /// **'{count} জন শিক্ষার্থী'**
-  String classStudents(String count);
+  /// **'{n, plural, other{{count} জন শিক্ষার্থী}}'**
+  String classStudents(int n, String count);
 
   /// No description provided for @notTaken.
   ///
@@ -451,6 +451,120 @@ abstract class AppLocalizations {
   /// In bn, this message translates to:
   /// **'{name} ({phone})'**
   String signedInAs(String name, String phone);
+
+  /// No description provided for @mainNavigation.
+  ///
+  /// In bn, this message translates to:
+  /// **'প্রধান মেনু'**
+  String get mainNavigation;
+
+  /// No description provided for @navToday.
+  ///
+  /// In bn, this message translates to:
+  /// **'আজকের উপস্থিতি'**
+  String get navToday;
+
+  /// No description provided for @statusOnline.
+  ///
+  /// In bn, this message translates to:
+  /// **'অনলাইন'**
+  String get statusOnline;
+
+  /// No description provided for @statusOffline.
+  ///
+  /// In bn, this message translates to:
+  /// **'অফলাইন'**
+  String get statusOffline;
+
+  /// No description provided for @signInBoxMessage.
+  ///
+  /// In bn, this message translates to:
+  /// **'উপস্থিতি নিতে সাইন ইন করুন'**
+  String get signInBoxMessage;
+
+  /// No description provided for @myClasses.
+  ///
+  /// In bn, this message translates to:
+  /// **'আমার শ্রেণি'**
+  String get myClasses;
+
+  /// No description provided for @statClasses.
+  ///
+  /// In bn, this message translates to:
+  /// **'শ্রেণি'**
+  String get statClasses;
+
+  /// No description provided for @statTaken.
+  ///
+  /// In bn, this message translates to:
+  /// **'নেওয়া হয়েছে'**
+  String get statTaken;
+
+  /// No description provided for @statNotTaken.
+  ///
+  /// In bn, this message translates to:
+  /// **'বাকি'**
+  String get statNotTaken;
+
+  /// No description provided for @statWaiting.
+  ///
+  /// In bn, this message translates to:
+  /// **'পাঠানো বাকি'**
+  String get statWaiting;
+
+  /// No description provided for @studentsBox.
+  ///
+  /// In bn, this message translates to:
+  /// **'শিক্ষার্থী'**
+  String get studentsBox;
+
+  /// No description provided for @account.
+  ///
+  /// In bn, this message translates to:
+  /// **'অ্যাকাউন্ট'**
+  String get account;
+
+  /// A branch of the school family; the teacher's branch is shown on Today, in the menu and in the settings.
+  ///
+  /// In bn, this message translates to:
+  /// **'শাখা'**
+  String get branch;
+
+  /// No description provided for @security.
+  ///
+  /// In bn, this message translates to:
+  /// **'নিরাপত্তা'**
+  String get security;
+
+  /// No description provided for @settingsSubtitle.
+  ///
+  /// In bn, this message translates to:
+  /// **'ভাষা, পাসওয়ার্ড ও সাইন আউট'**
+  String get settingsSubtitle;
+
+  /// No description provided for @sending.
+  ///
+  /// In bn, this message translates to:
+  /// **'পাঠানো হচ্ছে…'**
+  String get sending;
+
+  /// No description provided for @signOutHint.
+  ///
+  /// In bn, this message translates to:
+  /// **'এই ফোন থেকে সাইন আউট হলে ফোনে রাখা সব তথ্য মুছে যাবে।'**
+  String get signOutHint;
+
+  /// No description provided for @roll.
+  ///
+  /// In bn, this message translates to:
+  /// **'রোল {roll}'**
+  String roll(String roll);
+
+  /// No description provided for @openNavigation.
+  ///
+  /// In bn, this message translates to:
+  /// **'মেনু খুলুন'**
+  String get openNavigation;
 }
 
 class _AppLocalizationsDelegate

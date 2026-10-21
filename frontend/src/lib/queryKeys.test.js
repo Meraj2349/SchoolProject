@@ -15,6 +15,12 @@ describe("queryKeys", () => {
     expect(queryKeys.teachers.appAccess(2).slice(0, 2)).toEqual(queryKeys.teachers.appAccessPrefix);
   });
 
+  it("keys the attendance overview by day and branch, under the attendance prefix so saves refresh it", () => {
+    expect(queryKeys.attendance.overview("2026-03-01", 2).slice(0, 1)).toEqual(queryKeys.attendance.prefix);
+    expect(queryKeys.attendance.overview("2026-03-01", 2)).not.toEqual(queryKeys.attendance.overview("2026-03-01", 3));
+    expect(queryKeys.attendance.overview("2026-03-01", 2)).not.toEqual(queryKeys.attendance.overview("2026-03-02", 2));
+  });
+
   it("shares no cache between branch-agnostic class names and branch classes", () => {
     expect(queryKeys.classes.names()).toEqual(["classes", "names"]);
   });

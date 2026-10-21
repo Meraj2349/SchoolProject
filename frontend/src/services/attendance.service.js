@@ -46,4 +46,7 @@ export const attendanceService = {
 
   // The day's SMS to parents of absent children
   getSms: (date) => httpClient.get("/attendance/sms", { params: { date } }).then((r) => r.data),
+
+  // Every branch's classes on `date`: who took each one, and the day's counts
+  getOverview: (date) => httpClient.get("/attendance/overview", { params: { date } }).then((r) => r.data),
 };

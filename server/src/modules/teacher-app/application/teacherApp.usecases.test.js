@@ -15,6 +15,7 @@ const PHONE = "01711000001";
 const adminA = { role: "branch_admin", branchId: 1 };
 const adminB = { role: "branch_admin", branchId: 2 };
 const superAdmin = { role: "super_admin", branchId: null };
+const BATHULI = { id: 1, nameBn: "বাথুলী শাখা", nameEn: "Bathuli Branch" };
 
 let repository;
 let access;
@@ -23,10 +24,13 @@ let attendance;
 let clock;
 
 beforeEach(() => {
-  repository = makeFakeTeacherAccountRepository([
-    { id: 7, firstName: "Nasima", lastName: "Akter", branchId: 1, classes: [{ id: 10, name: "Class 5", section: "Good" }] },
-    { id: 8, firstName: "Kamal", lastName: "Hossain", branchId: 1 },
-  ]);
+  repository = makeFakeTeacherAccountRepository(
+    [
+      { id: 7, firstName: "Nasima", lastName: "Akter", branchId: 1, classes: [{ id: 10, name: "Class 5", section: "Good" }] },
+      { id: 8, firstName: "Kamal", lastName: "Hossain", branchId: 1 },
+    ],
+    { branches: [BATHULI] },
+  );
   clock = { now: () => NOW };
   attendance = { getRoster: jest.fn(async () => ({ students: [] })), saveDay: jest.fn(async () => ({ kept: [] })) };
   access = makeTeacherAccessUseCases({ repository, passwordHasher: fakePasswordHasher });
@@ -115,7 +119,7 @@ describe("signing in to the app", () => {
 
     expect(session).toEqual({
       token: "token:7:1:1",
-      teacher: { id: 7, firstName: "Nasima", lastName: "Akter", phone: PHONE },
+      teacher: { id: 7, firstName: "Nasima", lastName: "Akter", phone: PHONE, branch: BATHULI },
       today: "2026-03-10",
       classes: [{ id: 10, name: "Class 5", section: "Good" }],
     });
@@ -178,13 +182,21 @@ describe("a signed-in teacher", () => {
 
   it("is accepted while access is on and the token version matches", async () => {
     expect(await teacherApp.authenticate({ teacherId: 7, tokenVersion: 1 })).toEqual({
-      id: 7, branchId: 1, firstName: "Nasima", lastName: "Akter", phone: PHONE,
+      id: 7, branchId: 1, firstName: "Nasima", lastName: "Akter", phone: PHONE, branch: BATHULI,
     });
     expect(await teacherApp.authenticate({ teacherId: 7, tokenVersion: 0 })).toBeNull();
     expect(await teacherApp.authenticate({ teacherId: 99, tokenVersion: 0 })).toBeNull();
 
     await enable(7, { enabled: false });
     expect(await teacherApp.authenticate({ teacherId: 7, tokenVersion: 2 })).toBeNull();
+  });
+
+  it("sees their branch on their profile, without the bare branch id", async () => {
+    const teacher = await teacherApp.authenticate({ teacherId: 7, tokenVersion: 1 });
+
+    const profile = await teacherApp.me({ teacher });
+
+    expect(profile.teacher).toEqual({ id: 7, firstName: "Nasima", lastName: "Akter", phone: PHONE, branch: BATHULI });
   });
 
   it("changes the password and gets a new token, signing out the old ones", async () => {

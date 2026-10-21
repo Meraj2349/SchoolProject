@@ -64,6 +64,7 @@ export const queryKeys = {
     grid: (cls, sec, start, end, branchId = null) => ["attendance", "grid", cls, sec, start, end, { branchId }],
     roster: (classId, date, branchId = null) => ["attendance", "roster", classId, date, { branchId }],
     sms: (date, branchId = null) => ["attendance", "sms", date, { branchId }],
+    overview: (date, branchId = null) => ["attendance", "overview", date, { branchId }],
   },
   routines: {
     all: (branchId = null) => ["routines", { branchId }],

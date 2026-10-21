@@ -64,6 +64,11 @@ export function makeAttendanceController({ useCases, reads }) {
       ok(res, await useCases.getRoster({ actor: actorOf(req), classId: req.query.classId, date: req.query.date })),
     ),
 
+    /** Every class of the admin's branch (or of every branch) on ?date= (default today). */
+    overview: handle(async (req, res) =>
+      ok(res, await useCases.overview({ actor: actorOf(req), date: req.query.date })),
+    ),
+
     /** A class's whole day in one request: { entries: [{ studentId, status }] }. */
     saveDay: handle(async (req, res) => {
       const day = await useCases.saveDay({

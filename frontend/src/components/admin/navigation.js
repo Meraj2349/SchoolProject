@@ -66,6 +66,7 @@ export const NAV_GROUPS = [
     icon: FiCheckSquare,
     items: [
       { path: "/admin/attendance", key: "sidebar.attendance", icon: FiCheckSquare },
+      { path: "/admin/attendance/overview", key: "sidebar.attendanceOverview", icon: FiGitBranch },
       { path: "/admin/attendance/grid", key: "sidebar.attendanceGrid", icon: FiTable },
     ],
   },

@@ -8,11 +8,13 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
-import 'package:teacher_app/data/attendance_repository.dart';
-import 'package:teacher_app/data/local_store.dart';
-import 'package:teacher_app/data/session_store.dart';
-import 'package:teacher_app/data/teacher_api.dart';
-import 'package:teacher_app/domain/attendance.dart';
+import 'package:teacher_app/data/datasources/local_store.dart';
+import 'package:teacher_app/data/datasources/session_store.dart';
+import 'package:teacher_app/data/datasources/teacher_api.dart';
+import 'package:teacher_app/data/repositories/teacher_app_repository.dart';
+import 'package:teacher_app/domain/entities/attendance_status.dart';
+import 'package:teacher_app/domain/entities/pending_day.dart';
+import 'package:teacher_app/domain/errors.dart';
 
 final _apiUrl = Platform.environment['LIVE_API_URL'];
 final _adminToken = Platform.environment['LIVE_ADMIN_TOKEN'];
@@ -46,7 +48,7 @@ void main() {
   test('a class teacher takes attendance offline, syncs once, and parents of absent children get one SMS', () async {
     final client = SwitchableClient();
     final session = MemorySessionStore();
-    final repository = AttendanceRepository(
+    final repository = TeacherAppRepository(
       store: await SqfliteLocalStore.open(databaseFactoryFfiNoIsolate, inMemoryDatabasePath),
       session: session,
       client: client,
@@ -56,6 +58,7 @@ void main() {
     // Sign in (Bangla digits work) while online: the class list is kept on the phone.
     final profile = await repository.signIn(serverUrl: _apiUrl!, phone: '০১৭১১০০০০০৭', password: 'class5-secret');
     expect(profile.classes.map((c) => c.id), [10]);
+    expect(profile.teacher.branch?.nameIn('bn'), 'নাটিয়াপাড়া');
     final today = profile.today;
 
     // Offline: take the day, two absent.

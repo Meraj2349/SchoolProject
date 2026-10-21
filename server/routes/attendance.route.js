@@ -23,6 +23,8 @@ router.get("/exists", attendance.exists);
 router.get("/grid", attendance.grid);
 // GET /roster?classId=&date=  a class's students with their status that day
 router.get("/roster", attendance.roster);
+// GET /overview?date=  every class of the branch (or of all branches) that day
+router.get("/overview", attendance.overview);
 // GET /sms?date=  the day's SMS to parents of absent children
 router.get("/sms", absenceSmsController.list);
 router.get("/summary/class/:classID/date/:date", attendance.classDaySummary);

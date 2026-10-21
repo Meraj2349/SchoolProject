@@ -1,10 +1,11 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
-import 'package:teacher_app/data/attendance_repository.dart';
-import 'package:teacher_app/data/local_store.dart';
-import 'package:teacher_app/data/session_store.dart';
-import 'package:teacher_app/data/teacher_api.dart';
-import 'package:teacher_app/domain/attendance.dart';
+import 'package:teacher_app/data/datasources/local_store.dart';
+import 'package:teacher_app/data/datasources/session_store.dart';
+import 'package:teacher_app/data/repositories/teacher_app_repository.dart';
+import 'package:teacher_app/domain/entities/attendance_status.dart';
+import 'package:teacher_app/domain/entities/teacher.dart';
+import 'package:teacher_app/domain/errors.dart';
 
 import '../support/fake_school_server.dart';
 
@@ -18,7 +19,7 @@ void main() {
   late FakeSchoolServer school;
   late MemorySessionStore session;
   late LocalStore store;
-  late AttendanceRepository repository;
+  late TeacherAppRepository repository;
   late DateTime now;
   var refs = 0;
 
@@ -27,7 +28,7 @@ void main() {
     school = FakeSchoolServer();
     session = MemorySessionStore();
     store = await SqfliteLocalStore.open(databaseFactoryFfiNoIsolate, inMemoryDatabasePath);
-    repository = AttendanceRepository(
+    repository = TeacherAppRepository(
       store: store,
       session: session,
       client: school.client,
@@ -49,6 +50,23 @@ void main() {
       expect(await session.serverUrl(), _server);
       expect((await store.roster(10, '2026-03-10'))!.students, hasLength(2));
       expect(await repository.isSignedIn(), isTrue);
+    });
+
+    test('keeps the teacher\'s branch from the login and /me, also on the phone for offline days', () async {
+      final profile = await signIn();
+
+      expect(profile.teacher.branch, const Branch(id: 3, nameBn: 'মির্জাপুর শাখা', nameEn: 'Mirzapur Branch'));
+      expect((await store.profile())!.teacher.branch, profile.teacher.branch);
+      expect((await repository.profile()).value.teacher.branch, profile.teacher.branch); // GET /me
+    });
+
+    test('signs in to an older server that sends no branch', () async {
+      school.branch = null;
+
+      final profile = await signIn();
+
+      expect(profile.teacher.branch, isNull);
+      expect(profile.teacher.fullName, 'Nasima Akter');
     });
 
     test('passes on the server\'s reason for a wrong password', () async {
@@ -79,6 +97,7 @@ void main() {
 
       expect(profile.fresh, isFalse);
       expect(profile.value.classes.single.name, 'Class 5');
+      expect(profile.value.teacher.branch?.nameEn, 'Mirzapur Branch');
       expect(roster.fresh, isFalse);
       expect(roster.value.students.map((s) => s.fullName), ['Rahim Uddin', 'Karim Uddin']);
     });

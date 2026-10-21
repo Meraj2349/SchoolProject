@@ -17,6 +17,24 @@ const MARKER_NAME = `CASE a.MarkedByType
     WHEN 'admin' THEN ad.Username
   END`;
 
+// A class's branch (b) and class teacher (ct), for CLASS_JOINS.
+const BRANCH_COLUMNS = "b.name_bn AS branchNameBn, b.name_en AS branchNameEn";
+const CLASS_TEACHER_COLUMNS = `ct.TeacherID AS classTeacherId, CONCAT_WS(' ', ct.FirstName, ct.LastName) AS classTeacherName,
+  (ct.AppEnabled AND ct.AppPhone IS NOT NULL AND ct.AppPasswordHash IS NOT NULL) AS classTeacherAppAccess`;
+const CLASS_TEACHER_JOIN = "LEFT JOIN Teachers ct ON ct.TeacherID = c.TeacherID";
+const CLASS_JOINS = `LEFT JOIN Branches b ON b.id = c.branch_id ${CLASS_TEACHER_JOIN}`;
+
+// Classes in the school's order of class names (ClassNames.sort_order), then section.
+const CLASS_NAMES_JOIN = "LEFT JOIN ClassNames cn ON cn.name = c.ClassName";
+const BY_CLASS_ORDER = "cn.sort_order IS NULL, cn.sort_order, c.ClassName, c.Section, c.ClassID";
+
+const branchOf = (row) => ({ id: row.branchId, nameBn: row.branchNameBn, nameEn: row.branchNameEn });
+
+const classTeacherOf = (row) =>
+  row.classTeacherId == null
+    ? null
+    : { id: row.classTeacherId, name: row.classTeacherName, appAccess: Boolean(Number(row.classTeacherAppAccess)) };
+
 // Filters of list(): column condition per filter.
 const LIST_FILTERS = {
   id: "a.AttendanceID = ?",
@@ -53,11 +71,80 @@ async function withDeadlockRetry(run) {
 export const mysqlAttendanceRepository = {
   async findClass(classId) {
     const [[row]] = await db.query(
-      `SELECT ClassID AS id, ClassName AS name, Section AS section, branch_id AS branchId, TeacherID AS teacherId
-         FROM Classes WHERE ClassID = ?`,
+      `SELECT c.ClassID AS id, c.ClassName AS name, c.Section AS section, c.branch_id AS branchId, c.TeacherID AS teacherId,
+              ${BRANCH_COLUMNS}, ${CLASS_TEACHER_COLUMNS}
+         FROM Classes c ${CLASS_JOINS}
+        WHERE c.ClassID = ?`,
       [classId],
     );
-    return row ?? null;
+    if (!row) return null;
+    const { id, name, section, branchId, teacherId } = row;
+    return { id, name, section, branchId, teacherId, branch: branchOf(row), classTeacher: classTeacherOf(row) };
+  },
+
+  /** { id, nameBn, nameEn } of the branch, or of every branch (null), by id. */
+  async branchesIn(branchId) {
+    const [clause, params] = branchId == null ? ["", []] : ["WHERE id = ?", [branchId]];
+    const [rows] = await db.query(`SELECT id, name_bn AS nameBn, name_en AS nameEn FROM Branches ${clause} ORDER BY id`, params);
+    return rows;
+  },
+
+  /** The branch's classes (null: every branch's), with their class teacher and number of students. */
+  async classesIn(branchId) {
+    const scope = branchFilter(branchId, "c");
+    const [rows] = await db.query(
+      `SELECT c.ClassID AS id, c.ClassName AS name, c.Section AS section, c.branch_id AS branchId, ${CLASS_TEACHER_COLUMNS},
+              (SELECT COUNT(*) FROM Students s WHERE s.ClassID = c.ClassID AND s.branch_id = c.branch_id) AS students
+         FROM Classes c ${CLASS_TEACHER_JOIN} ${CLASS_NAMES_JOIN}
+        WHERE 1=1 ${scope.clause}
+        ORDER BY c.branch_id, ${BY_CLASS_ORDER}`,
+      scope.params,
+    );
+    return rows.map((row) => ({
+      id: row.id,
+      name: row.name,
+      section: row.section,
+      branchId: row.branchId,
+      students: Number(row.students),
+      classTeacher: classTeacherOf(row),
+    }));
+  },
+
+  /**
+   * The day of each class (of its own branch's students, as on the roster)
+   * that has any status on `date`: its counts and the latest mark.
+   */
+  async classDays({ branchId, date }) {
+    const scope = branchFilter(branchId, "c");
+    const [rows] = await db.query(
+      `WITH day AS (
+         SELECT s.ClassID AS classId, a.Status AS status, a.MarkedByType AS markedByType,
+                ${MARKER_NAME} AS markedByName, a.MarkedAt AS markedAt,
+                ROW_NUMBER() OVER (PARTITION BY s.ClassID ORDER BY a.MarkedAt DESC, a.AttendanceID DESC) AS nth
+           FROM Attendance a
+           JOIN Students s ON s.StudentID = a.StudentID
+           JOIN Classes c ON c.ClassID = s.ClassID AND c.branch_id = s.branch_id
+           LEFT JOIN Teachers t ON a.MarkedByType = 'teacher' AND t.TeacherID = a.MarkedBy
+           LEFT JOIN Admin ad ON a.MarkedByType = 'admin' AND ad.AdminID = a.MarkedBy
+          WHERE a.ClassDate = ? ${scope.clause}
+       )
+       SELECT classId,
+              SUM(status = 'Present') AS presentCount, SUM(status = 'Absent') AS absentCount,
+              SUM(status = 'Late') AS lateCount, SUM(status = 'Leave') AS leaveCount,
+              MAX(CASE WHEN nth = 1 THEN markedByType END) AS takenByType,
+              MAX(CASE WHEN nth = 1 THEN markedByName END) AS takenByName,
+              MAX(CASE WHEN nth = 1 THEN markedAt END) AS takenAt
+         FROM day GROUP BY classId`,
+      [date, ...scope.params],
+    );
+    return rows.map((row) => ({
+      classId: row.classId,
+      present: Number(row.presentCount),
+      absent: Number(row.absentCount),
+      late: Number(row.lateCount),
+      leave: Number(row.leaveCount),
+      takenBy: row.takenAt == null ? null : { type: row.takenByType, name: row.takenByName, at: row.takenAt },
+    }));
   },
 
   async findStudent(studentId, branchId) {
@@ -183,16 +270,18 @@ export const mysqlAttendanceRepository = {
     return Boolean(row.found);
   },
 
-  /** Every student of the class and section, left-joined to their days in the range. */
+  /** Every student of the class and section, with their branch, left-joined to their days in the range. */
   async gridRows({ branchId, className, section, from, to }) {
     const scope = branchFilter(branchId, "s");
     const [rows] = await db.query(
-      `SELECT s.StudentID, s.FirstName, s.LastName, s.RollNumber, a.ClassDate, a.Status
+      `SELECT s.StudentID, s.FirstName, s.LastName, s.RollNumber, a.ClassDate, a.Status,
+              s.branch_id AS BranchID, b.name_bn AS BranchNameBn, b.name_en AS BranchNameEn
          FROM Students s
          JOIN Classes c ON c.ClassID = s.ClassID
+         LEFT JOIN Branches b ON b.id = s.branch_id
          LEFT JOIN Attendance a ON a.StudentID = s.StudentID AND a.ClassDate BETWEEN ? AND ?
         WHERE c.ClassName = ? AND c.Section = ? ${scope.clause}
-        ORDER BY s.RollNumber, a.ClassDate`,
+        ORDER BY s.branch_id, s.RollNumber, a.ClassDate`,
       [from, to, className, section, ...scope.params],
     );
     return rows;
