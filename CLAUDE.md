@@ -85,10 +85,19 @@ real API, and builds the APK (artifact `teacher-app-apk`).
 
 ## Schema changes
 
-`server/Sql/database.sql` is the full schema for a fresh install (docker-compose
-loads it). For every schema change also add an idempotent, MySQL-8-compatible
-migration in `server/Sql/` for existing databases (no `ADD COLUMN IF NOT EXISTS`
-— that is MariaDB-only; check `information_schema` instead).
+The database is moving from MySQL to PostgreSQL (branch
+`feature/postgresql-migration`; plan and runbook in `docs/`). Until the
+cutover, make every schema change on both:
+
+- **PostgreSQL:** a new dbmate migration in `server/db/migrations/`
+  (`npm run db:new -- <name>`, applied with `npm run db:migrate`). Names keep
+  MySQL's spelling and are quoted (`"Students"."StudentID"`). DDL is
+  transactional and `IF NOT EXISTS` works natively; never edit an applied
+  migration, add a new one.
+- **MySQL:** `server/Sql/database.sql` is the full schema for a fresh install
+  (docker-compose loads it). Also add an idempotent, MySQL-8-compatible
+  migration in `server/Sql/` for existing databases (no `ADD COLUMN IF NOT
+  EXISTS` — that is MariaDB-only; check `information_schema` instead).
 
 ## Conventions
 
