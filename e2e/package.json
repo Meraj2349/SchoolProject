@@ -1,0 +1,14 @@
+{
+  "name": "school-e2e",
+  "private": true,
+  "type": "module",
+  "description": "Browser tests of the public website against the real server and a seeded database.",
+  "scripts": {
+    "seed": "node seed.js",
+    "test": "playwright test",
+    "report": "playwright show-report"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.63.0"
+  }
+}

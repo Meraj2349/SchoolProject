@@ -47,6 +47,9 @@ cd frontend && npm test          # Vitest + Testing Library
 cd frontend && npm run lint
 cd frontend && npm run dev       # http://localhost:5173
 
+# public website in a real browser (Playwright; needs MySQL like the integration tests)
+cd e2e && npm ci && npm test     # seeds school_e2e, starts API + frontend build
+
 # mobile app (Flutter 3.47)
 cd mobile/teacher_app && flutter analyze && flutter test
 cd mobile/teacher_app && tool/live_api_test.sh   # against the real API + MySQL
@@ -60,7 +63,9 @@ The database named by `TEST_DB_NAME` (default `school_test`) is dropped and
 recreated on every run — never point it at real data.
 
 CI (`.github/workflows/test.yml`) runs the unit tests, the integration tests
-against a MySQL 8 service, and the frontend tests and lint on every push and PR.
+against a MySQL 8 service, the browser tests (`e2e/`), and the frontend tests
+and lint on every push and PR. A new public page or form gets an `e2e/tests`
+case too.
 `.github/workflows/mobile.yml` analyzes and tests the app, runs it against the
 real API, and builds the APK (artifact `teacher-app-apk`).
 

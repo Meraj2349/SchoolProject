@@ -51,6 +51,55 @@ jobs:
       - run: npm ci
       - run: npm run test:integration
 
+  # The public website in a real browser (e2e/): the API on a seeded MySQL
+  # database and a production build of the frontend, desktop and phone, in
+  # Bangla and English.
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -proot"
+          --health-interval=5s --health-timeout=5s --health-retries=30
+    env:
+      CI: true
+      E2E_DB_HOST: 127.0.0.1
+      E2E_DB_PORT: 3306
+      E2E_DB_USER: root
+      E2E_DB_PASSWORD: root
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: |
+            server/package-lock.json
+            frontend/package-lock.json
+            e2e/package-lock.json
+      - run: npm ci
+        working-directory: server
+      - run: npm ci
+        working-directory: frontend
+      - run: npm ci
+        working-directory: e2e
+      - run: npx playwright install --with-deps chromium
+        working-directory: e2e
+      - run: npm test
+        working-directory: e2e
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: e2e-report
+          path: e2e/playwright-report
+          retention-days: 14
+
   frontend:
     runs-on: ubuntu-latest
     defaults:
