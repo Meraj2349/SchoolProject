@@ -111,11 +111,11 @@ function makeInvoiceQueries(conn) {
     // The upsert row-locks the counter until commit, so two cashiers can never
     // be given the same receipt number.
     async nextReceiptSeq(branchId, year) {
-      await conn.query(
-        `INSERT INTO "FeeReceiptCounters" (branch_id, "year", last_seq) VALUES (?, ?, 1)
-         ON DUPLICATE KEY UPDATE last_seq = last_seq + 1`,
-        [branchId, year],
-      );
+      const bump =
+        db.dialect === "postgres"
+          ? `ON CONFLICT (branch_id, "year") DO UPDATE SET last_seq = "FeeReceiptCounters".last_seq + 1`
+          : "ON DUPLICATE KEY UPDATE last_seq = last_seq + 1";
+      await conn.query(`INSERT INTO "FeeReceiptCounters" (branch_id, "year", last_seq) VALUES (?, ?, 1) ${bump}`, [branchId, year]);
       const row = await conn.one(`SELECT last_seq FROM "FeeReceiptCounters" WHERE branch_id = ? AND "year" = ?`, [
         branchId, year,
       ]);
@@ -159,7 +159,7 @@ async function listInvoices(branchId, filters = {}) {
        LEFT JOIN (SELECT invoice_id, SUM(amount) AS paid FROM "FeePayments" WHERE voided_at IS NULL GROUP BY invoice_id) p
               ON p.invoice_id = i.id
       WHERE 1=1 ${scope.clause} ${active.map(([, sql]) => `AND ${sql}`).join(" ")}
-      ORDER BY i."year" DESC, i."month" DESC, i.class_name, i.section, s."RollNumber" + 0, i.id`,
+      ORDER BY i."year" DESC, i."month" DESC, i.class_name, i.section, ${db.sql.leadingNumber(`s."RollNumber"`)}, i.id`,
     [...scope.params, ...active.map(([key]) => filters[key])],
   );
   return toRows(rows).map((row) => ({ ...row, balance: Math.round((row.total - row.paid) * 100) / 100 }));
@@ -245,10 +245,14 @@ async function getSettings(branchId) {
 }
 
 async function saveSettings(branchId, { due_day, late_fine, receipt_prefix }) {
+  const replace =
+    db.dialect === "postgres"
+      ? `ON CONFLICT (branch_id) DO UPDATE SET due_day = EXCLUDED.due_day, late_fine = EXCLUDED.late_fine,
+       receipt_prefix = EXCLUDED.receipt_prefix`
+      : `ON DUPLICATE KEY UPDATE due_day = VALUES(due_day), late_fine = VALUES(late_fine),
+       receipt_prefix = VALUES(receipt_prefix)`;
   await db.query(
-    `INSERT INTO "FeeSettings" (branch_id, due_day, late_fine, receipt_prefix) VALUES (?, ?, ?, ?)
-     ON DUPLICATE KEY UPDATE due_day = VALUES(due_day), late_fine = VALUES(late_fine),
-       receipt_prefix = VALUES(receipt_prefix)`,
+    `INSERT INTO "FeeSettings" (branch_id, due_day, late_fine, receipt_prefix) VALUES (?, ?, ?, ?) ${replace}`,
     [branchId, due_day, late_fine, receipt_prefix],
   );
 }

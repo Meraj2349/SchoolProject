@@ -98,3 +98,27 @@ describe("type parsing (the API keeps MySQL's shapes)", () => {
     expect(parse(1184, "2026-10-24 09:00:00+06")).toEqual(new Date("2026-10-24T03:00:00Z"));
   });
 });
+
+describe("PostgreSQL SQL fragments", () => {
+  const { sql } = makePgDriver(fakePool());
+
+  it("reads a roll number's leading digits as a number, 0 when there are none (like MySQL)", () => {
+    expect(sql.leadingNumber('s."RollNumber"')).toBe(`COALESCE(substring(s."RollNumber" COLLATE "C" from '^\\s*([0-9]+)')::bigint, 0)`);
+  });
+
+  it("compares NULL-safely with IS NOT DISTINCT FROM", () => {
+    expect(sql.nullSafeEquals("a.branch_id", "?")).toBe("a.branch_id IS NOT DISTINCT FROM ?");
+  });
+
+  it("gives the time a number of minutes ago", () => {
+    expect(sql.minutesAgo(10)).toBe("now() - make_interval(mins => 10)");
+  });
+
+  it("refuses a minute count that is not a whole number", () => {
+    expect(() => sql.minutesAgo("1; DROP TABLE x")).toThrow(/whole number/);
+  });
+
+  it("orders randomly with random()", () => {
+    expect(sql.random()).toBe("random()");
+  });
+});

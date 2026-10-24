@@ -13,21 +13,28 @@ export const mysqlAbsenceSmsRepository = {
   /**
    * Queues a message per student, due at `dueAt`. A message already queued,
    * sent or failed that day is left alone (one per day); a cancelled one is
-   * queued again. status is assigned last: MySQL applies assignments in
-   * order, so the conditions before it still see the stored status.
+   * queued again. On MySQL status is assigned last: MySQL applies
+   * assignments in order, so the conditions before it still see the stored
+   * status.
    */
   async queue({ studentIds, date, branchId, dueAt }) {
-    const incoming = valuesRows(studentIds.map((studentId) => [studentId, date, branchId, dueAt]));
-    const reopen = "AttendanceSms.status = 'cancelled'";
-    await db.query(
-      `INSERT INTO "AttendanceSms" (student_id, class_date, branch_id, due_at) VALUES ${incoming.sql} AS incoming
+    // Each student once: PostgreSQL's ON CONFLICT cannot touch a row twice.
+    const incoming = valuesRows([...new Set(studentIds)].map((studentId) => [studentId, date, branchId, dueAt]));
+    const insert = `INSERT INTO "AttendanceSms" (student_id, class_date, branch_id, due_at) VALUES ${incoming.sql}`;
+    const reopen = `"AttendanceSms".status = 'cancelled'`;
+    const sql =
+      db.dialect === "postgres"
+        ? `${insert}
+       ON CONFLICT (student_id, class_date) DO UPDATE
+         SET due_at = EXCLUDED.due_at, attempts = 0, error = NULL, status = 'pending'
+         WHERE ${reopen}`
+        : `${insert} AS incoming
        ON DUPLICATE KEY UPDATE
          due_at = IF(${reopen}, incoming.due_at, "AttendanceSms".due_at),
          attempts = IF(${reopen}, 0, "AttendanceSms".attempts),
          error = IF(${reopen}, NULL, "AttendanceSms".error),
-         status = IF(${reopen}, 'pending', "AttendanceSms".status)`,
-      incoming.params,
-    );
+         status = IF(${reopen}, 'pending', "AttendanceSms".status)`;
+    await db.query(sql, incoming.params);
   },
 
   async cancel({ studentIds, date }) {
@@ -45,7 +52,7 @@ export const mysqlAbsenceSmsRepository = {
   async failInterrupted() {
     await db.query(
       `UPDATE "AttendanceSms" SET status = 'failed', error = 'interrupted'
-        WHERE status = 'sending' AND updated_at < NOW() - INTERVAL ${STALE_SENDING_MINUTES} MINUTE`,
+        WHERE status = 'sending' AND updated_at < ${db.sql.minutesAgo(STALE_SENDING_MINUTES)}`,
     );
   },
 
@@ -99,7 +106,7 @@ export const mysqlAbsenceSmsRepository = {
          JOIN "Students" s ON s."StudentID" = m.student_id
          LEFT JOIN "Classes" c ON c."ClassID" = s."ClassID"
         WHERE m.class_date = ? ${scope.clause}
-        ORDER BY c."ClassName", c."Section", CAST(s."RollNumber" AS UNSIGNED), s."StudentID"`,
+        ORDER BY c."ClassName", c."Section", ${db.sql.leadingNumber(`s."RollNumber"`)}, s."StudentID"`,
       [date, ...scope.params],
     );
     return rows;

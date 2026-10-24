@@ -42,6 +42,16 @@ export function makePgDriver(pool) {
     begin: (client) => client.query("BEGIN"),
     commit: (client) => client.query("COMMIT"),
     rollback: (client) => client.query("ROLLBACK"),
+    sql: {
+      // MySQL's CAST(x AS UNSIGNED): the leading digits, 0 when there are none ("12A" → 12).
+      leadingNumber: (expr) => `COALESCE(substring(${expr} COLLATE "C" from '^\\s*([0-9]+)')::bigint, 0)`,
+      nullSafeEquals: (a, b) => `${a} IS NOT DISTINCT FROM ${b}`,
+      minutesAgo: (minutes) => {
+        if (!Number.isInteger(minutes)) throw new Error("minutesAgo needs a whole number of minutes");
+        return `now() - make_interval(mins => ${minutes})`;
+      },
+      random: () => "random()",
+    },
     quote,
     classify: (err) => ERROR_KINDS[err.code] ?? null,
     end: () => pool.end(),

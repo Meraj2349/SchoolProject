@@ -167,7 +167,7 @@ export const mysqlAttendanceRepository = {
          LEFT JOIN "Teachers" t ON a."MarkedByType" = 'teacher' AND t."TeacherID" = a."MarkedBy"
          LEFT JOIN "Admin" ad ON a."MarkedByType" = 'admin' AND ad."AdminID" = a."MarkedBy"
         WHERE s."ClassID" = ?
-        ORDER BY CAST(s."RollNumber" AS UNSIGNED), s."RollNumber", s."StudentID"`,
+        ORDER BY ${db.sql.leadingNumber(`s."RollNumber"`)}, s."RollNumber", s."StudentID"`,
       [date, classId],
     );
     return rows;
@@ -176,24 +176,29 @@ export const mysqlAttendanceRepository = {
   /**
    * Upserts the day in one statement. A stored day taken later than this save
    * (MarkedAt) is left as it is, so an admin's correction survives a phone
-   * syncing an older save, and repeating a save changes nothing. MarkedAt is
-   * assigned last: MySQL applies the assignments in order, so the conditions
-   * before it still see the stored time.
+   * syncing an older save, and repeating a save changes nothing. On MySQL
+   * MarkedAt is assigned last: MySQL applies the assignments in order, so the
+   * conditions before it still see the stored time.
    */
   async saveDay({ classId, branchId, date, entries, marker, takenAt }) {
     const incoming = valuesRows(
       entries.map(({ studentId, status }) => [studentId, classId, date, status, branchId, marker.type, marker.id, takenAt]),
     );
-    const newer = `("Attendance"."MarkedAt" IS NULL OR incoming."MarkedAt" >= "Attendance"."MarkedAt")`;
-    const take = (column) => `${column} = IF(${newer}, incoming.${column}, Attendance.${column})`;
-    await withDeadlockRetry(() =>
-      db.query(
-        `INSERT INTO "Attendance" ("StudentID", "ClassID", "ClassDate", "Status", branch_id, "MarkedByType", "MarkedBy", "MarkedAt")
-         VALUES ${incoming.sql} AS incoming
-         ON DUPLICATE KEY UPDATE ${["ClassID", "Status", "branch_id", "MarkedByType", "MarkedBy", "MarkedAt"].map(take).join(", ")}`,
-        incoming.params,
-      ),
-    );
+    const columns = ["ClassID", "Status", "branch_id", "MarkedByType", "MarkedBy", "MarkedAt"].map((c) => `"${c}"`);
+    const insert = `INSERT INTO "Attendance" ("StudentID", "ClassID", "ClassDate", "Status", branch_id, "MarkedByType", "MarkedBy", "MarkedAt")
+         VALUES ${incoming.sql}`;
+    // Students are unique within one save (the domain refuses duplicates), as
+    // PostgreSQL's ON CONFLICT requires.
+    const sql =
+      db.dialect === "postgres"
+        ? `${insert}
+         ON CONFLICT ("StudentID", "ClassDate") DO UPDATE SET ${columns.map((c) => `${c} = EXCLUDED.${c}`).join(", ")}
+         WHERE "Attendance"."MarkedAt" IS NULL OR EXCLUDED."MarkedAt" >= "Attendance"."MarkedAt"`
+        : `${insert} AS incoming
+         ON DUPLICATE KEY UPDATE ${columns
+           .map((c) => `${c} = IF("Attendance"."MarkedAt" IS NULL OR incoming."MarkedAt" >= "Attendance"."MarkedAt", incoming.${c}, "Attendance".${c})`)
+           .join(", ")}`;
+    await withDeadlockRetry(() => db.query(sql, incoming.params));
   },
 
   async findRecord(id, branchId) {
@@ -226,7 +231,7 @@ export const mysqlAttendanceRepository = {
     const { rows } = await db.query(
       `SELECT ${RECORD_COLUMNS} FROM "Attendance" a ${RECORD_JOINS}
         WHERE 1=1 ${where.clause} ${scope.clause}
-        ORDER BY a."ClassDate" DESC, c."ClassName", c."Section", CAST(s."RollNumber" AS UNSIGNED), s."FirstName"`,
+        ORDER BY a."ClassDate" DESC, c."ClassName", c."Section", ${db.sql.leadingNumber(`s."RollNumber"`)}, s."FirstName"`,
       [...where.params, ...scope.params],
     );
     return rows;
@@ -245,7 +250,7 @@ export const mysqlAttendanceRepository = {
     const { rows } = await db.query(
       `SELECT a."Status" AS status, COUNT(*) AS n FROM "Attendance" a
         WHERE 1=1 ${where.clause} ${scope.clause}
-        GROUP BY a."Status" ORDER BY FIELD(a."Status", 'Present', 'Absent', 'Late', 'Leave')`,
+        GROUP BY a."Status" ORDER BY CASE a."Status" WHEN 'Present' THEN 1 WHEN 'Absent' THEN 2 WHEN 'Late' THEN 3 WHEN 'Leave' THEN 4 ELSE 0 END`,
       [...where.params, ...scope.params],
     );
     return Object.fromEntries(rows.map((r) => [r.status, Number(r.n)]));

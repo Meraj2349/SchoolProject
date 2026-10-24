@@ -8,6 +8,11 @@ const ERROR_KINDS = {
   ER_LOCK_DEADLOCK: "deadlock",
 };
 
+const wholeMinutes = (minutes) => {
+  if (!Number.isInteger(minutes)) throw new Error("minutesAgo needs a whole number of minutes");
+  return minutes;
+};
+
 export function makeMysqlDriver(pool) {
   const exec = async (executor, sql, params) => {
     const [result] = await (executor ?? pool).query(sql, params);
@@ -32,6 +37,12 @@ export function makeMysqlDriver(pool) {
     begin: (connection) => connection.beginTransaction(),
     commit: (connection) => connection.commit(),
     rollback: (connection) => connection.rollback(),
+    sql: {
+      leadingNumber: (expr) => `CAST(${expr} AS UNSIGNED)`,
+      nullSafeEquals: (a, b) => `${a} <=> ${b}`,
+      minutesAgo: (minutes) => `NOW() - INTERVAL ${wholeMinutes(minutes)} MINUTE`,
+      random: () => "RAND()",
+    },
     quote: (name) => `\`${name.replaceAll("`", "``")}\``,
     classify: (err) => ERROR_KINDS[err.code] ?? null,
     end: () => pool.end(),

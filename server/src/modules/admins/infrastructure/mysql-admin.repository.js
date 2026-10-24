@@ -43,7 +43,7 @@ function makeRepository(sql) {
 
     // Same lookup the login uses: email + role + branch (NULL-safe).
     async findByLogin({ email, role, branchId }) {
-      const { rows } = await sql.query(`${SELECT_ADMIN} WHERE a."Email" = ? AND a.role = ? AND a.branch_id <=> ?`, [
+      const { rows } = await sql.query(`${SELECT_ADMIN} WHERE a."Email" = ? AND a.role = ? AND ${db.sql.nullSafeEquals("a.branch_id", "?")}`, [
         email,
         role,
         branchId,

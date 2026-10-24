@@ -131,3 +131,11 @@ describe("ident", () => {
     expect(makeDb(driver).ident("Students")).toBe("[Students]");
   });
 });
+
+describe("sql fragments", () => {
+  it("passes the driver's dialect fragments through", () => {
+    const sql = { random: () => "random()" };
+
+    expect(makeDb({ ...fakeDriver(), sql }).sql.random()).toBe("random()");
+  });
+});

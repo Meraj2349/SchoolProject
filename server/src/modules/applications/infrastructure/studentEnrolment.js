@@ -9,7 +9,7 @@ const ADMISSION_SECTION = STANDARD_SECTIONS.includes("General") ? "General" : ST
 export const studentEnrolment = {
   async enrol(student, branchId) {
     const { maxRoll } = await db.one(
-      `SELECT MAX(CAST(s."RollNumber" AS UNSIGNED)) AS "maxRoll"
+      `SELECT MAX(${db.sql.leadingNumber(`s."RollNumber"`)}) AS "maxRoll"
          FROM "Students" s JOIN "Classes" c ON c."ClassID" = s."ClassID"
         WHERE c."ClassName" = ? AND c."Section" = ? AND c.branch_id = ?`,
       [student.Class, ADMISSION_SECTION, branchId],

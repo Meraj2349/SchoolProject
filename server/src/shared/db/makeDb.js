@@ -13,6 +13,9 @@ export function makeDb(driver, executor = null) {
   const db = {
     dialect: driver.dialect,
 
+    /** SQL that differs between engines: leadingNumber, nullSafeEquals, minutesAgo, random. */
+    sql: driver.sql,
+
     /** A table or column name quoted for this engine. */
     ident: (name) => driver.quote(name),
 

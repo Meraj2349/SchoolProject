@@ -196,7 +196,7 @@ describe("taking a quiz", () => {
 
     const stolen = await request(app).post("/api/quiz/finish").set(nadia).send({ quizId: start.body.data.quizId, answers });
     const missing = await request(app).post("/api/quiz/finish").set(token).send({ answers });
-    await db.query(`UPDATE "QuizStarts" SET "StartedAt" = NOW() - INTERVAL 3 HOUR`);
+    await db.query(`UPDATE "QuizStarts" SET "StartedAt" = ${db.sql.minutesAgo(180)}`);
     const old = await request(app).post("/api/quiz/finish").set(token).send({ quizId: start.body.data.quizId, answers });
 
     expect([stolen.status, missing.status, old.status]).toEqual([404, 404, 409]);

@@ -50,9 +50,9 @@ describe("absence SMS to parents", () => {
   it("queues absent children 15 minutes after the save, and sends one Bangla SMS each once the time comes", async () => {
     await saveDay("Absent", "Present");
 
-    const queued = await db.one(`SELECT status, TIMESTAMPDIFF(MINUTE, NOW(), due_at) AS minutes FROM "AttendanceSms"`);
+    const queued = await db.one(`SELECT status, due_at FROM "AttendanceSms"`);
     expect(queued.status).toBe("pending");
-    expect(Number(queued.minutes)).toBeGreaterThanOrEqual(14);
+    expect((queued.due_at - Date.now()) / 60_000).toBeGreaterThanOrEqual(14);
 
     if (!stillToday()) return;
     await worker.sendDue();
@@ -81,13 +81,25 @@ describe("absence SMS to parents", () => {
 
   it("gives up on a message a crash left half-sent, so it is never sent twice", async () => {
     await saveDay("Absent", "Present");
-    await db.query(`UPDATE "AttendanceSms" SET status = 'sending', updated_at = NOW() - INTERVAL 20 MINUTE`);
+    await db.query(`UPDATE "AttendanceSms" SET status = 'sending', updated_at = ${db.sql.minutesAgo(20)}`);
 
     await worker.sendDue();
 
-    const { rows: rows } = await db.query(`SELECT status, error FROM "AttendanceSms"`);
+    const { rows } = await db.query(`SELECT status, error FROM "AttendanceSms"`);
     expect(rows).toEqual([{ status: "failed", error: "interrupted" }]);
     expect(sender.sent).toEqual([]);
+  });
+
+  it("counts a message as half-sent from when it was taken, not from when it was queued", async () => {
+    await saveDay("Absent", "Present");
+    await db.query(`UPDATE "AttendanceSms" SET updated_at = ${db.sql.minutesAgo(20)}`);
+    // Taking it changes the row, so updated_at moves to now (ON UPDATE / trigger).
+    await db.query(`UPDATE "AttendanceSms" SET status = 'sending'`);
+
+    await mysqlAbsenceSmsRepository.failInterrupted();
+
+    const { rows } = await db.query(`SELECT status FROM "AttendanceSms"`);
+    expect(rows).toEqual([{ status: "sending" }]);
   });
 
   it("shows admins the day's messages of their own branch only", async () => {

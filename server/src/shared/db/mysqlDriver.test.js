@@ -47,3 +47,23 @@ describe("MySQL identifiers", () => {
     expect(makeMysqlDriver({}).quote("year")).toBe("`year`");
   });
 });
+
+describe("MySQL SQL fragments", () => {
+  const { sql } = makeMysqlDriver({});
+
+  it("reads a roll number's leading digits as a number", () => {
+    expect(sql.leadingNumber('s."RollNumber"')).toBe('CAST(s."RollNumber" AS UNSIGNED)');
+  });
+
+  it("compares NULL-safely with <=>", () => {
+    expect(sql.nullSafeEquals("a.branch_id", "?")).toBe("a.branch_id <=> ?");
+  });
+
+  it("gives the time a number of minutes ago", () => {
+    expect(sql.minutesAgo(10)).toBe("NOW() - INTERVAL 10 MINUTE");
+  });
+
+  it("orders randomly with RAND()", () => {
+    expect(sql.random()).toBe("RAND()");
+  });
+});

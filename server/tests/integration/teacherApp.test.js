@@ -165,6 +165,20 @@ describe("teacher app", () => {
       expect(row.until).not.toBeNull();
     });
 
+    it("starts counting again from one once the lock has run out", async () => {
+      await giveAccess().expect(200);
+      for (let i = 0; i < 5; i += 1) await login(PHONE, "wrong-password");
+      await db.query(`UPDATE "Teachers" SET "LockedUntil" = ? WHERE "TeacherID" = ?`, [new Date(Date.now() - 60_000), teacherId]);
+
+      const wrongAgain = await login(PHONE, "wrong-password");
+      const afterOne = await db.one(`SELECT "FailedLogins" AS n, "LockedUntil" AS until FROM "Teachers" WHERE "TeacherID" = ?`, [teacherId]);
+      const right = await login();
+
+      expect(wrongAgain.status).toBe(401);
+      expect(afterOne).toEqual({ n: 1, until: null });
+      expect(right.status).toBe(200);
+    });
+
     it("unlocks the number when an admin sets a new password", async () => {
       await giveAccess().expect(200);
       for (let i = 0; i < 5; i += 1) await login(PHONE, "wrong-password");

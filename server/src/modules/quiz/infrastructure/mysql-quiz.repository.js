@@ -114,7 +114,7 @@ export const mysqlQuizRepository = {
     const { rows } = await db.query(
       `SELECT ${QUESTION_COLUMNS} FROM "QuizQuestions"
         WHERE "ClassKey" = ? AND "Active" = TRUE ${subject ? `AND "Subject" = ?` : ""}
-        ORDER BY RAND() LIMIT ?`,
+        ORDER BY ${db.sql.random()} LIMIT ?`,
       subject ? [classKey, subject, limit] : [classKey, limit],
     );
     return rows.map(toQuestion);

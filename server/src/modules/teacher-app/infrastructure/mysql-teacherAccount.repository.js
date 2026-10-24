@@ -2,7 +2,7 @@ import db from "../../../shared/db/index.js";
 import { branchFilter } from "../../../../utils/branchFilter.js";
 import { ConflictError } from "../../../shared/errors/index.js";
 
-// MySQL adapter for the teacher account port (see
+// Database adapter for the teacher account port (see
 // application/fakeTeacherAccountRepository.js). The sign-in columns live on
 // Teachers (attendance_v2_migration.sql).
 
@@ -54,7 +54,7 @@ export const mysqlTeacherAccountRepository = {
       phone !== undefined && [`"AppPhone" = ?`, [phone]],
       enabled !== undefined && [`"AppEnabled" = ?`, [enabled]],
       passwordHash !== undefined && [`"AppPasswordHash" = ?, "FailedLogins" = 0, "LockedUntil" = NULL`, [passwordHash]],
-      signOut && ["TokenVersion = TokenVersion + 1", []],
+      signOut && [`"TokenVersion" = "TokenVersion" + 1`, []],
     ].filter(Boolean);
     if (changes.length === 0) return;
     const sets = changes.map(([set]) => set);
@@ -68,22 +68,26 @@ export const mysqlTeacherAccountRepository = {
   },
 
   /**
-   * Counts a password check before it is made, in one statement, so guesses
-   * sent at the same moment cannot all pass a lock check first. Refused
-   * (affectedRows 0) while the number is locked. The `max`th check in a row
-   * locks it until `lockedUntil`; an expired lock starts the count again.
-   * MySQL applies the assignments in order: FailedLogins first (it still sees
-   * the old LockedUntil), then LockedUntil (it sees the new FailedLogins).
+   * Counts a password check before it is made. The teacher's row stays locked
+   * (FOR UPDATE) until the count is saved, so guesses sent at the same moment
+   * cannot all pass a lock check first. Refused while the number is locked.
+   * The `max`th check in a row locks it until `lockedUntil`; an expired lock
+   * starts the count again.
    */
   async reserveLoginAttempt(id, { max, lockedUntil, now }) {
-    const result = await db.query(
-      `UPDATE "Teachers"
-          SET "FailedLogins" = IF("LockedUntil" IS NOT NULL AND "LockedUntil" <= ?, 1, "FailedLogins" + 1),
-              "LockedUntil" = IF("FailedLogins" >= ?, ?, NULL)
-        WHERE "TeacherID" = ? AND ("LockedUntil" IS NULL OR "LockedUntil" <= ?)`,
-      [now, max, lockedUntil, id, now],
-    );
-    return { allowed: result.rowCount === 1 };
+    return db.withTransaction(async (tx) => {
+      const row = await tx.one(`SELECT "FailedLogins" AS failed, "LockedUntil" AS until FROM "Teachers" WHERE "TeacherID" = ? FOR UPDATE`, [
+        id,
+      ]);
+      if (!row || (row.until != null && row.until > now)) return { allowed: false };
+      const failed = row.until != null ? 1 : row.failed + 1;
+      await tx.query(`UPDATE "Teachers" SET "FailedLogins" = ?, "LockedUntil" = ? WHERE "TeacherID" = ?`, [
+        failed,
+        failed >= max ? lockedUntil : null,
+        id,
+      ]);
+      return { allowed: true };
+    });
   },
 
   async recordLogin(id, now) {
