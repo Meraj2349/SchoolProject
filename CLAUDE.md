@@ -49,7 +49,7 @@ cd frontend && npm run dev       # http://localhost:5173
 
 # mobile app (Flutter 3.47)
 cd mobile/teacher_app && flutter analyze && flutter test
-cd mobile/teacher_app && tool/live_api_test.sh   # against the real API + MySQL
+cd mobile/teacher_app && tool/live_api_test.sh   # against the real API + PostgreSQL
 ```
 
 Integration tests (`server/tests/integration`) build a fresh database from

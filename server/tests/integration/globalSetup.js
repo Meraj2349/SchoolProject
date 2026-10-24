@@ -3,6 +3,7 @@ import mysql from "mysql2/promise";
 import path from "path";
 import pg from "pg";
 import { fileURLToPath } from "url";
+import { runMigrations } from "../../src/shared/db/migrate.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const MYSQL_SCHEMA = path.resolve(__dirname, "../../Sql/database.sql");
@@ -16,8 +17,8 @@ const settings = (defaultPort) => ({
 });
 
 // Builds a fresh test database exactly as a new install gets it — so tests
-// catch schema drift too. MySQL: Sql/database.sql. PostgreSQL: the "up" part
-// of every dbmate migration, in order (what `npm run db:migrate` applies).
+// catch schema drift too. MySQL: Sql/database.sql. PostgreSQL: the dbmate
+// migrations, applied by the same runner as `npm run db:migrate`.
 export default async function globalSetup() {
   const dbName = process.env.TEST_DB_NAME || "school_test";
   if ((process.env.TEST_DB_DIALECT || "mysql") === "postgres") await buildPostgres(dbName);
@@ -48,18 +49,12 @@ async function buildPostgres(dbName) {
   const client = new pg.Client({ ...settings(5432), database: dbName });
   await client.connect();
   try {
-    for (const file of fs.readdirSync(PG_MIGRATIONS).filter((f) => f.endsWith(".sql")).sort()) {
-      const text = fs.readFileSync(path.join(PG_MIGRATIONS, file), "utf8");
-      await client.query(migrateUp(text));
-    }
+    await runMigrations({
+      client,
+      files: fs.readdirSync(PG_MIGRATIONS),
+      read: (file) => fs.readFileSync(path.join(PG_MIGRATIONS, file), "utf8"),
+    });
   } finally {
     await client.end();
   }
-}
-
-/** The SQL between dbmate's `-- migrate:up` and `-- migrate:down` markers. */
-export function migrateUp(text) {
-  const up = text.indexOf("-- migrate:up");
-  const down = text.indexOf("-- migrate:down");
-  return text.slice(up === -1 ? 0 : up, down === -1 ? undefined : down);
 }
