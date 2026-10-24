@@ -1,4 +1,4 @@
-import db from "../../../../config/db.config.js";
+import db from "../../../shared/db/index.js";
 import { ConflictError } from "../../../shared/errors/index.js";
 import {
   createBranch,
@@ -24,13 +24,13 @@ export const mysqlBranchRepository = {
     try {
       await db.query("DELETE FROM Branches WHERE id = ?", [id]);
     } catch (error) {
-      if (error.code === "ER_ROW_IS_REFERENCED_2") throw new ConflictError("branch_in_use");
+      if (db.isForeignKeyViolation(error)) throw new ConflictError("branch_in_use");
       throw error;
     }
   },
 
   async stats() {
-    const [branches, [admins]] = await Promise.all([
+    const [branches, { rows: admins }] = await Promise.all([
       getBranchStats(),
       db.query("SELECT branch_id, COUNT(*) AS total FROM Admin WHERE branch_id IS NOT NULL GROUP BY branch_id"),
     ]);
@@ -43,7 +43,7 @@ export const mysqlBranchRepository = {
     const countIn = async (tables) => {
       const counts = await Promise.all(
         tables.map(async (table) => {
-          const [[row]] = await db.query(`SELECT COUNT(*) AS n FROM \`${table}\` WHERE branch_id = ?`, [id]);
+          const row = await db.one(`SELECT COUNT(*) AS n FROM \`${table}\` WHERE branch_id = ?`, [id]);
           return Number(row.n);
         }),
       );

@@ -1,4 +1,4 @@
-import db from "../../../../config/db.config.js";
+import db, { inList, valuesRows } from "../../../shared/db/index.js";
 import { branchFilter } from "../../../../utils/branchFilter.js";
 
 // MySQL adapter for the quiz repository port. Questions are shared by every
@@ -49,21 +49,24 @@ export const mysqlQuizRepository = {
   // ── Question bank ──────────────────────────────────────────────────────
   async existingSourceKeys(keys) {
     if (keys.length === 0) return new Set();
-    const [rows] = await db.query("SELECT SourceKey FROM QuizQuestions WHERE SourceKey IN (?)", [keys]);
+    const list = inList(keys);
+    const { rows } = await db.query(`SELECT SourceKey FROM QuizQuestions WHERE SourceKey IN ${list.sql}`, list.params);
     return new Set(rows.map((row) => row.SourceKey));
   },
 
   async createQuestion(question) {
     const fields = Object.keys(COLUMNS).filter((field) => question[field] !== undefined);
-    const [result] = await db.query(
-      `INSERT INTO QuizQuestions (${fields.map((f) => COLUMNS[f]).join(", ")}) VALUES (?)`,
-      [fields.map((f) => columnValue(f, question[f]))],
+    const values = fields.map((f) => columnValue(f, question[f]));
+    const id = await db.insert(
+      `INSERT INTO QuizQuestions (${fields.map((f) => COLUMNS[f]).join(", ")}) VALUES (${values.map(() => "?").join(", ")})`,
+      values,
+      "QuestionID",
     );
-    return { id: result.insertId };
+    return { id };
   },
 
   async findQuestion(id) {
-    const [rows] = await db.query(`SELECT ${QUESTION_COLUMNS} FROM QuizQuestions WHERE QuestionID = ?`, [id]);
+    const { rows } = await db.query(`SELECT ${QUESTION_COLUMNS} FROM QuizQuestions WHERE QuestionID = ?`, [id]);
     return rows[0] ? toQuestion(rows[0]) : null;
   },
 
@@ -88,8 +91,8 @@ export const mysqlQuizRepository = {
       params.push(containing(search), containing(search));
     }
     const clause = `WHERE ${where.join(" AND ")} ${STATUS_CLAUSE[status] ?? STATUS_CLAUSE.active}`;
-    const [[{ total }]] = await db.query(`SELECT COUNT(*) AS total FROM QuizQuestions ${clause}`, params);
-    const [rows] = await db.query(
+    const { total } = await db.one(`SELECT COUNT(*) AS total FROM QuizQuestions ${clause}`, params);
+    const { rows } = await db.query(
       `SELECT ${QUESTION_COLUMNS} FROM QuizQuestions ${clause} ORDER BY Subject, QuestionID LIMIT ? OFFSET ?`,
       [...params, pageSize, offset],
     );
@@ -97,7 +100,7 @@ export const mysqlQuizRepository = {
   },
 
   async subjectCounts({ classKey, activeOnly }) {
-    const [rows] = await db.query(
+    const { rows } = await db.query(
       `SELECT Subject AS subject, COUNT(*) AS count FROM QuizQuestions
         WHERE ClassKey = ? ${activeOnly ? "AND Active = TRUE" : ""}
         GROUP BY Subject ORDER BY Subject`,
@@ -108,7 +111,7 @@ export const mysqlQuizRepository = {
 
   // ── Taking a quiz ──────────────────────────────────────────────────────
   async randomQuestions({ classKey, subject, limit }) {
-    const [rows] = await db.query(
+    const { rows } = await db.query(
       `SELECT ${QUESTION_COLUMNS} FROM QuizQuestions
         WHERE ClassKey = ? AND Active = TRUE ${subject ? "AND Subject = ?" : ""}
         ORDER BY RAND() LIMIT ?`,
@@ -119,20 +122,22 @@ export const mysqlQuizRepository = {
 
   async questionsByIds(ids) {
     if (ids.length === 0) return [];
-    const [rows] = await db.query(`SELECT ${QUESTION_COLUMNS} FROM QuizQuestions WHERE QuestionID IN (?)`, [ids]);
+    const list = inList(ids);
+    const { rows } = await db.query(`SELECT ${QUESTION_COLUMNS} FROM QuizQuestions WHERE QuestionID IN ${list.sql}`, list.params);
     return rows.map(toQuestion);
   },
 
   async createStart({ studentId, questionIds, subject, startedAt }) {
-    const [result] = await db.query(
+    const id = await db.insert(
       "INSERT INTO QuizStarts (StudentID, QuestionIDsJSON, Subject, StartedAt) VALUES (?, ?, ?, ?)",
       [studentId, JSON.stringify(questionIds), subject, startedAt],
+      "QuizStartID",
     );
-    return { id: result.insertId };
+    return { id };
   },
 
   async findStart(id) {
-    const [rows] = await db.query(
+    const { rows } = await db.query(
       "SELECT QuizStartID, StudentID, QuestionIDsJSON, Subject, StartedAt, FinishedAt FROM QuizStarts WHERE QuizStartID = ?",
       [id],
     );
@@ -154,18 +159,13 @@ export const mysqlQuizRepository = {
    * been finished (e.g. two submissions at once).
    */
   async saveSession(session, graded) {
-    const connection = await db.getConnection();
-    try {
-      await connection.beginTransaction();
-      const [claim] = await connection.query(
-        "UPDATE QuizStarts SET FinishedAt = ? WHERE QuizStartID = ? AND FinishedAt IS NULL",
-        [session.completedAt, session.quizId],
-      );
-      if (claim.affectedRows === 0) {
-        await connection.rollback();
-        return null;
-      }
-      const [result] = await connection.query(
+    return db.withTransaction(async (tx) => {
+      const claim = await tx.query("UPDATE QuizStarts SET FinishedAt = ? WHERE QuizStartID = ? AND FinishedAt IS NULL", [
+        session.completedAt,
+        session.quizId,
+      ]);
+      if (claim.rowCount === 0) return null;
+      const sessionId = await tx.insert(
         `INSERT INTO QuizSessions
            (StudentID, StudentName, ClassName, Section, Subject, Grade, TotalQuestions, CorrectAnswers,
             ScorePercentage, TimeTakenSeconds, branch_id, StartedAt, CompletedAt)
@@ -185,24 +185,22 @@ export const mysqlQuizRepository = {
           session.startedAt,
           session.completedAt,
         ],
+        "SessionID",
       );
-      await connection.query("UPDATE QuizStarts SET SessionID = ? WHERE QuizStartID = ?", [result.insertId, session.quizId]);
-      await connection.query(
-        `INSERT INTO QuizAttempts (SessionID, QuestionID, UserAnswer, CorrectAnswer, IsCorrect, TimeSpentSeconds) VALUES ?`,
-        [graded.map((g) => [result.insertId, g.questionId, g.userAnswer || null, g.correctAnswer, g.isCorrect ? 1 : 0, g.timeSpentSeconds])],
+      await tx.query("UPDATE QuizStarts SET SessionID = ? WHERE QuizStartID = ?", [sessionId, session.quizId]);
+      const attempts = valuesRows(
+        graded.map((g) => [sessionId, g.questionId, g.userAnswer || null, g.correctAnswer, g.isCorrect ? 1 : 0, g.timeSpentSeconds]),
       );
-      await connection.commit();
-      return result.insertId;
-    } catch (error) {
-      await connection.rollback();
-      throw error;
-    } finally {
-      connection.release();
-    }
+      await tx.query(
+        `INSERT INTO QuizAttempts (SessionID, QuestionID, UserAnswer, CorrectAnswer, IsCorrect, TimeSpentSeconds) VALUES ${attempts.sql}`,
+        attempts.params,
+      );
+      return sessionId;
+    });
   },
 
   async sessionsOfStudent(studentId) {
-    const [rows] = await db.query(
+    const { rows } = await db.query(
       `SELECT SessionID, Subject, Grade AS ClassKey, TotalQuestions, CorrectAnswers, ScorePercentage,
               TimeTakenSeconds, StartedAt, CompletedAt
          FROM QuizSessions WHERE StudentID = ? ORDER BY CompletedAt DESC, SessionID DESC`,
@@ -212,14 +210,14 @@ export const mysqlQuizRepository = {
   },
 
   async progressOfStudent(studentId) {
-    const [bySubject] = await db.query(
+    const { rows: bySubject } = await db.query(
       `SELECT Subject AS subject, COUNT(*) AS sessions, AVG(ScorePercentage) AS avgScore,
               SUM(CorrectAnswers) AS totalCorrect, SUM(TotalQuestions) AS totalQuestions
          FROM QuizSessions WHERE StudentID = ? AND Subject IS NOT NULL
         GROUP BY Subject ORDER BY Subject`,
       [studentId],
     );
-    const [[totals]] = await db.query(
+    const totals = await db.one(
       `SELECT COUNT(*) AS sessions, COALESCE(AVG(ScorePercentage), 0) AS avgScore,
               COALESCE(SUM(CorrectAnswers), 0) AS totalCorrect, COALESCE(SUM(TotalQuestions), 0) AS totalQuestions
          FROM QuizSessions WHERE StudentID = ?`,
@@ -243,8 +241,8 @@ export const mysqlQuizRepository = {
       values.push(subject);
     }
     const condition = `WHERE ${where.join(" AND ")}`;
-    const [[{ total }]] = await db.query(`SELECT COUNT(*) AS total FROM QuizSessions qs ${condition}`, values);
-    const [rows] = await db.query(
+    const { total } = await db.one(`SELECT COUNT(*) AS total FROM QuizSessions qs ${condition}`, values);
+    const { rows } = await db.query(
       `SELECT qs.SessionID, qs.StudentID, qs.StudentName, qs.ClassName, qs.Section, qs.Subject,
               qs.Grade AS ClassKey, qs.TotalQuestions, qs.CorrectAnswers, qs.ScorePercentage,
               qs.TimeTakenSeconds, qs.StartedAt, qs.CompletedAt, qs.branch_id, s.RollNumber AS StudentRoll
@@ -268,7 +266,7 @@ export const mysqlQuizRepository = {
     }
     // One row per student, with their current name and class (a student who
     // changed class still has one row).
-    const [rows] = await db.query(
+    const { rows } = await db.query(
       `SELECT s.StudentID, CONCAT(s.FirstName, ' ', s.LastName) AS StudentName, c.ClassName, c.Section,
               s.RollNumber AS StudentRoll,
               COUNT(*) AS sessions, AVG(qs.ScorePercentage) AS avgScore, MAX(qs.ScorePercentage) AS bestScore

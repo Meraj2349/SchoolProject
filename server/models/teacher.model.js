@@ -1,5 +1,5 @@
 // server/models/teacher.model.js
-import db from "../config/db.config.js";
+import db from "../src/shared/db/index.js";
 import { branchFilter } from "../utils/branchFilter.js";
 
 // Add a new teacher
@@ -26,8 +26,8 @@ const addTeacher = async ({
     `;
     values = [FirstName, LastName, Subject, ContactNumber, Email, emptyToNull(JoiningDate), Address];
   }
-  const [result] = await db.query(sql, values);
-  return { TeacherID: result.insertId };
+  const TeacherID = await db.insert(sql, values, "TeacherID");
+  return { TeacherID };
 };
 
 // Columns anyone may read: never the attendance app's sign-in details.
@@ -36,7 +36,7 @@ const PUBLIC_COLUMNS = "TeacherID, FirstName, LastName, Subject, ContactNumber, 
 // Get all teachers (branch-scoped)
 const getAllTeachers = async (branchId = null) => {
   const { clause, params } = branchFilter(branchId);
-  const [rows] = await db.query(
+  const { rows } = await db.query(
     `SELECT ${PUBLIC_COLUMNS} FROM Teachers WHERE 1=1 ${clause} ORDER BY TeacherID`,
     params,
   );
@@ -68,16 +68,16 @@ const updateTeacher = async (teacherID, updateData, branchId = null) => {
     WHERE TeacherID = ? ${clause}`;
   const params = [...columns.map((c) => emptyToNull(updateData[c])), teacherID, ...branchParams];
 
-  const [result] = await db.query(sql, params);
-  return result;
+  const { rowCount } = await db.query(sql, params);
+  return { affectedRows: rowCount };
 };
 
 // Delete a teacher (branch-scoped)
 const deleteTeacher = async (teacherID, branchId = null) => {
   const { clause, params: branchParams } = branchFilter(branchId);
   const sql = `DELETE FROM Teachers WHERE TeacherID = ? ${clause}`;
-  const [result] = await db.query(sql, [teacherID, ...branchParams]);
-  return result;
+  const { rowCount } = await db.query(sql, [teacherID, ...branchParams]);
+  return { affectedRows: rowCount };
 };
 
 const checkDuplicateTeacher = async (email, contactNumber, branchId = null) => {
@@ -86,7 +86,7 @@ const checkDuplicateTeacher = async (email, contactNumber, branchId = null) => {
     SELECT COUNT(*) as count FROM Teachers
     WHERE (Email = ? OR ContactNumber = ?) ${clause}
   `;
-  const [rows] = await db.query(sql, [email, contactNumber, ...branchParams]);
+  const { rows } = await db.query(sql, [email, contactNumber, ...branchParams]);
   return { duplicate: rows[0].count > 0 };
 };
 
@@ -104,7 +104,7 @@ const searchTeachers = async (query, className = "", branchId = null) => {
       ORDER BY assignedToClass DESC, t.FirstName, t.LastName
       LIMIT 10
     `;
-    const [rows] = await db.query(sql, [className, like, like, like, ...branchParams]);
+    const { rows } = await db.query(sql, [className, like, like, like, ...branchParams]);
     return rows;
   }
   const sql = `
@@ -114,7 +114,7 @@ const searchTeachers = async (query, className = "", branchId = null) => {
     ORDER BY t.FirstName, t.LastName
     LIMIT 10
   `;
-  const [rows] = await db.query(sql, [like, like, like, ...branchParams]);
+  const { rows } = await db.query(sql, [like, like, like, ...branchParams]);
   return rows;
 };
 

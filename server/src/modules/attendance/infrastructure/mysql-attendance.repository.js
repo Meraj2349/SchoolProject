@@ -1,4 +1,4 @@
-import db from "../../../../config/db.config.js";
+import db, { valuesRows } from "../../../shared/db/index.js";
 import { branchFilter } from "../../../../utils/branchFilter.js";
 
 // MySQL adapter for the attendance repository port (see
@@ -55,7 +55,6 @@ function whereOf(filters) {
   };
 }
 
-const DEADLOCK = "ER_LOCK_DEADLOCK";
 const SAVE_ATTEMPTS = 3;
 
 async function withDeadlockRetry(run) {
@@ -63,14 +62,14 @@ async function withDeadlockRetry(run) {
     try {
       return await run();
     } catch (error) {
-      if (error?.code !== DEADLOCK || attempt >= SAVE_ATTEMPTS) throw error;
+      if (!db.isDeadlock(error) || attempt >= SAVE_ATTEMPTS) throw error;
     }
   }
 }
 
 export const mysqlAttendanceRepository = {
   async findClass(classId) {
-    const [[row]] = await db.query(
+    const row = await db.one(
       `SELECT c.ClassID AS id, c.ClassName AS name, c.Section AS section, c.branch_id AS branchId, c.TeacherID AS teacherId,
               ${BRANCH_COLUMNS}, ${CLASS_TEACHER_COLUMNS}
          FROM Classes c ${CLASS_JOINS}
@@ -85,14 +84,14 @@ export const mysqlAttendanceRepository = {
   /** { id, nameBn, nameEn } of the branch, or of every branch (null), by id. */
   async branchesIn(branchId) {
     const [clause, params] = branchId == null ? ["", []] : ["WHERE id = ?", [branchId]];
-    const [rows] = await db.query(`SELECT id, name_bn AS nameBn, name_en AS nameEn FROM Branches ${clause} ORDER BY id`, params);
+    const { rows } = await db.query(`SELECT id, name_bn AS nameBn, name_en AS nameEn FROM Branches ${clause} ORDER BY id`, params);
     return rows;
   },
 
   /** The branch's classes (null: every branch's), with their class teacher and number of students. */
   async classesIn(branchId) {
     const scope = branchFilter(branchId, "c");
-    const [rows] = await db.query(
+    const { rows } = await db.query(
       `SELECT c.ClassID AS id, c.ClassName AS name, c.Section AS section, c.branch_id AS branchId, ${CLASS_TEACHER_COLUMNS},
               (SELECT COUNT(*) FROM Students s WHERE s.ClassID = c.ClassID AND s.branch_id = c.branch_id) AS students
          FROM Classes c ${CLASS_TEACHER_JOIN} ${CLASS_NAMES_JOIN}
@@ -116,7 +115,7 @@ export const mysqlAttendanceRepository = {
    */
   async classDays({ branchId, date }) {
     const scope = branchFilter(branchId, "c");
-    const [rows] = await db.query(
+    const { rows } = await db.query(
       `WITH day AS (
          SELECT s.ClassID AS classId, a.Status AS status, a.MarkedByType AS markedByType,
                 ${MARKER_NAME} AS markedByName, a.MarkedAt AS markedAt,
@@ -149,7 +148,7 @@ export const mysqlAttendanceRepository = {
 
   async findStudent(studentId, branchId) {
     const scope = branchFilter(branchId);
-    const [[row]] = await db.query(
+    const row = await db.one(
       `SELECT StudentID AS id, ClassID AS classId, branch_id AS branchId FROM Students WHERE StudentID = ? ${scope.clause}`,
       [studentId, ...scope.params],
     );
@@ -158,7 +157,7 @@ export const mysqlAttendanceRepository = {
 
   /** The class's students (of the class's own branch) with their day, by roll number. */
   async roster(classId, date) {
-    const [rows] = await db.query(
+    const { rows } = await db.query(
       `SELECT s.StudentID AS studentId, s.FirstName AS firstName, s.LastName AS lastName, s.RollNumber AS roll,
               a.AttendanceID AS attendanceId, a.Status AS status, a.MarkedByType AS markedByType,
               a.MarkedBy AS markedBy, ${MARKER_NAME} AS markedByName, a.MarkedAt AS markedAt
@@ -182,22 +181,24 @@ export const mysqlAttendanceRepository = {
    * before it still see the stored time.
    */
   async saveDay({ classId, branchId, date, entries, marker, takenAt }) {
-    const rows = entries.map(({ studentId, status }) => [studentId, classId, date, status, branchId, marker.type, marker.id, takenAt]);
+    const incoming = valuesRows(
+      entries.map(({ studentId, status }) => [studentId, classId, date, status, branchId, marker.type, marker.id, takenAt]),
+    );
     const newer = "(Attendance.MarkedAt IS NULL OR incoming.MarkedAt >= Attendance.MarkedAt)";
     const take = (column) => `${column} = IF(${newer}, incoming.${column}, Attendance.${column})`;
     await withDeadlockRetry(() =>
       db.query(
         `INSERT INTO Attendance (StudentID, ClassID, ClassDate, Status, branch_id, MarkedByType, MarkedBy, MarkedAt)
-         VALUES ? AS incoming
+         VALUES ${incoming.sql} AS incoming
          ON DUPLICATE KEY UPDATE ${["ClassID", "Status", "branch_id", "MarkedByType", "MarkedBy", "MarkedAt"].map(take).join(", ")}`,
-        [rows],
+        incoming.params,
       ),
     );
   },
 
   async findRecord(id, branchId) {
     const scope = branchFilter(branchId);
-    const [[row]] = await db.query(
+    const row = await db.one(
       `SELECT AttendanceID AS id, StudentID AS studentId, ClassID AS classId, ClassDate AS date, Status AS status,
               branch_id AS branchId
          FROM Attendance WHERE AttendanceID = ? ${scope.clause}`,
@@ -222,7 +223,7 @@ export const mysqlAttendanceRepository = {
       where.clause += " AND s.FirstName LIKE ?";
       where.params.push(`%${firstName.replace(/[\\%_]/g, "\\$&")}%`);
     }
-    const [rows] = await db.query(
+    const { rows } = await db.query(
       `SELECT ${RECORD_COLUMNS} FROM Attendance a ${RECORD_JOINS}
         WHERE 1=1 ${where.clause} ${scope.clause}
         ORDER BY a.ClassDate DESC, c.ClassName, c.Section, CAST(s.RollNumber AS UNSIGNED), s.FirstName`,
@@ -233,7 +234,7 @@ export const mysqlAttendanceRepository = {
 
   async countRecords(branchId) {
     const scope = branchFilter(branchId, "a");
-    const [[row]] = await db.query(`SELECT COUNT(*) AS n FROM Attendance a WHERE 1=1 ${scope.clause}`, scope.params);
+    const row = await db.one(`SELECT COUNT(*) AS n FROM Attendance a WHERE 1=1 ${scope.clause}`, scope.params);
     return Number(row.n);
   },
 
@@ -241,7 +242,7 @@ export const mysqlAttendanceRepository = {
   async statusCounts({ branchId, studentId, classId, date }) {
     const scope = branchFilter(branchId, "a");
     const where = whereOf({ studentId, classId, date });
-    const [rows] = await db.query(
+    const { rows } = await db.query(
       `SELECT a.Status AS status, COUNT(*) AS n FROM Attendance a
         WHERE 1=1 ${where.clause} ${scope.clause}
         GROUP BY a.Status ORDER BY FIELD(a.Status, 'Present', 'Absent', 'Late', 'Leave')`,
@@ -252,7 +253,7 @@ export const mysqlAttendanceRepository = {
 
   async findStudentInfo(studentId, branchId) {
     const scope = branchFilter(branchId, "s");
-    const [[row]] = await db.query(
+    const row = await db.one(
       `SELECT s.StudentID, s.FirstName, s.LastName, s.RollNumber, c.ClassName, c.Section
          FROM Students s LEFT JOIN Classes c ON c.ClassID = s.ClassID
         WHERE s.StudentID = ? ${scope.clause}`,
@@ -263,7 +264,7 @@ export const mysqlAttendanceRepository = {
 
   async exists({ branchId, studentId, date }) {
     const scope = branchFilter(branchId, "a");
-    const [[row]] = await db.query(
+    const row = await db.one(
       `SELECT EXISTS (SELECT 1 FROM Attendance a WHERE a.StudentID = ? AND a.ClassDate = ? ${scope.clause}) AS found`,
       [studentId, date, ...scope.params],
     );
@@ -273,7 +274,7 @@ export const mysqlAttendanceRepository = {
   /** Every student of the class and section, with their branch, left-joined to their days in the range. */
   async gridRows({ branchId, className, section, from, to }) {
     const scope = branchFilter(branchId, "s");
-    const [rows] = await db.query(
+    const { rows } = await db.query(
       `SELECT s.StudentID, s.FirstName, s.LastName, s.RollNumber, a.ClassDate, a.Status,
               s.branch_id AS BranchID, b.name_bn AS BranchNameBn, b.name_en AS BranchNameEn
          FROM Students s

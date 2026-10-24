@@ -1,4 +1,4 @@
-import db from "../config/db.config.js";
+import db from "../src/shared/db/index.js";
 
 /**
  * Event Model for School Management System
@@ -44,7 +44,7 @@ const eventWriteClause = (branchId) => {
 const getAllEvents = async (branchId = null) => {
   const { clause, params } = eventBranchClause(branchId);
   try {
-    const [rows] = await db.query(`
+    const { rows } = await db.query(`
       SELECT
         EventID,
         EventName,
@@ -74,7 +74,7 @@ const getEventById = async (eventId, branchId = null) => {
       throw new Error("Event ID is required");
     }
 
-    const [rows] = await db.query(
+    const { rows } = await db.query(
       `SELECT
         EventID,
         EventName,
@@ -158,14 +158,14 @@ const addEvent = async (eventData, branchId = null) => {
       ];
     }
 
-    const [result] = await db.query(sql, values);
+    const insertId = await db.insert(sql, values, "EventID");
 
     return {
       success: true,
-      eventId: result.insertId,
+      eventId: insertId,
       message: `Event '${eventName}' created successfully`,
       data: {
-        EventID: result.insertId,
+        EventID: insertId,
         EventName: eventName.trim(),
         EventType: eventType,
         StartDate: startDate,
@@ -188,7 +188,7 @@ const updateEvent = async (eventId, eventData, branchId = null) => {
       throw new Error("Event ID is required");
     }
 
-    const [existingEvent] = await db.query(
+    const { rows: existingEvent } = await db.query(
       `SELECT * FROM Events WHERE EventID = ? ${branchScope}`,
       [eventId, ...branchParams],
     );
@@ -265,19 +265,19 @@ const updateEvent = async (eventId, eventData, branchId = null) => {
     }
 
     params.push(eventId);
-    const [result] = await db.query(
+    const result = await db.query(
       `UPDATE Events SET ${updates.join(", ")} WHERE EventID = ?`,
       params,
     );
 
-    if (result.affectedRows === 0) {
+    if (result.rowCount === 0) {
       throw new Error("No rows were updated");
     }
 
     return {
       success: true,
       message: "Event updated successfully",
-      affectedRows: result.affectedRows,
+      affectedRows: result.rowCount,
     };
   } catch (err) {
     throw new Error("Error updating event: " + err.message);
@@ -292,7 +292,7 @@ const deleteEvent = async (eventId, branchId = null) => {
       throw new Error("Event ID is required");
     }
 
-    const [[eventInfo]] = await db.query(
+    const eventInfo = await db.one(
       `SELECT * FROM Events WHERE EventID = ? ${branchScope}`,
       [eventId, ...branchParams],
     );
@@ -300,12 +300,12 @@ const deleteEvent = async (eventId, branchId = null) => {
       throw new Error("Event not found");
     }
 
-    const [result] = await db.query(
+    const result = await db.query(
       `DELETE FROM Events WHERE EventID = ? ${branchScope}`,
       [eventId, ...branchParams],
     );
 
-    if (result.affectedRows === 0) {
+    if (result.rowCount === 0) {
       throw new Error("No event was deleted");
     }
 
@@ -331,7 +331,7 @@ const deleteEvent = async (eventId, branchId = null) => {
 const getEventsByDateRange = async (startDate, endDate, branchId = null) => {
   const { clause, params } = eventBranchClause(branchId);
   try {
-    const [rows] = await db.query(
+    const { rows } = await db.query(
       `SELECT
         EventID,
         EventName,
@@ -365,7 +365,7 @@ const getEventsByType = async (eventType, branchId = null) => {
       );
     }
 
-    const [rows] = await db.query(
+    const { rows } = await db.query(
       `SELECT
         EventID,
         EventName,

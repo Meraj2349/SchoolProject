@@ -1,5 +1,5 @@
 // filepath: /home/meraj/Dev/SchoolProject/server/models/admin.model.js
-import db from "../config/db.config.js";
+import db from "../src/shared/db/index.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
@@ -19,7 +19,7 @@ export const findAdminByEmail = async (email, isSuper = false, branchId = null) 
     sql = "SELECT * FROM Admin WHERE Email = ? LIMIT 1";
     params = [email];
   }
-  const [rows] = await db.query(sql, params);
+  const { rows } = await db.query(sql, params);
   return rows[0] ?? null;
 };
 
@@ -53,7 +53,7 @@ export const generateAuthToken = (adminID, role, branch_id) => {
 
 export const getAdminById = async (adminId) => {
   const sql = "SELECT * FROM Admin WHERE AdminID = ?";
-  const [rows] = await db.query(sql, [adminId]);
+  const { rows } = await db.query(sql, [adminId]);
   return rows[0];
 };
 
@@ -69,17 +69,17 @@ export const updateAdmin = async (adminId, adminData) => {
   }
   if (updates.length === 0) throw new Error("No fields to update");
 
-  const [result] = await db.query(
+  const result = await db.query(
     `UPDATE Admin SET ${updates.join(", ")} WHERE AdminID = ?`,
     [...params, adminId],
   );
-  if (result.affectedRows === 0) {
+  if (result.rowCount === 0) {
     throw new Error("No admin found with that ID");
   }
   return { success: true };
 };
 
 export const countAdmins = async () => {
-  const [[row]] = await db.query("SELECT COUNT(*) AS total FROM Admin");
+  const row = await db.one("SELECT COUNT(*) AS total FROM Admin");
   return Number(row.total);
 };

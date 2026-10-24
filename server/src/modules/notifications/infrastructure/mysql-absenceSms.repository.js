@@ -1,4 +1,4 @@
-import db from "../../../../config/db.config.js";
+import db, { inList, valuesRows } from "../../../shared/db/index.js";
 import { branchFilter } from "../../../../utils/branchFilter.js";
 
 // MySQL adapter for the absence SMS port (see application/fakeAbsenceSmsRepository.js).
@@ -17,23 +17,24 @@ export const mysqlAbsenceSmsRepository = {
    * order, so the conditions before it still see the stored status.
    */
   async queue({ studentIds, date, branchId, dueAt }) {
-    const rows = studentIds.map((studentId) => [studentId, date, branchId, dueAt]);
+    const incoming = valuesRows(studentIds.map((studentId) => [studentId, date, branchId, dueAt]));
     const reopen = "AttendanceSms.status = 'cancelled'";
     await db.query(
-      `INSERT INTO AttendanceSms (student_id, class_date, branch_id, due_at) VALUES ? AS incoming
+      `INSERT INTO AttendanceSms (student_id, class_date, branch_id, due_at) VALUES ${incoming.sql} AS incoming
        ON DUPLICATE KEY UPDATE
          due_at = IF(${reopen}, incoming.due_at, AttendanceSms.due_at),
          attempts = IF(${reopen}, 0, AttendanceSms.attempts),
          error = IF(${reopen}, NULL, AttendanceSms.error),
          status = IF(${reopen}, 'pending', AttendanceSms.status)`,
-      [rows],
+      incoming.params,
     );
   },
 
   async cancel({ studentIds, date }) {
+    const students = inList(studentIds);
     await db.query(
-      "UPDATE AttendanceSms SET status = 'cancelled' WHERE class_date = ? AND student_id IN (?) AND status = 'pending'",
-      [date, studentIds],
+      `UPDATE AttendanceSms SET status = 'cancelled' WHERE class_date = ? AND student_id IN ${students.sql} AND status = 'pending'`,
+      [date, ...students.params],
     );
   },
 
@@ -49,7 +50,7 @@ export const mysqlAbsenceSmsRepository = {
   },
 
   async dueIds(now, limit) {
-    const [rows] = await db.query(
+    const { rows } = await db.query(
       "SELECT id FROM AttendanceSms WHERE status = 'pending' AND due_at <= ? ORDER BY due_at, id LIMIT ?",
       [now, limit],
     );
@@ -58,16 +59,16 @@ export const mysqlAbsenceSmsRepository = {
 
   /** Takes the message for sending; false when another run took it first. */
   async claim(id) {
-    const [result] = await db.query(
+    const result = await db.query(
       "UPDATE AttendanceSms SET status = 'sending', attempts = attempts + 1 WHERE id = ? AND status = 'pending'",
       [id],
     );
-    return result.affectedRows === 1;
+    return result.rowCount === 1;
   },
 
   /** The message with the child's name, the parent's number and the child's status that day now. */
   async details(id) {
-    const [[row]] = await db.query(
+    const row = await db.one(
       `SELECT m.id, m.student_id AS studentId, m.class_date AS date, m.attempts,
               CONCAT_WS(' ', s.FirstName, s.LastName) AS name, s.ParentContact AS parentPhone,
               a.Status AS attendanceStatus
@@ -90,7 +91,7 @@ export const mysqlAbsenceSmsRepository = {
 
   async list({ branchId, date }) {
     const scope = branchFilter(branchId, "m");
-    const [rows] = await db.query(
+    const { rows } = await db.query(
       `SELECT m.id, m.student_id AS studentId, CONCAT_WS(' ', s.FirstName, s.LastName) AS studentName,
               s.RollNumber AS roll, c.ClassID AS classId, c.ClassName AS className, c.Section AS section, m.class_date AS date,
               m.status, m.phone, m.attempts, m.due_at AS dueAt, m.sent_at AS sentAt, m.error

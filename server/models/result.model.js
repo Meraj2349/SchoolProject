@@ -1,4 +1,4 @@
-import db from "../config/db.config.js";
+import db, { valuesRows } from "../src/shared/db/index.js";
 import { ValidationError } from "../src/shared/errors/index.js";
 import { branchFilter } from "../utils/branchFilter.js";
 
@@ -24,7 +24,7 @@ import { branchFilter } from "../utils/branchFilter.js";
 const getAllResults = async (branchId = null) => {
   const { clause, params } = branchFilter(branchId, "s");
   try {
-    const [rows] = await db.query(`
+    const { rows } = await db.query(`
       SELECT
         r.ResultID,
         r.MarksObtained,
@@ -57,7 +57,7 @@ const getAllResults = async (branchId = null) => {
 const getResultById = async (resultId, branchId = null) => {
   const { clause, params } = branchFilter(branchId, "s");
   try {
-    const [rows] = await db.query(
+    const { rows } = await db.query(
       `SELECT
         r.ResultID,
         r.MarksObtained,
@@ -89,7 +89,7 @@ const getResultById = async (resultId, branchId = null) => {
 const getResultsByStudent = async (studentId, branchId = null) => {
   const { clause, params } = branchFilter(branchId, "s");
   try {
-    const [rows] = await db.query(
+    const { rows } = await db.query(
       `SELECT
         r.ResultID,
         r.MarksObtained,
@@ -122,7 +122,7 @@ const getResultsByStudent = async (studentId, branchId = null) => {
 const getResultsByExam = async (examId, branchId = null) => {
   const { clause, params } = branchFilter(branchId, "s");
   try {
-    const [rows] = await db.query(
+    const { rows } = await db.query(
       `SELECT
         r.ResultID,
         r.MarksObtained,
@@ -155,7 +155,7 @@ const getResultsByExam = async (examId, branchId = null) => {
 const getResultsByClass = async (classId, branchId = null) => {
   const { clause, params } = branchFilter(branchId, "s");
   try {
-    const [rows] = await db.query(
+    const { rows } = await db.query(
       `SELECT
         r.ResultID,
         r.MarksObtained,
@@ -188,7 +188,7 @@ const getResultsByClass = async (classId, branchId = null) => {
 const getResultsBySubject = async (subjectId, branchId = null) => {
   const { clause, params } = branchFilter(branchId, "s");
   try {
-    const [rows] = await db.query(
+    const { rows } = await db.query(
       `SELECT
         r.ResultID,
         r.MarksObtained,
@@ -243,7 +243,7 @@ const addResult = async (resultData, branchId = null) => {
     // Branch-scoped student validation
     const branchStudentClause = branchId != null ? "AND s.branch_id = ?" : "";
     const branchStudentParam = branchId != null ? [branchId] : [];
-    const [studentCheck] = await db.query(
+    const { rows: studentCheck } = await db.query(
       `SELECT s.StudentID, s.FirstName, s.LastName, s.RollNumber, c.ClassName, c.Section
       FROM Students s
       LEFT JOIN Classes c ON s.ClassID = c.ClassID
@@ -260,7 +260,7 @@ const addResult = async (resultData, branchId = null) => {
 
     // The exam and subject must be the student's class (same section too),
     // otherwise a result can be filed under another section's exam.
-    const [examCheck] = await db.query(
+    const { rows: examCheck } = await db.query(
       `SELECT ExamID, ExamName, ExamType, ClassID FROM Exams WHERE ExamID = ? AND ClassID = ?`,
       [ExamID, ClassID],
     );
@@ -269,7 +269,7 @@ const addResult = async (resultData, branchId = null) => {
       throw new ValidationError("result_invalid", "Exam not found for this class");
     }
 
-    const [subjectCheck] = await db.query(
+    const { rows: subjectCheck } = await db.query(
       `SELECT SubjectID, SubjectName, ClassID FROM Subjects WHERE SubjectID = ? AND ClassID = ?`,
       [SubjectID, ClassID],
     );
@@ -289,16 +289,17 @@ const addResult = async (resultData, branchId = null) => {
       );
     }
 
-    const [result] = await db.query(
+    const insertId = await db.insert(
       // The result belongs to its student's branch.
       `INSERT INTO Results (StudentID, ExamID, SubjectID, ClassID, MarksObtained, branch_id)
        SELECT ?, ?, ?, ?, ?, branch_id FROM Students WHERE StudentID = ?`,
       [StudentID, ExamID, SubjectID, ClassID, MarksObtained, StudentID],
+      "ResultID",
     );
 
     return {
-      affectedRows: result.affectedRows,
-      insertId: result.insertId,
+      affectedRows: insertId ? 1 : 0,
+      insertId,
       success: true,
       message: "Result added successfully",
       data: {
@@ -368,7 +369,7 @@ const addResultByStudentDetails = async (resultData, branchId = null) => {
       studentParams.push(section);
     }
 
-    const [studentRows] = await db.query(studentQuery, studentParams);
+    const { rows: studentRows } = await db.query(studentQuery, studentParams);
 
     if (studentRows.length === 0) {
       throw new Error(
@@ -389,7 +390,7 @@ const addResultByStudentDetails = async (resultData, branchId = null) => {
     const branchClassParam = branchId != null ? [branchId] : [];
 
     // Get exam ID by exam name and class
-    const [examRows] = await db.query(
+    const { rows: examRows } = await db.query(
       `SELECT e.ExamID, e.ExamName, e.ExamType, c.ClassName, c.Section
       FROM Exams e
       LEFT JOIN Classes c ON e.ClassID = c.ClassID
@@ -407,7 +408,7 @@ const addResultByStudentDetails = async (resultData, branchId = null) => {
     const examId = exam.ExamID;
 
     // Get subject ID by subject name and class
-    const [subjectRows] = await db.query(
+    const { rows: subjectRows } = await db.query(
       `SELECT sub.SubjectID, sub.SubjectName, c.ClassName, c.Section
       FROM Subjects sub
       LEFT JOIN Classes c ON sub.ClassID = c.ClassID
@@ -425,7 +426,7 @@ const addResultByStudentDetails = async (resultData, branchId = null) => {
     const subjectId = subject.SubjectID;
 
     // Get class ID
-    const [classRows] = await db.query(
+    const { rows: classRows } = await db.query(
       `SELECT c.ClassID FROM Classes c WHERE c.ClassName = ? AND c.Section = ? ${branchClassClause}`,
       [className, section, ...branchClassParam],
     );
@@ -449,15 +450,16 @@ const addResultByStudentDetails = async (resultData, branchId = null) => {
       throw new Error("Marks obtained cannot exceed 100.");
     }
 
-    const [result] = await db.query(
+    const resultId = await db.insert(
       `INSERT INTO Results (StudentID, ExamID, SubjectID, ClassID, MarksObtained, branch_id)
        SELECT ?, ?, ?, ?, ?, branch_id FROM Students WHERE StudentID = ?`,
       [studentId, examId, subjectId, classId, marksObtained, studentId],
+      "ResultID",
     );
 
     return {
       success: true,
-      resultId: result.insertId,
+      resultId,
       studentName: `${student.FirstName} ${student.LastName}`,
       rollNumber: student.RollNumber,
       className: className,
@@ -522,7 +524,7 @@ const addMultipleResults = async (resultsData, branchId = null) => {
 
       // Branch-scope check: verify student belongs to this branch
       if (branchId != null) {
-        const [studentBranchCheck] = await db.query(
+        const { rows: studentBranchCheck } = await db.query(
           `SELECT StudentID FROM Students WHERE StudentID = ? AND branch_id = ?`,
           [StudentID, branchId],
         );
@@ -536,7 +538,7 @@ const addMultipleResults = async (resultsData, branchId = null) => {
 
       // Same checks as addResult: the student, exam and subject must all be
       // in the row's class (so in the student's branch and section too).
-      const [[classMatch]] = await db.query(
+      const classMatch = await db.one(
         `SELECT
            EXISTS (SELECT 1 FROM Students WHERE StudentID = ? AND ClassID = ?) AS student,
            EXISTS (SELECT 1 FROM Exams WHERE ExamID = ? AND ClassID = ?) AS exam,
@@ -575,16 +577,15 @@ const addMultipleResults = async (resultsData, branchId = null) => {
       throw new Error("No valid results to insert");
     }
 
-    const [result] = await db.query(
-      `INSERT INTO Results (StudentID, ExamID, SubjectID, ClassID, MarksObtained, branch_id) VALUES ?`,
-      [validatedResults],
+    const rows = valuesRows(validatedResults);
+    await db.query(
+      `INSERT INTO Results (StudentID, ExamID, SubjectID, ClassID, MarksObtained, branch_id) VALUES ${rows.sql}`,
+      rows.params,
     );
-
 
     return {
       success: true,
       insertedCount: validatedResults.length,
-      firstInsertId: result.insertId,
       message: `Successfully inserted ${validatedResults.length} results`,
     };
   } catch (err) {
@@ -602,7 +603,7 @@ const updateResult = async (resultId, resultData, branchId = null) => {
     }
 
     // Check if result exists (branch-scoped via student join)
-    const [existingResult] = await db.query(
+    const { rows: existingResult } = await db.query(
       `SELECT r.* FROM Results r
        LEFT JOIN Students s ON r.StudentID = s.StudentID
        WHERE r.ResultID = ? ${branchClause}`,
@@ -620,7 +621,7 @@ const updateResult = async (resultId, resultData, branchId = null) => {
     if (StudentID !== undefined) {
       const branchStudentClause = branchId != null ? "AND s.branch_id = ?" : "";
       const branchStudentParam = branchId != null ? [branchId] : [];
-      const [studentCheck] = await db.query(
+      const { rows: studentCheck } = await db.query(
         `SELECT s.StudentID FROM Students s WHERE s.StudentID = ? AND s.ClassID = ? ${branchStudentClause}`,
         [StudentID, ClassID || existingResult[0].ClassID, ...branchStudentParam],
       );
@@ -636,7 +637,7 @@ const updateResult = async (resultId, resultData, branchId = null) => {
     }
 
     if (ExamID !== undefined) {
-      const [examCheck] = await db.query(
+      const { rows: examCheck } = await db.query(
         `SELECT ExamID FROM Exams WHERE ExamID = ? AND ClassID = ?`,
         [ExamID, ClassID || existingResult[0].ClassID],
       );
@@ -652,7 +653,7 @@ const updateResult = async (resultId, resultData, branchId = null) => {
     }
 
     if (SubjectID !== undefined) {
-      const [subjectCheck] = await db.query(
+      const { rows: subjectCheck } = await db.query(
         `SELECT SubjectID FROM Subjects WHERE SubjectID = ? AND ClassID = ?`,
         [SubjectID, ClassID || existingResult[0].ClassID],
       );
@@ -670,7 +671,7 @@ const updateResult = async (resultId, resultData, branchId = null) => {
     if (ClassID !== undefined) {
       const branchClassClause = branchId != null ? "AND branch_id = ?" : "";
       const branchClassParam = branchId != null ? [branchId] : [];
-      const [classCheck] = await db.query(
+      const { rows: classCheck } = await db.query(
         `SELECT ClassID FROM Classes WHERE ClassID = ? ${branchClassClause}`,
         [ClassID, ...branchClassParam],
       );
@@ -705,7 +706,7 @@ const updateResult = async (resultId, resultData, branchId = null) => {
       const newExamID = ExamID || existingResult[0].ExamID;
       const newSubjectID = SubjectID || existingResult[0].SubjectID;
 
-      const [duplicateCheck] = await db.query(
+      const { rows: duplicateCheck } = await db.query(
         `SELECT ResultID FROM Results
         WHERE StudentID = ? AND ExamID = ? AND SubjectID = ? AND ResultID != ?`,
         [newStudentID, newExamID, newSubjectID, resultId],
@@ -719,19 +720,19 @@ const updateResult = async (resultId, resultData, branchId = null) => {
     }
 
     params.push(resultId);
-    const [result] = await db.query(
+    const result = await db.query(
       `UPDATE Results SET ${updates.join(", ")} WHERE ResultID = ?`,
       params,
     );
 
-    if (result.affectedRows === 0) {
+    if (result.rowCount === 0) {
       throw new Error("No rows were updated");
     }
 
     return {
       success: true,
       message: "Result updated successfully",
-      affectedRows: result.affectedRows,
+      affectedRows: result.rowCount,
     };
   } catch (err) {
     throw new Error("Error updating result: " + err.message);
@@ -741,11 +742,11 @@ const updateResult = async (resultId, resultData, branchId = null) => {
 // Delete result
 const deleteResult = async (resultId) => {
   try {
-    const [result] = await db.query(
+    const result = await db.query(
       `DELETE FROM Results WHERE ResultID = ?`,
       [resultId],
     );
-    return result;
+    return { affectedRows: result.rowCount };
   } catch (err) {
     throw new Error("Error deleting result: " + err.message);
   }
@@ -754,11 +755,11 @@ const deleteResult = async (resultId) => {
 // Delete results by exam
 const deleteResultsByExam = async (examId) => {
   try {
-    const [result] = await db.query(
+    const result = await db.query(
       `DELETE FROM Results WHERE ExamID = ?`,
       [examId],
     );
-    return result;
+    return { affectedRows: result.rowCount };
   } catch (err) {
     throw new Error("Error deleting results by exam: " + err.message);
   }
@@ -768,7 +769,7 @@ const deleteResultsByExam = async (examId) => {
 const getResultCount = async (branchId = null) => {
   const { clause, params } = branchFilter(branchId, "s");
   try {
-    const [rows] = await db.query(
+    const { rows } = await db.query(
       `SELECT COUNT(*) as count
        FROM Results r
        LEFT JOIN Students s ON r.StudentID = s.StudentID
@@ -784,7 +785,7 @@ const getResultCount = async (branchId = null) => {
 // Check if result exists
 const checkResultExists = async (studentId, examId, subjectId) => {
   try {
-    const [rows] = await db.query(
+    const { rows } = await db.query(
       `SELECT COUNT(*) as count
       FROM Results
       WHERE StudentID = ? AND ExamID = ? AND SubjectID = ?`,
@@ -799,7 +800,7 @@ const checkResultExists = async (studentId, examId, subjectId) => {
 // Find a result row by composite keys (StudentID + ExamID + SubjectID)
 const findResultByComposite = async (studentId, examId, subjectId) => {
   try {
-    const [rows] = await db.query(
+    const { rows } = await db.query(
       `SELECT
         r.ResultID,
         r.StudentID,
@@ -822,7 +823,7 @@ const findResultByComposite = async (studentId, examId, subjectId) => {
 const getStudentResultSummary = async (studentId, examId, branchId = null) => {
   const { clause, params } = branchFilter(branchId, "s");
   try {
-    const [rows] = await db.query(
+    const { rows } = await db.query(
       `SELECT
         r.ResultID,
         r.MarksObtained,
@@ -970,7 +971,7 @@ const searchResults = async (filters, branchId = null) => {
       }
     }
 
-    const [rows] = await db.query(query, params);
+    const { rows } = await db.query(query, params);
     return rows;
   } catch (err) {
     throw new Error("Error searching results: " + err.message);
@@ -1115,7 +1116,7 @@ const advancedSearchResults = async (searchCriteria, branchId = null) => {
     query += ` LIMIT ? OFFSET ?`;
     params.push(limit, offset);
 
-    const [rows] = await db.query(query, params);
+    const { rows } = await db.query(query, params);
 
     // Get total count for pagination
     let countQuery = `
@@ -1137,7 +1138,7 @@ const advancedSearchResults = async (searchCriteria, branchId = null) => {
     const conditionParams = params.slice(branchBaseParams.length, params.length - 2);
     const countParams = [...countBaseParams, ...conditionParams];
 
-    const [countRows] = await db.query(countQuery, countParams);
+    const { rows: countRows } = await db.query(countQuery, countParams);
 
     return {
       results: rows,

@@ -1,4 +1,4 @@
-import db from "../config/db.config.js";
+import db from "../src/shared/db/index.js";
 import { branchFilter } from "../utils/branchFilter.js";
 
 // Create new routine with ClassID (following Classes table structure)
@@ -34,14 +34,14 @@ export const createRoutine = async (routineData, branchId = null) => {
       routineData.CreatedBy || null,
     ];
   }
-  const [result] = await db.execute(sql, values);
-  return getRoutineById(result.insertId);
+  const routineId = await db.insert(sql, values, "RoutineID");
+  return getRoutineById(routineId);
 };
 
 // Get routine by ID with class details (ClassName এবং Section সহ), branch-scoped
 export const getRoutineById = async (id, branchId = null) => {
   const { clause, params } = branchFilter(branchId, "r");
-  const [rows] = await db.execute(
+  const { rows } = await db.query(
     `SELECT r.*, c.ClassName, c.Section, c.TeacherID,
      CONCAT(c.ClassName, ' - Section ', c.Section) as ClassSectionName
      FROM Routines r
@@ -55,7 +55,7 @@ export const getRoutineById = async (id, branchId = null) => {
 // Get all routines with class details (branch-scoped)
 export const getAllRoutines = async (branchId = null) => {
   const { clause, params } = branchFilter(branchId, "r");
-  const [rows] = await db.execute(
+  const { rows } = await db.query(
     `SELECT r.*, c.ClassName, c.Section, c.TeacherID,
      CONCAT(c.ClassName, ' - Section ', c.Section) as ClassSectionName
      FROM Routines r
@@ -70,7 +70,7 @@ export const getAllRoutines = async (branchId = null) => {
 // Get routines by class ID (branch-scoped)
 export const getRoutinesByClassId = async (classId, branchId = null) => {
   const { clause, params } = branchFilter(branchId, "r");
-  const [rows] = await db.execute(
+  const { rows } = await db.query(
     `SELECT r.*, c.ClassName, c.Section, c.TeacherID,
      CONCAT(c.ClassName, ' - Section ', c.Section) as ClassSectionName
      FROM Routines r
@@ -104,7 +104,7 @@ export const getRoutinesByClassSection = async (className, section, branchId = n
 
   query += " ORDER BY r.RoutineDate DESC, r.CreatedAt DESC";
 
-  const [rows] = await db.execute(query, params);
+  const { rows } = await db.query(query, params);
   return rows;
 };
 
@@ -148,7 +148,7 @@ export const updateRoutine = async (id, updateData) => {
 
   values.push(id);
 
-  await db.execute(
+  await db.query(
     `UPDATE Routines SET ${fields.join(", ")}, UpdatedAt = CURRENT_TIMESTAMP WHERE RoutineID = ?`,
     values,
   );
@@ -158,17 +158,17 @@ export const updateRoutine = async (id, updateData) => {
 
 // Delete routine (soft delete)
 export const deleteRoutine = async (id) => {
-  const [result] = await db.execute(
+  const result = await db.query(
     "UPDATE Routines SET IsActive = FALSE WHERE RoutineID = ?",
     [id],
   );
-  return result.affectedRows > 0;
+  return result.rowCount > 0;
 };
 
 // Search routines with class info (branch-scoped)
 export const searchRoutines = async (searchTerm, branchId = null) => {
   const { clause, params: branchParams } = branchFilter(branchId, "r");
-  const [rows] = await db.execute(
+  const { rows } = await db.query(
     `SELECT r.*, c.ClassName, c.Section, c.TeacherID,
      CONCAT(c.ClassName, ' - Section ', c.Section) as ClassSectionName
      FROM Routines r
@@ -192,7 +192,7 @@ export const searchRoutines = async (searchTerm, branchId = null) => {
 // Get all available classes for dropdown (branch-scoped)
 export const getAllClasses = async (branchId = null) => {
   const { clause, params } = branchFilter(branchId);
-  const [rows] = await db.execute(
+  const { rows } = await db.query(
     `SELECT ClassID, ClassName, Section,
      CONCAT(ClassName, ' - Section ', Section) as ClassSectionName,
      TeacherID
@@ -207,7 +207,7 @@ export const getAllClasses = async (branchId = null) => {
 // Get distinct class names for filter dropdown (branch-scoped)
 export const getDistinctClasses = async (branchId = null) => {
   const { clause, params } = branchFilter(branchId);
-  const [rows] = await db.execute(
+  const { rows } = await db.query(
     `SELECT DISTINCT c.ClassName FROM Classes c WHERE 1=1 ${clause} ORDER BY c.ClassName`,
     params,
   );
@@ -217,7 +217,7 @@ export const getDistinctClasses = async (branchId = null) => {
 // Get distinct sections for filter dropdown (branch-scoped)
 export const getDistinctSections = async (branchId = null) => {
   const { clause, params } = branchFilter(branchId);
-  const [rows] = await db.execute(
+  const { rows } = await db.query(
     `SELECT DISTINCT c.Section FROM Classes c WHERE 1=1 ${clause} ORDER BY c.Section`,
     params,
   );
@@ -227,7 +227,7 @@ export const getDistinctSections = async (branchId = null) => {
 // Get sections by class name (dynamic section loading, branch-scoped)
 export const getSectionsByClassName = async (className, branchId = null) => {
   const { clause, params: branchParams } = branchFilter(branchId);
-  const [rows] = await db.execute(
+  const { rows } = await db.query(
     `SELECT ClassID, Section FROM Classes WHERE ClassName = ? ${clause} ORDER BY Section`,
     [className, ...branchParams],
   );
@@ -237,7 +237,7 @@ export const getSectionsByClassName = async (className, branchId = null) => {
 // Validate if class exists (before creating/updating routine, branch-scoped)
 export const validateClassId = async (classId, branchId = null) => {
   const { clause, params: branchParams } = branchFilter(branchId);
-  const [rows] = await db.execute(
+  const { rows } = await db.query(
     `SELECT ClassID, ClassName, Section FROM Classes WHERE ClassID = ? ${clause}`,
     [classId, ...branchParams],
   );

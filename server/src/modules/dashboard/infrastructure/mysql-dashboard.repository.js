@@ -1,8 +1,8 @@
-import db from "../../../../config/db.config.js";
+import db from "../../../shared/db/index.js";
 import { branchFilter } from "../../../../utils/branchFilter.js";
 
 const scalar = async (sql, params) => {
-  const [[row]] = await db.query(sql, params);
+  const row = await db.one(sql, params);
   return Number(row.total);
 };
 
@@ -20,7 +20,7 @@ export const mysqlDashboardRepository = {
 
   async attendanceCounts(branchId, date) {
     const { clause, params } = branchFilter(branchId, "a");
-    const [rows] = await db.query(
+    const { rows } = await db.query(
       `SELECT a.Status AS status, COUNT(*) AS total FROM Attendance a
         WHERE a.ClassDate = ? ${clause} GROUP BY a.Status`,
       [date, ...params],
@@ -30,7 +30,7 @@ export const mysqlDashboardRepository = {
 
   async recentPayments(branchId, limit) {
     const { clause, params } = branchFilter(branchId, "p");
-    const [rows] = await db.query(
+    const { rows } = await db.query(
       `SELECT p.id, p.receipt_no, p.amount, p.method, p.paid_on, p.branch_id,
               i.student_id, CONCAT(s.FirstName, ' ', s.LastName) AS student_name,
               i.class_name, i.section, i.\`year\`, i.\`month\`
@@ -48,7 +48,7 @@ export const mysqlDashboardRepository = {
   // Events from today on: the branch's own plus school-wide (branch_id NULL) ones.
   async upcomingEvents(branchId, fromDate, limit) {
     const branchClause = branchId == null ? "" : "AND (branch_id = ? OR branch_id IS NULL)";
-    const [rows] = await db.query(
+    const { rows } = await db.query(
       `SELECT EventID, EventName, EventType, StartDate, EndDate, Venue, branch_id
          FROM Events
         WHERE EndDate >= ? ${branchClause}

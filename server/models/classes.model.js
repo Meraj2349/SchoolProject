@@ -1,4 +1,4 @@
-import db from "../config/db.config.js";
+import db from "../src/shared/db/index.js";
 import { branchFilter } from "../utils/branchFilter.js";
 import { branchOf } from "../utils/branchOwnership.js";
 import { ValidationError } from "../src/shared/errors/index.js";
@@ -14,8 +14,8 @@ export const addClass = async ({ className, section, teacherId }, branchId = nul
     values = [className, section, teacherId];
   }
   try {
-    const [result] = await db.query(sql, values);
-    return { ClassID: result.insertId };
+    const ClassID = await db.insert(sql, values, "ClassID");
+    return { ClassID };
   } catch (error) {
     console.error("Error adding class:", error);
     throw error;
@@ -29,11 +29,11 @@ export const addClass = async ({ className, section, teacherId }, branchId = nul
 export const deleteClass = async (classId, branchId = null) => {
   const { clause, params: branchParams } = branchFilter(branchId);
   try {
-    const [result] = await db.query(
+    const result = await db.query(
       `UPDATE Classes SET TeacherID = NULL WHERE ClassID = ? ${clause}`,
       [classId, ...branchParams],
     );
-    if (result.affectedRows === 0) {
+    if (result.rowCount === 0) {
       throw new Error("No class found with that ID");
     }
     return { success: true };
@@ -59,7 +59,7 @@ export const getClasses = async (branchId = null) => {
              t.FirstName, t.LastName, t.Subject
   `;
   try {
-    const [rows] = await db.query(sql, branchParams);
+    const { rows } = await db.query(sql, branchParams);
     return rows;
   } catch (error) {
     console.error("Error fetching classes:", error);
@@ -83,8 +83,8 @@ export const editClass = async (classId, { className, section, teacherId }, bran
     WHERE ClassID = ? ${clause}
   `;
   try {
-    const [result] = await db.query(sql, [className, section, teacherId, classId, ...branchParams]);
-    if (result.affectedRows === 0) {
+    const result = await db.query(sql, [className, section, teacherId, classId, ...branchParams]);
+    if (result.rowCount === 0) {
       throw new Error("No class found with that ID");
     }
     return { success: true };
@@ -105,7 +105,7 @@ export const getClasswiseStudentCount = async (branchId = null) => {
     GROUP BY c.ClassID
   `;
   try {
-    const [rows] = await db.query(sql, branchParams);
+    const { rows } = await db.query(sql, branchParams);
     return rows;
   } catch (error) {
     console.error("Error fetching classwise student count:", error);
@@ -116,11 +116,11 @@ export const getClasswiseStudentCount = async (branchId = null) => {
 // Hard-delete a class row entirely — super_admin only (irreversible)
 export const hardDeleteClass = async (classId) => {
   try {
-    const [result] = await db.query(
+    const result = await db.query(
       `DELETE FROM Classes WHERE ClassID = ?`,
       [classId],
     );
-    if (result.affectedRows === 0) {
+    if (result.rowCount === 0) {
       throw new Error("No class found with that ID");
     }
     return { success: true };
@@ -134,7 +134,7 @@ export const hardDeleteClass = async (classId) => {
 export const getDistinctClassNames = async () => {
   const sql = `SELECT name FROM ClassNames ORDER BY sort_order, name`;
   try {
-    const [rows] = await db.query(sql);
+    const { rows } = await db.query(sql);
     return rows.map((r) => r.name);
   } catch (error) {
     console.error("Error fetching distinct class names:", error);
@@ -155,7 +155,7 @@ export const getDistinctClassesWithSections = async (branchId = null) => {
     ORDER BY ClassName, Section
   `;
   try {
-    const [rows] = await db.query(sql, branchParams);
+    const { rows } = await db.query(sql, branchParams);
     return rows;
   } catch (error) {
     console.error("Error fetching distinct classes:", error);
@@ -173,7 +173,7 @@ export const getTotalStudentsInClassByName = async (className, branchId = null) 
     WHERE c.ClassName = ? ${clause}
   `;
   try {
-    const [rows] = await db.query(sql, [className, ...branchParams]);
+    const { rows } = await db.query(sql, [className, ...branchParams]);
     return rows[0] ? rows[0].TotalStudents : 0;
   } catch (error) {
     console.error("Error fetching total students in class:", error);

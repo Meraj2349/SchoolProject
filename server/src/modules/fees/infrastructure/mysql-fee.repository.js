@@ -1,4 +1,4 @@
-import db from "../../../../config/db.config.js";
+import db, { assignments, inList, insertList, valuesRows } from "../../../shared/db/index.js";
 import { branchFilter } from "../../../../utils/branchFilter.js";
 
 // MySQL adapter for the fee repository port used by the fee use cases.
@@ -16,6 +16,7 @@ function toRow(row) {
 }
 
 const toRows = (rows) => rows.map(toRow);
+const pick = (data, columns) => Object.fromEntries(columns.map((c) => [c, data[c]]));
 
 const STUDENT_COLUMNS = `s.StudentID AS id, s.branch_id, CONCAT(s.FirstName, ' ', s.LastName) AS name,
   s.RollNumber AS roll_number, c.ClassName AS class_name, c.Section AS section`;
@@ -33,7 +34,7 @@ function makeCrud(table, columns) {
   const crud = {
     async list(branchId, where = "", params = []) {
       const scope = branchFilter(branchId);
-      const [rows] = await db.query(
+      const { rows } = await db.query(
         `SELECT * FROM ${table} WHERE 1=1 ${scope.clause} ${where} ORDER BY id`,
         [...scope.params, ...params],
       );
@@ -41,24 +42,17 @@ function makeCrud(table, columns) {
     },
     async find(branchId, id) {
       const scope = branchFilter(branchId);
-      const [[row]] = await db.query(`SELECT * FROM ${table} WHERE id = ? ${scope.clause}`, [id, ...scope.params]);
+      const row = await db.one(`SELECT * FROM ${table} WHERE id = ? ${scope.clause}`, [id, ...scope.params]);
       return toRow(row);
     },
     async create(branchId, data) {
-      const values = columns.map((c) => data[c]);
-      const [result] = await db.query(
-        `INSERT INTO ${table} (branch_id, ${columns.map((c) => `\`${c}\``).join(", ")}) VALUES (?, ?)`,
-        [branchId, values],
-      );
-      return crud.find(branchId, result.insertId);
+      const values = insertList({ branch_id: branchId, ...pick(data, columns) }, db.ident);
+      const id = await db.insert(`INSERT INTO ${table} ${values.sql}`, values.params, "id");
+      return crud.find(branchId, id);
     },
     async update(branchId, id, data) {
-      const assignments = columns.map((c) => `\`${c}\` = ?`).join(", ");
-      await db.query(`UPDATE ${table} SET ${assignments} WHERE id = ? AND branch_id = ?`, [
-        ...columns.map((c) => data[c]),
-        id,
-        branchId,
-      ]);
+      const set = assignments(pick(data, columns), db.ident);
+      await db.query(`UPDATE ${table} SET ${set.sql} WHERE id = ? AND branch_id = ?`, [...set.params, id, branchId]);
     },
     async remove(branchId, id) {
       await db.query(`DELETE FROM ${table} WHERE id = ? AND branch_id = ?`, [id, branchId]);
@@ -77,14 +71,14 @@ const discounts = makeCrud("StudentDiscounts", [
 function makeInvoiceQueries(conn) {
   async function linesOf(invoice) {
     if (!invoice) return null;
-    const [items] = await conn.query("SELECT * FROM FeeInvoiceItems WHERE invoice_id = ? ORDER BY id", [invoice.id]);
-    const [payments] = await conn.query("SELECT * FROM FeePayments WHERE invoice_id = ? ORDER BY id", [invoice.id]);
+    const { rows: items } = await conn.query("SELECT * FROM FeeInvoiceItems WHERE invoice_id = ? ORDER BY id", [invoice.id]);
+    const { rows: payments } = await conn.query("SELECT * FROM FeePayments WHERE invoice_id = ? ORDER BY id", [invoice.id]);
     return { ...invoice, items: toRows(items), payments: toRows(payments) };
   }
 
   async function selectInvoice(branchId, id, lock = "") {
     const scope = branchFilter(branchId, "i");
-    const [[row]] = await conn.query(
+    const row = await conn.one(
       `SELECT ${INVOICE_COLUMNS} FROM FeeInvoices i ${INVOICE_JOINS} WHERE i.id = ? ${scope.clause} ${lock}`,
       [id, ...scope.params],
     );
@@ -97,7 +91,7 @@ function makeInvoiceQueries(conn) {
 
     async lockPayment(branchId, id) {
       const scope = branchFilter(branchId);
-      const [[row]] = await conn.query(`SELECT * FROM FeePayments WHERE id = ? ${scope.clause} FOR UPDATE`, [
+      const row = await conn.one(`SELECT * FROM FeePayments WHERE id = ? ${scope.clause} FOR UPDATE`, [
         id,
         ...scope.params,
       ]);
@@ -122,19 +116,19 @@ function makeInvoiceQueries(conn) {
          ON DUPLICATE KEY UPDATE last_seq = last_seq + 1`,
         [branchId, year],
       );
-      const [[row]] = await conn.query("SELECT last_seq FROM FeeReceiptCounters WHERE branch_id = ? AND `year` = ?", [
+      const row = await conn.one("SELECT last_seq FROM FeeReceiptCounters WHERE branch_id = ? AND `year` = ?", [
         branchId, year,
       ]);
       return row.last_seq;
     },
 
     async createPayment(p) {
-      const [result] = await conn.query(
+      return conn.insert(
         `INSERT INTO FeePayments (branch_id, invoice_id, amount, method, paid_on, receipt_no, received_by, note)
          VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
         [p.branch_id, p.invoice_id, p.amount, p.method, p.paid_on, p.receipt_no, p.received_by, p.note],
+        "id",
       );
-      return result.insertId;
     },
 
     async voidPayment(id, { voided_by, void_reason }) {
@@ -143,21 +137,6 @@ function makeInvoiceQueries(conn) {
       ]);
     },
   };
-}
-
-async function withTransaction(work) {
-  const connection = await db.getConnection();
-  try {
-    await connection.beginTransaction();
-    const result = await work(connection);
-    await connection.commit();
-    return result;
-  } catch (error) {
-    await connection.rollback();
-    throw error;
-  } finally {
-    connection.release();
-  }
 }
 
 const INVOICE_FILTERS = [
@@ -172,7 +151,7 @@ const INVOICE_FILTERS = [
 async function listInvoices(branchId, filters = {}) {
   const scope = branchFilter(branchId, "i");
   const active = INVOICE_FILTERS.filter(([key]) => filters[key] != null);
-  const [rows] = await db.query(
+  const { rows } = await db.query(
     `SELECT ${INVOICE_COLUMNS}, COALESCE(it.total, 0) AS total, COALESCE(p.paid, 0) AS paid
        FROM FeeInvoices i ${INVOICE_JOINS}
        LEFT JOIN (SELECT invoice_id, SUM(amount) AS total FROM FeeInvoiceItems GROUP BY invoice_id) it
@@ -190,30 +169,30 @@ async function listInvoices(branchId, filters = {}) {
 // (another request got there first): the UNIQUE key is the real guard.
 async function createInvoice(branchId, { items, ...invoice }) {
   try {
-    return await withTransaction(async (connection) => {
-      const [result] = await connection.query(
+    return await db.withTransaction(async (tx) => {
+      const invoiceId = await tx.insert(
         `INSERT INTO FeeInvoices
            (branch_id, student_id, class_name, section, \`year\`, \`month\`, due_date, status, created_by)
          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [branchId, invoice.student_id, invoice.class_name, invoice.section, invoice.year, invoice.month,
           invoice.due_date, invoice.status, invoice.created_by],
+        "id",
       );
       if (items.length > 0) {
-        await connection.query("INSERT INTO FeeInvoiceItems (invoice_id, kind, label, amount) VALUES ?", [
-          items.map((item) => [result.insertId, item.kind, item.label, item.amount]),
-        ]);
+        const lines = valuesRows(items.map((item) => [invoiceId, item.kind, item.label, item.amount]));
+        await tx.query(`INSERT INTO FeeInvoiceItems (invoice_id, kind, label, amount) VALUES ${lines.sql}`, lines.params);
       }
-      return result.insertId;
+      return invoiceId;
     });
   } catch (error) {
-    if (error.code === "ER_DUP_ENTRY") return null;
+    if (db.isUniqueViolation(error)) return null;
     throw error;
   }
 }
 
 async function findStudent(branchId, id) {
   const scope = branchFilter(branchId, "s");
-  const [[row]] = await db.query(
+  const row = await db.one(
     `SELECT ${STUDENT_COLUMNS} FROM Students s JOIN Classes c ON c.ClassID = s.ClassID
       WHERE s.StudentID = ? ${scope.clause}`,
     [id, ...scope.params],
@@ -222,17 +201,18 @@ async function findStudent(branchId, id) {
 }
 
 async function listBillableStudents(branchId, { class_names = [] } = {}) {
-  const byClass = class_names.length > 0 ? "AND c.ClassName IN (?)" : "";
-  const [rows] = await db.query(
+  const classes = inList(class_names);
+  const byClass = class_names.length > 0 ? `AND c.ClassName IN ${classes.sql}` : "";
+  const { rows } = await db.query(
     `SELECT ${STUDENT_COLUMNS} FROM Students s JOIN Classes c ON c.ClassID = s.ClassID
       WHERE s.branch_id = ? ${byClass} ORDER BY s.StudentID`,
-    class_names.length > 0 ? [branchId, class_names] : [branchId],
+    [branchId, ...classes.params],
   );
   return rows;
 }
 
 async function invoicedStudentIds(branchId, { year, month }) {
-  const [rows] = await db.query(
+  const { rows } = await db.query(
     "SELECT student_id FROM FeeInvoices WHERE branch_id = ? AND `year` = ? AND `month` = ?",
     [branchId, year, month],
   );
@@ -242,7 +222,7 @@ async function invoicedStudentIds(branchId, { year, month }) {
 async function listPayments(branchId, { student_id } = {}) {
   const scope = branchFilter(branchId, "p");
   const byStudent = student_id ? "AND i.student_id = ?" : "";
-  const [rows] = await db.query(
+  const { rows } = await db.query(
     `SELECT p.*, i.\`year\`, i.\`month\` FROM FeePayments p JOIN FeeInvoices i ON i.id = p.invoice_id
       WHERE 1=1 ${scope.clause} ${byStudent} ORDER BY p.paid_on DESC, p.id DESC`,
     [...scope.params, ...(student_id ? [student_id] : [])],
@@ -252,12 +232,12 @@ async function listPayments(branchId, { student_id } = {}) {
 
 async function findPayment(branchId, id) {
   const scope = branchFilter(branchId);
-  const [[row]] = await db.query(`SELECT * FROM FeePayments WHERE id = ? ${scope.clause}`, [id, ...scope.params]);
+  const row = await db.one(`SELECT * FROM FeePayments WHERE id = ? ${scope.clause}`, [id, ...scope.params]);
   return toRow(row);
 }
 
 async function getSettings(branchId) {
-  const [[row]] = await db.query(
+  const row = await db.one(
     "SELECT due_day, late_fine, receipt_prefix FROM FeeSettings WHERE branch_id = ?",
     [branchId],
   );
@@ -274,7 +254,7 @@ async function saveSettings(branchId, { due_day, late_fine, receipt_prefix }) {
 }
 
 async function findStructureByClass(branchId, className, academicYear) {
-  const [[row]] = await db.query(
+  const row = await db.one(
     "SELECT * FROM FeeStructures WHERE branch_id = ? AND class_name = ? AND academic_year = ?",
     [branchId, className, academicYear],
   );
@@ -317,5 +297,5 @@ export const mysqlFeeRepository = {
   listPayments,
   findPayment,
 
-  inTransaction: (work) => withTransaction((connection) => work(makeInvoiceQueries(connection))),
+  inTransaction: (work) => db.withTransaction((tx) => work(makeInvoiceQueries(tx))),
 };

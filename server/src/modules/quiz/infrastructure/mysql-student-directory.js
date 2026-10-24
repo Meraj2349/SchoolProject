@@ -1,4 +1,4 @@
-import db from "../../../../config/db.config.js";
+import db from "../../../shared/db/index.js";
 
 // Looks up students for the quiz: by the identity they type in, or by the id
 // in their quiz token. Returns the student with their current class.
@@ -20,7 +20,7 @@ const toStudent = (row) => ({
 
 export const mysqlStudentDirectory = {
   async verify({ branchId, firstName, lastName, className, section, rollNumber }) {
-    const [rows] = await db.query(
+    const { rows } = await db.query(
       `${SELECT_STUDENT}
         WHERE s.branch_id = ? AND s.FirstName = ? AND s.LastName = ?
           AND c.ClassName = ? AND c.Section = ? AND s.RollNumber = ?
@@ -31,7 +31,7 @@ export const mysqlStudentDirectory = {
   },
 
   async findById(studentId) {
-    const [rows] = await db.query(`${SELECT_STUDENT} WHERE s.StudentID = ?`, [studentId]);
+    const { rows } = await db.query(`${SELECT_STUDENT} WHERE s.StudentID = ?`, [studentId]);
     return rows[0] ? toStudent(rows[0]) : null;
   },
 };

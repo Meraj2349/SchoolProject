@@ -1,4 +1,4 @@
-import db from "../config/db.config.js";
+import db from "../src/shared/db/index.js";
 import { branchFilter } from "../utils/branchFilter.js";
 import { branchOf } from "../utils/branchOwnership.js";
 import { ValidationError } from "../src/shared/errors/index.js";
@@ -18,8 +18,8 @@ export const addSubject = async ({ subjectName, classId }, branchId = null) => {
       sql = "INSERT INTO Subjects (SubjectName, ClassID) VALUES (?, ?)";
       values = [subjectName, classId];
     }
-    const [result] = await db.query(sql, values);
-    return { SubjectID: result.insertId };
+    const SubjectID = await db.insert(sql, values, "SubjectID");
+    return { SubjectID };
   } catch (error) {
     throw new Error("Error adding subject: " + error.message);
   }
@@ -29,11 +29,11 @@ export const addSubject = async ({ subjectName, classId }, branchId = null) => {
 export const deleteSubject = async (subjectId, branchId = null) => {
   const { clause, params: branchParams } = branchFilter(branchId);
   try {
-    const [result] = await db.query(
+    const result = await db.query(
       `DELETE FROM Subjects WHERE SubjectID = ? ${clause}`,
       [subjectId, ...branchParams],
     );
-    if (result.affectedRows === 0) {
+    if (result.rowCount === 0) {
       throw new Error("No subject found with that ID");
     }
     return { success: true };
@@ -46,7 +46,7 @@ export const deleteSubject = async (subjectId, branchId = null) => {
 export const getSubjects = async (branchId = null) => {
   const { clause, params: branchParams } = branchFilter(branchId, "c");
   try {
-    const [rows] = await db.query(`
+    const { rows } = await db.query(`
       SELECT
         s.SubjectID,
         s.SubjectName,
@@ -68,7 +68,7 @@ export const getSubjects = async (branchId = null) => {
 export const getSubjectsByClassId = async (classId, branchId = null) => {
   const { clause, params: branchParams } = branchFilter(branchId, "c");
   try {
-    const [rows] = await db.query(`
+    const { rows } = await db.query(`
       SELECT
         s.SubjectID,
         s.SubjectName,
@@ -90,7 +90,7 @@ export const getSubjectsByClassId = async (classId, branchId = null) => {
 export const getSubjectsByClassName = async (className, branchId = null) => {
   const { clause, params: branchParams } = branchFilter(branchId, "c");
   try {
-    const [rows] = await db.query(`
+    const { rows } = await db.query(`
       SELECT
         s.SubjectID,
         s.SubjectName,
@@ -117,11 +117,11 @@ export const editSubject = async (subjectId, { subjectName, classId }, branchId 
     throw new ValidationError("branch_mismatch");
   }
   try {
-    const [result] = await db.query(
+    const result = await db.query(
       `UPDATE Subjects SET SubjectName = ?, ClassID = ? WHERE SubjectID = ? ${clause}`,
       [subjectName, classId, subjectId, ...branchParams],
     );
-    if (result.affectedRows === 0) {
+    if (result.rowCount === 0) {
       throw new Error("No subject found with that ID");
     }
     return { success: true };

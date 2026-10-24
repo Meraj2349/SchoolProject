@@ -6,7 +6,7 @@
 
 import path from "path";
 import { fileURLToPath } from "url";
-import db from "../config/db.config.js";
+import db from "../src/shared/db/index.js";
 import { importBenqa } from "../src/modules/quiz/index.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));

@@ -1,4 +1,4 @@
-import db from "../config/db.config.js";
+import db from "../src/shared/db/index.js";
 import { branchFilter } from "../utils/branchFilter.js";
 
 /**
@@ -28,7 +28,7 @@ const VALID_EXAM_TYPES = [
 const getAllExams = async (branchId = null) => {
   const { clause, params: branchParams } = branchFilter(branchId, "c");
   try {
-    const [rows] = await db.query(`
+    const { rows } = await db.query(`
       SELECT
         e.ExamID,
         e.ExamType,
@@ -56,7 +56,7 @@ const getExamById = async (examId, branchId = null) => {
       throw new Error("Exam ID is required");
     }
 
-    const [rows] = await db.query(
+    const { rows } = await db.query(
       `SELECT
         e.ExamID,
         e.ExamType,
@@ -81,7 +81,7 @@ const getExamById = async (examId, branchId = null) => {
 const getExamsByClass = async (classId, branchId = null) => {
   const { clause, params: branchParams } = branchFilter(branchId, "c");
   try {
-    const [rows] = await db.query(
+    const { rows } = await db.query(
       `SELECT
         e.ExamID,
         e.ExamType,
@@ -122,7 +122,7 @@ const addExamByClassDetails = async (examData, branchId = null) => {
     // Get class ID by class name and section (branch-scoped)
     const branchClause = branchId != null ? "AND branch_id = ?" : "";
     const branchParam = branchId != null ? [branchId] : [];
-    const [classRows] = await db.query(
+    const { rows: classRows } = await db.query(
       `SELECT ClassID, ClassName, Section FROM Classes WHERE ClassName = ? AND Section = ? ${branchClause}`,
       [className, sectionName, ...branchParam],
     );
@@ -145,19 +145,20 @@ const addExamByClassDetails = async (examData, branchId = null) => {
       throw new Error("examDate cannot be in the past");
     }
 
-    const [result] = await db.query(
+    const insertId = await db.insert(
       // The exam belongs to its class's branch.
       `INSERT INTO Exams (ExamType, ExamName, ClassID, ExamDate, branch_id)
        SELECT ?, ?, ClassID, ?, branch_id FROM Classes WHERE ClassID = ?`,
       [examType, examName, examDate, classInfo.ClassID],
+      "ExamID",
     );
 
     return {
       success: true,
-      examId: result.insertId,
+      examId: insertId,
       message: `Exam '${examName}' successfully scheduled for class '${className} - ${sectionName}' on ${examDate}`,
       data: {
-        ExamID: result.insertId,
+        ExamID: insertId,
         ExamType: examType,
         ExamName: examName,
         ClassID: classInfo.ClassID,
@@ -195,7 +196,7 @@ const createExamByClassNameAndSection = async (
 
     const branchClause = branchId != null ? "AND branch_id = ?" : "";
     const branchParam = branchId != null ? [branchId] : [];
-    const [classRows] = await db.query(
+    const { rows: classRows } = await db.query(
       `SELECT ClassID, ClassName, Section FROM Classes WHERE ClassName = ? AND Section = ? ${branchClause}`,
       [className, sectionName, ...branchParam],
     );
@@ -218,19 +219,20 @@ const createExamByClassNameAndSection = async (
       throw new Error("examDate cannot be in the past");
     }
 
-    const [result] = await db.query(
+    const insertId = await db.insert(
       // The exam belongs to its class's branch.
       `INSERT INTO Exams (ExamType, ExamName, ClassID, ExamDate, branch_id)
        SELECT ?, ?, ClassID, ?, branch_id FROM Classes WHERE ClassID = ?`,
       [examType, examName, examDate, classInfo.ClassID],
+      "ExamID",
     );
 
     return {
       success: true,
-      examId: result.insertId,
+      examId: insertId,
       message: `Exam '${examName}' successfully created for class '${className} - ${sectionName}' on ${examDate}`,
       exam: {
-        ExamID: result.insertId,
+        ExamID: insertId,
         ExamType: examType,
         ExamName: examName,
         ClassID: classInfo.ClassID,
@@ -264,7 +266,7 @@ const updateExam = async (examId, examData, branchId = null) => {
       const sn = SectionName || "";
       const branchClause = branchId != null ? "AND branch_id = ?" : "";
       const branchParam = branchId != null ? [branchId] : [];
-      const [classRows] = await db.query(
+      const { rows: classRows } = await db.query(
         `SELECT ClassID FROM Classes WHERE ClassName = ? AND Section = ? ${branchClause}`,
         [cn, sn, ...branchParam],
       );
@@ -295,7 +297,7 @@ const updateExam = async (examId, examData, branchId = null) => {
     if (ClassID !== undefined) {
       const branchClause = branchId != null ? "AND branch_id = ?" : "";
       const branchParam = branchId != null ? [branchId] : [];
-      const [classCheck] = await db.query(
+      const { rows: classCheck } = await db.query(
         `SELECT ClassID FROM Classes WHERE ClassID = ? ${branchClause}`,
         [ClassID, ...branchParam],
       );
@@ -315,12 +317,12 @@ const updateExam = async (examId, examData, branchId = null) => {
     if (updates.length === 0) throw new Error("No valid fields to update");
 
     params.push(examId);
-    const [result] = await db.query(
+    const result = await db.query(
       `UPDATE Exams SET ${updates.join(", ")} WHERE ExamID = ?`,
       params,
     );
 
-    if (result.affectedRows === 0) throw new Error("No rows were updated");
+    if (result.rowCount === 0) throw new Error("No rows were updated");
 
     return { success: true, message: "Exam updated successfully" };
   } catch (err) {
@@ -342,12 +344,12 @@ const deleteExam = async (examId, branchId = null) => {
 
     await db.query("DELETE FROM Results WHERE ExamID = ?", [examId]);
 
-    const [result] = await db.query(
+    const result = await db.query(
       `DELETE FROM Exams WHERE ExamID = ?`,
       [examId],
     );
 
-    if (result.affectedRows === 0) {
+    if (result.rowCount === 0) {
       throw new Error("No exam was deleted");
     }
 
@@ -371,7 +373,7 @@ const deleteExam = async (examId, branchId = null) => {
 // Get distinct exam names (public — no branch scoping, used for autocomplete on public pages)
 const getDistinctExamNames = async () => {
   try {
-    const [rows] = await db.query(
+    const { rows } = await db.query(
       `SELECT DISTINCT ExamName FROM Exams ORDER BY ExamName ASC`
     );
     return rows.map((r) => r.ExamName);

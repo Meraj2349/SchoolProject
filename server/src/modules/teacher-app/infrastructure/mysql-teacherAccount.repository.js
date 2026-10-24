@@ -1,4 +1,4 @@
-import db from "../../../../config/db.config.js";
+import db from "../../../shared/db/index.js";
 import { branchFilter } from "../../../../utils/branchFilter.js";
 import { ConflictError } from "../../../shared/errors/index.js";
 
@@ -26,18 +26,18 @@ function toAccount(row) {
 
 export const mysqlTeacherAccountRepository = {
   async findAccount(id) {
-    const [[row]] = await db.query(`SELECT ${ACCOUNT_COLUMNS} FROM ${ACCOUNTS} WHERE t.TeacherID = ?`, [id]);
+    const row = await db.one(`SELECT ${ACCOUNT_COLUMNS} FROM ${ACCOUNTS} WHERE t.TeacherID = ?`, [id]);
     return toAccount(row);
   },
 
   async findAccountByPhone(phone) {
-    const [[row]] = await db.query(`SELECT ${ACCOUNT_COLUMNS} FROM ${ACCOUNTS} WHERE t.AppPhone = ?`, [phone]);
+    const row = await db.one(`SELECT ${ACCOUNT_COLUMNS} FROM ${ACCOUNTS} WHERE t.AppPhone = ?`, [phone]);
     return toAccount(row);
   },
 
   async listAccess(branchId) {
     const scope = branchFilter(branchId, "t");
-    const [rows] = await db.query(
+    const { rows } = await db.query(
       `SELECT ${ACCOUNT_COLUMNS} FROM ${ACCOUNTS} WHERE 1=1 ${scope.clause} ORDER BY t.FirstName, t.LastName, t.TeacherID`,
       scope.params,
     );
@@ -62,7 +62,7 @@ export const mysqlTeacherAccountRepository = {
     try {
       await db.query(`UPDATE Teachers SET ${sets.join(", ")} WHERE TeacherID = ?`, [...params, id]);
     } catch (error) {
-      if (error?.code === "ER_DUP_ENTRY") throw new ConflictError("teacher_app_phone_taken");
+      if (db.isUniqueViolation(error)) throw new ConflictError("teacher_app_phone_taken");
       throw error;
     }
   },
@@ -76,14 +76,14 @@ export const mysqlTeacherAccountRepository = {
    * the old LockedUntil), then LockedUntil (it sees the new FailedLogins).
    */
   async reserveLoginAttempt(id, { max, lockedUntil, now }) {
-    const [result] = await db.query(
+    const result = await db.query(
       `UPDATE Teachers
           SET FailedLogins = IF(LockedUntil IS NOT NULL AND LockedUntil <= ?, 1, FailedLogins + 1),
               LockedUntil = IF(FailedLogins >= ?, ?, NULL)
         WHERE TeacherID = ? AND (LockedUntil IS NULL OR LockedUntil <= ?)`,
       [now, max, lockedUntil, id, now],
     );
-    return { allowed: result.affectedRows === 1 };
+    return { allowed: result.rowCount === 1 };
   },
 
   async recordLogin(id, now) {
@@ -92,7 +92,7 @@ export const mysqlTeacherAccountRepository = {
 
   /** The classes the teacher is class teacher of, with whether `date` is taken. */
   async classesOf(teacherId, branchId, date) {
-    const [rows] = await db.query(
+    const { rows } = await db.query(
       `SELECT c.ClassID AS id, c.ClassName AS name, c.Section AS section,
               COUNT(DISTINCT s.StudentID) AS students, COUNT(a.AttendanceID) AS takenCount, MAX(a.MarkedAt) AS takenAt
          FROM Classes c
