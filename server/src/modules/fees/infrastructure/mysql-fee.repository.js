@@ -35,27 +35,27 @@ function makeCrud(table, columns) {
     async list(branchId, where = "", params = []) {
       const scope = branchFilter(branchId);
       const { rows } = await db.query(
-        `SELECT * FROM ${table} WHERE 1=1 ${scope.clause} ${where} ORDER BY id`,
+        `SELECT * FROM ${db.ident(table)} WHERE 1=1 ${scope.clause} ${where} ORDER BY id`,
         [...scope.params, ...params],
       );
       return toRows(rows);
     },
     async find(branchId, id) {
       const scope = branchFilter(branchId);
-      const row = await db.one(`SELECT * FROM ${table} WHERE id = ? ${scope.clause}`, [id, ...scope.params]);
+      const row = await db.one(`SELECT * FROM ${db.ident(table)} WHERE id = ? ${scope.clause}`, [id, ...scope.params]);
       return toRow(row);
     },
     async create(branchId, data) {
       const values = insertList({ branch_id: branchId, ...pick(data, columns) }, db.ident);
-      const id = await db.insert(`INSERT INTO ${table} ${values.sql}`, values.params, "id");
+      const id = await db.insert(`INSERT INTO ${db.ident(table)} ${values.sql}`, values.params, "id");
       return crud.find(branchId, id);
     },
     async update(branchId, id, data) {
       const set = assignments(pick(data, columns), db.ident);
-      await db.query(`UPDATE ${table} SET ${set.sql} WHERE id = ? AND branch_id = ?`, [...set.params, id, branchId]);
+      await db.query(`UPDATE ${db.ident(table)} SET ${set.sql} WHERE id = ? AND branch_id = ?`, [...set.params, id, branchId]);
     },
     async remove(branchId, id) {
-      await db.query(`DELETE FROM ${table} WHERE id = ? AND branch_id = ?`, [id, branchId]);
+      await db.query(`DELETE FROM ${db.ident(table)} WHERE id = ? AND branch_id = ?`, [id, branchId]);
     },
   };
   return crud;

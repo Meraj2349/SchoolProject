@@ -43,7 +43,7 @@ export const mysqlBranchRepository = {
     const countIn = async (tables) => {
       const counts = await Promise.all(
         tables.map(async (table) => {
-          const row = await db.one(`SELECT COUNT(*) AS n FROM \`${table}\` WHERE branch_id = ?`, [id]);
+          const row = await db.one(`SELECT COUNT(*) AS n FROM ${db.ident(table)} WHERE branch_id = ?`, [id]);
           return Number(row.n);
         }),
       );

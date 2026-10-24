@@ -69,7 +69,7 @@ function makeRepository(sql) {
     async update(id, changes) {
       const fields = Object.keys(COLUMNS).filter((key) => changes[key] !== undefined);
       if (fields.length === 0) return;
-      await sql.query(`UPDATE "Admin" SET ${fields.map((key) => `${COLUMNS[key]} = ?`).join(", ")} WHERE "AdminID" = ?`, [
+      await sql.query(`UPDATE "Admin" SET ${fields.map((key) => `${db.ident(COLUMNS[key])} = ?`).join(", ")} WHERE "AdminID" = ?`, [
         ...fields.map((key) => changes[key]),
         id,
       ]);

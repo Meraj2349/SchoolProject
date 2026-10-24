@@ -12,7 +12,7 @@ export const mysqlDashboardRepository = {
     const { clause, params } = branchFilter(branchId);
     const [students, teachers, classes] = await Promise.all(
       ["Students", "Teachers", "Classes"].map((table) =>
-        scalar(`SELECT COUNT(*) AS total FROM ${table} WHERE 1=1 ${clause}`, params),
+        scalar(`SELECT COUNT(*) AS total FROM ${db.ident(table)} WHERE 1=1 ${clause}`, params),
       ),
     );
     return { students, teachers, classes };

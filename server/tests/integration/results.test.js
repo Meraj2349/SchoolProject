@@ -68,7 +68,7 @@ describe("results API", () => {
       });
 
       expect(res.status).toBe(201);
-      expect(await count("Results", "MarksObtained = 0")).toBe(1);
+      expect(await count("Results", `"MarksObtained" = 0`)).toBe(1);
     });
 
     it("reports success for a batch that was saved", async () => {

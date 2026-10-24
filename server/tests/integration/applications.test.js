@@ -21,7 +21,7 @@ const setStatus = (id, status, headers = adminA) =>
   request(app).put(`/api/applications/${id}/status`).set(headers).send({ status });
 
 const enrolled = async () => {
-  const { rows: rows } = await db.query(
+  const { rows } = await db.query(
     `SELECT s."FirstName", s."LastName", s.branch_id, c."ClassName", c."Section", c.branch_id AS "classBranch"
        FROM "Students" s JOIN "Classes" c ON c."ClassID" = s."ClassID"`,
   );

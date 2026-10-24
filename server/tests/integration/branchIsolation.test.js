@@ -121,7 +121,7 @@ describe("a branch admin cannot touch another branch's data", () => {
       const res = await request(app).delete(`/api/routines/${b.routineId}`).set(adminA);
 
       expect(res.status).toBe(404);
-      expect(await count("Routines", "IsActive = TRUE")).toBe(1);
+      expect(await count("Routines", `"IsActive" = TRUE`)).toBe(1);
     });
   });
 
@@ -162,7 +162,7 @@ describe("a branch admin cannot touch another branch's data", () => {
 
       expect(edit.status).toBe(404);
       expect(del.status).toBe(404);
-      expect(await count("Events", "EventName = 'Sports Day'")).toBe(1);
+      expect(await count("Events", `"EventName" = 'Sports Day'`)).toBe(1);
     });
 
     it("can still edit its own branch's event", async () => {

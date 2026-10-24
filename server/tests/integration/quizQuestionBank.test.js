@@ -20,7 +20,7 @@ describe("importing BEnQA questions", () => {
       alreadyImported: 0,
       skipped: { quiz_spreadsheet_error: 1, quiz_answer_invalid: 1, quiz_duplicate: 1 },
     });
-    const { rows: rows } = await db.query(
+    const { rows } = await db.query(
       `SELECT "SourceKey", "ClassKey", "Subject", "Prompt", "OptionsJSON", "PromptBn", "OptionsBnJSON", "CorrectAnswer", "Active" FROM "QuizQuestions" ORDER BY "SourceKey"`,
     );
     expect(rows.map((r) => r.SourceKey)).toEqual(["benqa:10th-Physics:1", "benqa:10th-Physics:5", "benqa:8th-Math:1"]);

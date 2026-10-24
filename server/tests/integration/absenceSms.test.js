@@ -60,7 +60,7 @@ describe("absence SMS to parents", () => {
     await worker.sendDue();
 
     expect(sender.sent).toEqual([{ to: "01711000001", text: expect.stringMatching(/^প্রিয় অভিভাবক, আপনার সন্তান Rahim Uddin/) }]);
-    const { rows: rows } = await db.query(`SELECT status, phone FROM "AttendanceSms"`);
+    const { rows } = await db.query(`SELECT status, phone FROM "AttendanceSms"`);
     expect(rows).toEqual([{ status: "sent", phone: "01711000001" }]);
   });
 
@@ -72,7 +72,7 @@ describe("absence SMS to parents", () => {
     await worker.sendDue();
 
     expect(sender.sent.map((m) => m.to)).toEqual(["01711000002"]);
-    const { rows: rows } = await db.query(`SELECT student_id AS id, status FROM "AttendanceSms" ORDER BY student_id`);
+    const { rows } = await db.query(`SELECT student_id AS id, status FROM "AttendanceSms" ORDER BY student_id`);
     expect(rows).toEqual([
       { id: rahim.studentId, status: "cancelled" },
       { id: karim.studentId, status: "sent" },

@@ -239,7 +239,7 @@ describe("teacher app", () => {
       expect(roster.status).toBe(200);
       expect(roster.body.data.students.map((s) => s.firstName)).toEqual(["Rahim", "Karim"]);
       expect(res.status).toBe(200);
-      const { rows: rows } = await db.query(`SELECT "Status", "MarkedByType", "MarkedBy" FROM "Attendance" ORDER BY "StudentID"`);
+      const { rows } = await db.query(`SELECT "Status", "MarkedByType", "MarkedBy" FROM "Attendance" ORDER BY "StudentID"`);
       expect(rows).toEqual([
         { Status: "Present", MarkedByType: "teacher", MarkedBy: teacherId },
         { Status: "Absent", MarkedByType: "teacher", MarkedBy: teacherId },
@@ -293,7 +293,7 @@ describe("teacher app", () => {
       expect(first.status).toBe(200);
       expect(first.body.data.kept).toEqual([rahim.studentId, karim.studentId]);
       expect(again.status).toBe(200);
-      const { rows: rows } = await db.query(`SELECT "Status", "MarkedByType" FROM "Attendance" ORDER BY "StudentID"`);
+      const { rows } = await db.query(`SELECT "Status", "MarkedByType" FROM "Attendance" ORDER BY "StudentID"`);
       expect(rows).toEqual([
         { Status: "Present", MarkedByType: "admin" },
         { Status: "Leave", MarkedByType: "admin" },

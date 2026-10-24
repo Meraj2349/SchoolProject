@@ -31,7 +31,7 @@ const addTeacher = async ({
 };
 
 // Columns anyone may read: never the attendance app's sign-in details.
-const PUBLIC_COLUMNS = "TeacherID, FirstName, LastName, Subject, ContactNumber, Email, JoiningDate, Address, branch_id";
+const PUBLIC_COLUMNS = `"TeacherID", "FirstName", "LastName", "Subject", "ContactNumber", "Email", "JoiningDate", "Address", branch_id`;
 
 // Get all teachers (branch-scoped)
 const getAllTeachers = async (branchId = null) => {
@@ -64,7 +64,7 @@ const updateTeacher = async (teacherID, updateData, branchId = null) => {
   const columns = EDITABLE_COLUMNS.filter((column) => updateData[column] !== undefined);
   if (columns.length === 0) return { affectedRows: 0, noFields: true };
 
-  const sql = `UPDATE "Teachers" SET ${columns.map((c) => `${c} = ?`).join(", ")}
+  const sql = `UPDATE "Teachers" SET ${columns.map((c) => `${db.ident(c)} = ?`).join(", ")}
     WHERE "TeacherID" = ? ${clause}`;
   const params = [...columns.map((c) => emptyToNull(updateData[c])), teacherID, ...branchParams];
 
@@ -101,7 +101,7 @@ const searchTeachers = async (query, className = "", branchId = null) => {
       FROM "Teachers" t
       LEFT JOIN "Classes" c ON c."TeacherID" = t."TeacherID" AND c."ClassName" = ?
       WHERE (t."FirstName" LIKE ? OR t."LastName" LIKE ? OR CONCAT(t."FirstName", ' ', t."LastName") LIKE ?) ${clause}
-      ORDER BY assignedToClass DESC, t."FirstName", t."LastName"
+      ORDER BY "assignedToClass" DESC, t."FirstName", t."LastName"
       LIMIT 10
     `;
     const { rows } = await db.query(sql, [className, like, like, like, ...branchParams]);

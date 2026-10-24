@@ -127,13 +127,12 @@ export const mysqlAttendanceRepository = {
            LEFT JOIN "Admin" ad ON a."MarkedByType" = 'admin' AND ad."AdminID" = a."MarkedBy"
           WHERE a."ClassDate" = ? ${scope.clause}
        )
-       SELECT classId,
-              SUM(status = 'Present') AS "presentCount", SUM(status = 'Absent') AS "absentCount",
-              SUM(status = 'Late') AS "lateCount", SUM(status = 'Leave') AS "leaveCount",
-              MAX(CASE WHEN nth = 1 THEN markedByType END) AS "takenByType",
-              MAX(CASE WHEN nth = 1 THEN markedByName END) AS "takenByName",
-              MAX(CASE WHEN nth = 1 THEN markedAt END) AS "takenAt"
-         FROM day GROUP BY classId`,
+       SELECT "classId",
+              ${["Present", "Absent", "Late", "Leave"].map((s) => `SUM(CASE WHEN status = '${s}' THEN 1 ELSE 0 END) AS "${s.toLowerCase()}Count"`).join(", ")},
+              MAX(CASE WHEN nth = 1 THEN "markedByType" END) AS "takenByType",
+              MAX(CASE WHEN nth = 1 THEN "markedByName" END) AS "takenByName",
+              MAX(CASE WHEN nth = 1 THEN "markedAt" END) AS "takenAt"
+         FROM day GROUP BY "classId"`,
       [date, ...scope.params],
     );
     return rows.map((row) => ({

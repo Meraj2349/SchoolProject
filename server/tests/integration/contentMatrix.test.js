@@ -183,15 +183,15 @@ const KINDS = [
 
 const listIds = (res, kind) => (res.body.data ?? res.body).map((row) => row[kind.id]).sort((a, b) => a - b);
 const branchOf = async (kind, id) => {
-  const row = await db.one(`SELECT branch_id FROM \`${kind.table}\` WHERE \`${kind.id}\` = ?`, [id]);
+  const row = await db.one(`SELECT branch_id FROM ${db.ident(kind.table)} WHERE ${db.ident(kind.id)} = ?`, [id]);
   return row?.branch_id;
 };
 const newestId = async (kind) => {
-  const row = await db.one(`SELECT MAX(\`${kind.id}\`) AS id FROM \`${kind.table}\``);
+  const row = await db.one(`SELECT MAX(${db.ident(kind.id)}) AS id FROM ${db.ident(kind.table)}`);
   return row.id;
 };
 const valueOf = async (kind, id) => {
-  const row = await db.one(`SELECT \`${kind.changed.column}\` AS v FROM \`${kind.table}\` WHERE \`${kind.id}\` = ?`, [id]);
+  const row = await db.one(`SELECT ${db.ident(kind.changed.column)} AS v FROM ${db.ident(kind.table)} WHERE ${db.ident(kind.id)} = ?`, [id]);
   return row?.v;
 };
 

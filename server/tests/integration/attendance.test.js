@@ -49,7 +49,7 @@ describe("attendance", () => {
 
     expect(res.status).toBe(200);
     expect(res.body.data.students.map((s) => s.status)).toEqual(["Present", "Leave"]);
-    const { rows: rows } = await db.query(`SELECT "Status", "MarkedByType", "MarkedBy", branch_id FROM "Attendance" ORDER BY "StudentID"`);
+    const { rows } = await db.query(`SELECT "Status", "MarkedByType", "MarkedBy", branch_id FROM "Attendance" ORDER BY "StudentID"`);
     expect(rows).toEqual([
       { Status: "Present", MarkedByType: "admin", MarkedBy: FIXTURE_ADMINS[BRANCH_A], branch_id: BRANCH_A },
       { Status: "Leave", MarkedByType: "admin", MarkedBy: FIXTURE_ADMINS[BRANCH_A], branch_id: BRANCH_A },
@@ -101,7 +101,7 @@ describe("attendance", () => {
 
     expect(res.status).toBe(201);
     expect(res.body.data).toEqual({ recordsCreated: 1 });
-    expect(await count("Attendance", "Status = 'Absent'")).toBe(1);
+    expect(await count("Attendance", `"Status" = 'Absent'`)).toBe(1);
     expect(await count("Attendance")).toBe(2);
   });
 
@@ -190,7 +190,7 @@ describe("attendance", () => {
     const record = await db.one(`SELECT "AttendanceID" FROM "Attendance" WHERE "StudentID" = ?`, [rahim.studentId]);
 
     await request(app).put(`/api/attendance/${record.AttendanceID}`).set(adminA).send({ status: "Leave" }).expect(200);
-    expect(await count("Attendance", "Status = 'Leave'")).toBe(1);
+    expect(await count("Attendance", `"Status" = 'Leave'`)).toBe(1);
 
     await request(app).delete(`/api/attendance/${record.AttendanceID}`).set(adminA).expect(200);
     expect(await count("Attendance")).toBe(1);

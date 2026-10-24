@@ -7,7 +7,7 @@
 --   INT AUTO_INCREMENT      → integer identity (bigint for the quiz tables)
 --   ENUM(...)               → varchar + CHECK
 --   TINYINT UNSIGNED        → smallint + CHECK (>= 0)
---   TIMESTAMP / DATETIME    → timestamptz
+--   TIMESTAMP / DATETIME    → timestamptz(0): whole seconds, as MySQL stored them
 --   JSON                    → jsonb
 --   ON UPDATE CURRENT_TIMESTAMP → set_updated_at() trigger (bottom of file)
 --   MySQL's utf8mb4_0900_ai_ci (case and accent insensitive) → the ci
@@ -34,8 +34,8 @@ CREATE TABLE "Branches" (
     "address_en" varchar(500) COLLATE ci,
     "is_proposed" boolean DEFAULT FALSE,
     "established_date" date,
-    "created_at" timestamptz DEFAULT CURRENT_TIMESTAMP,
-    "updated_at" timestamptz DEFAULT CURRENT_TIMESTAMP
+    "created_at" timestamptz(0) DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" timestamptz(0) DEFAULT CURRENT_TIMESTAMP
 );
 
 -- ============================================================
@@ -56,9 +56,9 @@ CREATE TABLE "Teachers" (
     "AppPasswordHash" varchar(100) COLLATE ci NULL,
     "AppEnabled" boolean NOT NULL DEFAULT FALSE,
     "TokenVersion" integer NOT NULL DEFAULT 0, -- bumped to sign the teacher out everywhere
-    "LastLoginAt" timestamptz NULL,
+    "LastLoginAt" timestamptz(0) NULL,
     "FailedLogins" smallint NOT NULL DEFAULT 0 CHECK ("FailedLogins" BETWEEN 0 AND 255),
-    "LockedUntil" timestamptz NULL,
+    "LockedUntil" timestamptz(0) NULL,
     CONSTRAINT "uq_teachers_app_phone" UNIQUE ("AppPhone")
 );
 
@@ -107,8 +107,8 @@ CREATE TABLE "Routines" (
     "FilePublicID" varchar(255) COLLATE ci, -- Cloudinary public_id for deletion
     "IsActive" boolean DEFAULT TRUE,
     "CreatedBy" integer, -- AdminID
-    "CreatedAt" timestamptz DEFAULT CURRENT_TIMESTAMP,
-    "UpdatedAt" timestamptz DEFAULT CURRENT_TIMESTAMP,
+    "CreatedAt" timestamptz(0) DEFAULT CURRENT_TIMESTAMP,
+    "UpdatedAt" timestamptz(0) DEFAULT CURRENT_TIMESTAMP,
     "branch_id" integer NOT NULL DEFAULT 1 REFERENCES "Branches" ("id")
 );
 CREATE INDEX "idx_class_id" ON "Routines" ("ClassID");
@@ -126,7 +126,7 @@ CREATE TABLE "Attendance" (
     "MarkedByType" varchar(7) COLLATE ci NULL CHECK ("MarkedByType" IN ('admin', 'teacher')),
     "MarkedBy" integer NULL, -- Admin.AdminID or Teachers.TeacherID, by MarkedByType
     "MarkedAt" timestamptz(3) NULL, -- when the day was taken; a save taken earlier never overwrites it
-    "UpdatedAt" timestamptz DEFAULT CURRENT_TIMESTAMP,
+    "UpdatedAt" timestamptz(0) DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT "fk_attendance_class" FOREIGN KEY ("ClassID") REFERENCES "Classes" ("ClassID") ON DELETE SET NULL,
     CONSTRAINT "uq_attendance_student_day" UNIQUE ("StudentID", "ClassDate")
 );
@@ -174,8 +174,8 @@ CREATE TABLE "Notices" (
     "Description" text COLLATE ci NOT NULL,
     "Show" boolean NOT NULL DEFAULT FALSE,
     "branch_id" integer NULL REFERENCES "Branches" ("id"),
-    "CreatedAt" timestamptz DEFAULT CURRENT_TIMESTAMP,
-    "UpdatedAt" timestamptz DEFAULT CURRENT_TIMESTAMP
+    "CreatedAt" timestamptz(0) DEFAULT CURRENT_TIMESTAMP,
+    "UpdatedAt" timestamptz(0) DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE "Messages" (
@@ -183,8 +183,8 @@ CREATE TABLE "Messages" (
     "Messages" text COLLATE ci NOT NULL,
     "Show" boolean NOT NULL DEFAULT FALSE,
     "branch_id" integer NULL REFERENCES "Branches" ("id"),
-    "CreatedAt" timestamptz DEFAULT CURRENT_TIMESTAMP,
-    "UpdatedAt" timestamptz DEFAULT CURRENT_TIMESTAMP
+    "CreatedAt" timestamptz(0) DEFAULT CURRENT_TIMESTAMP,
+    "UpdatedAt" timestamptz(0) DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE "Images" (
@@ -192,7 +192,7 @@ CREATE TABLE "Images" (
     "ImagePath" varchar(255) COLLATE ci NOT NULL,
     "PublicID" varchar(255) COLLATE ci NOT NULL,
     "Description" text COLLATE ci,
-    "UploadDate" timestamptz DEFAULT CURRENT_TIMESTAMP,
+    "UploadDate" timestamptz(0) DEFAULT CURRENT_TIMESTAMP,
     "UploadedBy" integer, -- AdminID or TeacherID who uploaded
     "ImageType" varchar(7) COLLATE ci NOT NULL CHECK ("ImageType" IN ('student', 'teacher', 'school', 'event', 'notice')),
     "StudentID" integer NULL REFERENCES "Students" ("StudentID") ON DELETE CASCADE,
@@ -210,8 +210,8 @@ CREATE TABLE "Events" (
     "Venue" varchar(100) COLLATE ci,
     "Description" text COLLATE ci,
     "branch_id" integer NULL REFERENCES "Branches" ("id"), -- NULL = school-wide event shown in every branch
-    "CreatedAt" timestamptz DEFAULT CURRENT_TIMESTAMP,
-    "UpdatedAt" timestamptz DEFAULT CURRENT_TIMESTAMP
+    "CreatedAt" timestamptz(0) DEFAULT CURRENT_TIMESTAMP,
+    "UpdatedAt" timestamptz(0) DEFAULT CURRENT_TIMESTAMP
 );
 CREATE INDEX "idx_events_date" ON "Events" ("StartDate", "EndDate");
 CREATE INDEX "idx_events_type" ON "Events" ("EventType");
@@ -224,8 +224,8 @@ CREATE TABLE "News" (
     "link" varchar(500) COLLATE ci NOT NULL DEFAULT '/events',
     "is_active" boolean NOT NULL DEFAULT TRUE,
     "branch_id" integer NULL REFERENCES "Branches" ("id"),
-    "created_at" timestamptz DEFAULT CURRENT_TIMESTAMP,
-    "updated_at" timestamptz DEFAULT CURRENT_TIMESTAMP
+    "created_at" timestamptz(0) DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" timestamptz(0) DEFAULT CURRENT_TIMESTAMP
 );
 CREATE INDEX "idx_news_active_date" ON "News" ("is_active", "date" DESC);
 
@@ -238,8 +238,8 @@ CREATE TABLE "NoticeAnnouncements" (
     "date" date NOT NULL,
     "is_published" boolean NOT NULL DEFAULT TRUE,
     "branch_id" integer NULL REFERENCES "Branches" ("id"),
-    "created_at" timestamptz DEFAULT CURRENT_TIMESTAMP,
-    "updated_at" timestamptz DEFAULT CURRENT_TIMESTAMP
+    "created_at" timestamptz(0) DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" timestamptz(0) DEFAULT CURRENT_TIMESTAMP
 );
 CREATE INDEX "idx_notice_announcements_published_date" ON "NoticeAnnouncements" ("is_published", "date" DESC);
 CREATE INDEX "idx_notice_announcements_category" ON "NoticeAnnouncements" ("category");
@@ -260,8 +260,8 @@ CREATE TABLE "Achievements" (
     "passed" integer NULL,
     "gpa5" integer NULL,
     "branch_id" integer NULL REFERENCES "Branches" ("id"),
-    "created_at" timestamptz DEFAULT CURRENT_TIMESTAMP,
-    "updated_at" timestamptz DEFAULT CURRENT_TIMESTAMP
+    "created_at" timestamptz(0) DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" timestamptz(0) DEFAULT CURRENT_TIMESTAMP
 );
 CREATE INDEX "idx_achievements_showcase" ON "Achievements" ("is_published", "is_featured", "year");
 
@@ -275,7 +275,7 @@ CREATE TABLE "ChairmanProfile" (
     "institution_bn" varchar(255) COLLATE ci NOT NULL DEFAULT 'স্টার শিক্ষা পরিবার',
     "image_url" varchar(500) COLLATE ci,
     "image_public_id" varchar(255) COLLATE ci,
-    "updated_at" timestamptz DEFAULT CURRENT_TIMESTAMP
+    "updated_at" timestamptz(0) DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Shared class names (same for every branch; sections differ per branch).
@@ -305,8 +305,8 @@ CREATE TABLE "Applications" (
     "status" varchar(8) COLLATE ci DEFAULT 'pending' CHECK ("status" IN ('pending', 'reviewed', 'accepted', 'rejected')),
     "student_id" integer NULL, -- student created when the application was accepted
     "branch_id" integer NULL REFERENCES "Branches" ("id"), -- branch applied to; the student is enrolled there
-    "created_at" timestamptz DEFAULT CURRENT_TIMESTAMP,
-    "updated_at" timestamptz DEFAULT CURRENT_TIMESTAMP
+    "created_at" timestamptz(0) DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" timestamptz(0) DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Job circulars (নিয়োগ বিজ্ঞপ্তি) and the applications sent online.
@@ -323,8 +323,8 @@ CREATE TABLE "JobCirculars" (
     "is_open" boolean NOT NULL DEFAULT TRUE,
     "is_published" boolean NOT NULL DEFAULT TRUE,
     "branch_id" integer NULL REFERENCES "Branches" ("id"),
-    "created_at" timestamptz DEFAULT CURRENT_TIMESTAMP,
-    "updated_at" timestamptz DEFAULT CURRENT_TIMESTAMP
+    "created_at" timestamptz(0) DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" timestamptz(0) DEFAULT CURRENT_TIMESTAMP
 );
 CREATE INDEX "idx_job_circulars_list" ON "JobCirculars" ("is_published", "is_open", "circular_date");
 
@@ -343,8 +343,8 @@ CREATE TABLE "JobApplications" (
     "cv_file" varchar(255) COLLATE ci NULL, -- stored in private_uploads, never served publicly
     "status" varchar(11) COLLATE ci NOT NULL DEFAULT 'new' CHECK ("status" IN ('new', 'shortlisted', 'rejected', 'hired')),
     "branch_id" integer NULL REFERENCES "Branches" ("id"), -- the circular's branch
-    "created_at" timestamptz DEFAULT CURRENT_TIMESTAMP,
-    "updated_at" timestamptz DEFAULT CURRENT_TIMESTAMP,
+    "created_at" timestamptz(0) DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" timestamptz(0) DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT "fk_job_applications_circular" FOREIGN KEY ("circular_id") REFERENCES "JobCirculars" ("id") ON DELETE CASCADE
 );
 -- One application per post (by name, so reordering posts does not matter) per mobile.
@@ -377,8 +377,8 @@ CREATE TABLE "QuizQuestions" (
     "Active" boolean NOT NULL DEFAULT TRUE,
     "CreatedBy" integer DEFAULT NULL,
     "UpdatedBy" integer DEFAULT NULL,
-    "CreatedAt" timestamptz DEFAULT CURRENT_TIMESTAMP,
-    "UpdatedAt" timestamptz DEFAULT CURRENT_TIMESTAMP,
+    "CreatedAt" timestamptz(0) DEFAULT CURRENT_TIMESTAMP,
+    "UpdatedAt" timestamptz(0) DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT "uq_quiz_question_source" UNIQUE ("SourceKey")
 );
 CREATE INDEX "idx_quiz_question_class_subject" ON "QuizQuestions" ("ClassKey", "Subject");
@@ -397,8 +397,8 @@ CREATE TABLE "QuizSessions" (
     "ScorePercentage" numeric(5, 2) NOT NULL,
     "TimeTakenSeconds" integer NOT NULL,
     "branch_id" integer DEFAULT NULL,
-    "StartedAt" timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "CompletedAt" timestamptz DEFAULT NULL
+    "StartedAt" timestamptz(0) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "CompletedAt" timestamptz(0) DEFAULT NULL
 );
 CREATE INDEX "idx_quiz_session_user" ON "QuizSessions" ("UserID");
 CREATE INDEX "idx_quiz_session_student" ON "QuizSessions" ("StudentID");
@@ -422,8 +422,8 @@ CREATE TABLE "QuizStarts" (
     "StudentID" integer NOT NULL,
     "QuestionIDsJSON" jsonb NOT NULL,
     "Subject" varchar(100) COLLATE ci DEFAULT NULL,
-    "StartedAt" timestamptz NOT NULL,
-    "FinishedAt" timestamptz DEFAULT NULL,
+    "StartedAt" timestamptz(0) NOT NULL,
+    "FinishedAt" timestamptz(0) DEFAULT NULL,
     "SessionID" bigint DEFAULT NULL,
     CONSTRAINT "fk_quiz_starts_student" FOREIGN KEY ("StudentID") REFERENCES "Students" ("StudentID") ON DELETE CASCADE,
     CONSTRAINT "fk_quiz_starts_session" FOREIGN KEY ("SessionID") REFERENCES "QuizSessions" ("SessionID") ON DELETE SET NULL
@@ -440,7 +440,7 @@ CREATE TABLE "FeeSettings" (
     "due_day" smallint NOT NULL DEFAULT 10,
     "late_fine" numeric(10, 2) NOT NULL DEFAULT 0,
     "receipt_prefix" varchar(10) COLLATE ci NOT NULL DEFAULT 'RCT',
-    "updated_at" timestamptz DEFAULT CURRENT_TIMESTAMP
+    "updated_at" timestamptz(0) DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Monthly tuition per class name (all sections share it) and academic year.
@@ -450,7 +450,7 @@ CREATE TABLE "FeeStructures" (
     "class_name" varchar(20) COLLATE ci NOT NULL,
     "academic_year" smallint NOT NULL,
     "monthly_tuition" numeric(10, 2) NOT NULL,
-    "created_at" timestamptz DEFAULT CURRENT_TIMESTAMP,
+    "created_at" timestamptz(0) DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT "uq_fee_structure" UNIQUE ("branch_id", "class_name", "academic_year")
 );
 
@@ -462,7 +462,7 @@ CREATE TABLE "FeeHeads" (
     "name_bn" varchar(100) COLLATE ci,
     "default_amount" numeric(10, 2) NOT NULL DEFAULT 0,
     "active" boolean NOT NULL DEFAULT TRUE,
-    "created_at" timestamptz DEFAULT CURRENT_TIMESTAMP
+    "created_at" timestamptz(0) DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Scholarships, sibling discounts and waivers (100%).
@@ -476,7 +476,7 @@ CREATE TABLE "StudentDiscounts" (
     "reason" varchar(255) COLLATE ci,
     "valid_from" date NULL,
     "valid_to" date NULL,
-    "created_at" timestamptz DEFAULT CURRENT_TIMESTAMP
+    "created_at" timestamptz(0) DEFAULT CURRENT_TIMESTAMP
 );
 CREATE INDEX "idx_discounts_student" ON "StudentDiscounts" ("student_id");
 
@@ -493,7 +493,7 @@ CREATE TABLE "FeeInvoices" (
     "due_date" date NOT NULL,
     "status" varchar(7) COLLATE ci NOT NULL DEFAULT 'unpaid' CHECK ("status" IN ('unpaid', 'partial', 'paid')),
     "created_by" integer NULL,
-    "created_at" timestamptz DEFAULT CURRENT_TIMESTAMP,
+    "created_at" timestamptz(0) DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT "uq_invoice_student_month" UNIQUE ("student_id", "year", "month"),
     CONSTRAINT "fk_invoices_student" FOREIGN KEY ("student_id") REFERENCES "Students" ("StudentID") ON DELETE RESTRICT
 );
@@ -519,10 +519,10 @@ CREATE TABLE "FeePayments" (
     "receipt_no" varchar(30) COLLATE ci NOT NULL,
     "received_by" integer NULL,
     "note" varchar(255) COLLATE ci,
-    "voided_at" timestamptz NULL,
+    "voided_at" timestamptz(0) NULL,
     "voided_by" integer NULL,
     "void_reason" varchar(255) COLLATE ci,
-    "created_at" timestamptz DEFAULT CURRENT_TIMESTAMP,
+    "created_at" timestamptz(0) DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT "uq_payment_receipt" UNIQUE ("branch_id", "receipt_no")
 );
 CREATE INDEX "idx_payments_invoice" ON "FeePayments" ("invoice_id");
@@ -543,15 +543,15 @@ CREATE TABLE "AttendanceSms" (
     "student_id" integer NOT NULL REFERENCES "Students" ("StudentID") ON DELETE CASCADE,
     "class_date" date NOT NULL,
     "phone" varchar(20) COLLATE ci NULL, -- the parent number it was sent to
-    "due_at" timestamptz NOT NULL, -- sent from this time on, if the student is still absent
+    "due_at" timestamptz(0) NOT NULL, -- sent from this time on, if the student is still absent
     "status" varchar(9) COLLATE ci NOT NULL DEFAULT 'pending' CHECK ("status" IN ('pending', 'sending', 'sent', 'failed', 'cancelled', 'skipped')),
     "attempts" smallint NOT NULL DEFAULT 0 CHECK ("attempts" BETWEEN 0 AND 255),
     "provider_ref" varchar(100) COLLATE ci NULL,
-    "sent_at" timestamptz NULL,
+    "sent_at" timestamptz(0) NULL,
     "error" varchar(255) COLLATE ci NULL,
     "branch_id" integer NOT NULL REFERENCES "Branches" ("id"),
-    "created_at" timestamptz DEFAULT CURRENT_TIMESTAMP,
-    "updated_at" timestamptz DEFAULT CURRENT_TIMESTAMP,
+    "created_at" timestamptz(0) DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" timestamptz(0) DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT "uq_attendance_sms_day" UNIQUE ("student_id", "class_date")
 );
 CREATE INDEX "idx_attendance_sms_due" ON "AttendanceSms" ("status", "due_at");

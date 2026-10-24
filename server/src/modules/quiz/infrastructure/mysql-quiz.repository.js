@@ -4,8 +4,8 @@ import { branchFilter } from "../../../../utils/branchFilter.js";
 // MySQL adapter for the quiz repository port. Questions are shared by every
 // branch; sessions belong to the student's branch.
 
-const QUESTION_COLUMNS = `QuestionID, SourceKey, ClassKey, Subject, Prompt, OptionsJSON, PromptBn, OptionsBnJSON,
-  CorrectAnswer, Active, UpdatedAt`;
+const QUESTION_COLUMNS = `"QuestionID", "SourceKey", "ClassKey", "Subject", "Prompt", "OptionsJSON", "PromptBn", "OptionsBnJSON",
+  "CorrectAnswer", "Active", "UpdatedAt"`;
 
 const json = (value) => (typeof value === "string" ? JSON.parse(value) : value);
 
@@ -58,7 +58,7 @@ export const mysqlQuizRepository = {
     const fields = Object.keys(COLUMNS).filter((field) => question[field] !== undefined);
     const values = fields.map((f) => columnValue(f, question[f]));
     const id = await db.insert(
-      `INSERT INTO "QuizQuestions" (${fields.map((f) => COLUMNS[f]).join(", ")}) VALUES (${values.map(() => "?").join(", ")})`,
+      `INSERT INTO "QuizQuestions" (${fields.map((f) => db.ident(COLUMNS[f])).join(", ")}) VALUES (${values.map(() => "?").join(", ")})`,
       values,
       "QuestionID",
     );
@@ -73,7 +73,7 @@ export const mysqlQuizRepository = {
   async updateQuestion(id, changes) {
     const fields = Object.keys(COLUMNS).filter((field) => changes[field] !== undefined);
     if (fields.length === 0) return;
-    await db.query(`UPDATE "QuizQuestions" SET ${fields.map((f) => `${COLUMNS[f]} = ?`).join(", ")} WHERE "QuestionID" = ?`, [
+    await db.query(`UPDATE "QuizQuestions" SET ${fields.map((f) => `${db.ident(COLUMNS[f])} = ?`).join(", ")} WHERE "QuestionID" = ?`, [
       ...fields.map((f) => columnValue(f, changes[f])),
       id,
     ]);
@@ -275,7 +275,7 @@ export const mysqlQuizRepository = {
          LEFT JOIN "Classes" c ON c."ClassID" = s."ClassID"
         WHERE 1=1 ${clause} ${classClause}
         GROUP BY s."StudentID", c."ClassID"
-        ORDER BY avgScore DESC, sessions DESC, "StudentName"
+        ORDER BY "avgScore" DESC, sessions DESC, "StudentName"
         LIMIT ?`,
       [...values, limit],
     );

@@ -37,7 +37,7 @@ async function runMigration() {
 }
 
 const addedBranches = async () => {
-  const { rows: rows } = await db.query(
+  const { rows } = await db.query(
     "SELECT name_en, name_bn, address_en, address_bn FROM Branches WHERE id > ? ORDER BY id",
     [FIXTURE_BRANCHES],
   );

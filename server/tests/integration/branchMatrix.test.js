@@ -155,7 +155,7 @@ describe("branch ownership of new rows", () => {
     const res = await request(app).post("/api/subjects/add").set(adminA).send({ subjectName: "Art", classId: b.classId });
 
     expect(res.status).toBeGreaterThanOrEqual(400);
-    expect(await count("Subjects", "SubjectName = 'Art'")).toBe(0);
+    expect(await count("Subjects", `"SubjectName" = 'Art'`)).toBe(0);
   });
 
   it("a branch admin cannot give their class another branch's teacher", async () => {

@@ -64,7 +64,7 @@ describe("quiz_question_bank_migration.sql", () => {
     await runMigration();
 
     expect(await describeTable()).toEqual(fresh);
-    const { rows: rows } = await db.query("SELECT Grade, ClassKey, Active FROM QuizQuestions ORDER BY QuestionID");
+    const { rows } = await db.query("SELECT Grade, ClassKey, Active FROM QuizQuestions ORDER BY QuestionID");
     expect(rows).toEqual([
       { Grade: "10th", ClassKey: "10", Active: 1 },
       { Grade: "Class 5", ClassKey: "5", Active: 1 },
@@ -81,7 +81,7 @@ describe("quiz_starts_migration.sql", () => {
 
   it("creates the QuizStarts table like a fresh install, safely twice", async () => {
     const columns = async () => {
-      const { rows: rows } = await db.query(
+      const { rows } = await db.query(
         "SELECT COLUMN_NAME AS name, COLUMN_TYPE AS type, IS_NULLABLE AS nullable FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'QuizStarts' ORDER BY COLUMN_NAME",
       );
       return rows;

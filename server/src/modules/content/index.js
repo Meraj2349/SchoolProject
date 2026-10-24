@@ -23,13 +23,13 @@ const controllerFor = ({ kind, table, messages, files, onRemoved }) =>
 
 export const noticesController = controllerFor({
   kind: notice,
-  table: { table: "Notices", idColumn: "NoticeID", visibleColumn: "Show", orderBy: "NoticeID" },
+  table: { table: "Notices", idColumn: "NoticeID", visibleColumn: "Show", orderBy: '"NoticeID"' },
   messages: { created: "notice_added", updated: "notice_updated", deleted: "notice_deleted", visibility: "notice_visibility_updated" },
 });
 
 export const messagesController = controllerFor({
   kind: message,
-  table: { table: "Messages", idColumn: "MessageID", visibleColumn: "Show", orderBy: "MessageID" },
+  table: { table: "Messages", idColumn: "MessageID", visibleColumn: "Show", orderBy: '"MessageID"' },
   messages: { created: "message_added", updated: "message_updated", deleted: "message_deleted", visibility: "message_visibility_updated" },
 });
 
