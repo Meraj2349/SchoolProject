@@ -9,14 +9,14 @@ import jwt from "jsonwebtoken";
 export const findAdminByEmail = async (email, isSuper = false, branchId = null) => {
   let sql, params;
   if (isSuper) {
-    sql = "SELECT * FROM Admin WHERE Email = ? AND role = 'super_admin' LIMIT 1";
+    sql = `SELECT * FROM "Admin" WHERE "Email" = ? AND role = 'super_admin' LIMIT 1`;
     params = [email];
   } else if (branchId != null) {
-    sql = "SELECT * FROM Admin WHERE Email = ? AND role = 'branch_admin' AND branch_id = ? LIMIT 1";
+    sql = `SELECT * FROM "Admin" WHERE "Email" = ? AND role = 'branch_admin' AND branch_id = ? LIMIT 1`;
     params = [email, branchId];
   } else {
     // Fallback — original behaviour (used by updateEmailPassword etc.)
-    sql = "SELECT * FROM Admin WHERE Email = ? LIMIT 1";
+    sql = `SELECT * FROM "Admin" WHERE "Email" = ? LIMIT 1`;
     params = [email];
   }
   const { rows } = await db.query(sql, params);
@@ -52,7 +52,7 @@ export const generateAuthToken = (adminID, role, branch_id) => {
 };
 
 export const getAdminById = async (adminId) => {
-  const sql = "SELECT * FROM Admin WHERE AdminID = ?";
+  const sql = `SELECT * FROM "Admin" WHERE "AdminID" = ?`;
   const { rows } = await db.query(sql, [adminId]);
   return rows[0];
 };
@@ -70,7 +70,7 @@ export const updateAdmin = async (adminId, adminData) => {
   if (updates.length === 0) throw new Error("No fields to update");
 
   const result = await db.query(
-    `UPDATE Admin SET ${updates.join(", ")} WHERE AdminID = ?`,
+    `UPDATE "Admin" SET ${updates.join(", ")} WHERE "AdminID" = ?`,
     [...params, adminId],
   );
   if (result.rowCount === 0) {
@@ -80,6 +80,6 @@ export const updateAdmin = async (adminId, adminData) => {
 };
 
 export const countAdmins = async () => {
-  const row = await db.one("SELECT COUNT(*) AS total FROM Admin");
+  const row = await db.one(`SELECT COUNT(*) AS total FROM "Admin"`);
   return Number(row.total);
 };

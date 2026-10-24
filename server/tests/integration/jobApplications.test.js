@@ -43,7 +43,7 @@ describe("job applications", () => {
 
     expect(res.status).toBe(201);
     expect(res.body.message).toBe("Your application has been received. We will contact you if you are shortlisted.");
-    const [[row]] = await db.query("SELECT * FROM JobApplications");
+    const row = await db.one(`SELECT * FROM "JobApplications"`);
     expect(row).toMatchObject({ circular_id: id, post_index: 1, post_title_bn: "সহকারি শিক্ষক (বাংলা)", phone: "01712345678", status: "new", branch_id: BRANCH_A });
     expect(filesIn(path.join(JOB_APPLICATION_CV_ROOT, String(id)))).toEqual([row.cv_file]);
     expect(filesIn(path.join(JOB_APPLICATION_CV_ROOT, "incoming"))).toEqual([]);
@@ -96,7 +96,7 @@ describe("job applications", () => {
   it("lets each branch's admins see and download only their own applications", async () => {
     const id = await circular();
     await apply({ ...FORM, circular_id: id }, { cv: {} }).expect(201);
-    const [[{ id: applicationId }]] = await db.query("SELECT id FROM JobApplications");
+    const { id: applicationId } = await db.one(`SELECT id FROM "JobApplications"`);
 
     expect((await request(app).get("/api/job-applications").set(adminA)).body.data).toHaveLength(1);
     expect((await request(app).get("/api/job-applications").set(adminB)).body.data).toHaveLength(0);
@@ -111,7 +111,7 @@ describe("job applications", () => {
 
     await request(app).put(`/api/job-applications/${applicationId}/status`).set(adminB).send({ status: "hired" }).expect(404);
     await request(app).put(`/api/job-applications/${applicationId}/status`).set(adminA).send({ status: "shortlisted" }).expect(200);
-    const [[row]] = await db.query("SELECT status FROM JobApplications");
+    const row = await db.one(`SELECT status FROM "JobApplications"`);
     expect(row.status).toBe("shortlisted");
   });
 
@@ -119,7 +119,7 @@ describe("job applications", () => {
     const id = await circular();
     await apply({ ...FORM, circular_id: id }, { cv: {} }).expect(201);
     await apply({ ...FORM, circular_id: id, post_index: "0" }, { cv: {} }).expect(201);
-    const [[first]] = await db.query("SELECT id, cv_file FROM JobApplications ORDER BY id LIMIT 1");
+    const first = await db.one(`SELECT id, cv_file FROM "JobApplications" ORDER BY id LIMIT 1`);
 
     await request(app).delete(`/api/job-applications/${first.id}`).set(adminA).expect(200);
     expect(filesIn(path.join(JOB_APPLICATION_CV_ROOT, String(id)))).toHaveLength(1);

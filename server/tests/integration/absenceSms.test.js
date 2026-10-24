@@ -22,8 +22,8 @@ describe("absence SMS to parents", () => {
     await resetDb();
     rahim = await seedStudent({ roll: "1", firstName: "Rahim" });
     karim = await seedStudent({ roll: "2", firstName: "Karim" });
-    await db.query("UPDATE Students SET ParentContact = '01711000001' WHERE StudentID = ?", [rahim.studentId]);
-    await db.query("UPDATE Students SET ParentContact = '01711000002' WHERE StudentID = ?", [karim.studentId]);
+    await db.query(`UPDATE "Students" SET "ParentContact" = '01711000001' WHERE "StudentID" = ?`, [rahim.studentId]);
+    await db.query(`UPDATE "Students" SET "ParentContact" = '01711000002' WHERE "StudentID" = ?`, [karim.studentId]);
     sender = makeFakeSmsSender();
     savedAt = Date.now();
     // The real queue and database; a fake gateway and a clock 16 minutes on.
@@ -50,7 +50,7 @@ describe("absence SMS to parents", () => {
   it("queues absent children 15 minutes after the save, and sends one Bangla SMS each once the time comes", async () => {
     await saveDay("Absent", "Present");
 
-    const [[queued]] = await db.query("SELECT status, TIMESTAMPDIFF(MINUTE, NOW(), due_at) AS minutes FROM AttendanceSms");
+    const queued = await db.one(`SELECT status, TIMESTAMPDIFF(MINUTE, NOW(), due_at) AS minutes FROM "AttendanceSms"`);
     expect(queued.status).toBe("pending");
     expect(Number(queued.minutes)).toBeGreaterThanOrEqual(14);
 
@@ -60,7 +60,7 @@ describe("absence SMS to parents", () => {
     await worker.sendDue();
 
     expect(sender.sent).toEqual([{ to: "01711000001", text: expect.stringMatching(/^প্রিয় অভিভাবক, আপনার সন্তান Rahim Uddin/) }]);
-    const [rows] = await db.query("SELECT status, phone FROM AttendanceSms");
+    const { rows: rows } = await db.query(`SELECT status, phone FROM "AttendanceSms"`);
     expect(rows).toEqual([{ status: "sent", phone: "01711000001" }]);
   });
 
@@ -72,7 +72,7 @@ describe("absence SMS to parents", () => {
     await worker.sendDue();
 
     expect(sender.sent.map((m) => m.to)).toEqual(["01711000002"]);
-    const [rows] = await db.query("SELECT student_id AS id, status FROM AttendanceSms ORDER BY student_id");
+    const { rows: rows } = await db.query(`SELECT student_id AS id, status FROM "AttendanceSms" ORDER BY student_id`);
     expect(rows).toEqual([
       { id: rahim.studentId, status: "cancelled" },
       { id: karim.studentId, status: "sent" },
@@ -81,11 +81,11 @@ describe("absence SMS to parents", () => {
 
   it("gives up on a message a crash left half-sent, so it is never sent twice", async () => {
     await saveDay("Absent", "Present");
-    await db.query("UPDATE AttendanceSms SET status = 'sending', updated_at = NOW() - INTERVAL 20 MINUTE");
+    await db.query(`UPDATE "AttendanceSms" SET status = 'sending', updated_at = NOW() - INTERVAL 20 MINUTE`);
 
     await worker.sendDue();
 
-    const [rows] = await db.query("SELECT status, error FROM AttendanceSms");
+    const { rows: rows } = await db.query(`SELECT status, error FROM "AttendanceSms"`);
     expect(rows).toEqual([{ status: "failed", error: "interrupted" }]);
     expect(sender.sent).toEqual([]);
   });
@@ -108,7 +108,7 @@ describe("absence SMS to parents", () => {
       .send({ entries: [{ studentId: rahim.studentId, status: "Absent" }, { studentId: karim.studentId, status: "Absent" }] })
       .expect(200);
 
-    const [[{ n }]] = await db.query("SELECT COUNT(*) AS n FROM AttendanceSms");
+    const { n } = await db.one(`SELECT COUNT(*) AS n FROM "AttendanceSms"`);
     expect(Number(n)).toBe(0);
   });
 });

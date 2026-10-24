@@ -93,7 +93,7 @@ describe("GET /api/dashboard/summary", () => {
   });
 
   it("leaves voided payments out of recent payments", async () => {
-    const [[payment]] = await db.query("SELECT id FROM FeePayments WHERE branch_id = ?", [BRANCH_A]);
+    const payment = await db.one(`SELECT id FROM "FeePayments" WHERE branch_id = ?`, [BRANCH_A]);
     await fees(`/payments/${payment.id}/void`, { reason: "Entered twice" }, adminA).expect(200);
 
     const res = await request(app).get("/api/dashboard/summary").set(adminA);

@@ -5,7 +5,7 @@ export const getChairmanProfile = async () => {
   const { rows } = await db.query(
     `SELECT id, name_en, name_bn, title_en, title_bn,
             institution_en, institution_bn, image_url, image_public_id, updated_at
-     FROM ChairmanProfile WHERE id = 1 LIMIT 1`,
+     FROM "ChairmanProfile" WHERE id = 1 LIMIT 1`,
   );
   return rows[0] || null;
 };
@@ -31,7 +31,7 @@ export const updateChairmanProfile = async (fields) => {
   }
   if (setClauses.length === 0) return { success: true };
   await db.query(
-    `UPDATE ChairmanProfile SET ${setClauses.join(", ")} WHERE id = 1`,
+    `UPDATE "ChairmanProfile" SET ${setClauses.join(", ")} WHERE id = 1`,
     values,
   );
   return { success: true };
@@ -40,7 +40,7 @@ export const updateChairmanProfile = async (fields) => {
 /** Return the current image_public_id (needed before replacing the image). */
 export const getChairmanImagePublicId = async () => {
   const { rows } = await db.query(
-    `SELECT image_public_id FROM ChairmanProfile WHERE id = 1 LIMIT 1`,
+    `SELECT image_public_id FROM "ChairmanProfile" WHERE id = 1 LIMIT 1`,
   );
   return rows[0]?.image_public_id ?? null;
 };

@@ -145,7 +145,7 @@ describe("taking a quiz", () => {
 
     expect(res.status).toBe(201);
     expect(res.body.data).toMatchObject({ totalQuestions: 1, correctAnswers: 1, scorePercentage: 100, grade: "A" });
-    const [[session]] = await db.query("SELECT * FROM QuizSessions");
+    const session = await db.one(`SELECT * FROM "QuizSessions"`);
     expect(session).toMatchObject({ StudentName: "Rahim Uddin", ClassName: "Class 8", Grade: "8", Subject: "Math", branch_id: BRANCH_A });
     expect(session.TimeTakenSeconds).toBeLessThan(10);
     expect((new Date(session.CompletedAt) - new Date(session.StartedAt)) / 1000).toBe(session.TimeTakenSeconds);
@@ -196,7 +196,7 @@ describe("taking a quiz", () => {
 
     const stolen = await request(app).post("/api/quiz/finish").set(nadia).send({ quizId: start.body.data.quizId, answers });
     const missing = await request(app).post("/api/quiz/finish").set(token).send({ answers });
-    await db.query("UPDATE QuizStarts SET StartedAt = NOW() - INTERVAL 3 HOUR");
+    await db.query(`UPDATE "QuizStarts" SET "StartedAt" = NOW() - INTERVAL 3 HOUR`);
     const old = await request(app).post("/api/quiz/finish").set(token).send({ quizId: start.body.data.quizId, answers });
 
     expect([stolen.status, missing.status, old.status]).toEqual([404, 404, 409]);
@@ -245,7 +245,7 @@ describe("question bank (admin)", () => {
     expect(created.status).toBe(201);
     const id = created.body.data.id;
     expect(created.body.data).toMatchObject({ classKey: "6", prompt: newQuestion.prompt, optionsBn: newQuestion.optionsBn, active: true });
-    const [[row]] = await db.query("SELECT CreatedBy FROM QuizQuestions WHERE QuestionID = ?", [id]);
+    const row = await db.one(`SELECT "CreatedBy" FROM "QuizQuestions" WHERE "QuestionID" = ?`, [id]);
     expect(row.CreatedBy).toBe(9001);
 
     const edited = await asAdmin(request(app).put(`/api/quiz/admin/questions/${id}`)).send({ answer: "c" });
@@ -279,7 +279,7 @@ describe("question bank (admin)", () => {
 
     expect([add.status, edit.status, hide.status]).toEqual([403, 403, 403]);
     expect(add.body).toEqual({ success: false, message: expect.any(String) });
-    const [[row]] = await db.query("SELECT CorrectAnswer, Active FROM QuizQuestions WHERE QuestionID = ?", [id]);
+    const row = await db.one(`SELECT "CorrectAnswer", "Active" FROM "QuizQuestions" WHERE "QuestionID" = ?`, [id]);
     expect(row).toEqual({ CorrectAnswer: "B", Active: 1 });
     expect(await count("QuizQuestions")).toBe(1);
   });
@@ -352,8 +352,8 @@ describe("quiz results (admin)", () => {
   });
 
   it("lists a student once on the leaderboard even after changing class", async () => {
-    const [[rahim]] = await db.query("SELECT StudentID FROM Students WHERE FirstName = 'Rahim'");
-    await db.query("UPDATE QuizSessions SET ClassName = 'Class 7', Section = 'Better' WHERE StudentID = ? ", [rahim.StudentID]);
+    const rahim = await db.one(`SELECT "StudentID" FROM "Students" WHERE "FirstName" = 'Rahim'`);
+    await db.query(`UPDATE "QuizSessions" SET "ClassName" = 'Class 7', "Section" = 'Better' WHERE "StudentID" = ? `, [rahim.StudentID]);
     await addQuestion("8", "Science", "A");
     await takeQuiz(bearer(quizStudentToken(rahim.StudentID, BRANCH_A)), { subject: "Science", answerFor: () => "A" });
 
@@ -365,7 +365,7 @@ describe("quiz results (admin)", () => {
   });
 
   it("treats malformed answers as unanswered instead of failing", async () => {
-    const [[rahim]] = await db.query("SELECT StudentID FROM Students WHERE FirstName = 'Rahim'");
+    const rahim = await db.one(`SELECT "StudentID" FROM "Students" WHERE "FirstName" = 'Rahim'`);
     const token = bearer(quizStudentToken(rahim.StudentID, BRANCH_A));
     const start = await request(app).post("/api/quiz/start").set(token).send({});
 

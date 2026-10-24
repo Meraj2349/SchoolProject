@@ -6,13 +6,13 @@ import { ConflictError } from "../../../shared/errors/index.js";
 // application/fakeTeacherAccountRepository.js). The sign-in columns live on
 // Teachers (attendance_v2_migration.sql).
 
-const ACCOUNT_COLUMNS = `t.TeacherID AS id, t.FirstName AS firstName, t.LastName AS lastName, t.branch_id AS branchId,
-  t.AppPhone AS phone, t.AppPasswordHash AS passwordHash, t.AppEnabled AS enabled, t.TokenVersion AS tokenVersion,
-  t.LastLoginAt AS lastLoginAt, t.FailedLogins AS failedLogins, t.LockedUntil AS lockedUntil,
-  b.name_bn AS branchNameBn, b.name_en AS branchNameEn`;
+const ACCOUNT_COLUMNS = `t."TeacherID" AS id, t."FirstName" AS "firstName", t."LastName" AS "lastName", t.branch_id AS "branchId",
+  t."AppPhone" AS phone, t."AppPasswordHash" AS "passwordHash", t."AppEnabled" AS enabled, t."TokenVersion" AS "tokenVersion",
+  t."LastLoginAt" AS "lastLoginAt", t."FailedLogins" AS "failedLogins", t."LockedUntil" AS "lockedUntil",
+  b.name_bn AS "branchNameBn", b.name_en AS "branchNameEn"`;
 
 // Teachers (t) with their branch (b).
-const ACCOUNTS = "Teachers t LEFT JOIN Branches b ON b.id = t.branch_id";
+const ACCOUNTS = `"Teachers" t LEFT JOIN "Branches" b ON b.id = t.branch_id`;
 
 function toAccount(row) {
   if (!row) return null;
@@ -26,19 +26,19 @@ function toAccount(row) {
 
 export const mysqlTeacherAccountRepository = {
   async findAccount(id) {
-    const row = await db.one(`SELECT ${ACCOUNT_COLUMNS} FROM ${ACCOUNTS} WHERE t.TeacherID = ?`, [id]);
+    const row = await db.one(`SELECT ${ACCOUNT_COLUMNS} FROM ${ACCOUNTS} WHERE t."TeacherID" = ?`, [id]);
     return toAccount(row);
   },
 
   async findAccountByPhone(phone) {
-    const row = await db.one(`SELECT ${ACCOUNT_COLUMNS} FROM ${ACCOUNTS} WHERE t.AppPhone = ?`, [phone]);
+    const row = await db.one(`SELECT ${ACCOUNT_COLUMNS} FROM ${ACCOUNTS} WHERE t."AppPhone" = ?`, [phone]);
     return toAccount(row);
   },
 
   async listAccess(branchId) {
     const scope = branchFilter(branchId, "t");
     const { rows } = await db.query(
-      `SELECT ${ACCOUNT_COLUMNS} FROM ${ACCOUNTS} WHERE 1=1 ${scope.clause} ORDER BY t.FirstName, t.LastName, t.TeacherID`,
+      `SELECT ${ACCOUNT_COLUMNS} FROM ${ACCOUNTS} WHERE 1=1 ${scope.clause} ORDER BY t."FirstName", t."LastName", t."TeacherID"`,
       scope.params,
     );
     return rows.map(toAccount);
@@ -51,16 +51,16 @@ export const mysqlTeacherAccountRepository = {
    */
   async updateAccess(id, { phone, passwordHash, enabled, signOut }) {
     const changes = [
-      phone !== undefined && ["AppPhone = ?", [phone]],
-      enabled !== undefined && ["AppEnabled = ?", [enabled]],
-      passwordHash !== undefined && ["AppPasswordHash = ?, FailedLogins = 0, LockedUntil = NULL", [passwordHash]],
+      phone !== undefined && [`"AppPhone" = ?`, [phone]],
+      enabled !== undefined && [`"AppEnabled" = ?`, [enabled]],
+      passwordHash !== undefined && [`"AppPasswordHash" = ?, "FailedLogins" = 0, "LockedUntil" = NULL`, [passwordHash]],
       signOut && ["TokenVersion = TokenVersion + 1", []],
     ].filter(Boolean);
     if (changes.length === 0) return;
     const sets = changes.map(([set]) => set);
     const params = changes.flatMap(([, values]) => values);
     try {
-      await db.query(`UPDATE Teachers SET ${sets.join(", ")} WHERE TeacherID = ?`, [...params, id]);
+      await db.query(`UPDATE "Teachers" SET ${sets.join(", ")} WHERE "TeacherID" = ?`, [...params, id]);
     } catch (error) {
       if (db.isUniqueViolation(error)) throw new ConflictError("teacher_app_phone_taken");
       throw error;
@@ -77,30 +77,30 @@ export const mysqlTeacherAccountRepository = {
    */
   async reserveLoginAttempt(id, { max, lockedUntil, now }) {
     const result = await db.query(
-      `UPDATE Teachers
-          SET FailedLogins = IF(LockedUntil IS NOT NULL AND LockedUntil <= ?, 1, FailedLogins + 1),
-              LockedUntil = IF(FailedLogins >= ?, ?, NULL)
-        WHERE TeacherID = ? AND (LockedUntil IS NULL OR LockedUntil <= ?)`,
+      `UPDATE "Teachers"
+          SET "FailedLogins" = IF("LockedUntil" IS NOT NULL AND "LockedUntil" <= ?, 1, "FailedLogins" + 1),
+              "LockedUntil" = IF("FailedLogins" >= ?, ?, NULL)
+        WHERE "TeacherID" = ? AND ("LockedUntil" IS NULL OR "LockedUntil" <= ?)`,
       [now, max, lockedUntil, id, now],
     );
     return { allowed: result.rowCount === 1 };
   },
 
   async recordLogin(id, now) {
-    await db.query("UPDATE Teachers SET FailedLogins = 0, LockedUntil = NULL, LastLoginAt = ? WHERE TeacherID = ?", [now, id]);
+    await db.query(`UPDATE "Teachers" SET "FailedLogins" = 0, "LockedUntil" = NULL, "LastLoginAt" = ? WHERE "TeacherID" = ?`, [now, id]);
   },
 
   /** The classes the teacher is class teacher of, with whether `date` is taken. */
   async classesOf(teacherId, branchId, date) {
     const { rows } = await db.query(
-      `SELECT c.ClassID AS id, c.ClassName AS name, c.Section AS section,
-              COUNT(DISTINCT s.StudentID) AS students, COUNT(a.AttendanceID) AS takenCount, MAX(a.MarkedAt) AS takenAt
-         FROM Classes c
-         LEFT JOIN Students s ON s.ClassID = c.ClassID AND s.branch_id = c.branch_id
-         LEFT JOIN Attendance a ON a.StudentID = s.StudentID AND a.ClassDate = ?
-        WHERE c.TeacherID = ? AND c.branch_id = ?
-        GROUP BY c.ClassID, c.ClassName, c.Section
-        ORDER BY c.ClassName, c.Section`,
+      `SELECT c."ClassID" AS id, c."ClassName" AS name, c."Section" AS section,
+              COUNT(DISTINCT s."StudentID") AS students, COUNT(a."AttendanceID") AS "takenCount", MAX(a."MarkedAt") AS "takenAt"
+         FROM "Classes" c
+         LEFT JOIN "Students" s ON s."ClassID" = c."ClassID" AND s.branch_id = c.branch_id
+         LEFT JOIN "Attendance" a ON a."StudentID" = s."StudentID" AND a."ClassDate" = ?
+        WHERE c."TeacherID" = ? AND c.branch_id = ?
+        GROUP BY c."ClassID", c."ClassName", c."Section"
+        ORDER BY c."ClassName", c."Section"`,
       [date, teacherId, branchId],
     );
     return rows.map(({ takenCount, students, ...cls }) => ({

@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken";
-import db from "../../config/db.config.js";
+import db, { insertList } from "../../src/shared/db/index.js";
 
 export { db };
 
@@ -9,55 +9,95 @@ export const BRANCH_B = 2;
 // Admin accounts seeded by resetDb, used by the default tokens.
 export const FIXTURE_ADMINS = { super: 9001, [BRANCH_A]: 9002, [BRANCH_B]: 9003 };
 
-// Reference data loaded by database.sql that tests must not wipe.
+// Reference data loaded with the schema that tests must not wipe.
 const REFERENCE_TABLES = ["ClassNames", "ChairmanProfile"];
+
+async function dataTables() {
+  const { rows } =
+    db.dialect === "postgres"
+      ? await db.query(
+          "SELECT table_name AS name FROM information_schema.tables WHERE table_schema = current_schema() AND table_type = 'BASE TABLE'",
+        )
+      : await db.query("SELECT TABLE_NAME AS name FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE()");
+  return rows.map((row) => row.name).filter((name) => !REFERENCE_TABLES.includes(name) && name !== "schema_migrations");
+}
 
 // Empties every data table and re-seeds two branches so each test starts clean.
 export async function resetDb() {
-  const [tables] = await db.query(
-    "SELECT TABLE_NAME AS name FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME NOT IN (?)",
-    [REFERENCE_TABLES],
-  );
-  // FOREIGN_KEY_CHECKS is per connection, so do all of it on one connection.
-  const connection = await db.getConnection();
-  try {
-    await connection.query("SET FOREIGN_KEY_CHECKS = 0");
-    for (const { name } of tables) await connection.query(`TRUNCATE TABLE \`${name}\``);
-    await connection.query("SET FOREIGN_KEY_CHECKS = 1");
-  } finally {
-    connection.release();
+  const tables = await dataTables();
+  if (db.dialect === "postgres") {
+    await db.query(`TRUNCATE ${tables.map((t) => db.ident(t)).join(", ")} RESTART IDENTITY CASCADE`);
+  } else {
+    // FOREIGN_KEY_CHECKS is per connection, so do all of it on one connection.
+    await db.withTransaction(async (tx) => {
+      await tx.query("SET FOREIGN_KEY_CHECKS = 0");
+      for (const table of tables) await tx.query(`TRUNCATE TABLE ${db.ident(table)}`);
+      await tx.query("SET FOREIGN_KEY_CHECKS = 1");
+    });
   }
   await db.query(
-    "INSERT INTO Branches (id, name_en, name_bn) VALUES (?, 'Main', 'প্রধান'), (?, 'North', 'উত্তর')",
+    `INSERT INTO "Branches" ("id", "name_en", "name_bn") VALUES (?, 'Main', 'প্রধান'), (?, 'North', 'উত্তর')`,
     [BRANCH_A, BRANCH_B],
   );
   // The server checks every admin token against the Admin table, so the
   // default tokens below belong to these real accounts.
   await db.query(
-    `INSERT INTO Admin (AdminID, Username, Email, Password, role, branch_id) VALUES
+    `INSERT INTO "Admin" ("AdminID", "Username", "Email", "Password", "role", "branch_id") VALUES
        (?, 'fixture-super', 'super@fixture.test', 'x', 'super_admin', NULL),
        (?, 'fixture-a', 'a@fixture.test', 'x', 'branch_admin', ?),
        (?, 'fixture-b', 'b@fixture.test', 'x', 'branch_admin', ?)`,
     [FIXTURE_ADMINS.super, FIXTURE_ADMINS[BRANCH_A], BRANCH_A, FIXTURE_ADMINS[BRANCH_B], BRANCH_B],
   );
+  // PostgreSQL does not move an identity past ids given explicitly.
+  if (db.dialect === "postgres") {
+    await db.query(`SELECT setval(pg_get_serial_sequence('"Branches"', 'id'), (SELECT MAX("id") FROM "Branches"))`);
+    await db.query(`SELECT setval(pg_get_serial_sequence('"Admin"', 'AdminID'), (SELECT MAX("AdminID") FROM "Admin"))`);
+  }
 }
 
 // For tests that manage admin accounts themselves (counts, first registration).
 export async function clearAdmins() {
-  await db.query("DELETE FROM Admin");
+  await db.query(`DELETE FROM "Admin"`);
 }
 
+const identityColumns = new Map();
+
+/** The table's generated id column on PostgreSQL (MySQL reports insertId on its own). */
+async function identityColumnOf(table) {
+  if (db.dialect !== "postgres") return null;
+  if (!identityColumns.has(table)) {
+    const row = await db.one(
+      `SELECT a.attname AS name FROM pg_attribute a
+        WHERE a.attrelid = ?::regclass AND a.attidentity <> '' AND NOT a.attisdropped`,
+      [db.ident(table)],
+    );
+    identityColumns.set(table, row?.name ?? null);
+  }
+  return identityColumns.get(table);
+}
+
+/** Inserts a row and returns its generated id (undefined for tables without one). */
 export async function insert(table, row) {
-  const columns = Object.keys(row);
-  const [result] = await db.query(
-    `INSERT INTO \`${table}\` (${columns.map((c) => `\`${c}\``).join(", ")}) VALUES (?)`,
-    [Object.values(row)],
-  );
-  return result.insertId;
+  const values = insertList(row, db.ident);
+  const sql = `INSERT INTO ${db.ident(table)} ${values.sql}`;
+  const idColumn = await identityColumnOf(table);
+  if (db.dialect === "postgres" && !idColumn) {
+    await db.query(sql, values.params);
+    return undefined;
+  }
+  const id = await db.insert(sql, values.params, idColumn);
+  // An explicit id leaves PostgreSQL's identity behind; move it past the row.
+  if (idColumn && row[idColumn] !== undefined) {
+    await db.query(
+      `SELECT setval(pg_get_serial_sequence(?, ?), (SELECT MAX(${db.ident(idColumn)}) FROM ${db.ident(table)}))`,
+      [db.ident(table), idColumn],
+    );
+  }
+  return id;
 }
 
 export async function count(table, where = "1=1", params = []) {
-  const [[row]] = await db.query(`SELECT COUNT(*) AS n FROM \`${table}\` WHERE ${where}`, params);
+  const row = await db.one(`SELECT COUNT(*) AS n FROM ${db.ident(table)} WHERE ${where}`, params);
   return Number(row.n);
 }
 
@@ -76,8 +116,8 @@ export const bearer = (token) => ({ Authorization: `Bearer ${token}` });
 
 // A class + student in the given branch, the most common fixture.
 export async function seedStudent({ branchId = BRANCH_A, className = "Class 5", section = "Good", roll = "1", firstName = "Rahim" } = {}) {
-  const [[existing]] = await db.query(
-    "SELECT ClassID FROM Classes WHERE ClassName = ? AND Section = ? AND branch_id = ?",
+  const existing = await db.one(
+    `SELECT "ClassID" FROM "Classes" WHERE "ClassName" = ? AND "Section" = ? AND "branch_id" = ?`,
     [className, section, branchId],
   );
   const classId =

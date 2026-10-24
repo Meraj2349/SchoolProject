@@ -179,7 +179,7 @@ describe("authentication & authorization", () => {
         .set(bearer(superAdminToken(bossId)))
         .send({ Password: "newpass123" });
 
-      const [[row]] = await db.query("SELECT Email FROM Admin WHERE AdminID = ?", [id]);
+      const row = await db.one(`SELECT "Email" FROM "Admin" WHERE "AdminID" = ?`, [id]);
       expect(row.Email).toBe("b@school.test");
     });
   });

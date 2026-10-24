@@ -61,7 +61,7 @@ describe("a branch admin cannot touch another branch's data", () => {
       });
 
       expect(res.status).toBe(404);
-      const [[row]] = await db.query("SELECT FirstName FROM Students WHERE StudentID = ?", [b.studentId]);
+      const row = await db.one(`SELECT "FirstName" FROM "Students" WHERE "StudentID" = ?`, [b.studentId]);
       expect(row.FirstName).toBe("Rahim");
     });
   });
@@ -86,7 +86,7 @@ describe("a branch admin cannot touch another branch's data", () => {
       const res = await request(app).put(`/api/attendance/${b.attendanceId}`).set(adminA).send({ status: "Absent" });
 
       expect(res.status).toBe(404);
-      const [[row]] = await db.query("SELECT Status FROM Attendance WHERE AttendanceID = ?", [b.attendanceId]);
+      const row = await db.one(`SELECT "Status" FROM "Attendance" WHERE "AttendanceID" = ?`, [b.attendanceId]);
       expect(row.Status).toBe("Present");
     });
 
@@ -104,7 +104,7 @@ describe("a branch admin cannot touch another branch's data", () => {
         .send({ studentId: b.studentId, classDate: "2026-01-06", status: "Absent" })
         .expect(200);
 
-      expect(await count("Attendance", "ClassDate = '2026-01-06' AND branch_id = ?", [BRANCH_B])).toBe(1);
+      expect(await count("Attendance", `"ClassDate" = '2026-01-06' AND branch_id = ?`, [BRANCH_B])).toBe(1);
     });
   });
 
@@ -113,7 +113,7 @@ describe("a branch admin cannot touch another branch's data", () => {
       const res = await request(app).put(`/api/routines/${b.routineId}`).set(adminA).send({ RoutineTitle: "Hacked" });
 
       expect(res.status).toBe(404);
-      const [[row]] = await db.query("SELECT RoutineTitle FROM Routines WHERE RoutineID = ?", [b.routineId]);
+      const row = await db.one(`SELECT "RoutineTitle" FROM "Routines" WHERE "RoutineID" = ?`, [b.routineId]);
       expect(row.RoutineTitle).toBe("Term 1");
     });
 
@@ -146,7 +146,7 @@ describe("a branch admin cannot touch another branch's data", () => {
         .send({ FirstName: "Nasrin", branch_id: BRANCH_B, "TeacherID = 999, LastName": "x" });
 
       expect(res.status).toBe(200);
-      const [[row]] = await db.query("SELECT * FROM Teachers WHERE TeacherID = ?", [teacherId]);
+      const row = await db.one(`SELECT * FROM "Teachers" WHERE "TeacherID" = ?`, [teacherId]);
       expect(row).toMatchObject({ FirstName: "Nasrin", LastName: "A", branch_id: BRANCH_A });
     });
   });

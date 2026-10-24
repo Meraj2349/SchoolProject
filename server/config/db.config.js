@@ -22,4 +22,10 @@ const db = mysql.createPool({
   dateStrings: ["DATE"],
 });
 
+// Double quotes name tables and columns ("Students"), as in PostgreSQL, so
+// the same SQL runs on both engines while the app moves to PostgreSQL.
+db.pool.on("connection", (connection) => {
+  connection.query("SET SESSION sql_mode = CONCAT(@@SESSION.sql_mode, ',ANSI_QUOTES')");
+});
+
 export default db;

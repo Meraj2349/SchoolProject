@@ -4,9 +4,9 @@ import db from "../../../shared/db/index.js";
 // in their quiz token. Returns the student with their current class.
 
 const SELECT_STUDENT = `
-  SELECT s.StudentID, s.FirstName, s.LastName, s.RollNumber, s.branch_id, c.ClassName, c.Section
-    FROM Students s
-    JOIN Classes c ON c.ClassID = s.ClassID`;
+  SELECT s."StudentID", s."FirstName", s."LastName", s."RollNumber", s.branch_id, c."ClassName", c."Section"
+    FROM "Students" s
+    JOIN "Classes" c ON c."ClassID" = s."ClassID"`;
 
 const toStudent = (row) => ({
   studentId: row.StudentID,
@@ -22,8 +22,8 @@ export const mysqlStudentDirectory = {
   async verify({ branchId, firstName, lastName, className, section, rollNumber }) {
     const { rows } = await db.query(
       `${SELECT_STUDENT}
-        WHERE s.branch_id = ? AND s.FirstName = ? AND s.LastName = ?
-          AND c.ClassName = ? AND c.Section = ? AND s.RollNumber = ?
+        WHERE s.branch_id = ? AND s."FirstName" = ? AND s."LastName" = ?
+          AND c."ClassName" = ? AND c."Section" = ? AND s."RollNumber" = ?
         LIMIT 1`,
       [branchId, firstName, lastName, className, section, rollNumber],
     );
@@ -31,7 +31,7 @@ export const mysqlStudentDirectory = {
   },
 
   async findById(studentId) {
-    const { rows } = await db.query(`${SELECT_STUDENT} WHERE s.StudentID = ?`, [studentId]);
+    const { rows } = await db.query(`${SELECT_STUDENT} WHERE s."StudentID" = ?`, [studentId]);
     return rows[0] ? toStudent(rows[0]) : null;
   },
 };

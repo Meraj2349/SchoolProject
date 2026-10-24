@@ -12,10 +12,10 @@ export const addSubject = async ({ subjectName, classId }, branchId = null) => {
   try {
     let sql, values;
     if (branchId != null) {
-      sql = "INSERT INTO Subjects (SubjectName, ClassID, branch_id) VALUES (?, ?, ?)";
+      sql = `INSERT INTO "Subjects" ("SubjectName", "ClassID", branch_id) VALUES (?, ?, ?)`;
       values = [subjectName, classId, branchId];
     } else {
-      sql = "INSERT INTO Subjects (SubjectName, ClassID) VALUES (?, ?)";
+      sql = `INSERT INTO "Subjects" ("SubjectName", "ClassID") VALUES (?, ?)`;
       values = [subjectName, classId];
     }
     const SubjectID = await db.insert(sql, values, "SubjectID");
@@ -30,7 +30,7 @@ export const deleteSubject = async (subjectId, branchId = null) => {
   const { clause, params: branchParams } = branchFilter(branchId);
   try {
     const result = await db.query(
-      `DELETE FROM Subjects WHERE SubjectID = ? ${clause}`,
+      `DELETE FROM "Subjects" WHERE "SubjectID" = ? ${clause}`,
       [subjectId, ...branchParams],
     );
     if (result.rowCount === 0) {
@@ -48,15 +48,15 @@ export const getSubjects = async (branchId = null) => {
   try {
     const { rows } = await db.query(`
       SELECT
-        s.SubjectID,
-        s.SubjectName,
-        s.ClassID,
-        c.ClassName,
-        c.Section
-      FROM Subjects s
-      LEFT JOIN Classes c ON s.ClassID = c.ClassID
+        s."SubjectID",
+        s."SubjectName",
+        s."ClassID",
+        c."ClassName",
+        c."Section"
+      FROM "Subjects" s
+      LEFT JOIN "Classes" c ON s."ClassID" = c."ClassID"
       WHERE 1=1 ${clause}
-      ORDER BY c.ClassName, c.Section, s.SubjectName
+      ORDER BY c."ClassName", c."Section", s."SubjectName"
     `, branchParams);
     return rows;
   } catch (error) {
@@ -70,15 +70,15 @@ export const getSubjectsByClassId = async (classId, branchId = null) => {
   try {
     const { rows } = await db.query(`
       SELECT
-        s.SubjectID,
-        s.SubjectName,
-        s.ClassID,
-        c.ClassName,
-        c.Section
-      FROM Subjects s
-      LEFT JOIN Classes c ON s.ClassID = c.ClassID
-      WHERE s.ClassID = ? ${clause}
-      ORDER BY s.SubjectName
+        s."SubjectID",
+        s."SubjectName",
+        s."ClassID",
+        c."ClassName",
+        c."Section"
+      FROM "Subjects" s
+      LEFT JOIN "Classes" c ON s."ClassID" = c."ClassID"
+      WHERE s."ClassID" = ? ${clause}
+      ORDER BY s."SubjectName"
     `, [classId, ...branchParams]);
     return rows;
   } catch (error) {
@@ -92,15 +92,15 @@ export const getSubjectsByClassName = async (className, branchId = null) => {
   try {
     const { rows } = await db.query(`
       SELECT
-        s.SubjectID,
-        s.SubjectName,
-        s.ClassID,
-        c.ClassName,
-        c.Section
-      FROM Subjects s
-      LEFT JOIN Classes c ON s.ClassID = c.ClassID
-      WHERE c.ClassName = ? ${clause}
-      ORDER BY c.Section, s.SubjectName
+        s."SubjectID",
+        s."SubjectName",
+        s."ClassID",
+        c."ClassName",
+        c."Section"
+      FROM "Subjects" s
+      LEFT JOIN "Classes" c ON s."ClassID" = c."ClassID"
+      WHERE c."ClassName" = ? ${clause}
+      ORDER BY c."Section", s."SubjectName"
     `, [className, ...branchParams]);
     return rows;
   } catch (error) {
@@ -118,7 +118,7 @@ export const editSubject = async (subjectId, { subjectName, classId }, branchId 
   }
   try {
     const result = await db.query(
-      `UPDATE Subjects SET SubjectName = ?, ClassID = ? WHERE SubjectID = ? ${clause}`,
+      `UPDATE "Subjects" SET "SubjectName" = ?, "ClassID" = ? WHERE "SubjectID" = ? ${clause}`,
       [subjectName, classId, subjectId, ...branchParams],
     );
     if (result.rowCount === 0) {

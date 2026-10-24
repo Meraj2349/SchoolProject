@@ -29,7 +29,7 @@ async function runMigration() {
 
 // Puts a table back the way it was before branches had content: no branch_id.
 async function dropBranchColumn(table) {
-  const [fks] = await db.query(
+  const { rows: fks } = await db.query(
     `SELECT CONSTRAINT_NAME AS name FROM information_schema.KEY_COLUMN_USAGE
       WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? AND COLUMN_NAME = 'branch_id'
         AND REFERENCED_TABLE_NAME IS NOT NULL`,
@@ -52,8 +52,8 @@ describe("branch_content_migration.sql", () => {
     await runMigration();
     await runMigration();
 
-    const [[notice]] = await db.query("SELECT branch_id FROM Notices");
-    const [images] = await db.query("SELECT ImageType, branch_id FROM Images ORDER BY ImageID");
+    const notice = await db.one("SELECT branch_id FROM Notices");
+    const { rows: images } = await db.query("SELECT ImageType, branch_id FROM Images ORDER BY ImageID");
     expect(notice.branch_id).toBeNull();
     // A student's photo belongs to the student's branch.
     expect(images).toEqual([

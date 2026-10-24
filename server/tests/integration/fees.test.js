@@ -83,7 +83,7 @@ describe("fees", () => {
 
     const receipts = results.filter((r) => r.status === 201).map((r) => r.body.data.payment.receipt_no);
     expect(new Set(receipts).size).toBe(receipts.length);
-    const [[{ paid }]] = await db.query("SELECT SUM(amount) AS paid FROM FeePayments");
+    const { paid } = await db.one(`SELECT SUM(amount) AS paid FROM "FeePayments"`);
     expect(Number(paid)).toBeLessThanOrEqual(1000);
     expect(results.filter((r) => r.status === 400)).toHaveLength(1);
   });
@@ -214,8 +214,8 @@ describe("fees", () => {
 
   it("keeps the student's attendance and results when the delete is refused", async () => {
     const { studentId } = await seedBilledStudent();
-    const [[student]] = await db.query("SELECT ClassID FROM Students WHERE StudentID = ?", [studentId]);
-    await db.query("INSERT INTO Attendance (StudentID, ClassID, ClassDate, Status, branch_id) VALUES (?, ?, '2026-03-02', 'Present', ?)", [studentId, student.ClassID, BRANCH_A]);
+    const student = await db.one(`SELECT "ClassID" FROM "Students" WHERE "StudentID" = ?`, [studentId]);
+    await db.query(`INSERT INTO "Attendance" ("StudentID", "ClassID", "ClassDate", "Status", branch_id) VALUES (?, ?, '2026-03-02', 'Present', ?)`, [studentId, student.ClassID, BRANCH_A]);
 
     await request(app).delete(`/api/students/${studentId}`).set(adminA).expect(409);
 
@@ -247,7 +247,7 @@ describe("fees", () => {
     });
 
     it("a branch admin cannot change another branch's setup or discount its students", async () => {
-      const [[structure]] = await db.query("SELECT id FROM FeeStructures WHERE branch_id = ?", [BRANCH_B]);
+      const structure = await db.one(`SELECT id FROM "FeeStructures" WHERE branch_id = ?`, [BRANCH_B]);
 
       expect((await api.put(`/structures/${structure.id}`, { monthly_tuition: 1 })).status).toBe(404);
       expect((await api.delete(`/structures/${structure.id}`)).status).toBe(404);

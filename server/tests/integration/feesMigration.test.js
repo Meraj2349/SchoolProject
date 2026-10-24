@@ -31,7 +31,7 @@ const runMigration = async () => {
 };
 
 const columnsOf = async (table) => {
-  const [rows] = await db.query(
+  const { rows: rows } = await db.query(
     "SELECT COLUMN_NAME AS name FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ?",
     [table],
   );

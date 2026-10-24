@@ -26,26 +26,26 @@ const getAllResults = async (branchId = null) => {
   try {
     const { rows } = await db.query(`
       SELECT
-        r.ResultID,
-        r.MarksObtained,
-        100 AS TotalMarks,
-        CONCAT(s.FirstName, ' ', s.LastName) as StudentName,
-        s.FirstName,
-        s.LastName,
-        s.RollNumber,
-        e.ExamName,
-        e.ExamType,
-        e.ExamDate,
-        sub.SubjectName,
-        c.ClassName,
-        c.Section
-      FROM Results r
-      LEFT JOIN Students s ON r.StudentID = s.StudentID
-      LEFT JOIN Exams e ON r.ExamID = e.ExamID
-      LEFT JOIN Subjects sub ON r.SubjectID = sub.SubjectID
-      LEFT JOIN Classes c ON r.ClassID = c.ClassID
+        r."ResultID",
+        r."MarksObtained",
+        100 AS "TotalMarks",
+        CONCAT(s."FirstName", ' ', s."LastName") as "StudentName",
+        s."FirstName",
+        s."LastName",
+        s."RollNumber",
+        e."ExamName",
+        e."ExamType",
+        e."ExamDate",
+        sub."SubjectName",
+        c."ClassName",
+        c."Section"
+      FROM "Results" r
+      LEFT JOIN "Students" s ON r."StudentID" = s."StudentID"
+      LEFT JOIN "Exams" e ON r."ExamID" = e."ExamID"
+      LEFT JOIN "Subjects" sub ON r."SubjectID" = sub."SubjectID"
+      LEFT JOIN "Classes" c ON r."ClassID" = c."ClassID"
       WHERE 1=1 ${clause}
-      ORDER BY e.ExamDate DESC, s.RollNumber
+      ORDER BY e."ExamDate" DESC, s."RollNumber"
     `, params);
     return rows;
   } catch (err) {
@@ -59,24 +59,24 @@ const getResultById = async (resultId, branchId = null) => {
   try {
     const { rows } = await db.query(
       `SELECT
-        r.ResultID,
-        r.MarksObtained,
-        CONCAT(s.FirstName, ' ', s.LastName) as StudentName,
-        s.FirstName,
-        s.LastName,
-        s.RollNumber,
-        e.ExamName,
-        e.ExamType,
-        e.ExamDate,
-        sub.SubjectName,
-        c.ClassName,
-        c.Section
-      FROM Results r
-      LEFT JOIN Students s ON r.StudentID = s.StudentID
-      LEFT JOIN Exams e ON r.ExamID = e.ExamID
-      LEFT JOIN Subjects sub ON r.SubjectID = sub.SubjectID
-      LEFT JOIN Classes c ON r.ClassID = c.ClassID
-      WHERE r.ResultID = ? ${clause}`,
+        r."ResultID",
+        r."MarksObtained",
+        CONCAT(s."FirstName", ' ', s."LastName") as "StudentName",
+        s."FirstName",
+        s."LastName",
+        s."RollNumber",
+        e."ExamName",
+        e."ExamType",
+        e."ExamDate",
+        sub."SubjectName",
+        c."ClassName",
+        c."Section"
+      FROM "Results" r
+      LEFT JOIN "Students" s ON r."StudentID" = s."StudentID"
+      LEFT JOIN "Exams" e ON r."ExamID" = e."ExamID"
+      LEFT JOIN "Subjects" sub ON r."SubjectID" = sub."SubjectID"
+      LEFT JOIN "Classes" c ON r."ClassID" = c."ClassID"
+      WHERE r."ResultID" = ? ${clause}`,
       [resultId, ...params],
     );
     return rows[0];
@@ -91,25 +91,25 @@ const getResultsByStudent = async (studentId, branchId = null) => {
   try {
     const { rows } = await db.query(
       `SELECT
-        r.ResultID,
-        r.MarksObtained,
-        CONCAT(s.FirstName, ' ', s.LastName) as StudentName,
-        s.FirstName,
-        s.LastName,
-        s.RollNumber,
-        e.ExamName,
-        e.ExamType,
-        e.ExamDate,
-        sub.SubjectName,
-        c.ClassName,
-        c.Section
-      FROM Results r
-      LEFT JOIN Students s ON r.StudentID = s.StudentID
-      LEFT JOIN Exams e ON r.ExamID = e.ExamID
-      LEFT JOIN Subjects sub ON r.SubjectID = sub.SubjectID
-      LEFT JOIN Classes c ON r.ClassID = c.ClassID
-      WHERE r.StudentID = ? ${clause}
-      ORDER BY e.ExamDate DESC`,
+        r."ResultID",
+        r."MarksObtained",
+        CONCAT(s."FirstName", ' ', s."LastName") as "StudentName",
+        s."FirstName",
+        s."LastName",
+        s."RollNumber",
+        e."ExamName",
+        e."ExamType",
+        e."ExamDate",
+        sub."SubjectName",
+        c."ClassName",
+        c."Section"
+      FROM "Results" r
+      LEFT JOIN "Students" s ON r."StudentID" = s."StudentID"
+      LEFT JOIN "Exams" e ON r."ExamID" = e."ExamID"
+      LEFT JOIN "Subjects" sub ON r."SubjectID" = sub."SubjectID"
+      LEFT JOIN "Classes" c ON r."ClassID" = c."ClassID"
+      WHERE r."StudentID" = ? ${clause}
+      ORDER BY e."ExamDate" DESC`,
       [studentId, ...params],
     );
     return rows;
@@ -124,25 +124,25 @@ const getResultsByExam = async (examId, branchId = null) => {
   try {
     const { rows } = await db.query(
       `SELECT
-        r.ResultID,
-        r.MarksObtained,
-        CONCAT(s.FirstName, ' ', s.LastName) as StudentName,
-        s.FirstName,
-        s.LastName,
-        s.RollNumber,
-        e.ExamName,
-        e.ExamType,
-        e.ExamDate,
-        sub.SubjectName,
-        c.ClassName,
-        c.Section
-      FROM Results r
-      LEFT JOIN Students s ON r.StudentID = s.StudentID
-      LEFT JOIN Exams e ON r.ExamID = e.ExamID
-      LEFT JOIN Subjects sub ON r.SubjectID = sub.SubjectID
-      LEFT JOIN Classes c ON r.ClassID = c.ClassID
-      WHERE r.ExamID = ? ${clause}
-      ORDER BY s.RollNumber, sub.SubjectName`,
+        r."ResultID",
+        r."MarksObtained",
+        CONCAT(s."FirstName", ' ', s."LastName") as "StudentName",
+        s."FirstName",
+        s."LastName",
+        s."RollNumber",
+        e."ExamName",
+        e."ExamType",
+        e."ExamDate",
+        sub."SubjectName",
+        c."ClassName",
+        c."Section"
+      FROM "Results" r
+      LEFT JOIN "Students" s ON r."StudentID" = s."StudentID"
+      LEFT JOIN "Exams" e ON r."ExamID" = e."ExamID"
+      LEFT JOIN "Subjects" sub ON r."SubjectID" = sub."SubjectID"
+      LEFT JOIN "Classes" c ON r."ClassID" = c."ClassID"
+      WHERE r."ExamID" = ? ${clause}
+      ORDER BY s."RollNumber", sub."SubjectName"`,
       [examId, ...params],
     );
     return rows;
@@ -157,25 +157,25 @@ const getResultsByClass = async (classId, branchId = null) => {
   try {
     const { rows } = await db.query(
       `SELECT
-        r.ResultID,
-        r.MarksObtained,
-        CONCAT(s.FirstName, ' ', s.LastName) as StudentName,
-        s.FirstName,
-        s.LastName,
-        s.RollNumber,
-        e.ExamName,
-        e.ExamType,
-        e.ExamDate,
-        sub.SubjectName,
-        c.ClassName,
-        c.Section
-      FROM Results r
-      LEFT JOIN Students s ON r.StudentID = s.StudentID
-      LEFT JOIN Exams e ON r.ExamID = e.ExamID
-      LEFT JOIN Subjects sub ON r.SubjectID = sub.SubjectID
-      LEFT JOIN Classes c ON r.ClassID = c.ClassID
-      WHERE r.ClassID = ? ${clause}
-      ORDER BY e.ExamDate DESC, s.RollNumber`,
+        r."ResultID",
+        r."MarksObtained",
+        CONCAT(s."FirstName", ' ', s."LastName") as "StudentName",
+        s."FirstName",
+        s."LastName",
+        s."RollNumber",
+        e."ExamName",
+        e."ExamType",
+        e."ExamDate",
+        sub."SubjectName",
+        c."ClassName",
+        c."Section"
+      FROM "Results" r
+      LEFT JOIN "Students" s ON r."StudentID" = s."StudentID"
+      LEFT JOIN "Exams" e ON r."ExamID" = e."ExamID"
+      LEFT JOIN "Subjects" sub ON r."SubjectID" = sub."SubjectID"
+      LEFT JOIN "Classes" c ON r."ClassID" = c."ClassID"
+      WHERE r."ClassID" = ? ${clause}
+      ORDER BY e."ExamDate" DESC, s."RollNumber"`,
       [classId, ...params],
     );
     return rows;
@@ -190,25 +190,25 @@ const getResultsBySubject = async (subjectId, branchId = null) => {
   try {
     const { rows } = await db.query(
       `SELECT
-        r.ResultID,
-        r.MarksObtained,
-        CONCAT(s.FirstName, ' ', s.LastName) as StudentName,
-        s.FirstName,
-        s.LastName,
-        s.RollNumber,
-        e.ExamName,
-        e.ExamType,
-        e.ExamDate,
-        sub.SubjectName,
-        c.ClassName,
-        c.Section
-      FROM Results r
-      LEFT JOIN Students s ON r.StudentID = s.StudentID
-      LEFT JOIN Exams e ON r.ExamID = e.ExamID
-      LEFT JOIN Subjects sub ON r.SubjectID = sub.SubjectID
-      LEFT JOIN Classes c ON r.ClassID = c.ClassID
-      WHERE r.SubjectID = ? ${clause}
-      ORDER BY e.ExamDate DESC, s.RollNumber`,
+        r."ResultID",
+        r."MarksObtained",
+        CONCAT(s."FirstName", ' ', s."LastName") as "StudentName",
+        s."FirstName",
+        s."LastName",
+        s."RollNumber",
+        e."ExamName",
+        e."ExamType",
+        e."ExamDate",
+        sub."SubjectName",
+        c."ClassName",
+        c."Section"
+      FROM "Results" r
+      LEFT JOIN "Students" s ON r."StudentID" = s."StudentID"
+      LEFT JOIN "Exams" e ON r."ExamID" = e."ExamID"
+      LEFT JOIN "Subjects" sub ON r."SubjectID" = sub."SubjectID"
+      LEFT JOIN "Classes" c ON r."ClassID" = c."ClassID"
+      WHERE r."SubjectID" = ? ${clause}
+      ORDER BY e."ExamDate" DESC, s."RollNumber"`,
       [subjectId, ...params],
     );
     return rows;
@@ -244,10 +244,10 @@ const addResult = async (resultData, branchId = null) => {
     const branchStudentClause = branchId != null ? "AND s.branch_id = ?" : "";
     const branchStudentParam = branchId != null ? [branchId] : [];
     const { rows: studentCheck } = await db.query(
-      `SELECT s.StudentID, s.FirstName, s.LastName, s.RollNumber, c.ClassName, c.Section
-      FROM Students s
-      LEFT JOIN Classes c ON s.ClassID = c.ClassID
-      WHERE s.StudentID = ? AND s.ClassID = ? ${branchStudentClause}`,
+      `SELECT s."StudentID", s."FirstName", s."LastName", s."RollNumber", c."ClassName", c."Section"
+      FROM "Students" s
+      LEFT JOIN "Classes" c ON s."ClassID" = c."ClassID"
+      WHERE s."StudentID" = ? AND s."ClassID" = ? ${branchStudentClause}`,
       [StudentID, ClassID, ...branchStudentParam],
     );
 
@@ -261,7 +261,7 @@ const addResult = async (resultData, branchId = null) => {
     // The exam and subject must be the student's class (same section too),
     // otherwise a result can be filed under another section's exam.
     const { rows: examCheck } = await db.query(
-      `SELECT ExamID, ExamName, ExamType, ClassID FROM Exams WHERE ExamID = ? AND ClassID = ?`,
+      `SELECT "ExamID", "ExamName", "ExamType", "ClassID" FROM "Exams" WHERE "ExamID" = ? AND "ClassID" = ?`,
       [ExamID, ClassID],
     );
 
@@ -270,7 +270,7 @@ const addResult = async (resultData, branchId = null) => {
     }
 
     const { rows: subjectCheck } = await db.query(
-      `SELECT SubjectID, SubjectName, ClassID FROM Subjects WHERE SubjectID = ? AND ClassID = ?`,
+      `SELECT "SubjectID", "SubjectName", "ClassID" FROM "Subjects" WHERE "SubjectID" = ? AND "ClassID" = ?`,
       [SubjectID, ClassID],
     );
 
@@ -291,8 +291,8 @@ const addResult = async (resultData, branchId = null) => {
 
     const insertId = await db.insert(
       // The result belongs to its student's branch.
-      `INSERT INTO Results (StudentID, ExamID, SubjectID, ClassID, MarksObtained, branch_id)
-       SELECT ?, ?, ?, ?, ?, branch_id FROM Students WHERE StudentID = ?`,
+      `INSERT INTO "Results" ("StudentID", "ExamID", "SubjectID", "ClassID", "MarksObtained", branch_id)
+       SELECT ?, ?, ?, ?, ?, branch_id FROM "Students" WHERE "StudentID" = ?`,
       [StudentID, ExamID, SubjectID, ClassID, MarksObtained, StudentID],
       "ResultID",
     );
@@ -341,31 +341,31 @@ const addResultByStudentDetails = async (resultData, branchId = null) => {
     const branchStudentParam = branchId != null ? [branchId] : [];
 
     let studentQuery = `
-      SELECT s.StudentID, s.FirstName, s.LastName, s.RollNumber, c.ClassName, c.Section
-      FROM Students s
-      LEFT JOIN Classes c ON s.ClassID = c.ClassID
+      SELECT s."StudentID", s."FirstName", s."LastName", s."RollNumber", c."ClassName", c."Section"
+      FROM "Students" s
+      LEFT JOIN "Classes" c ON s."ClassID" = c."ClassID"
       WHERE 1=1 ${branchStudentClause}
     `;
     const studentParams = [...branchStudentParam];
 
     if (studentName) {
-      studentQuery += ` AND (CONCAT(s.FirstName, ' ', s.LastName) LIKE ? OR s.FirstName LIKE ? OR s.LastName LIKE ?)`;
+      studentQuery += ` AND (CONCAT(s."FirstName", ' ', s."LastName") LIKE ? OR s."FirstName" LIKE ? OR s."LastName" LIKE ?)`;
       const namePattern = `%${studentName}%`;
       studentParams.push(namePattern, namePattern, namePattern);
     }
 
     if (rollNumber) {
-      studentQuery += ` AND s.RollNumber = ?`;
+      studentQuery += ` AND s."RollNumber" = ?`;
       studentParams.push(rollNumber);
     }
 
     if (className) {
-      studentQuery += ` AND c.ClassName = ?`;
+      studentQuery += ` AND c."ClassName" = ?`;
       studentParams.push(className);
     }
 
     if (section) {
-      studentQuery += ` AND c.Section = ?`;
+      studentQuery += ` AND c."Section" = ?`;
       studentParams.push(section);
     }
 
@@ -391,10 +391,10 @@ const addResultByStudentDetails = async (resultData, branchId = null) => {
 
     // Get exam ID by exam name and class
     const { rows: examRows } = await db.query(
-      `SELECT e.ExamID, e.ExamName, e.ExamType, c.ClassName, c.Section
-      FROM Exams e
-      LEFT JOIN Classes c ON e.ClassID = c.ClassID
-      WHERE e.ExamName = ? AND c.ClassName = ? AND c.Section = ? ${branchClassClause}`,
+      `SELECT e."ExamID", e."ExamName", e."ExamType", c."ClassName", c."Section"
+      FROM "Exams" e
+      LEFT JOIN "Classes" c ON e."ClassID" = c."ClassID"
+      WHERE e."ExamName" = ? AND c."ClassName" = ? AND c."Section" = ? ${branchClassClause}`,
       [examName, className, section, ...branchClassParam],
     );
 
@@ -409,10 +409,10 @@ const addResultByStudentDetails = async (resultData, branchId = null) => {
 
     // Get subject ID by subject name and class
     const { rows: subjectRows } = await db.query(
-      `SELECT sub.SubjectID, sub.SubjectName, c.ClassName, c.Section
-      FROM Subjects sub
-      LEFT JOIN Classes c ON sub.ClassID = c.ClassID
-      WHERE sub.SubjectName = ? AND c.ClassName = ? AND c.Section = ? ${branchClassClause}`,
+      `SELECT sub."SubjectID", sub."SubjectName", c."ClassName", c."Section"
+      FROM "Subjects" sub
+      LEFT JOIN "Classes" c ON sub."ClassID" = c."ClassID"
+      WHERE sub."SubjectName" = ? AND c."ClassName" = ? AND c."Section" = ? ${branchClassClause}`,
       [subjectName, className, section, ...branchClassParam],
     );
 
@@ -427,7 +427,7 @@ const addResultByStudentDetails = async (resultData, branchId = null) => {
 
     // Get class ID
     const { rows: classRows } = await db.query(
-      `SELECT c.ClassID FROM Classes c WHERE c.ClassName = ? AND c.Section = ? ${branchClassClause}`,
+      `SELECT c."ClassID" FROM "Classes" c WHERE c."ClassName" = ? AND c."Section" = ? ${branchClassClause}`,
       [className, section, ...branchClassParam],
     );
 
@@ -451,8 +451,8 @@ const addResultByStudentDetails = async (resultData, branchId = null) => {
     }
 
     const resultId = await db.insert(
-      `INSERT INTO Results (StudentID, ExamID, SubjectID, ClassID, MarksObtained, branch_id)
-       SELECT ?, ?, ?, ?, ?, branch_id FROM Students WHERE StudentID = ?`,
+      `INSERT INTO "Results" ("StudentID", "ExamID", "SubjectID", "ClassID", "MarksObtained", branch_id)
+       SELECT ?, ?, ?, ?, ?, branch_id FROM "Students" WHERE "StudentID" = ?`,
       [studentId, examId, subjectId, classId, marksObtained, studentId],
       "ResultID",
     );
@@ -525,7 +525,7 @@ const addMultipleResults = async (resultsData, branchId = null) => {
       // Branch-scope check: verify student belongs to this branch
       if (branchId != null) {
         const { rows: studentBranchCheck } = await db.query(
-          `SELECT StudentID FROM Students WHERE StudentID = ? AND branch_id = ?`,
+          `SELECT "StudentID" FROM "Students" WHERE "StudentID" = ? AND branch_id = ?`,
           [StudentID, branchId],
         );
         if (studentBranchCheck.length === 0) {
@@ -540,9 +540,9 @@ const addMultipleResults = async (resultsData, branchId = null) => {
       // in the row's class (so in the student's branch and section too).
       const classMatch = await db.one(
         `SELECT
-           EXISTS (SELECT 1 FROM Students WHERE StudentID = ? AND ClassID = ?) AS student,
-           EXISTS (SELECT 1 FROM Exams WHERE ExamID = ? AND ClassID = ?) AS exam,
-           EXISTS (SELECT 1 FROM Subjects WHERE SubjectID = ? AND ClassID = ?) AS subject`,
+           EXISTS (SELECT 1 FROM "Students" WHERE "StudentID" = ? AND "ClassID" = ?) AS student,
+           EXISTS (SELECT 1 FROM "Exams" WHERE "ExamID" = ? AND "ClassID" = ?) AS exam,
+           EXISTS (SELECT 1 FROM "Subjects" WHERE "SubjectID" = ? AND "ClassID" = ?) AS subject`,
         [StudentID, ClassID, ExamID, ClassID, SubjectID, ClassID],
       );
       if (!classMatch.student || !classMatch.exam || !classMatch.subject) {
@@ -579,7 +579,7 @@ const addMultipleResults = async (resultsData, branchId = null) => {
 
     const rows = valuesRows(validatedResults);
     await db.query(
-      `INSERT INTO Results (StudentID, ExamID, SubjectID, ClassID, MarksObtained, branch_id) VALUES ${rows.sql}`,
+      `INSERT INTO "Results" ("StudentID", "ExamID", "SubjectID", "ClassID", "MarksObtained", branch_id) VALUES ${rows.sql}`,
       rows.params,
     );
 
@@ -604,9 +604,9 @@ const updateResult = async (resultId, resultData, branchId = null) => {
 
     // Check if result exists (branch-scoped via student join)
     const { rows: existingResult } = await db.query(
-      `SELECT r.* FROM Results r
-       LEFT JOIN Students s ON r.StudentID = s.StudentID
-       WHERE r.ResultID = ? ${branchClause}`,
+      `SELECT r.* FROM "Results" r
+       LEFT JOIN "Students" s ON r."StudentID" = s."StudentID"
+       WHERE r."ResultID" = ? ${branchClause}`,
       [resultId, ...branchParams],
     );
 
@@ -622,7 +622,7 @@ const updateResult = async (resultId, resultData, branchId = null) => {
       const branchStudentClause = branchId != null ? "AND s.branch_id = ?" : "";
       const branchStudentParam = branchId != null ? [branchId] : [];
       const { rows: studentCheck } = await db.query(
-        `SELECT s.StudentID FROM Students s WHERE s.StudentID = ? AND s.ClassID = ? ${branchStudentClause}`,
+        `SELECT s."StudentID" FROM "Students" s WHERE s."StudentID" = ? AND s."ClassID" = ? ${branchStudentClause}`,
         [StudentID, ClassID || existingResult[0].ClassID, ...branchStudentParam],
       );
 
@@ -632,13 +632,13 @@ const updateResult = async (resultId, resultData, branchId = null) => {
         );
       }
 
-      updates.push("StudentID = ?");
+      updates.push(`"StudentID" = ?`);
       params.push(StudentID);
     }
 
     if (ExamID !== undefined) {
       const { rows: examCheck } = await db.query(
-        `SELECT ExamID FROM Exams WHERE ExamID = ? AND ClassID = ?`,
+        `SELECT "ExamID" FROM "Exams" WHERE "ExamID" = ? AND "ClassID" = ?`,
         [ExamID, ClassID || existingResult[0].ClassID],
       );
 
@@ -648,13 +648,13 @@ const updateResult = async (resultId, resultData, branchId = null) => {
         );
       }
 
-      updates.push("ExamID = ?");
+      updates.push(`"ExamID" = ?`);
       params.push(ExamID);
     }
 
     if (SubjectID !== undefined) {
       const { rows: subjectCheck } = await db.query(
-        `SELECT SubjectID FROM Subjects WHERE SubjectID = ? AND ClassID = ?`,
+        `SELECT "SubjectID" FROM "Subjects" WHERE "SubjectID" = ? AND "ClassID" = ?`,
         [SubjectID, ClassID || existingResult[0].ClassID],
       );
 
@@ -664,7 +664,7 @@ const updateResult = async (resultId, resultData, branchId = null) => {
         );
       }
 
-      updates.push("SubjectID = ?");
+      updates.push(`"SubjectID" = ?`);
       params.push(SubjectID);
     }
 
@@ -672,7 +672,7 @@ const updateResult = async (resultId, resultData, branchId = null) => {
       const branchClassClause = branchId != null ? "AND branch_id = ?" : "";
       const branchClassParam = branchId != null ? [branchId] : [];
       const { rows: classCheck } = await db.query(
-        `SELECT ClassID FROM Classes WHERE ClassID = ? ${branchClassClause}`,
+        `SELECT "ClassID" FROM "Classes" WHERE "ClassID" = ? ${branchClassClause}`,
         [ClassID, ...branchClassParam],
       );
 
@@ -680,7 +680,7 @@ const updateResult = async (resultId, resultData, branchId = null) => {
         throw new Error("Class not found");
       }
 
-      updates.push("ClassID = ?");
+      updates.push(`"ClassID" = ?`);
       params.push(ClassID);
     }
 
@@ -689,7 +689,7 @@ const updateResult = async (resultId, resultData, branchId = null) => {
         throw new Error("Marks obtained must be between 0 and 100");
       }
 
-      updates.push("MarksObtained = ?");
+      updates.push(`"MarksObtained" = ?`);
       params.push(MarksObtained);
     }
 
@@ -707,8 +707,8 @@ const updateResult = async (resultId, resultData, branchId = null) => {
       const newSubjectID = SubjectID || existingResult[0].SubjectID;
 
       const { rows: duplicateCheck } = await db.query(
-        `SELECT ResultID FROM Results
-        WHERE StudentID = ? AND ExamID = ? AND SubjectID = ? AND ResultID != ?`,
+        `SELECT "ResultID" FROM "Results"
+        WHERE "StudentID" = ? AND "ExamID" = ? AND "SubjectID" = ? AND "ResultID" != ?`,
         [newStudentID, newExamID, newSubjectID, resultId],
       );
 
@@ -721,7 +721,7 @@ const updateResult = async (resultId, resultData, branchId = null) => {
 
     params.push(resultId);
     const result = await db.query(
-      `UPDATE Results SET ${updates.join(", ")} WHERE ResultID = ?`,
+      `UPDATE "Results" SET ${updates.join(", ")} WHERE "ResultID" = ?`,
       params,
     );
 
@@ -743,7 +743,7 @@ const updateResult = async (resultId, resultData, branchId = null) => {
 const deleteResult = async (resultId) => {
   try {
     const result = await db.query(
-      `DELETE FROM Results WHERE ResultID = ?`,
+      `DELETE FROM "Results" WHERE "ResultID" = ?`,
       [resultId],
     );
     return { affectedRows: result.rowCount };
@@ -756,7 +756,7 @@ const deleteResult = async (resultId) => {
 const deleteResultsByExam = async (examId) => {
   try {
     const result = await db.query(
-      `DELETE FROM Results WHERE ExamID = ?`,
+      `DELETE FROM "Results" WHERE "ExamID" = ?`,
       [examId],
     );
     return { affectedRows: result.rowCount };
@@ -771,8 +771,8 @@ const getResultCount = async (branchId = null) => {
   try {
     const { rows } = await db.query(
       `SELECT COUNT(*) as count
-       FROM Results r
-       LEFT JOIN Students s ON r.StudentID = s.StudentID
+       FROM "Results" r
+       LEFT JOIN "Students" s ON r."StudentID" = s."StudentID"
        WHERE 1=1 ${clause}`,
       params,
     );
@@ -787,8 +787,8 @@ const checkResultExists = async (studentId, examId, subjectId) => {
   try {
     const { rows } = await db.query(
       `SELECT COUNT(*) as count
-      FROM Results
-      WHERE StudentID = ? AND ExamID = ? AND SubjectID = ?`,
+      FROM "Results"
+      WHERE "StudentID" = ? AND "ExamID" = ? AND "SubjectID" = ?`,
       [studentId, examId, subjectId],
     );
     return rows[0].count > 0;
@@ -802,14 +802,14 @@ const findResultByComposite = async (studentId, examId, subjectId) => {
   try {
     const { rows } = await db.query(
       `SELECT
-        r.ResultID,
-        r.StudentID,
-        r.ExamID,
-        r.SubjectID,
-        r.ClassID,
-        r.MarksObtained
-      FROM Results r
-      WHERE r.StudentID = ? AND r.ExamID = ? AND r.SubjectID = ?
+        r."ResultID",
+        r."StudentID",
+        r."ExamID",
+        r."SubjectID",
+        r."ClassID",
+        r."MarksObtained"
+      FROM "Results" r
+      WHERE r."StudentID" = ? AND r."ExamID" = ? AND r."SubjectID" = ?
       LIMIT 1`,
       [studentId, examId, subjectId],
     );
@@ -825,24 +825,24 @@ const getStudentResultSummary = async (studentId, examId, branchId = null) => {
   try {
     const { rows } = await db.query(
       `SELECT
-        r.ResultID,
-        r.MarksObtained,
-        sub.SubjectName,
-        CONCAT(s.FirstName, ' ', s.LastName) as StudentName,
-        s.FirstName,
-        s.LastName,
-        s.RollNumber,
-        e.ExamName,
-        e.ExamType,
-        c.ClassName,
-        c.Section
-      FROM Results r
-      LEFT JOIN Students s ON r.StudentID = s.StudentID
-      LEFT JOIN Exams e ON r.ExamID = e.ExamID
-      LEFT JOIN Subjects sub ON r.SubjectID = sub.SubjectID
-      LEFT JOIN Classes c ON r.ClassID = c.ClassID
-      WHERE r.StudentID = ? AND r.ExamID = ? ${clause}
-      ORDER BY sub.SubjectName`,
+        r."ResultID",
+        r."MarksObtained",
+        sub."SubjectName",
+        CONCAT(s."FirstName", ' ', s."LastName") as "StudentName",
+        s."FirstName",
+        s."LastName",
+        s."RollNumber",
+        e."ExamName",
+        e."ExamType",
+        c."ClassName",
+        c."Section"
+      FROM "Results" r
+      LEFT JOIN "Students" s ON r."StudentID" = s."StudentID"
+      LEFT JOIN "Exams" e ON r."ExamID" = e."ExamID"
+      LEFT JOIN "Subjects" sub ON r."SubjectID" = sub."SubjectID"
+      LEFT JOIN "Classes" c ON r."ClassID" = c."ClassID"
+      WHERE r."StudentID" = ? AND r."ExamID" = ? ${clause}
+      ORDER BY sub."SubjectName"`,
       [studentId, examId, ...params],
     );
     return rows;
@@ -857,24 +857,24 @@ const searchResults = async (filters, branchId = null) => {
   try {
     let query = `
       SELECT
-        r.ResultID,
-        r.MarksObtained,
-        100 AS TotalMarks,
-        CONCAT(s.FirstName, ' ', s.LastName) as StudentName,
-        s.FirstName,
-        s.LastName,
-        s.RollNumber,
-        e.ExamName,
-        e.ExamType,
-        e.ExamDate,
-        sub.SubjectName,
-        c.ClassName,
-        c.Section
-      FROM Results r
-      LEFT JOIN Students s ON r.StudentID = s.StudentID
-      LEFT JOIN Exams e ON r.ExamID = e.ExamID
-      LEFT JOIN Subjects sub ON r.SubjectID = sub.SubjectID
-      LEFT JOIN Classes c ON r.ClassID = c.ClassID
+        r."ResultID",
+        r."MarksObtained",
+        100 AS "TotalMarks",
+        CONCAT(s."FirstName", ' ', s."LastName") as "StudentName",
+        s."FirstName",
+        s."LastName",
+        s."RollNumber",
+        e."ExamName",
+        e."ExamType",
+        e."ExamDate",
+        sub."SubjectName",
+        c."ClassName",
+        c."Section"
+      FROM "Results" r
+      LEFT JOIN "Students" s ON r."StudentID" = s."StudentID"
+      LEFT JOIN "Exams" e ON r."ExamID" = e."ExamID"
+      LEFT JOIN "Subjects" sub ON r."SubjectID" = sub."SubjectID"
+      LEFT JOIN "Classes" c ON r."ClassID" = c."ClassID"
       WHERE 1=1 ${branchClause}
     `;
     const params = [...branchParams];
@@ -882,7 +882,7 @@ const searchResults = async (filters, branchId = null) => {
     // Accept both 'studentName' (admin panel) and 'firstName' (public results page)
     const nameFilter = filters.studentName || filters.firstName;
     if (nameFilter) {
-      query += ` AND (s.FirstName LIKE ? OR s.LastName LIKE ? OR CONCAT(s.FirstName, ' ', s.LastName) LIKE ?)`;
+      query += ` AND (s."FirstName" LIKE ? OR s."LastName" LIKE ? OR CONCAT(s."FirstName", ' ', s."LastName") LIKE ?)`;
       const namePattern = `%${nameFilter}%`;
       params.push(namePattern, namePattern, namePattern);
     }
@@ -890,76 +890,76 @@ const searchResults = async (filters, branchId = null) => {
     // Exact matches: a LIKE '%Class 1%' would also return Class 10, and
     // roll '%1%' would return rolls 10, 11, 21… — other students' results.
     if (filters.rollNumber) {
-      query += ` AND s.RollNumber = ?`;
+      query += ` AND s."RollNumber" = ?`;
       params.push(filters.rollNumber);
     }
 
     if (filters.className) {
-      query += ` AND c.ClassName = ?`;
+      query += ` AND c."ClassName" = ?`;
       params.push(filters.className);
     }
 
     if (filters.section) {
-      query += ` AND c.Section = ?`;
+      query += ` AND c."Section" = ?`;
       params.push(filters.section);
     }
 
     if (filters.examName) {
-      query += ` AND e.ExamName LIKE ?`;
+      query += ` AND e."ExamName" LIKE ?`;
       params.push(`%${filters.examName}%`);
     }
 
     if (filters.subjectName) {
-      query += ` AND sub.SubjectName LIKE ?`;
+      query += ` AND sub."SubjectName" LIKE ?`;
       params.push(`%${filters.subjectName}%`);
     }
 
     if (filters.examType) {
-      query += ` AND e.ExamType = ?`;
+      query += ` AND e."ExamType" = ?`;
       params.push(filters.examType);
     }
 
     if (filters.studentId) {
-      query += ` AND r.StudentID = ?`;
+      query += ` AND r."StudentID" = ?`;
       params.push(filters.studentId);
     }
 
     if (filters.examId) {
-      query += ` AND r.ExamID = ?`;
+      query += ` AND r."ExamID" = ?`;
       params.push(filters.examId);
     }
 
     if (filters.subjectId) {
-      query += ` AND r.SubjectID = ?`;
+      query += ` AND r."SubjectID" = ?`;
       params.push(filters.subjectId);
     }
 
     if (filters.classId) {
-      query += ` AND r.ClassID = ?`;
+      query += ` AND r."ClassID" = ?`;
       params.push(filters.classId);
     }
 
     if (filters.minMarks) {
-      query += ` AND r.MarksObtained >= ?`;
+      query += ` AND r."MarksObtained" >= ?`;
       params.push(filters.minMarks);
     }
 
     if (filters.maxMarks) {
-      query += ` AND r.MarksObtained <= ?`;
+      query += ` AND r."MarksObtained" <= ?`;
       params.push(filters.maxMarks);
     }
 
     if (filters.startDate) {
-      query += ` AND e.ExamDate >= ?`;
+      query += ` AND e."ExamDate" >= ?`;
       params.push(filters.startDate);
     }
 
     if (filters.endDate) {
-      query += ` AND e.ExamDate <= ?`;
+      query += ` AND e."ExamDate" <= ?`;
       params.push(filters.endDate);
     }
 
-    query += ` ORDER BY e.ExamDate DESC, c.ClassName, s.RollNumber, sub.SubjectName`;
+    query += ` ORDER BY e."ExamDate" DESC, c."ClassName", s."RollNumber", sub."SubjectName"`;
 
     if (filters.limit) {
       query += ` LIMIT ?`;
@@ -1002,35 +1002,35 @@ const advancedSearchResults = async (searchCriteria, branchId = null) => {
 
     let query = `
       SELECT
-        r.ResultID,
-        r.MarksObtained,
-        CONCAT(s.FirstName, ' ', s.LastName) as StudentName,
-        s.FirstName,
-        s.LastName,
-        s.RollNumber,
-        e.ExamName,
-        e.ExamType,
-        e.ExamDate,
-        sub.SubjectName,
-        c.ClassName,
-        c.Section,
+        r."ResultID",
+        r."MarksObtained",
+        CONCAT(s."FirstName", ' ', s."LastName") as "StudentName",
+        s."FirstName",
+        s."LastName",
+        s."RollNumber",
+        e."ExamName",
+        e."ExamType",
+        e."ExamDate",
+        sub."SubjectName",
+        c."ClassName",
+        c."Section",
         CASE
-          WHEN r.MarksObtained >= 90 THEN 'A+'
-          WHEN r.MarksObtained >= 80 THEN 'A'
-          WHEN r.MarksObtained >= 70 THEN 'B'
-          WHEN r.MarksObtained >= 60 THEN 'C'
-          WHEN r.MarksObtained >= 40 THEN 'D'
+          WHEN r."MarksObtained" >= 90 THEN 'A+'
+          WHEN r."MarksObtained" >= 80 THEN 'A'
+          WHEN r."MarksObtained" >= 70 THEN 'B'
+          WHEN r."MarksObtained" >= 60 THEN 'C'
+          WHEN r."MarksObtained" >= 40 THEN 'D'
           ELSE 'F'
-        END as Grade,
+        END as "Grade",
         CASE
-          WHEN r.MarksObtained >= 40 THEN 'PASS'
+          WHEN r."MarksObtained" >= 40 THEN 'PASS'
           ELSE 'FAIL'
-        END as Status
-      FROM Results r
-      LEFT JOIN Students s ON r.StudentID = s.StudentID
-      LEFT JOIN Exams e ON r.ExamID = e.ExamID
-      LEFT JOIN Subjects sub ON r.SubjectID = sub.SubjectID
-      LEFT JOIN Classes c ON r.ClassID = c.ClassID
+        END as "Status"
+      FROM "Results" r
+      LEFT JOIN "Students" s ON r."StudentID" = s."StudentID"
+      LEFT JOIN "Exams" e ON r."ExamID" = e."ExamID"
+      LEFT JOIN "Subjects" sub ON r."SubjectID" = sub."SubjectID"
+      LEFT JOIN "Classes" c ON r."ClassID" = c."ClassID"
       WHERE 1=1 ${branchClause}
     `;
 
@@ -1039,59 +1039,59 @@ const advancedSearchResults = async (searchCriteria, branchId = null) => {
 
     if (studentName) {
       conditions.push(
-        `(s.FirstName LIKE ? OR s.LastName LIKE ? OR CONCAT(s.FirstName, ' ', s.LastName) LIKE ?)`,
+        `(s."FirstName" LIKE ? OR s."LastName" LIKE ? OR CONCAT(s."FirstName", ' ', s."LastName") LIKE ?)`,
       );
       const namePattern = `%${studentName}%`;
       params.push(namePattern, namePattern, namePattern);
     }
 
     if (rollNumber) {
-      conditions.push(`s.RollNumber LIKE ?`);
+      conditions.push(`s."RollNumber" LIKE ?`);
       params.push(`%${rollNumber}%`);
     }
 
     if (className) {
-      conditions.push(`c.ClassName LIKE ?`);
+      conditions.push(`c."ClassName" LIKE ?`);
       params.push(`%${className}%`);
     }
 
     if (section) {
-      conditions.push(`c.Section LIKE ?`);
+      conditions.push(`c."Section" LIKE ?`);
       params.push(`%${section}%`);
     }
 
     if (examName) {
-      conditions.push(`e.ExamName LIKE ?`);
+      conditions.push(`e."ExamName" LIKE ?`);
       params.push(`%${examName}%`);
     }
 
     if (subjectName) {
-      conditions.push(`sub.SubjectName LIKE ?`);
+      conditions.push(`sub."SubjectName" LIKE ?`);
       params.push(`%${subjectName}%`);
     }
 
     if (examType) {
-      conditions.push(`e.ExamType = ?`);
+      conditions.push(`e."ExamType" = ?`);
       params.push(examType);
     }
 
     if (minMarks !== undefined) {
-      conditions.push(`r.MarksObtained >= ?`);
+      conditions.push(`r."MarksObtained" >= ?`);
       params.push(minMarks);
     }
 
     if (maxMarks !== undefined) {
-      conditions.push(`r.MarksObtained <= ?`);
+      conditions.push(`r."MarksObtained" <= ?`);
       params.push(maxMarks);
     }
 
     if (startDate) {
-      conditions.push(`e.ExamDate >= ?`);
+      conditions.push(`e."ExamDate" >= ?`);
       params.push(startDate);
     }
 
     if (endDate) {
-      conditions.push(`e.ExamDate <= ?`);
+      conditions.push(`e."ExamDate" <= ?`);
       params.push(endDate);
     }
 
@@ -1100,18 +1100,18 @@ const advancedSearchResults = async (searchCriteria, branchId = null) => {
     }
 
     const sortColumns = {
-      examDate: "e.ExamDate",
-      studentName: 'CONCAT(s.FirstName, " ", s.LastName)',
-      rollNumber: "s.RollNumber",
-      className: "c.ClassName",
-      marks: "r.MarksObtained",
-      subjectName: "sub.SubjectName",
+      examDate: `e."ExamDate"`,
+      studentName: 'CONCAT(s."FirstName", " ", s."LastName")',
+      rollNumber: `s."RollNumber"`,
+      className: `c."ClassName"`,
+      marks: `r."MarksObtained"`,
+      subjectName: `sub."SubjectName"`,
     };
 
-    const sortColumn = sortColumns[sortBy] || "e.ExamDate";
+    const sortColumn = sortColumns[sortBy] || `e."ExamDate"`;
     const order = sortOrder.toUpperCase() === "ASC" ? "ASC" : "DESC";
 
-    query += ` ORDER BY ${sortColumn} ${order}, s.RollNumber ASC`;
+    query += ` ORDER BY ${sortColumn} ${order}, s."RollNumber" ASC`;
 
     query += ` LIMIT ? OFFSET ?`;
     params.push(limit, offset);
@@ -1121,11 +1121,11 @@ const advancedSearchResults = async (searchCriteria, branchId = null) => {
     // Get total count for pagination
     let countQuery = `
       SELECT COUNT(*) as total
-      FROM Results r
-      LEFT JOIN Students s ON r.StudentID = s.StudentID
-      LEFT JOIN Exams e ON r.ExamID = e.ExamID
-      LEFT JOIN Subjects sub ON r.SubjectID = sub.SubjectID
-      LEFT JOIN Classes c ON r.ClassID = c.ClassID
+      FROM "Results" r
+      LEFT JOIN "Students" s ON r."StudentID" = s."StudentID"
+      LEFT JOIN "Exams" e ON r."ExamID" = e."ExamID"
+      LEFT JOIN "Subjects" sub ON r."SubjectID" = sub."SubjectID"
+      LEFT JOIN "Classes" c ON r."ClassID" = c."ClassID"
       WHERE 1=1 ${branchClause}
     `;
 

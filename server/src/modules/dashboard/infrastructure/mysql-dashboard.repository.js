@@ -21,8 +21,8 @@ export const mysqlDashboardRepository = {
   async attendanceCounts(branchId, date) {
     const { clause, params } = branchFilter(branchId, "a");
     const { rows } = await db.query(
-      `SELECT a.Status AS status, COUNT(*) AS total FROM Attendance a
-        WHERE a.ClassDate = ? ${clause} GROUP BY a.Status`,
+      `SELECT a."Status" AS status, COUNT(*) AS total FROM "Attendance" a
+        WHERE a."ClassDate" = ? ${clause} GROUP BY a."Status"`,
       [date, ...params],
     );
     return Object.fromEntries(rows.map((row) => [row.status, Number(row.total)]));
@@ -32,11 +32,11 @@ export const mysqlDashboardRepository = {
     const { clause, params } = branchFilter(branchId, "p");
     const { rows } = await db.query(
       `SELECT p.id, p.receipt_no, p.amount, p.method, p.paid_on, p.branch_id,
-              i.student_id, CONCAT(s.FirstName, ' ', s.LastName) AS student_name,
-              i.class_name, i.section, i.\`year\`, i.\`month\`
-         FROM FeePayments p
-         JOIN FeeInvoices i ON i.id = p.invoice_id
-         JOIN Students s ON s.StudentID = i.student_id
+              i.student_id, CONCAT(s."FirstName", ' ', s."LastName") AS student_name,
+              i.class_name, i.section, i."year", i."month"
+         FROM "FeePayments" p
+         JOIN "FeeInvoices" i ON i.id = p.invoice_id
+         JOIN "Students" s ON s."StudentID" = i.student_id
         WHERE p.voided_at IS NULL ${clause}
         ORDER BY p.paid_on DESC, p.id DESC
         LIMIT ?`,
@@ -49,10 +49,10 @@ export const mysqlDashboardRepository = {
   async upcomingEvents(branchId, fromDate, limit) {
     const branchClause = branchId == null ? "" : "AND (branch_id = ? OR branch_id IS NULL)";
     const { rows } = await db.query(
-      `SELECT EventID, EventName, EventType, StartDate, EndDate, Venue, branch_id
-         FROM Events
-        WHERE EndDate >= ? ${branchClause}
-        ORDER BY StartDate, EventID
+      `SELECT "EventID", "EventName", "EventType", "StartDate", "EndDate", "Venue", branch_id
+         FROM "Events"
+        WHERE "EndDate" >= ? ${branchClause}
+        ORDER BY "StartDate", "EventID"
         LIMIT ?`,
       [fromDate, ...(branchId == null ? [] : [branchId]), limit],
     );

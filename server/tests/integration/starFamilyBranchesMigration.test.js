@@ -37,7 +37,7 @@ async function runMigration() {
 }
 
 const addedBranches = async () => {
-  const [rows] = await db.query(
+  const { rows: rows } = await db.query(
     "SELECT name_en, name_bn, address_en, address_bn FROM Branches WHERE id > ? ORDER BY id",
     [FIXTURE_BRANCHES],
   );
@@ -62,7 +62,7 @@ describe("star_family_branches_migration.sql", () => {
     await runMigration();
     await runMigration();
 
-    const [[stored]] = await db.query("SELECT name_en, name_bn, address_en, address_bn FROM Branches WHERE id = ?", [id]);
+    const stored = await db.one("SELECT name_en, name_bn, address_en, address_bn FROM Branches WHERE id = ?", [id]);
     expect(stored).toEqual(edited);
     expect(await count("Branches", "name_en LIKE '%Mirzapur%'")).toBe(1);
     expect(await count("Branches")).toBe(FIXTURE_BRANCHES + FAMILY.length);

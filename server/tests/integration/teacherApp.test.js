@@ -40,7 +40,7 @@ describe("teacher app", () => {
     otherTeacherId = await insert("Teachers", { FirstName: "Kamal", LastName: "Hossain", Subject: "Math", branch_id: BRANCH_A });
     rahim = await seedStudent({ branchId: BRANCH_A, roll: "1", firstName: "Rahim" });
     karim = await seedStudent({ branchId: BRANCH_A, roll: "2", firstName: "Karim" });
-    await db.query("UPDATE Classes SET TeacherID = ? WHERE ClassID = ?", [teacherId, rahim.classId]);
+    await db.query(`UPDATE "Classes" SET "TeacherID" = ? WHERE "ClassID" = ?`, [teacherId, rahim.classId]);
   });
   afterAll(() => db.end());
 
@@ -83,7 +83,7 @@ describe("teacher app", () => {
 
       expect(res.status).toBe(200);
       expect(res.body.data).toMatchObject({ teacherId, phone: PHONE, enabled: true, hasPassword: true, lastLoginAt: null });
-      const [[row]] = await db.query("SELECT AppPasswordHash AS hash FROM Teachers WHERE TeacherID = ?", [teacherId]);
+      const row = await db.one(`SELECT "AppPasswordHash" AS hash FROM "Teachers" WHERE "TeacherID" = ?`, [teacherId]);
       expect(row.hash).toMatch(/^\$2[aby]\$/);
       expect(row.hash).not.toContain(PASSWORD);
 
@@ -98,7 +98,7 @@ describe("teacher app", () => {
       expect((await giveAccess(teacherB)).status).toBe(404);
       expect((await giveAccess(otherTeacherId)).status).toBe(409);
       expect((await giveAccess(otherTeacherId, { phone: "01711000002", password: "short", enabled: true })).status).toBe(400);
-      expect(await count("Teachers", "AppPhone IS NOT NULL")).toBe(1);
+      expect(await count("Teachers", `"AppPhone" IS NOT NULL`)).toBe(1);
     });
   });
 
@@ -160,7 +160,7 @@ describe("teacher app", () => {
       const results = await Promise.all(guesses.map((password) => login(PHONE, password)));
 
       expect(results.filter((r) => r.status === 200)).toHaveLength(0);
-      const [[row]] = await db.query("SELECT FailedLogins AS n, LockedUntil AS until FROM Teachers WHERE TeacherID = ?", [teacherId]);
+      const row = await db.one(`SELECT "FailedLogins" AS n, "LockedUntil" AS until FROM "Teachers" WHERE "TeacherID" = ?`, [teacherId]);
       expect(row.n).toBe(5);
       expect(row.until).not.toBeNull();
     });
@@ -225,7 +225,7 @@ describe("teacher app", () => {
       expect(roster.status).toBe(200);
       expect(roster.body.data.students.map((s) => s.firstName)).toEqual(["Rahim", "Karim"]);
       expect(res.status).toBe(200);
-      const [rows] = await db.query("SELECT Status, MarkedByType, MarkedBy FROM Attendance ORDER BY StudentID");
+      const { rows: rows } = await db.query(`SELECT "Status", "MarkedByType", "MarkedBy" FROM "Attendance" ORDER BY "StudentID"`);
       expect(rows).toEqual([
         { Status: "Present", MarkedByType: "teacher", MarkedBy: teacherId },
         { Status: "Absent", MarkedByType: "teacher", MarkedBy: teacherId },
@@ -261,7 +261,7 @@ describe("teacher app", () => {
       expect(caughtUp.status).toBe(200);
       expect(resent.status).toBe(200);
       expect(rewritten.status).toBe(403);
-      expect(await count("Attendance", "ClassDate = ? AND Status = 'Absent'", [yesterday])).toBe(1);
+      expect(await count("Attendance", `"ClassDate" = ? AND "Status" = 'Absent'`, [yesterday])).toBe(1);
     });
 
     it("keeps an admin's correction when the phone syncs an older save, and a repeated sync changes nothing", async () => {
@@ -279,7 +279,7 @@ describe("teacher app", () => {
       expect(first.status).toBe(200);
       expect(first.body.data.kept).toEqual([rahim.studentId, karim.studentId]);
       expect(again.status).toBe(200);
-      const [rows] = await db.query("SELECT Status, MarkedByType FROM Attendance ORDER BY StudentID");
+      const { rows: rows } = await db.query(`SELECT "Status", "MarkedByType" FROM "Attendance" ORDER BY "StudentID"`);
       expect(rows).toEqual([
         { Status: "Present", MarkedByType: "admin" },
         { Status: "Leave", MarkedByType: "admin" },

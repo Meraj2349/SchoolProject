@@ -4,7 +4,7 @@ import { db } from "./helpers.js";
 // Sql/database.sql is what a fresh install (docker-compose) loads. These are
 // the columns and tables the application code queries.
 const columnsOf = async (table) => {
-  const [rows] = await db.query(
+  const { rows: rows } = await db.query(
     "SELECT COLUMN_NAME AS name FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ?",
     [table],
   );
@@ -43,12 +43,12 @@ describe("fresh database schema", () => {
   it.each(["Notices", "NoticeAnnouncements", "News", "Messages", "Images", "Applications", "Achievements", "JobCirculars", "JobApplications"])(
     "gives %s an optional branch that must exist",
     async (table) => {
-      const [[column]] = await db.query(
+      const column = await db.one(
         `SELECT IS_NULLABLE AS nullable FROM information_schema.COLUMNS
           WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? AND COLUMN_NAME = 'branch_id'`,
         [table],
       );
-      const [[fk]] = await db.query(
+      const fk = await db.one(
         `SELECT REFERENCED_TABLE_NAME AS target FROM information_schema.KEY_COLUMN_USAGE
           WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? AND COLUMN_NAME = 'branch_id'
             AND REFERENCED_TABLE_NAME IS NOT NULL`,
@@ -60,12 +60,12 @@ describe("fresh database schema", () => {
   );
 
   it("has the shared ClassNames reference table with the standard classes", async () => {
-    const [rows] = await db.query("SELECT name FROM ClassNames ORDER BY sort_order");
+    const { rows: rows } = await db.query(`SELECT name FROM "ClassNames" ORDER BY sort_order`);
     expect(rows.map((r) => r.name)).toEqual(expect.arrayContaining(["Play", "Class 1", "Class 10"]));
   });
 
   it("makes a class name + section unique per branch, not globally", async () => {
-    const [rows] = await db.query(
+    const { rows: rows } = await db.query(
       `SELECT INDEX_NAME AS name, GROUP_CONCAT(COLUMN_NAME ORDER BY SEQ_IN_INDEX) AS cols
          FROM information_schema.STATISTICS
         WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'Classes' AND NON_UNIQUE = 0

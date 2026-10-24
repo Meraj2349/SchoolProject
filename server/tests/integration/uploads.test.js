@@ -54,7 +54,7 @@ describe("file uploads", () => {
       const res = await request(app).put(`/api/images/${id}/image`).set(admin).attach("image", PNG, "new.png");
 
       expect(res.status).toBe(200);
-      const [[row]] = await db.query("SELECT ImagePath, PublicID FROM Images WHERE ImageID = ?", [id]);
+      const row = await db.one(`SELECT "ImagePath", "PublicID" FROM "Images" WHERE "ImageID" = ?`, [id]);
       expect(row).toEqual({ ImagePath: "https://cdn.test/1.png", PublicID: "pid-1" });
       expect(cloud.deleted).toEqual(["pid-old"]);
     });
@@ -67,26 +67,26 @@ describe("file uploads", () => {
       const res = await request(app).put(`/api/images/${id}`).set(admin).send({ description: "Prize giving" });
 
       expect(res.status).toBe(200);
-      const [[row]] = await db.query("SELECT Description, ImageType FROM Images WHERE ImageID = ?", [id]);
+      const row = await db.one(`SELECT "Description", "ImageType" FROM "Images" WHERE "ImageID" = ?`, [id]);
       expect(row).toEqual({ Description: "Prize giving", ImageType: "event" });
     });
   });
 
   describe("chairman photo", () => {
     it("keeps the current photo when uploading the new one fails", async () => {
-      await db.query("UPDATE ChairmanProfile SET image_url = 'https://cdn.test/old.png', image_public_id = 'pid-old' WHERE id = 1");
+      await db.query(`UPDATE "ChairmanProfile" SET image_url = 'https://cdn.test/old.png', image_public_id = 'pid-old' WHERE id = 1`);
       cloud.failNextUpload = true;
 
       const res = await request(app).put("/api/chairman").set(admin).attach("image", PNG, "new.png");
 
       expect(res.status).toBe(500);
       expect(cloud.deleted).toEqual([]);
-      const [[row]] = await db.query("SELECT image_public_id FROM ChairmanProfile WHERE id = 1");
+      const row = await db.one(`SELECT image_public_id FROM "ChairmanProfile" WHERE id = 1`);
       expect(row.image_public_id).toBe("pid-old");
     });
 
     it("replaces the photo and then removes the old one", async () => {
-      await db.query("UPDATE ChairmanProfile SET image_url = 'https://cdn.test/old.png', image_public_id = 'pid-old' WHERE id = 1");
+      await db.query(`UPDATE "ChairmanProfile" SET image_url = 'https://cdn.test/old.png', image_public_id = 'pid-old' WHERE id = 1`);
 
       const res = await request(app).put("/api/chairman").set(admin).attach("image", PNG, "new.png");
 

@@ -31,7 +31,7 @@ describe("job circulars", () => {
       .attach("poster", PDF, { filename: "circular.pdf", contentType: "application/pdf" })
       .expect(201);
 
-    const [[row]] = await db.query("SELECT posts, image_url, deadline, is_open FROM JobCirculars WHERE id = ?", [res.body.data.id]);
+    const row = await db.one(`SELECT posts, image_url, deadline, is_open FROM "JobCirculars" WHERE id = ?`, [res.body.data.id]);
     expect(row.posts).toEqual([POST]);
     expect(row.deadline).toBe("2026-10-31");
     expect(row.is_open).toBe(1);
@@ -116,7 +116,7 @@ describe("job circular migrations", () => {
       await run("job_applications_migration.sql");
     }
 
-    const [circulars] = await db.query("SELECT title_bn, is_open, image_url FROM JobCirculars ORDER BY circular_date");
+    const { rows: circulars } = await db.query(`SELECT title_bn, is_open, image_url FROM "JobCirculars" ORDER BY circular_date`);
     expect(circulars).toEqual([
       { title_bn: "জরুরি নিয়োগ বিজ্ঞপ্তি: অ্যাকাউন্টেন্ট", is_open: 0, image_url: "/images/circulars/accountant-2025-06-28.jpg" },
       { title_bn: "জরুরি নিয়োগ বিজ্ঞপ্তি: সহকারি শিক্ষক (বাংলা)", is_open: 0, image_url: "/images/circulars/assistant-teacher-bangla-2025-07-29.jpg" },

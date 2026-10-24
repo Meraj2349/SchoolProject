@@ -22,7 +22,7 @@ export const mysqlBranchRepository = {
   // usage() counts the common cases first; this catches anything else.
   remove: async (id) => {
     try {
-      await db.query("DELETE FROM Branches WHERE id = ?", [id]);
+      await db.query(`DELETE FROM "Branches" WHERE id = ?`, [id]);
     } catch (error) {
       if (db.isForeignKeyViolation(error)) throw new ConflictError("branch_in_use");
       throw error;
@@ -32,7 +32,7 @@ export const mysqlBranchRepository = {
   async stats() {
     const [branches, { rows: admins }] = await Promise.all([
       getBranchStats(),
-      db.query("SELECT branch_id, COUNT(*) AS total FROM Admin WHERE branch_id IS NOT NULL GROUP BY branch_id"),
+      db.query(`SELECT branch_id, COUNT(*) AS total FROM "Admin" WHERE branch_id IS NOT NULL GROUP BY branch_id`),
     ]);
     const adminCount = new Map(admins.map((row) => [row.branch_id, Number(row.total)]));
     return branches.map((branch) => ({ ...branch, adminCount: adminCount.get(branch.id) ?? 0 }));

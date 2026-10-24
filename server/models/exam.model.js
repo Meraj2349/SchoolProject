@@ -30,17 +30,17 @@ const getAllExams = async (branchId = null) => {
   try {
     const { rows } = await db.query(`
       SELECT
-        e.ExamID,
-        e.ExamType,
-        e.ExamName,
-        e.ClassID,
-        e.ExamDate,
-        c.ClassName,
-        c.Section
-      FROM Exams e
-      LEFT JOIN Classes c ON e.ClassID = c.ClassID
+        e."ExamID",
+        e."ExamType",
+        e."ExamName",
+        e."ClassID",
+        e."ExamDate",
+        c."ClassName",
+        c."Section"
+      FROM "Exams" e
+      LEFT JOIN "Classes" c ON e."ClassID" = c."ClassID"
       WHERE 1=1 ${clause}
-      ORDER BY e.ExamDate DESC, e.ExamID DESC
+      ORDER BY e."ExamDate" DESC, e."ExamID" DESC
     `, branchParams);
     return rows;
   } catch (err) {
@@ -58,16 +58,16 @@ const getExamById = async (examId, branchId = null) => {
 
     const { rows } = await db.query(
       `SELECT
-        e.ExamID,
-        e.ExamType,
-        e.ExamName,
-        e.ClassID,
-        e.ExamDate,
-        c.ClassName,
-        c.Section
-      FROM Exams e
-      LEFT JOIN Classes c ON e.ClassID = c.ClassID
-      WHERE e.ExamID = ? ${clause}`,
+        e."ExamID",
+        e."ExamType",
+        e."ExamName",
+        e."ClassID",
+        e."ExamDate",
+        c."ClassName",
+        c."Section"
+      FROM "Exams" e
+      LEFT JOIN "Classes" c ON e."ClassID" = c."ClassID"
+      WHERE e."ExamID" = ? ${clause}`,
       [examId, ...branchParams],
     );
 
@@ -83,17 +83,17 @@ const getExamsByClass = async (classId, branchId = null) => {
   try {
     const { rows } = await db.query(
       `SELECT
-        e.ExamID,
-        e.ExamType,
-        e.ExamName,
-        e.ClassID,
-        e.ExamDate,
-        c.ClassName,
-        c.Section
-      FROM Exams e
-      LEFT JOIN Classes c ON e.ClassID = c.ClassID
-      WHERE e.ClassID = ? ${clause}
-      ORDER BY e.ExamDate DESC`,
+        e."ExamID",
+        e."ExamType",
+        e."ExamName",
+        e."ClassID",
+        e."ExamDate",
+        c."ClassName",
+        c."Section"
+      FROM "Exams" e
+      LEFT JOIN "Classes" c ON e."ClassID" = c."ClassID"
+      WHERE e."ClassID" = ? ${clause}
+      ORDER BY e."ExamDate" DESC`,
       [classId, ...branchParams],
     );
     return rows;
@@ -123,7 +123,7 @@ const addExamByClassDetails = async (examData, branchId = null) => {
     const branchClause = branchId != null ? "AND branch_id = ?" : "";
     const branchParam = branchId != null ? [branchId] : [];
     const { rows: classRows } = await db.query(
-      `SELECT ClassID, ClassName, Section FROM Classes WHERE ClassName = ? AND Section = ? ${branchClause}`,
+      `SELECT "ClassID", "ClassName", "Section" FROM "Classes" WHERE "ClassName" = ? AND "Section" = ? ${branchClause}`,
       [className, sectionName, ...branchParam],
     );
 
@@ -147,8 +147,8 @@ const addExamByClassDetails = async (examData, branchId = null) => {
 
     const insertId = await db.insert(
       // The exam belongs to its class's branch.
-      `INSERT INTO Exams (ExamType, ExamName, ClassID, ExamDate, branch_id)
-       SELECT ?, ?, ClassID, ?, branch_id FROM Classes WHERE ClassID = ?`,
+      `INSERT INTO "Exams" ("ExamType", "ExamName", "ClassID", "ExamDate", branch_id)
+       SELECT ?, ?, "ClassID", ?, branch_id FROM "Classes" WHERE "ClassID" = ?`,
       [examType, examName, examDate, classInfo.ClassID],
       "ExamID",
     );
@@ -197,7 +197,7 @@ const createExamByClassNameAndSection = async (
     const branchClause = branchId != null ? "AND branch_id = ?" : "";
     const branchParam = branchId != null ? [branchId] : [];
     const { rows: classRows } = await db.query(
-      `SELECT ClassID, ClassName, Section FROM Classes WHERE ClassName = ? AND Section = ? ${branchClause}`,
+      `SELECT "ClassID", "ClassName", "Section" FROM "Classes" WHERE "ClassName" = ? AND "Section" = ? ${branchClause}`,
       [className, sectionName, ...branchParam],
     );
 
@@ -221,8 +221,8 @@ const createExamByClassNameAndSection = async (
 
     const insertId = await db.insert(
       // The exam belongs to its class's branch.
-      `INSERT INTO Exams (ExamType, ExamName, ClassID, ExamDate, branch_id)
-       SELECT ?, ?, ClassID, ?, branch_id FROM Classes WHERE ClassID = ?`,
+      `INSERT INTO "Exams" ("ExamType", "ExamName", "ClassID", "ExamDate", branch_id)
+       SELECT ?, ?, "ClassID", ?, branch_id FROM "Classes" WHERE "ClassID" = ?`,
       [examType, examName, examDate, classInfo.ClassID],
       "ExamID",
     );
@@ -267,7 +267,7 @@ const updateExam = async (examId, examData, branchId = null) => {
       const branchClause = branchId != null ? "AND branch_id = ?" : "";
       const branchParam = branchId != null ? [branchId] : [];
       const { rows: classRows } = await db.query(
-        `SELECT ClassID FROM Classes WHERE ClassName = ? AND Section = ? ${branchClause}`,
+        `SELECT "ClassID" FROM "Classes" WHERE "ClassName" = ? AND "Section" = ? ${branchClause}`,
         [cn, sn, ...branchParam],
       );
       if (classRows.length === 0)
@@ -283,14 +283,14 @@ const updateExam = async (examId, examData, branchId = null) => {
         throw new Error(
           `Invalid ExamType. Must be one of: ${VALID_EXAM_TYPES.join(", ")}`,
         );
-      updates.push("ExamType = ?");
+      updates.push(`"ExamType" = ?`);
       params.push(ExamType);
     }
 
     if (ExamName !== undefined) {
       if (!ExamName || ExamName.trim().length === 0)
         throw new Error("ExamName cannot be empty");
-      updates.push("ExamName = ?");
+      updates.push(`"ExamName" = ?`);
       params.push(ExamName.trim());
     }
 
@@ -298,11 +298,11 @@ const updateExam = async (examId, examData, branchId = null) => {
       const branchClause = branchId != null ? "AND branch_id = ?" : "";
       const branchParam = branchId != null ? [branchId] : [];
       const { rows: classCheck } = await db.query(
-        `SELECT ClassID FROM Classes WHERE ClassID = ? ${branchClause}`,
+        `SELECT "ClassID" FROM "Classes" WHERE "ClassID" = ? ${branchClause}`,
         [ClassID, ...branchParam],
       );
       if (classCheck.length === 0) throw new Error("Class not found");
-      updates.push("ClassID = ?");
+      updates.push(`"ClassID" = ?`);
       params.push(ClassID);
     }
 
@@ -310,7 +310,7 @@ const updateExam = async (examId, examData, branchId = null) => {
       const d = new Date(ExamDate);
       if (isNaN(d.getTime()))
         throw new Error("Invalid ExamDate format. Use YYYY-MM-DD");
-      updates.push("ExamDate = ?");
+      updates.push(`"ExamDate" = ?`);
       params.push(ExamDate);
     }
 
@@ -318,7 +318,7 @@ const updateExam = async (examId, examData, branchId = null) => {
 
     params.push(examId);
     const result = await db.query(
-      `UPDATE Exams SET ${updates.join(", ")} WHERE ExamID = ?`,
+      `UPDATE "Exams" SET ${updates.join(", ")} WHERE "ExamID" = ?`,
       params,
     );
 
@@ -342,10 +342,10 @@ const deleteExam = async (examId, branchId = null) => {
       throw new Error("Exam not found");
     }
 
-    await db.query("DELETE FROM Results WHERE ExamID = ?", [examId]);
+    await db.query(`DELETE FROM "Results" WHERE "ExamID" = ?`, [examId]);
 
     const result = await db.query(
-      `DELETE FROM Exams WHERE ExamID = ?`,
+      `DELETE FROM "Exams" WHERE "ExamID" = ?`,
       [examId],
     );
 
@@ -374,7 +374,7 @@ const deleteExam = async (examId, branchId = null) => {
 const getDistinctExamNames = async () => {
   try {
     const { rows } = await db.query(
-      `SELECT DISTINCT ExamName FROM Exams ORDER BY ExamName ASC`
+      `SELECT DISTINCT "ExamName" FROM "Exams" ORDER BY "ExamName" ASC`
     );
     return rows.map((r) => r.ExamName);
   } catch (err) {

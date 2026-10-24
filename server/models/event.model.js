@@ -46,19 +46,19 @@ const getAllEvents = async (branchId = null) => {
   try {
     const { rows } = await db.query(`
       SELECT
-        EventID,
-        EventName,
-        EventType,
-        StartDate,
-        EndDate,
-        Venue,
-        Description,
+        "EventID",
+        "EventName",
+        "EventType",
+        "StartDate",
+        "EndDate",
+        "Venue",
+        "Description",
         branch_id,
-        CreatedAt,
-        UpdatedAt
-      FROM Events
+        "CreatedAt",
+        "UpdatedAt"
+      FROM "Events"
       WHERE 1=1 ${clause}
-      ORDER BY StartDate ASC, CreatedAt DESC
+      ORDER BY "StartDate" ASC, "CreatedAt" DESC
     `, params);
     return rows;
   } catch (err) {
@@ -76,18 +76,18 @@ const getEventById = async (eventId, branchId = null) => {
 
     const { rows } = await db.query(
       `SELECT
-        EventID,
-        EventName,
-        EventType,
-        StartDate,
-        EndDate,
-        Venue,
-        Description,
+        "EventID",
+        "EventName",
+        "EventType",
+        "StartDate",
+        "EndDate",
+        "Venue",
+        "Description",
         branch_id,
-        CreatedAt,
-        UpdatedAt
-      FROM Events
-      WHERE EventID = ? ${clause}`,
+        "CreatedAt",
+        "UpdatedAt"
+      FROM "Events"
+      WHERE "EventID" = ? ${clause}`,
       [eventId, ...params],
     );
 
@@ -136,7 +136,7 @@ const addEvent = async (eventData, branchId = null) => {
 
     let sql, values;
     if (branchId != null) {
-      sql = `INSERT INTO Events (EventName, EventType, StartDate, EndDate, Venue, Description, branch_id) VALUES (?, ?, ?, ?, ?, ?, ?)`;
+      sql = `INSERT INTO "Events" ("EventName", "EventType", "StartDate", "EndDate", "Venue", "Description", branch_id) VALUES (?, ?, ?, ?, ?, ?, ?)`;
       values = [
         eventName.trim(),
         eventType,
@@ -147,7 +147,7 @@ const addEvent = async (eventData, branchId = null) => {
         branchId,
       ];
     } else {
-      sql = `INSERT INTO Events (EventName, EventType, StartDate, EndDate, Venue, Description) VALUES (?, ?, ?, ?, ?, ?)`;
+      sql = `INSERT INTO "Events" ("EventName", "EventType", "StartDate", "EndDate", "Venue", "Description") VALUES (?, ?, ?, ?, ?, ?)`;
       values = [
         eventName.trim(),
         eventType,
@@ -189,7 +189,7 @@ const updateEvent = async (eventId, eventData, branchId = null) => {
     }
 
     const { rows: existingEvent } = await db.query(
-      `SELECT * FROM Events WHERE EventID = ? ${branchScope}`,
+      `SELECT * FROM "Events" WHERE "EventID" = ? ${branchScope}`,
       [eventId, ...branchParams],
     );
 
@@ -209,7 +209,7 @@ const updateEvent = async (eventId, eventData, branchId = null) => {
       if (eventName.length > 100) {
         throw new Error("Event name cannot exceed 100 characters");
       }
-      updates.push("EventName = ?");
+      updates.push(`"EventName" = ?`);
       params.push(eventName.trim());
     }
 
@@ -219,7 +219,7 @@ const updateEvent = async (eventId, eventData, branchId = null) => {
           `Invalid event type. Must be one of: ${VALID_EVENT_TYPES.join(", ")}`,
         );
       }
-      updates.push("EventType = ?");
+      updates.push(`"EventType" = ?`);
       params.push(eventType);
     }
 
@@ -228,7 +228,7 @@ const updateEvent = async (eventId, eventData, branchId = null) => {
       if (isNaN(startDateObj.getTime())) {
         throw new Error("Invalid start date format. Use YYYY-MM-DD");
       }
-      updates.push("StartDate = ?");
+      updates.push(`"StartDate" = ?`);
       params.push(startDate);
     }
 
@@ -237,7 +237,7 @@ const updateEvent = async (eventId, eventData, branchId = null) => {
       if (isNaN(endDateObj.getTime())) {
         throw new Error("Invalid end date format. Use YYYY-MM-DD");
       }
-      updates.push("EndDate = ?");
+      updates.push(`"EndDate" = ?`);
       params.push(endDate);
     }
 
@@ -251,12 +251,12 @@ const updateEvent = async (eventId, eventData, branchId = null) => {
       if (venue && venue.length > 100) {
         throw new Error("Venue name cannot exceed 100 characters");
       }
-      updates.push("Venue = ?");
+      updates.push(`"Venue" = ?`);
       params.push(venue?.trim() || null);
     }
 
     if (description !== undefined) {
-      updates.push("Description = ?");
+      updates.push(`"Description" = ?`);
       params.push(description?.trim() || null);
     }
 
@@ -266,7 +266,7 @@ const updateEvent = async (eventId, eventData, branchId = null) => {
 
     params.push(eventId);
     const result = await db.query(
-      `UPDATE Events SET ${updates.join(", ")} WHERE EventID = ?`,
+      `UPDATE "Events" SET ${updates.join(", ")} WHERE "EventID" = ?`,
       params,
     );
 
@@ -293,7 +293,7 @@ const deleteEvent = async (eventId, branchId = null) => {
     }
 
     const eventInfo = await db.one(
-      `SELECT * FROM Events WHERE EventID = ? ${branchScope}`,
+      `SELECT * FROM "Events" WHERE "EventID" = ? ${branchScope}`,
       [eventId, ...branchParams],
     );
     if (!eventInfo) {
@@ -301,7 +301,7 @@ const deleteEvent = async (eventId, branchId = null) => {
     }
 
     const result = await db.query(
-      `DELETE FROM Events WHERE EventID = ? ${branchScope}`,
+      `DELETE FROM "Events" WHERE "EventID" = ? ${branchScope}`,
       [eventId, ...branchParams],
     );
 
@@ -333,19 +333,19 @@ const getEventsByDateRange = async (startDate, endDate, branchId = null) => {
   try {
     const { rows } = await db.query(
       `SELECT
-        EventID,
-        EventName,
-        EventType,
-        StartDate,
-        EndDate,
-        Venue,
-        Description,
+        "EventID",
+        "EventName",
+        "EventType",
+        "StartDate",
+        "EndDate",
+        "Venue",
+        "Description",
         branch_id,
-        CreatedAt,
-        UpdatedAt
-      FROM Events
-      WHERE StartDate >= ? AND EndDate <= ? ${clause}
-      ORDER BY StartDate ASC`,
+        "CreatedAt",
+        "UpdatedAt"
+      FROM "Events"
+      WHERE "StartDate" >= ? AND "EndDate" <= ? ${clause}
+      ORDER BY "StartDate" ASC`,
       [startDate, endDate, ...params],
     );
 
@@ -367,19 +367,19 @@ const getEventsByType = async (eventType, branchId = null) => {
 
     const { rows } = await db.query(
       `SELECT
-        EventID,
-        EventName,
-        EventType,
-        StartDate,
-        EndDate,
-        Venue,
-        Description,
+        "EventID",
+        "EventName",
+        "EventType",
+        "StartDate",
+        "EndDate",
+        "Venue",
+        "Description",
         branch_id,
-        CreatedAt,
-        UpdatedAt
-      FROM Events
-      WHERE EventType = ? ${clause}
-      ORDER BY StartDate ASC`,
+        "CreatedAt",
+        "UpdatedAt"
+      FROM "Events"
+      WHERE "EventType" = ? ${clause}
+      ORDER BY "StartDate" ASC`,
       [eventType, ...params],
     );
 

@@ -43,34 +43,5 @@
     "jest": "^29.7.0",
     "nodemon": "^3.1.9",
     "supertest": "^7.3.1"
-  },
-  "jest": {
-    "projects": [
-      {
-        "displayName": "unit",
-        "testEnvironment": "node",
-        "transform": {},
-        "roots": [
-          "<rootDir>/src",
-          "<rootDir>/tests/unit"
-        ],
-        "collectCoverageFrom": [
-          "src/**/*.js",
-          "!src/**/index.js"
-        ]
-      },
-      {
-        "displayName": "integration",
-        "testEnvironment": "node",
-        "transform": {},
-        "roots": [
-          "<rootDir>/tests/integration"
-        ],
-        "globalSetup": "<rootDir>/tests/integration/globalSetup.js",
-        "setupFiles": [
-          "<rootDir>/tests/integration/env.js"
-        ]
-      }
-    ]
   }
 }

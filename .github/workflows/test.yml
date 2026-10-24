@@ -51,6 +51,44 @@ jobs:
       - run: npm ci
       - run: npm run test:integration
 
+  # The same integration suite on PostgreSQL, the database the app is moving
+  # to. Allowed to fail while the SQL is being ported (docs/postgres-migration.md,
+  # phases 3–4); it becomes required before the cutover.
+  server-integration-postgres:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_USER: school_test
+          POSTGRES_PASSWORD: school_test
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U school_test"
+          --health-interval=5s --health-timeout=5s --health-retries=30
+    env:
+      TEST_DB_DIALECT: postgres
+      TEST_DB_HOST: 127.0.0.1
+      TEST_DB_PORT: 5432
+      TEST_DB_USER: school_test
+      TEST_DB_PASSWORD: school_test
+    defaults:
+      run:
+        working-directory: server
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: server/package-lock.json
+      - run: npm ci
+      - run: npm run test:integration
+
   frontend:
     runs-on: ubuntu-latest
     defaults:
