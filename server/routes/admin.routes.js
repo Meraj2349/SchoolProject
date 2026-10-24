@@ -11,8 +11,6 @@ import { adminController } from "../src/modules/admins/index.js";
 
 const router = express.Router();
 
-const superAdminOnly = [authMiddleware, adminController.requireSuperAdmin];
-
 // Anyone may register while no admin exists yet (first-time setup).
 // After that only a logged-in super_admin can create admins.
 const firstAdminOrSuperAdmin = async (req, res, next) => {
@@ -29,15 +27,13 @@ const firstAdminOrSuperAdmin = async (req, res, next) => {
   authMiddleware(req, res, () => adminController.requireSuperAdmin(req, res, next));
 };
 
-// Account management lives in src/modules/admins (also at /api/admins);
-// these older paths are kept for the register page and existing clients.
+// Account management lives in src/modules/admins at /api/admins; createAdmin
+// stays here for the register page (first-time setup).
 router.post("/createAdmin", firstAdminOrSuperAdmin, adminController.create);
 //login admin
 router.post("/login", loginAdminController);
 //logout admin
 router.post("/logout", handleLogout);
-router.put("/update/:id", ...superAdminOnly, adminController.update);
-router.delete("/delete/:id", ...superAdminOnly, adminController.remove);
 //updateEmallpassword
 router.put("/updateEmailPassword", authMiddleware, updateEmailPassword);
 

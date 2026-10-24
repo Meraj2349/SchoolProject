@@ -225,13 +225,13 @@ describe("managing admins (/api/admins)", () => {
       expect(res.body.data.map((s) => s.FirstName)).toEqual(["Nadia"]);
     });
 
-    it("also guards the old /api/admin routes", async () => {
+    it("a demoted super admin's old login cannot change, remove or create admins", async () => {
       const exBoss = await seedAdmin({ email: "ex@school.test", role: "super_admin" });
       await asBoss(request(app).put(`/api/admins/${exBoss}`)).send({ role: "branch_admin", branch_id: BRANCH_A });
       const asExBoss = bearer(superAdminToken(exBoss));
 
-      expect((await request(app).delete(`/api/admin/delete/${bossId}`).set(asExBoss)).status).toBe(403);
-      expect((await request(app).put(`/api/admin/update/${bossId}`).set(asExBoss).send({ Password: "takeover1" })).status).toBe(403);
+      expect((await request(app).delete(`/api/admins/${bossId}`).set(asExBoss)).status).toBe(403);
+      expect((await request(app).put(`/api/admins/${bossId}`).set(asExBoss).send({ Password: "takeover1" })).status).toBe(403);
       expect(
         (
           await request(app)
