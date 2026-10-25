@@ -15,4 +15,12 @@ export const E2E = {
   routine: "Class 5 weekly routine",
   circular: { en: "Teachers wanted 2026", bn: "শিক্ষক নিয়োগ ২০২৬" },
   post: { en: "Assistant Teacher (Maths)", bn: "সহকারী শিক্ষক (গণিত)" },
+
+  // Admin accounts that sign in through the real login page. `settings` is
+  // only for the change-password test, so the others keep their password.
+  admins: {
+    super: { email: "head@school.test", password: "Head-Office-2026" },
+    branch: { email: "natiapara@school.test", password: "Natiapara-2026" },
+    settings: { email: "settings@school.test", password: "Settings-2026" },
+  },
 };

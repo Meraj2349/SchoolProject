@@ -4,7 +4,11 @@
 //
 // The database named by E2E_DB_NAME (default school_e2e) is dropped first —
 // never point it at real data.
+import { createRequire } from "node:module";
 import { E2E } from "./fixtures/data.js";
+
+// The server's own password hashing, so the accounts sign in like real ones.
+const bcrypt = createRequire(new URL("../server/package.json", import.meta.url))("bcryptjs");
 
 const env = {
   TEST_DB_HOST: process.env.E2E_DB_HOST || "127.0.0.1",
@@ -40,6 +44,16 @@ try {
   await db.query("UPDATE Branches SET name_en = ?, name_bn = ?, address_en = ?, address_bn = ? WHERE id = ?", [
     E2E.branchB.en, E2E.branchB.bn, "Bathuli, Delduar, Tangail", "বাথুলী, দেলদুয়ার, টাঙ্গাইল", BRANCH_B,
   ]);
+
+  // Admins who sign in through the login page (fixtures/data.js)
+  const admin = async (account, role, branchId = null) =>
+    insert("Admin", {
+      Username: account.email.split("@")[0], Email: account.email,
+      Password: await bcrypt.hash(account.password, 4), role, branch_id: branchId,
+    });
+  await admin(E2E.admins.super, "super_admin");
+  await admin(E2E.admins.branch, "branch_admin", BRANCH_A);
+  await admin(E2E.admins.settings, "branch_admin", BRANCH_A);
 
   // People and classes
   const teacher = await insert("Teachers", {

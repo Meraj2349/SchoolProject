@@ -1011,7 +1011,8 @@
       "branch": "Branch",
       "newContentForSchool": "New items are published for the whole school. Choose a branch in the top bar to publish for one branch only.",
       "newContentForBranch": "New items are published for {branch}.",
-      "contentNotYours": "Only the super admin can change this."
+      "contentNotYours": "Only the super admin can change this.",
+      "superAdminOnly": "Only the super admin can open this page."
     },
     "fees": {
       "overviewTitle": "Fees",

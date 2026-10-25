@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { breadcrumbsFor, findNavItem, NAV_GROUPS, visibleNavigation } from "./navigation";
+import { breadcrumbsFor, canOpen, findNavItem, NAV_GROUPS, visibleNavigation } from "./navigation";
 
 const paths = (groups) => groups.flatMap((g) => g.items.map((i) => i.path));
 
@@ -93,6 +93,25 @@ describe("admin navigation", () => {
 
     it("shows only admin home for unknown pages", () => {
       expect(breadcrumbsFor("/admin/nope")).toEqual([{ key: "admin.shell.home", path: "/admin/dashboard" }]);
+    });
+  });
+
+  describe("canOpen", () => {
+    it("lets a super admin open every page", () => {
+      expect(canOpen("/admin/chairman", "super_admin")).toBe(true);
+      expect(canOpen("/admin/admins", "super_admin")).toBe(true);
+    });
+
+    it("keeps a branch admin out of super-admin pages, and pages under them", () => {
+      expect(canOpen("/admin/chairman", "branch_admin")).toBe(false);
+      expect(canOpen("/admin/branches", "branch_admin")).toBe(false);
+      expect(canOpen("/admin/admins/7", "branch_admin")).toBe(false);
+    });
+
+    it("lets a branch admin open the other pages", () => {
+      expect(canOpen("/admin/studentList", "branch_admin")).toBe(true);
+      expect(canOpen("/admin/fees/receipt/3", "branch_admin")).toBe(true);
+      expect(canOpen("/admin/nope", "branch_admin")).toBe(true);
     });
   });
 });

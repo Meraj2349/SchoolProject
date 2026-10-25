@@ -48,6 +48,13 @@ export const test = base.extend({
       (url) => !["localhost", "127.0.0.1"].includes(url.hostname),
       (route) => route.fulfill({ status: 200, contentType: "text/html", body: "" }),
     );
+    // The seeded photos are on this site (real ones are on Cloudinary), and
+    // Next's image optimizer refuses local addresses: serve them as they are.
+    await page.route("**/_next/image?*", async (route) => {
+      const source = new URL(route.request().url()).searchParams.get("url");
+      if (!source?.startsWith("http://localhost")) return route.continue();
+      return route.fulfill({ response: await route.fetch({ url: source }) });
+    });
     // The project's language, unless the visitor already chose one (a reload
     // keeps their choice).
     await page.addInitScript((lang) => {

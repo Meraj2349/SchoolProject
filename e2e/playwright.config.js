@@ -1,8 +1,10 @@
 import { defineConfig, devices } from "@playwright/test";
 
-// The public website in a real browser, against the real API and a seeded
-// database (seed.js). Every spec runs on desktop and phone, in Bangla (the
-// site's default) and English.
+// The website in a real browser, against the real API and a seeded database
+// (seed.js). Public pages: every spec on desktop and phone, in Bangla (the
+// site's default) and English. Admin pages (tests/admin): after the public
+// tests, so admin changes never race their checks; signed in once per admin
+// by auth.setup.js.
 const CI = Boolean(process.env.CI);
 
 const backendEnv = {
@@ -30,6 +32,14 @@ const screens = [
   { name: "phone", use: { ...devices["Pixel 7"] } },
 ];
 
+const publicProjects = screens.flatMap((screen) =>
+  languages.map((language) => ({
+    name: `${screen.name}-${language}`,
+    testIgnore: "admin/**",
+    use: { ...screen.use, language },
+  })),
+);
+
 export default defineConfig({
   testDir: "./tests",
   fullyParallel: true,
@@ -44,9 +54,23 @@ export default defineConfig({
     trace: "retain-on-failure",
     screenshot: "only-on-failure",
   },
-  projects: screens.flatMap((screen) =>
-    languages.map((language) => ({ name: `${screen.name}-${language}`, use: { ...screen.use, language } })),
-  ),
+  projects: [
+    ...publicProjects,
+    { name: "admin-setup", testMatch: "admin/auth.setup.js" },
+    ...languages.map((language) => ({
+      name: `admin-desktop-${language}`,
+      testMatch: "admin/*.spec.js",
+      dependencies: ["admin-setup", ...publicProjects.map((project) => project.name)],
+      use: { ...screens[0].use, language },
+    })),
+    {
+      // Every admin page on a phone; the workflows run on desktop.
+      name: "admin-phone-en",
+      testMatch: "admin/pages.spec.js",
+      dependencies: ["admin-setup", ...publicProjects.map((project) => project.name)],
+      use: { ...screens[1].use, language: "en" },
+    },
+  ],
   webServer: [
     {
       // Fresh data for every run, then the API.
