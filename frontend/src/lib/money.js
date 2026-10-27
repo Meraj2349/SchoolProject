@@ -7,7 +7,7 @@ const formatterFor = (language) => {
   return formatters[locale];
 };
 
-/** "৳1,23,456.50" (or Bangla digits). Accepts numbers or MySQL decimal strings. */
+/** "৳1,23,456.50" (or Bangla digits). Accepts numbers or the decimal strings the API returns. */
 export function formatTaka(amount, language = "en") {
   if (amount === null || amount === undefined || amount === "") return "—";
   const value = Number(amount);

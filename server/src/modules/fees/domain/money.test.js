@@ -8,7 +8,7 @@ describe("toPoisha / fromPoisha", () => {
     expect(fromPoisha(toPoisha(0.1) + toPoisha(0.2))).toBe(0.3);
   });
 
-  it("accepts the decimal strings MySQL returns", () => {
+  it("accepts the decimal strings the database returns", () => {
     expect(toPoisha("1250.50")).toBe(125050);
   });
 });

@@ -64,7 +64,6 @@ jobs:
       - run: tool/live_api_test.sh
         working-directory: mobile/teacher_app
         env:
-          LIVE_DB_DIALECT: postgres
           LIVE_DB_HOST: 127.0.0.1
           LIVE_DB_USER: school_test
           LIVE_DB_PASSWORD: school_test

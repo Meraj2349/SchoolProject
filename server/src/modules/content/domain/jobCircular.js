@@ -88,7 +88,7 @@ function circularFields(input) {
     deadline,
     how_to_apply_en: capped(optionalText(input.how_to_apply_en), MAX_HOW_TO_APPLY),
     how_to_apply_bn: capped(optionalText(input.how_to_apply_bn), MAX_HOW_TO_APPLY),
-    // Stored in a JSON column; mysql2 would expand a plain array into a list.
+    // Stored in a JSON column; pg would send a plain array as a PostgreSQL array.
     posts: JSON.stringify(posts(input.posts)),
     is_open: !isFalse(input.is_open),
     is_published: !isFalse(input.is_published),

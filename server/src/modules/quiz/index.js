@@ -3,8 +3,8 @@ import { makeQuestionBankUseCases } from "./application/questionBank.usecases.js
 import { makeQuizPlayUseCases } from "./application/quizPlay.usecases.js";
 import { makeQuizResultsUseCases } from "./application/quizResults.usecases.js";
 import { loadBenqa } from "./infrastructure/benqaSource.js";
-import { mysqlQuizRepository } from "./infrastructure/mysql-quiz.repository.js";
-import { mysqlStudentDirectory } from "./infrastructure/mysql-student-directory.js";
+import { postgresQuizRepository } from "./infrastructure/postgres-quiz.repository.js";
+import { postgresStudentDirectory } from "./infrastructure/postgres-student-directory.js";
 import { makeQuizController } from "./interface/quiz.controller.js";
 
 // Composition root: the only place that knows which concrete adapters are used.
@@ -18,16 +18,16 @@ const issueQuizToken = (student) =>
     expiresIn: QUIZ_TOKEN_EXPIRY,
   });
 
-export const questionBank = makeQuestionBankUseCases({ quizRepository: mysqlQuizRepository });
+export const questionBank = makeQuestionBankUseCases({ quizRepository: postgresQuizRepository });
 
 export const quizController = makeQuizController({
   play: makeQuizPlayUseCases({
-    quizRepository: mysqlQuizRepository,
-    studentDirectory: mysqlStudentDirectory,
+    quizRepository: postgresQuizRepository,
+    studentDirectory: postgresStudentDirectory,
     issueToken: issueQuizToken,
   }),
   bank: questionBank,
-  results: makeQuizResultsUseCases({ quizRepository: mysqlQuizRepository }),
+  results: makeQuizResultsUseCases({ quizRepository: postgresQuizRepository }),
 });
 
 /** Imports the BEnQA CSVs in `folder` for the given class keys. */

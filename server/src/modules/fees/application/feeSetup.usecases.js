@@ -14,7 +14,7 @@ import { requireBranch } from "./requireBranch.js";
  * heads and student discounts. Every read and write is scoped to a branch.
  *
  * @param {object} deps
- * @param {object} deps.feeRepository  see infrastructure/mysql-fee.repository.js
+ * @param {object} deps.feeRepository  see infrastructure/postgres-fee.repository.js
  */
 export function makeFeeSetupUseCases({ feeRepository: repo }) {
   const findOrFail = async (find, branchId, id, notFoundCode) => {

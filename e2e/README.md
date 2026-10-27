@@ -12,10 +12,9 @@ npm test                          # npm run report: the HTML report of the last 
 
 `npm test` runs `seed.js` first: it drops and rebuilds the database
 `E2E_DB_NAME` (default `school_e2e`) with the server's schema and fills it
-with the data the pages show (`fixtures/data.js`). It runs on PostgreSQL, the
-app's database; `E2E_DB_DIALECT=mysql` runs it on MySQL. Configure the server
-with `E2E_DB_HOST`, `E2E_DB_PORT`, `E2E_DB_USER`, `E2E_DB_PASSWORD` (defaults:
-`127.0.0.1`, port 5432 or 3306, `school_test`; see `fixtures/database.js`).
+with the data the pages show (`fixtures/data.js`). Configure the PostgreSQL
+server with `E2E_DB_HOST`, `E2E_DB_PORT`, `E2E_DB_USER`, `E2E_DB_PASSWORD`
+(defaults: `127.0.0.1`, port 5432, `school_test`; see `fixtures/database.js`).
 Never point it at real data.
 
 Locally an API on :3000 or a frontend on :5173 that is already running is

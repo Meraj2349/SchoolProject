@@ -1,5 +1,10 @@
 # Cutover runbook: MySQL → PostgreSQL
 
+> **After section 8** the MySQL service, the copy tool (`pgcopy`,
+> `server/scripts/mysql-to-postgres/`) and `server/Sql/` are no longer in the
+> code; sections 1–7 need the code from before that change (git history).
+> Section 3 (backups and restore) always applies.
+
 Phase 6 of [postgres-migration.md](postgres-migration.md). This covers moving
 the live school data from MySQL to PostgreSQL on the docker-compose server,
 the rollback, and the backups after the switch. Every command runs on the
@@ -299,16 +304,23 @@ Each step uses data that existed before the copy:
 
 ## 8. After "go": retire MySQL
 
-Do this in a PR, once the go/no-go is passed:
+**In the code** (branch `feature/remove-mysql`; merge it only after the
+go/no-go): the `db` service, the `mysql_data` volume and the MySQL settings
+are gone from `docker-compose.yml` and the `.env` examples; the MySQL driver,
+`mysql2`, the unused `sequelize`, the MySQL CI jobs, the `*Migration.test.js`
+tests, `server/Sql/` and the copy tool are removed (all in git history), and
+CLAUDE.md asks only for a dbmate migration per schema change.
 
-- Remove the `db` service, the `mysql_data` volume entry and the MySQL
-  settings from `docker-compose.yml`, `.env.example` and `server/.env.example`.
-  Keep the last MySQL dump (step 5.2) with the other backups for a year.
-- Remove the MySQL driver (`server/src/shared/db/mysqlDriver.js`,
-  `server/config/db.config.js`), the `mysql2` and unused `sequelize`
-  dependencies, the MySQL CI job and the `*Migration.test.js` tests.
-- Remove `server/Sql/` (it stays in git history) and this copy tool
-  (`server/scripts/mysql-to-postgres/`, `tests/copy/`, the `server-copy` CI job).
-- In CLAUDE.md, schema changes then need only a dbmate migration.
-- On the server: `docker compose rm db` and, once the dump is safe
-  elsewhere, `docker volume rm <project>_mysql_data`.
+**On the server**, after merging and pulling:
+
+1. Make sure the last MySQL dump (step 5.2) is with the off-server backups;
+   keep it for a year.
+2. In `.env`, delete `DB_DIALECT` and `MYSQL_ROOT_PASSWORD`. A leftover
+   `DB_DIALECT=mysql` stops the backend with a clear message.
+3. Restart without the old MySQL container:
+   ```bash
+   docker compose up -d --remove-orphans
+   docker compose ps                     # no db service
+   ```
+4. Once the dump is safe elsewhere, delete MySQL's data:
+   `docker volume ls | grep mysql_data`, then `docker volume rm <that name>`.

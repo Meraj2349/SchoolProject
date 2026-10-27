@@ -3,7 +3,7 @@ import jwt from "jsonwebtoken";
 import { attendance } from "../attendance/index.js";
 import { makeTeacherAccessUseCases } from "./application/teacherAccess.usecases.js";
 import { makeTeacherAppUseCases } from "./application/teacherApp.usecases.js";
-import { mysqlTeacherAccountRepository } from "./infrastructure/mysql-teacherAccount.repository.js";
+import { postgresTeacherAccountRepository } from "./infrastructure/postgres-teacherAccount.repository.js";
 import { makeTeacherAccessController, makeTeacherAppController } from "./interface/teacherApp.controller.js";
 import { makeTeacherAuth } from "./interface/teacherAuth.js";
 
@@ -28,7 +28,7 @@ const issueTeacherToken = ({ teacherId, branchId, tokenVersion }) =>
   });
 
 const teacherApp = makeTeacherAppUseCases({
-  repository: mysqlTeacherAccountRepository,
+  repository: postgresTeacherAccountRepository,
   attendance,
   passwordHasher,
   issueToken: issueTeacherToken,
@@ -40,5 +40,5 @@ export const teacherAuth = makeTeacherAuth({ authenticate: teacherApp.authentica
 export const teacherAppController = makeTeacherAppController({ useCases: teacherApp });
 
 export const teacherAccessController = makeTeacherAccessController({
-  useCases: makeTeacherAccessUseCases({ repository: mysqlTeacherAccountRepository, passwordHasher }),
+  useCases: makeTeacherAccessUseCases({ repository: postgresTeacherAccountRepository, passwordHasher }),
 });

@@ -1,183 +1,63 @@
-# School Project API
+# SchoolProject
 
-This is a Node.js and Express.js based API for managing students and teachers in a school. The API allows you to perform CRUD operations on students and teachers, as well as search for students and get the total count of students.
+School management system for the branches of স্টার শিক্ষা পরিবার (Star
+Shiksha Paribar): the public website, the admin panel and a teachers'
+attendance app.
 
-## Table of Contents
+| Part | What | Stack |
+|---|---|---|
+| `server/` | REST API | Node.js 22, Express 4, PostgreSQL 18 (`pg`), JWT, Cloudinary |
+| `frontend/` | Website + admin panel | Next.js (App Router), React 19, Ant Design, Tailwind |
+| `mobile/teacher_app/` | Attendance app for class teachers (offline-first) | Flutter (Android) |
+| `e2e/` | Browser tests of the website and admin panel | Playwright |
 
-- [School Project API](#school-project-api)
-  - [Table of Contents](#table-of-contents)
-  - [Features](#features)
-  - [Prerequisites](#prerequisites)
-  - [Installation](#installation)
-  - [Usage](#usage)
-  - [API Endpoints](#api-endpoints)
-    - [Students](#students)
-    - [Teachers](#teachers)
-  - [Testing](#testing)
-  - [Project Structure](#project-structure)
-  - [Contributing](#contributing)
-  - [License](#license)
-  - [Contact](#contact)
+Admins are either a super admin (every branch) or a branch admin (one branch).
+Students, teachers, classes, attendance, exams and results, fees, notices,
+news, the gallery, job circulars and the quiz are kept per branch.
 
-## Features
+## Run it with Docker
 
-- Add, update, delete, and fetch students and teachers.
-- Search for students by name, class, or section.
-- Get the total count of students.
-- Middleware for handling authentication (to be implemented).
+```bash
+cp .env.example .env     # fill in real values: passwords, JWT secret, Cloudinary keys
+docker compose up -d
+```
 
-## Prerequisites
+- API: http://localhost:3000
+- Website and admin panel: http://localhost:5174
+- PostgreSQL: `localhost:5433`, user `school`, database `School_Management`
 
-- Node.js (v14 or higher)
-- npm (v6 or higher)
-- MySQL or any other SQL database
+The one-shot `migrate` service applies `server/db/migrations` before the
+backend starts, so an empty database gets the whole schema and the branches.
 
-## Installation
+## Run it for development
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/yourusername/school-project-api.git
-   cd school-project-api# SchoolProject
-   ```
-2. Install the dependencies:
-   `
-npm install`
+You need Node.js 22 and a PostgreSQL 18 server.
 
-3.Set up the database configuration:
+```bash
+cd server && cp .env.example .env    # DB_* settings for your PostgreSQL
+npm ci && npm run db:migrate && npm run dev     # http://localhost:3000
 
-Create a config/db.config.js file with your database connection details.
-// filepath: /home/meraj/Dev/SchoolProject/server/config/db.config.js
-import mysql from 'mysql2/promise';
+cd frontend && npm ci && npm run dev            # http://localhost:5173
+```
 
-const db = mysql.createPool({
-host: 'localhost',
-user: 'root',
-password: 'password',
-database: 'school_db',
-});
+## Tests
 
-export default db;
+```bash
+cd server && npm test                  # unit tests, no database
+cd server && npm run test:integration  # real PostgreSQL (TEST_DB_*), drops and rebuilds school_test
+cd frontend && npm test && npm run lint
+cd e2e && npm ci && npm test           # website + admin panel in a real browser
+cd mobile/teacher_app && flutter analyze && flutter test
+```
 
-4.Run the server:
-npm start
+CI runs all of them on every push and pull request (`.github/workflows/`).
+How the project is built (test-first, clean architecture, conventions) is in
+[`CLAUDE.md`](CLAUDE.md).
 
-Usage
-The server will start on the port specified in the environment variables or default to 3000. You can access the API at http://localhost:3000.
+## Operations
 
-API Endpoints
-
-GitHub Copilot
-Sure, here is a more detailed and standardized README.md for your project:
-
-Install the dependencies:
-
-Set up the database configuration:
-
-Create a config/db.config.js file with your database connection details.
-1 vulnerability
-Run the server:
-
-Usage
-The server will start on the port specified in the environment variables or default to 3000. You can access the API at http://localhost:3000.
-
-API Endpoints
-Students
-GET /api/students
-
-Fetch all students.
-POST /api/students/addStudents
-
-Add a new student.
-Body:
-DELETE /api/students/deleteStudent/:id
-
-Delete a student by ID.
-PUT /api/students/updateStudent/:id
-
-Update a student by ID.
-Body:
-GET /api/students/search
-
-Search for students by name, class, or section.
-Query Parameters: FirstName, Class, Section
-GET /api/students/count
-
-Get the total number of students.
-GET /api/students/student/:id
-
-Get a student by ID.
-Teachers
-POST /api/teachers/addTeacher
-
-Add a new teacher.
-Body:
-GET /api/teachers
-
-Fetch all teachers.
-PUT /api/teachers/updateTeacher/:id
-
-Update a teacher by ID.
-Body: (similar to add teacher)
-DELETE /api/teachers/deleteTeacher/:id
-
-Delete a teacher by ID.
-Testing
-To test the API endpoints, you can use Postman or any other API testing tool. Refer to the API Endpoints section for details on how to test each endpoint.
-
-Example Postman Requests
-GET All Students
-
-Method: GET
-URL: http://localhost:3000/api/students
-POST Add Student
-
-Method: POST
-URL: http://localhost:3000/api/students/addStudents
-Body: (raw JSON)
-DELETE Delete Student
-
-Method: DELETE
-URL: http://localhost:3000/api/students/deleteStudent/1
-PUT Update Student
-
-Method: PUT
-URL: http://localhost:3000/api/students/updateStudent/1
-Body: (raw JSON)
-Project Structure
-.
-├── server
-│ ├── config
-│ │ └── db.config.js
-│ ├── controllers
-│ │ ├── student.controller.js
-│ │ └── teacher.controller.js
-│ ├── middlewares
-│ │ └── auth.middleware.js
-│ ├── models
-│ │ ├── student.model.js
-│ │ └── teacher.model.js
-│ ├── routes
-│ │ ├── student.route.js
-│ │ └── teacher.route.js
-│ └── app.js
-├── package.json
-└── README.md
-
-Contributing
-Contributions are welcome! Please open an issue or submit a pull request for any improvements or bug fixes.
-
-Fork the repository.
-Create a new branch (git checkout -b feature-branch).
-Make your changes.
-Commit your changes (git commit -m 'Add some feature').
-Push to the branch (git push origin feature-branch).
-Open a pull request.
-
-License
-This project is licensed under the MIT License. See the LICENSE file for details.
-
-Contact
-For any questions or inquiries, please contact merajislam2349@gmail.com.
-
-
-
+- Nightly backups: `scripts/backup-postgres.sh` (cron), restore steps in
+  [`docs/postgres-cutover.md`](docs/postgres-cutover.md#3-backups-set-up-before-the-cutover).
+- Schema changes: a new migration in `server/db/migrations` (`npm run db:new -- <name>`).
+- History: the app moved from MySQL to PostgreSQL in 2026
+  ([`docs/postgres-migration.md`](docs/postgres-migration.md)).

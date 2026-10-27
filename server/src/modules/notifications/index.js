@@ -1,5 +1,5 @@
 import { makeAbsenceSmsUseCases } from "./application/absenceSms.usecases.js";
-import { mysqlAbsenceSmsRepository } from "./infrastructure/mysql-absenceSms.repository.js";
+import { postgresAbsenceSmsRepository } from "./infrastructure/postgres-absenceSms.repository.js";
 import { makeLogSmsSender, makeSmsSender } from "./infrastructure/smsSenders.js";
 import { makeAbsenceSmsController } from "./interface/absenceSms.controller.js";
 
@@ -25,7 +25,7 @@ function senderFromEnv() {
 const delay = Number(process.env.ATTENDANCE_SMS_DELAY_MINUTES);
 
 export const absenceSms = makeAbsenceSmsUseCases({
-  repository: mysqlAbsenceSmsRepository,
+  repository: postgresAbsenceSmsRepository,
   sender: senderFromEnv(),
   clock: { now: () => new Date() },
   enabled: process.env.ATTENDANCE_SMS_ENABLED === "true",

@@ -13,28 +13,16 @@ export const FIXTURE_ADMINS = { super: 9001, [BRANCH_A]: 9002, [BRANCH_B]: 9003 
 const REFERENCE_TABLES = ["ClassNames", "ChairmanProfile"];
 
 async function dataTables() {
-  const { rows } =
-    db.dialect === "postgres"
-      ? await db.query(
-          "SELECT table_name AS name FROM information_schema.tables WHERE table_schema = current_schema() AND table_type = 'BASE TABLE'",
-        )
-      : await db.query("SELECT TABLE_NAME AS name FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE()");
+  const { rows } = await db.query(
+    "SELECT table_name AS name FROM information_schema.tables WHERE table_schema = current_schema() AND table_type = 'BASE TABLE'",
+  );
   return rows.map((row) => row.name).filter((name) => !REFERENCE_TABLES.includes(name) && name !== "schema_migrations");
 }
 
 // Empties every data table and re-seeds two branches so each test starts clean.
 export async function resetDb() {
   const tables = await dataTables();
-  if (db.dialect === "postgres") {
-    await db.query(`TRUNCATE ${tables.map((t) => db.ident(t)).join(", ")} RESTART IDENTITY CASCADE`);
-  } else {
-    // FOREIGN_KEY_CHECKS is per connection, so do all of it on one connection.
-    await db.withTransaction(async (tx) => {
-      await tx.query("SET FOREIGN_KEY_CHECKS = 0");
-      for (const table of tables) await tx.query(`TRUNCATE TABLE ${db.ident(table)}`);
-      await tx.query("SET FOREIGN_KEY_CHECKS = 1");
-    });
-  }
+  await db.query(`TRUNCATE ${tables.map((t) => db.ident(t)).join(", ")} RESTART IDENTITY CASCADE`);
   await db.query(
     `INSERT INTO "Branches" ("id", "name_en", "name_bn") VALUES (?, 'Main', 'প্রধান'), (?, 'North', 'উত্তর')`,
     [BRANCH_A, BRANCH_B],
@@ -49,10 +37,8 @@ export async function resetDb() {
     [FIXTURE_ADMINS.super, FIXTURE_ADMINS[BRANCH_A], BRANCH_A, FIXTURE_ADMINS[BRANCH_B], BRANCH_B],
   );
   // PostgreSQL does not move an identity past ids given explicitly.
-  if (db.dialect === "postgres") {
-    await db.query(`SELECT setval(pg_get_serial_sequence('"Branches"', 'id'), (SELECT MAX("id") FROM "Branches"))`);
-    await db.query(`SELECT setval(pg_get_serial_sequence('"Admin"', 'AdminID'), (SELECT MAX("AdminID") FROM "Admin"))`);
-  }
+  await db.query(`SELECT setval(pg_get_serial_sequence('"Branches"', 'id'), (SELECT MAX("id") FROM "Branches"))`);
+  await db.query(`SELECT setval(pg_get_serial_sequence('"Admin"', 'AdminID'), (SELECT MAX("AdminID") FROM "Admin"))`);
 }
 
 // For tests that manage admin accounts themselves (counts, first registration).
@@ -62,9 +48,8 @@ export async function clearAdmins() {
 
 const identityColumns = new Map();
 
-/** The table's generated id column on PostgreSQL (MySQL reports insertId on its own). */
+/** The table's generated (identity) id column, or null. */
 async function identityColumnOf(table) {
-  if (db.dialect !== "postgres") return null;
   if (!identityColumns.has(table)) {
     const row = await db.one(
       `SELECT a.attname AS name FROM pg_attribute a
@@ -81,7 +66,7 @@ export async function insert(table, row) {
   const values = insertList(row, db.ident);
   const sql = `INSERT INTO ${db.ident(table)} ${values.sql}`;
   const idColumn = await identityColumnOf(table);
-  if (db.dialect === "postgres" && !idColumn) {
+  if (!idColumn) {
     await db.query(sql, values.params);
     return undefined;
   }

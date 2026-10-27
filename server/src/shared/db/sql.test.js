@@ -41,7 +41,7 @@ describe("insertList / assignments", () => {
     expect(assignments({ Title: "Hi", IsVisible: true }, quote)).toEqual({ sql: '"Title" = ?, "IsVisible" = ?', params: ["Hi", true] });
   });
 
-  it("writes undefined as NULL, like mysql2's SET ? did", () => {
+  it("writes undefined as NULL", () => {
     expect(assignments({ Title: "Hi", Body: undefined }, quote).params).toEqual(["Hi", null]);
   });
 

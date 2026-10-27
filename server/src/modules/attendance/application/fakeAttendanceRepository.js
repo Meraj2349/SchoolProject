@@ -1,4 +1,4 @@
-// In-memory stand-in for the MySQL attendance repository, for use-case tests.
+// In-memory stand-in for the PostgreSQL attendance repository, for use-case tests.
 // It keeps the same rule as the real one: a save replaces a student's day only
 // when it was taken at or after the time the stored day was taken.
 
@@ -24,7 +24,7 @@ export function makeFakeAttendanceRepository({ branches = [], teachers = [], cla
   const classesInScope = (branchId) =>
     state.classes.filter((c) => inScope(c.branchId, branchId)).sort((a, b) => a.branchId - b.branchId);
 
-  // The class's students of the class's own branch, as the MySQL roster joins them.
+  // The class's students of the class's own branch, as the PostgreSQL roster joins them.
   const studentsOf = (cls) => state.students.filter((s) => s.classId === cls.id && s.branchId === cls.branchId);
 
   const markerNameOf = (record) => `${record.markedByType}#${record.markedBy}`;

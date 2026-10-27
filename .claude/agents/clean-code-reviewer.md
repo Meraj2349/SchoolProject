@@ -27,7 +27,7 @@ review those.
    - No `.skip`, `.only`, commented-out or deleted tests.
 2. **Architecture**
    - Dependency rule: `domain/` and `application/` import nothing from express,
-     `config/db.config.js`, `models/`, Cloudinary, `fs`.
+     `src/shared/db`, `models/`, Cloudinary, `fs`.
    - Controllers contain no SQL or business rules; repositories contain no
      business rules; wiring only in `index.js`.
    - Frontend: components → hooks → services → `httpClient`; query keys from

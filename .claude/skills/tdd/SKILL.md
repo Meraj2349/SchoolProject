@@ -52,7 +52,7 @@ Characterisation tests for legacy code outside `server/src` go in
 | `domain/` | Pure unit tests, input → output / thrown `ValidationError` | none |
 | `application/` (use cases) | Unit tests with **in-memory fake** repositories and storage | hand-written fakes (see `branch.usecases.test.js`) |
 | `interface/` (controllers) | Supertest against a tiny Express app wrapping the controller | fake use cases |
-| `infrastructure/`, legacy `models/` + routes | Integration tests in `server/tests/integration`: real MySQL, real app via Supertest | Cloudinary via `jest.unstable_mockModule` (see `uploads.test.js`) |
+| `infrastructure/`, legacy `models/` + routes | Integration tests in `server/tests/integration`: real PostgreSQL, real app via Supertest | Cloudinary via `jest.unstable_mockModule` (see `uploads.test.js`) |
 
 Integration test helpers (`tests/integration/helpers.js`): `resetDb()` gives
 each test two clean branches, `seedStudent()`, `insert()`, `count()`, and

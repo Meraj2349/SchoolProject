@@ -3,7 +3,7 @@ import request from "supertest";
 import app from "../../app.js";
 import { makeAbsenceSmsUseCases } from "../../src/modules/notifications/application/absenceSms.usecases.js";
 import { makeFakeSmsSender } from "../../src/modules/notifications/application/fakeAbsenceSmsRepository.js";
-import { mysqlAbsenceSmsRepository } from "../../src/modules/notifications/infrastructure/mysql-absenceSms.repository.js";
+import { postgresAbsenceSmsRepository } from "../../src/modules/notifications/infrastructure/postgres-absenceSms.repository.js";
 import { schoolToday } from "../../src/shared/schoolDate.js";
 import { BRANCH_A, BRANCH_B, bearer, branchAdminToken, db, resetDb, seedStudent } from "./helpers.js";
 
@@ -28,7 +28,7 @@ describe("absence SMS to parents", () => {
     savedAt = Date.now();
     // The real queue and database; a fake gateway and a clock 16 minutes on.
     worker = makeAbsenceSmsUseCases({
-      repository: mysqlAbsenceSmsRepository,
+      repository: postgresAbsenceSmsRepository,
       sender,
       clock: { now: () => new Date(savedAt + 16 * 60_000) },
       enabled: true,
@@ -96,7 +96,7 @@ describe("absence SMS to parents", () => {
     // Taking it changes the row, so updated_at moves to now (ON UPDATE / trigger).
     await db.query(`UPDATE "AttendanceSms" SET status = 'sending'`);
 
-    await mysqlAbsenceSmsRepository.failInterrupted();
+    await postgresAbsenceSmsRepository.failInterrupted();
 
     const { rows } = await db.query(`SELECT status FROM "AttendanceSms"`);
     expect(rows).toEqual([{ status: "sending" }]);

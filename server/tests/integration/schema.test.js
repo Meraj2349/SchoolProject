@@ -1,15 +1,12 @@
 import { afterAll, describe, expect, it } from "@jest/globals";
 import { db } from "./helpers.js";
 
-// What a fresh install gets (Sql/database.sql on MySQL, the dbmate
-// migrations on PostgreSQL). These are the columns and tables the
-// application code queries.
-const pg = db.dialect === "postgres";
-const SCHEMA = pg ? "current_schema()" : "DATABASE()";
+// What a fresh install gets (the dbmate migrations). These are the columns
+// and tables the application code queries.
 
 const columnsOf = async (table) => {
   const { rows } = await db.query(
-    `SELECT column_name AS name FROM information_schema.columns WHERE table_schema = ${SCHEMA} AND table_name = ?`,
+    `SELECT column_name AS name FROM information_schema.columns WHERE table_schema = current_schema() AND table_name = ?`,
     [table],
   );
   return rows.map((r) => r.name);
@@ -17,43 +14,29 @@ const columnsOf = async (table) => {
 
 /** The table a column's foreign key points to. */
 const referencedTable = async (table, column) => {
-  const row = pg
-    ? await db.one(
-        `SELECT target.relname AS target FROM pg_constraint k
-           JOIN pg_class source ON source.oid = k.conrelid
-           JOIN pg_class target ON target.oid = k.confrelid
-           JOIN pg_attribute a ON a.attrelid = k.conrelid AND a.attnum = ANY (k.conkey)
-          WHERE k.contype = 'f' AND source.relname = ? AND a.attname = ?`,
-        [table, column],
-      )
-    : await db.one(
-        `SELECT REFERENCED_TABLE_NAME AS target FROM information_schema.KEY_COLUMN_USAGE
-          WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? AND COLUMN_NAME = ? AND REFERENCED_TABLE_NAME IS NOT NULL`,
-        [table, column],
-      );
+  const row = await db.one(
+    `SELECT target.relname AS target FROM pg_constraint k
+       JOIN pg_class source ON source.oid = k.conrelid
+       JOIN pg_class target ON target.oid = k.confrelid
+       JOIN pg_attribute a ON a.attrelid = k.conrelid AND a.attnum = ANY (k.conkey)
+      WHERE k.contype = 'f' AND source.relname = ? AND a.attname = ?`,
+    [table, column],
+  );
   return row?.target;
 };
 
 /** The column lists of a table's unique keys, e.g. "ClassName,Section,branch_id". */
 const uniqueKeys = async (table) => {
-  const { rows } = pg
-    ? await db.query(
-        `SELECT string_agg(a.attname, ',' ORDER BY k.ord) AS cols
-           FROM pg_index i
-           JOIN pg_class t ON t.oid = i.indrelid
-           CROSS JOIN LATERAL unnest(i.indkey) WITH ORDINALITY AS k(attnum, ord)
-           JOIN pg_attribute a ON a.attrelid = i.indrelid AND a.attnum = k.attnum
-          WHERE t.relname = ? AND i.indisunique AND NOT i.indisprimary
-          GROUP BY i.indexrelid`,
-        [table],
-      )
-    : await db.query(
-        `SELECT GROUP_CONCAT(COLUMN_NAME ORDER BY SEQ_IN_INDEX) AS cols
-           FROM information_schema.STATISTICS
-          WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? AND NON_UNIQUE = 0
-          GROUP BY INDEX_NAME`,
-        [table],
-      );
+  const { rows } = await db.query(
+    `SELECT string_agg(a.attname, ',' ORDER BY k.ord) AS cols
+       FROM pg_index i
+       JOIN pg_class t ON t.oid = i.indrelid
+       CROSS JOIN LATERAL unnest(i.indkey) WITH ORDINALITY AS k(attnum, ord)
+       JOIN pg_attribute a ON a.attrelid = i.indrelid AND a.attnum = k.attnum
+      WHERE t.relname = ? AND i.indisunique AND NOT i.indisprimary
+      GROUP BY i.indexrelid`,
+    [table],
+  );
   return rows.map((r) => r.cols);
 };
 
@@ -91,7 +74,7 @@ describe("fresh database schema", () => {
     async (table) => {
       const column = await db.one(
         `SELECT is_nullable AS nullable FROM information_schema.columns
-          WHERE table_schema = ${SCHEMA} AND table_name = ? AND column_name = 'branch_id'`,
+          WHERE table_schema = current_schema() AND table_name = ? AND column_name = 'branch_id'`,
         [table],
       );
       expect(column?.nullable).toBe("YES");

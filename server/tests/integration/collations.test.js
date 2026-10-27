@@ -1,13 +1,11 @@
 import { afterAll, beforeEach, describe, expect, it } from "@jest/globals";
 import { BRANCH_A, count, db, insert, resetDb, seedStudent } from "./helpers.js";
 
-// How PostgreSQL compares each kind of text (MySQL keeps its own rules).
+// How PostgreSQL compares each kind of text.
 // Names and titles ignore case but keep every letter: য় is not য, ড় is not ড.
 // Statuses, codes, ids, phone numbers and links compare exactly, so a status
 // CHECK refuses 'PRESENT' as MySQL's ENUM did.
-const onPostgres = db.dialect === "postgres" ? describe : describe.skip;
-
-onPostgres("text collations (PostgreSQL)", () => {
+describe("text collations", () => {
   beforeEach(resetDb);
   afterAll(() => db.end());
 

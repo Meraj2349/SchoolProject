@@ -1,5 +1,5 @@
 // In-memory implementation of the fee repository port, shared by the use-case
-// tests. It mirrors the branch scoping of the MySQL adapter: a null branchId
+// tests. It mirrors the branch scoping of the PostgreSQL adapter: a null branchId
 // (super admin) sees every branch.
 const inBranch = (branchId) => (row) => branchId == null || row.branch_id === Number(branchId);
 

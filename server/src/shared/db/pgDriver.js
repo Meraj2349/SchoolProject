@@ -25,8 +25,6 @@ export function makePgDriver(pool) {
   const exec = (executor, sql, params) => (executor ?? pool).query(toPositional(sql), params);
 
   return {
-    dialect: "postgres",
-
     async run(executor, sql, params) {
       const result = await exec(executor, sql, params);
       return { rows: result.rows, rowCount: result.rowCount };

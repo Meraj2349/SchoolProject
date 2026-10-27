@@ -9,7 +9,6 @@ function fakeDriver({ results = [], classify = () => null } = {}) {
   return {
     calls,
     client,
-    dialect: "fake",
     run: jest.fn(async (executor, sql, params) => {
       calls.push({ executor, sql, params });
       return queue.shift() ?? { rows: [], rowCount: 0 };
@@ -118,10 +117,6 @@ describe("makeDb", () => {
     expect(db.isDeadlock({ kind: "deadlock" })).toBe(true);
     expect(db.isUniqueViolation(null)).toBe(false);
   });
-
-  it("tells which database it talks to", () => {
-    expect(makeDb(fakeDriver()).dialect).toBe("fake");
-  });
 });
 
 describe("ident", () => {
@@ -133,7 +128,7 @@ describe("ident", () => {
 });
 
 describe("sql fragments", () => {
-  it("passes the driver's dialect fragments through", () => {
+  it("passes the driver's SQL fragments through", () => {
     const sql = { random: () => "random()" };
 
     expect(makeDb({ ...fakeDriver(), sql }).sql.random()).toBe("random()");

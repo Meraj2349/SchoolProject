@@ -1,6 +1,6 @@
 import { makeFeeBillingUseCases } from "./application/feeBilling.usecases.js";
 import { makeFeeSetupUseCases } from "./application/feeSetup.usecases.js";
-import { mysqlFeeRepository } from "./infrastructure/mysql-fee.repository.js";
+import { postgresFeeRepository } from "./infrastructure/postgres-fee.repository.js";
 import { makeFeeController } from "./interface/fee.controller.js";
 import { schoolToday } from "../../shared/schoolDate.js";
 
@@ -9,9 +9,9 @@ import { schoolToday } from "../../shared/schoolDate.js";
 const today = () => schoolToday();
 
 // Exported so other modules (the dashboard) reuse the same billing rules.
-export const feeBilling = makeFeeBillingUseCases({ feeRepository: mysqlFeeRepository, today });
+export const feeBilling = makeFeeBillingUseCases({ feeRepository: postgresFeeRepository, today });
 
 export const feeController = makeFeeController({
-  setup: makeFeeSetupUseCases({ feeRepository: mysqlFeeRepository }),
+  setup: makeFeeSetupUseCases({ feeRepository: postgresFeeRepository }),
   billing: feeBilling,
 });

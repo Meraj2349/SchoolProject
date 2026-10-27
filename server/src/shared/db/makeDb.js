@@ -1,22 +1,19 @@
 // The database port every repository uses. The engine-specific work (running
-// SQL, transactions, error codes) lives in a driver, so the same code runs on
-// MySQL and PostgreSQL.
+// SQL, transactions, error codes) lives in a driver: pgDriver.js.
 //
 //   query(sql, params)            → { rows, rowCount }
 //   one(sql, params)              → first row or null
 //   insert(sql, params, idColumn) → the new row's id
 //   withTransaction(async (tx) => …) — tx has the same methods
 //
-// SQL uses `?` placeholders on both engines.
+// SQL uses `?` placeholders; the driver numbers them ($1, $2, …).
 
 export function makeDb(driver, executor = null) {
   const db = {
-    dialect: driver.dialect,
-
-    /** SQL that differs between engines: leadingNumber, nullSafeEquals, minutesAgo, random. */
+    /** Ready-made SQL fragments: leadingNumber, nullSafeEquals, minutesAgo, random. */
     sql: driver.sql,
 
-    /** A table or column name quoted for this engine. */
+    /** A table or column name, quoted. */
     ident: (name) => driver.quote(name),
 
     query: (sql, params = []) => driver.run(executor, sql, params),

@@ -72,8 +72,7 @@ tool/live_api_test.sh         # against the real server and a throw-away Postgre
 (`server/db/migrations`), starts the API on port 3100 and runs
 `test/integration/live_api_test.dart`: sign in, save offline, sync once, the
 server's records and the two SMS (log-only mode). Set `LIVE_DB_HOST`,
-`LIVE_DB_PORT`, `LIVE_DB_USER` and `LIVE_DB_PASSWORD` for a PostgreSQL server
-(`LIVE_DB_DIALECT=mysql` runs it against the old MySQL database instead). It
+`LIVE_DB_PORT`, `LIVE_DB_USER` and `LIVE_DB_PASSWORD` for a PostgreSQL server. It
 drops the database `LIVE_DB_NAME` (default `teacher_app_live`) first.
 
 Run on a phone or emulator against a server on your computer (debug builds

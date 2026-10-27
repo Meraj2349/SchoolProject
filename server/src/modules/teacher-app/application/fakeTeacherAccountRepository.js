@@ -1,6 +1,6 @@
-// In-memory stand-in for the MySQL teacher account repository, for use-case tests.
+// In-memory stand-in for the PostgreSQL teacher account repository, for use-case tests.
 
-// `branches` ({ id, nameBn, nameEn }) are joined onto the accounts as `branch`, as in MySQL.
+// `branches` ({ id, nameBn, nameEn }) are joined onto the accounts as `branch`, as in the database.
 export function makeFakeTeacherAccountRepository(teachers = [], { branches = [] } = {}) {
   const state = {
     accounts: teachers.map((t) => ({
