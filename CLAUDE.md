@@ -2,14 +2,14 @@
 
 Multi-branch school management system.
 
-- `server/` — Express 4 + MySQL (`mysql2`), ESM. JWT auth with `super_admin`
+- `server/` — Express 4 + PostgreSQL 18 (`pg`), ESM. JWT auth with `super_admin`
   (all branches) and `branch_admin` (one branch, `req.branchId`). Cloudinary for
   images. Bilingual API messages in `server/config/i18n.js` (`en`, `bn`).
 - `frontend/` — Next.js (App Router), React 19, React Query, Zustand, Ant Design,
   Tailwind. JSX in `.js` files. **Read `frontend/AGENTS.md` before touching Next APIs.**
 - `mobile/teacher_app/` — Flutter (Android) app for class teachers to take
   attendance, offline-first; talks to `/api/teacher-app/v1`. See its README.
-- `docker-compose.yml` — backend, frontend, MySQL 8.
+- `docker-compose.yml` — backend, frontend, PostgreSQL 18 (+ a one-shot `migrate`).
 
 ## How we work: TDD + Clean Architecture
 
@@ -39,16 +39,16 @@ docker compose up
 # server
 cd server && npm test                  # unit tests: Jest + Supertest (ESM), no DB
 cd server && npm run test:watch
-cd server && npm run test:integration  # real MySQL, see below
-cd server && npm run test:copy         # MySQL → PostgreSQL data copy (both servers: TEST_MYSQL_*, TEST_PG_*)
-cd server && npm run dev               # needs MySQL + server/.env
+cd server && npm run test:integration  # real PostgreSQL, see below
+cd server && npm run db:migrate        # apply server/db/migrations (DB_* settings)
+cd server && npm run dev               # needs PostgreSQL + server/.env
 
 # frontend
 cd frontend && npm test          # Vitest + Testing Library
 cd frontend && npm run lint
 cd frontend && npm run dev       # http://localhost:5173
 
-# website + admin panel in a real browser (Playwright; PostgreSQL, or E2E_DB_DIALECT=mysql)
+# website + admin panel in a real browser (Playwright, PostgreSQL)
 cd e2e && npm ci && npm test     # seeds school_e2e (E2E_DB_*), starts API + frontend build
 
 # mobile app (Flutter 3.47)
@@ -56,16 +56,17 @@ cd mobile/teacher_app && flutter analyze && flutter test
 cd mobile/teacher_app && tool/live_api_test.sh   # against the real API + PostgreSQL
 ```
 
-Integration tests (`server/tests/integration`) build a fresh database from
-`server/Sql/database.sql` and call the real app over HTTP. They need a MySQL 8
-server; configure it with `TEST_DB_HOST`, `TEST_DB_PORT`, `TEST_DB_USER`,
-`TEST_DB_PASSWORD` (defaults: `127.0.0.1:3306`, user/password `school_test`).
+Integration tests (`server/tests/integration`) build a fresh database with the
+migrations in `server/db/migrations` and call the real app over HTTP. They need
+a PostgreSQL 18 server (`LIKE` on the case-insensitive collations needs 18);
+configure it with `TEST_DB_HOST`, `TEST_DB_PORT`, `TEST_DB_USER`,
+`TEST_DB_PASSWORD` (defaults: `127.0.0.1:5432`, user/password `school_test`).
 The database named by `TEST_DB_NAME` (default `school_test`) is dropped and
 recreated on every run — never point it at real data.
 
 CI (`.github/workflows/test.yml`) runs the unit tests, the integration tests
-against MySQL 8 and PostgreSQL 18 services, the data copy tests (`server-copy`, both at once), the browser tests (`e2e/`, on
-PostgreSQL), and the frontend tests and lint on every push and PR. A new public page or form gets an `e2e/tests`
+against a PostgreSQL 18 service, the browser tests (`e2e/`), and the frontend
+tests and lint on every push and PR. A new public page or form gets an `e2e/tests`
 case too; a new admin page or workflow gets one in `e2e/tests/admin` (the menu
 in `frontend/src/components/admin/navigation.js` drives the page checks).
 `.github/workflows/mobile.yml` analyzes and tests the app, runs it against the
@@ -84,28 +85,30 @@ real API, and builds the APK (artifact `teacher-app-apk`).
   access for their own teachers. Rosters carry `branch` and `classTeacher`;
   `GET /api/attendance/overview?date=` lists each branch's classes, class
   teacher and whether the day is taken (counts follow each student's current
-  class, like the roster; index: `attendance_day_index_migration.sql`). The app shows the teacher's branch
-  (`teacher.branch` from `/login` and `/me`). Poster branches:
-  `server/Sql/star_family_branches_migration.sql`.
+  class, like the roster). The app shows the teacher's branch
+  (`teacher.branch` from `/login` and `/me`). The family's branches are seeded
+  by the first migration (`server/db/migrations/20261024000000_initial_schema.sql`).
 - Absence SMS: `server/src/modules/notifications`, one per child per day, after
   `ATTENDANCE_SMS_DELAY_MINUTES`; provider switch `SMS_PROVIDER=log|bulksmsbd`.
 
 ## Schema changes
 
-The database is moving from MySQL to PostgreSQL (plan in
-`docs/postgres-migration.md`, cutover runbook in `docs/postgres-cutover.md`,
-data copy in `server/scripts/mysql-to-postgres/`). Until the cutover, make
-every schema change on both:
+Every schema change is a new dbmate migration in `server/db/migrations/`
+(`npm run db:new -- <name>`, applied by `npm run db:migrate` and by the
+docker-compose `migrate` service before the backend starts). Never edit an
+applied migration; add a new one. DDL is transactional and `IF NOT EXISTS`
+works natively.
 
-- **PostgreSQL:** a new dbmate migration in `server/db/migrations/`
-  (`npm run db:new -- <name>`, applied with `npm run db:migrate`). Names keep
-  MySQL's spelling and are quoted (`"Students"."StudentID"`). DDL is
-  transactional and `IF NOT EXISTS` works natively; never edit an applied
-  migration, add a new one.
-- **MySQL:** `server/Sql/database.sql` is the full schema for a fresh install
-  (docker-compose loads it). Also add an idempotent, MySQL-8-compatible
-  migration in `server/Sql/` for existing databases (no `ADD COLUMN IF NOT
-  EXISTS` — that is MariaDB-only; check `information_schema` instead).
+- Table and column names keep their original (MySQL-era) spelling and are
+  quoted: `"Students"."StudentID"`. API responses use the same keys.
+- A new text column gets a collation: `"C"` for statuses, codes, ids, phone
+  numbers and links; `ci2` for names, titles, emails and free text
+  (`tests/integration/collations.test.js` checks).
+- A new foreign key gets an index starting with its columns
+  (`tests/integration/pgSchema.test.js` checks).
+
+The app moved from MySQL to PostgreSQL in 2026 (`docs/postgres-migration.md`,
+`docs/postgres-cutover.md`); MySQL support was removed afterwards.
 
 ## Conventions
 

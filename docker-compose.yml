@@ -6,10 +6,9 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=3000
-      # PostgreSQL by default. Rollback to MySQL (until it is retired):
-      # DB_DIALECT=mysql DB_HOST=db DB_USER=root DB_PASSWORD=<mysql root password>
-      # and `docker compose --profile mysql up -d` — see docs/postgres-cutover.md.
-      - DB_DIALECT=${DB_DIALECT:-postgres}
+      # Passed on only so an old .env still saying DB_DIALECT=mysql stops the
+      # backend with a clear message (MySQL was retired).
+      - DB_DIALECT=${DB_DIALECT:-}
       - DB_HOST=${DB_HOST:-postgres}
       - DB_PORT=${DB_PORT:-}
       - DB_USER=${DB_USER:-school}
@@ -97,35 +96,8 @@ services:
     networks:
       - school-network
 
-  # The old MySQL database: kept, untouched, for the data copy and for
-  # rollback until PostgreSQL has been signed off (docs/postgres-cutover.md).
-  # Starts only with `docker compose --profile mysql ...`.
-  db:
-    image: mysql:8.0
-    profiles: ["mysql"]
-    environment:
-      MYSQL_DATABASE: ${DB_NAME:-School_Management}
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-}
-      MYSQL_ROOT_HOST: "%"
-    ports:
-      - "3307:3306"
-    volumes:
-      - mysql_data:/var/lib/mysql
-      - ./server/Sql/database.sql:/docker-entrypoint-initdb.d/database.sql
-      # runs after database.sql (alphabetical): the family's branches
-      - ./server/Sql/star_family_branches_migration.sql:/docker-entrypoint-initdb.d/zz_star_family_branches.sql
-    restart: unless-stopped
-    healthcheck:
-      # $$ = read the password inside the container, not from this file
-      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u root -p$$MYSQL_ROOT_PASSWORD"]
-      timeout: 20s
-      retries: 10
-    networks:
-      - school-network
-
 volumes:
   postgres_data:
-  mysql_data:
   uploads:
   private_uploads:
 

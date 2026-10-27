@@ -1,10 +1,8 @@
 import { afterAll, describe, expect, it } from "@jest/globals";
 import { db } from "./helpers.js";
 
-// Rules for the PostgreSQL schema that MySQL kept by itself.
-const onPostgres = db.dialect === "postgres" ? describe : describe.skip;
-
-onPostgres("PostgreSQL schema rules", () => {
+// Rules for the schema that MySQL used to keep by itself.
+describe("PostgreSQL schema rules", () => {
   afterAll(() => db.end());
 
   // MySQL indexes every foreign-key column automatically; PostgreSQL never

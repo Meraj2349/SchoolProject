@@ -10,7 +10,7 @@ describe("formatTaka", () => {
     expect(formatTaka(123456.5, "bn")).toBe("৳১,২৩,৪৫৬.৫০");
   });
 
-  it("accepts the decimal strings MySQL returns", () => {
+  it("accepts the decimal strings the API returns", () => {
     expect(formatTaka("1500.00", "en")).toBe("৳1,500.00");
   });
 

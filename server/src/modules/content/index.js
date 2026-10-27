@@ -6,7 +6,7 @@ import { jobCircular } from "./domain/jobCircular.js";
 import { jobApplicationCvs } from "../job-applications/index.js";
 import { announcement, message, news, notice } from "./domain/contentKinds.js";
 import { makeLocalUploadStore } from "./infrastructure/localUploadStore.js";
-import { makeMysqlContentRepository } from "./infrastructure/mysql-content.repository.js";
+import { makePostgresContentRepository } from "./infrastructure/postgres-content.repository.js";
 import { makeContentController } from "./interface/content.controller.js";
 
 // Composition root for the website content: notices, the chairman's messages,
@@ -16,7 +16,7 @@ const PUBLIC_DIR = path.resolve(path.dirname(fileURLToPath(import.meta.url)), ".
 
 const controllerFor = ({ kind, table, messages, files, onRemoved }) =>
   makeContentController({
-    useCases: makeContentUseCases({ kind, repository: makeMysqlContentRepository(table), onRemoved }),
+    useCases: makeContentUseCases({ kind, repository: makePostgresContentRepository(table), onRemoved }),
     messages,
     files,
   });

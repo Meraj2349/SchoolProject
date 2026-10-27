@@ -21,40 +21,9 @@ jobs:
       - run: npm ci
       - run: npm test
 
+  # The integration suite against a real PostgreSQL database built from
+  # server/db/migrations.
   server-integration:
-    runs-on: ubuntu-latest
-    services:
-      mysql:
-        image: mysql:8.0
-        env:
-          MYSQL_ROOT_PASSWORD: root
-        ports:
-          - 3306:3306
-        options: >-
-          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -proot"
-          --health-interval=5s --health-timeout=5s --health-retries=30
-    env:
-      TEST_DB_HOST: 127.0.0.1
-      TEST_DB_PORT: 3306
-      TEST_DB_USER: root
-      TEST_DB_PASSWORD: root
-    defaults:
-      run:
-        working-directory: server
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-          cache-dependency-path: server/package-lock.json
-      - run: npm ci
-      - run: npm run test:integration
-
-  # The same integration suite on PostgreSQL, the database the app is moving
-  # to (docs/postgres-migration.md). The *Migration tests (old MySQL scripts)
-  # run on MySQL only.
-  server-integration-postgres:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     services:
@@ -70,7 +39,6 @@ jobs:
           --health-cmd="pg_isready -U school_test"
           --health-interval=5s --health-timeout=5s --health-retries=30
     env:
-      TEST_DB_DIALECT: postgres
       TEST_DB_HOST: 127.0.0.1
       TEST_DB_PORT: 5432
       TEST_DB_USER: school_test
@@ -87,50 +55,6 @@ jobs:
           cache-dependency-path: server/package-lock.json
       - run: npm ci
       - run: npm run test:integration
-
-  # The MySQL → PostgreSQL data copy for the cutover (docs/postgres-cutover.md):
-  # needs both databases at once.
-  server-copy:
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    services:
-      mysql:
-        image: mysql:8.0
-        env:
-          MYSQL_ROOT_PASSWORD: root
-        ports:
-          - 3306:3306
-        options: >-
-          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -proot"
-          --health-interval=5s --health-timeout=5s --health-retries=30
-      postgres:
-        image: postgres:18
-        env:
-          POSTGRES_USER: school_test
-          POSTGRES_PASSWORD: school_test
-          POSTGRES_DB: postgres
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd="pg_isready -U school_test"
-          --health-interval=5s --health-timeout=5s --health-retries=30
-    env:
-      TEST_MYSQL_USER: root
-      TEST_MYSQL_PASSWORD: root
-      TEST_PG_USER: school_test
-      TEST_PG_PASSWORD: school_test
-    defaults:
-      run:
-        working-directory: server
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-          cache-dependency-path: server/package-lock.json
-      - run: npm ci
-      - run: npm run test:copy
 
   # The website and the admin panel in a real browser (e2e/): the API on a
   # seeded PostgreSQL database and a production build of the frontend,
@@ -152,7 +76,6 @@ jobs:
           --health-interval=5s --health-timeout=5s --health-retries=30
     env:
       CI: true
-      E2E_DB_DIALECT: postgres
       E2E_DB_HOST: 127.0.0.1
       E2E_DB_PORT: 5432
       E2E_DB_USER: school_test

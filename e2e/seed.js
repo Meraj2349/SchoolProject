@@ -13,7 +13,6 @@ const bcrypt = createRequire(new URL("../server/package.json", import.meta.url))
 
 // The integration-test setup reads TEST_DB_*, the app's db module DB_*.
 Object.assign(process.env, serverDbEnv, {
-  TEST_DB_DIALECT: database.dialect,
   TEST_DB_HOST: database.host,
   TEST_DB_PORT: database.port,
   TEST_DB_USER: database.user,
@@ -120,7 +119,7 @@ try {
       CorrectAnswer: answer, Active: true,
     });
   }
-  console.log(`Seeded ${database.name} (${database.dialect})`);
+  console.log(`Seeded ${database.name}`);
 } finally {
   await db.end();
 }

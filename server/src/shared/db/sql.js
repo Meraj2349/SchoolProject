@@ -1,5 +1,5 @@
-// SQL fragments that work the same on MySQL and PostgreSQL. They replace
-// mysql2's own expansion of arrays (`IN (?)`, `VALUES ?`), which pg lacks.
+// SQL fragments for lists of values and column objects (`IN (?, ?)`,
+// multi-row `VALUES`, `SET a = ?, b = ?`), which pg does not expand itself.
 
 /** `IN ${sql}` for a list of values. An empty list matches nothing. */
 export function inList(values) {
@@ -19,7 +19,7 @@ export function valuesRows(rows) {
 const IDENTIFIER = /^[A-Za-z_][A-Za-z0-9_]*$/;
 
 function columnsOf(row, quote) {
-  // Like mysql2's `SET ?`: functions are skipped and undefined is written as NULL.
+  // Functions are skipped and undefined is written as NULL.
   const entries = Object.entries(row)
     .filter(([, value]) => typeof value !== "function")
     .map(([name, value]) => [name, value === undefined ? null : value]);

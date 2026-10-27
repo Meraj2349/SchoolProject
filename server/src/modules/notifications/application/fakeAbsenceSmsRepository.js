@@ -1,4 +1,4 @@
-// In-memory stand-in for the MySQL absence SMS repository, for use-case tests.
+// In-memory stand-in for the PostgreSQL absence SMS repository, for use-case tests.
 // `students` are { id, name, parentPhone, statusOn: { date: status } }.
 
 export function makeFakeAbsenceSmsRepository({ students = [] } = {}) {

@@ -8,7 +8,7 @@ The SchoolProject at /home/meraj/Desktop/SchoolProject has two frontends:
 
 **Backend** (`server/`):
 - Node.js + Express (plain JavaScript, ES modules, `"type": "module"`)
-- MySQL via `mysql2` + Sequelize ORM
+- PostgreSQL 18 via `pg` (raw SQL through `server/src/shared/db`; no ORM). MySQL was retired in 2026
 - Runs on port 3000 (`npm run dev` uses nodemon)
 - JWT auth, bcryptjs, Cloudinary for images
 - Entry point: `server/app.js`
@@ -40,9 +40,8 @@ The SchoolProject at /home/meraj/Desktop/SchoolProject has two frontends:
 - Images, Events, Students, Results, Attendance, Routines use standard REST paths
 
 **Database**:
-- MySQL 8 running natively on the host (NOT via Docker) on port 3306
-- Database name: `School_Management`
-- Root password in server/.env: `admin1234`
+- PostgreSQL 18 (docker compose service `postgres`, host port 5433); schema from `server/db/migrations` (dbmate format)
+- Database name: `School_Management`; connection settings in server/.env (DB_*)
 - Tables: Admin, Attendance, Classes, Exams, Images, Messages, Notices, Results, Routines, Students, Subjects, Teachers
 
 **web_application/** — Python Flask AI assistant app (unrelated to main school app)
@@ -50,7 +49,7 @@ The SchoolProject at /home/meraj/Desktop/SchoolProject has two frontends:
 **No separate admin panel** — Admin is built into the same Next.js `frontend/` app under `/admin/*` routes with layout at `src/app/admin/layout.js` (includes Sidebar + AdminGuard).
 
 Why: Migration from Vite/React (client/) to Next.js (frontend/) was performed. Always use frontend/ for new development.
-How to apply: When working on this project, use the frontend/ directory for UI work. Backend is still plain JS Express with MySQL/Sequelize.
+How to apply: When working on this project, use the frontend/ directory for UI work. Backend is plain JS Express with PostgreSQL.
 
 ## Public Pages Design System — Navy/Gold (completed 2026-04-16)
 
@@ -83,7 +82,7 @@ Approach: Tailwind v4 + PostCSS is via `@tailwindcss/postcss` in `postcss.config
 ## Attendance System (completed 2026-04-14)
 
 Full attendance CRUD system was built. Key facts:
-- Backend model: raw SQL in `server/models/attendance.model.js` — MySQL `Attendance` table with `AttendanceID, StudentID, ClassID, ClassDate, Status` columns
+- Backend model: raw SQL in `server/models/attendance.model.js` — `Attendance` table with `AttendanceID, StudentID, ClassID, ClassDate, Status` columns
 - Backend routes registered at `/api/attendance` in `server/app.js`
 - Two key admin pages: `AdminPage.js` (mark attendance for a class/date — uses `upsertCell` per student), `AdminAttendanceGridPage.js` (interactive month grid — uses `getGrid` API which returns `{students, dates}` matrix)
 - `upsertCell` endpoint (`POST /attendance/cell`) auto-resolves `classID` from `studentId` server-side — frontend never needs to pass `classID`

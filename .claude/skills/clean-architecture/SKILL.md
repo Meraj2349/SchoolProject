@@ -20,7 +20,7 @@ server/src/
 └── modules/<feature>/
     ├── domain/              entities, value objects, pure business rules
     ├── application/         use cases: make<Feature>UseCases({ ...ports })
-    ├── infrastructure/      adapters: MySQL repository, external services
+    ├── infrastructure/      adapters: PostgreSQL repository, external services
     ├── interface/           HTTP controller: make<Feature>Controller({ useCases })
     └── index.js             composition root — wires adapters into use cases
 ```
@@ -40,10 +40,10 @@ index.js → everything (wiring only)
 
 | Layer | May import | Must NOT import |
 |---|---|---|
-| `domain` | `shared/errors` | express, mysql, db.config, cloudinary, fs, i18n |
-| `application` | `domain`, `shared/errors` | express, `req`/`res`, db.config, models, cloudinary |
-| `interface` | `shared/http`, `config/i18n` | db.config, models, SQL |
-| `infrastructure` | db.config, models, SDKs | interface |
+| `domain` | `shared/errors` | express, pg, `shared/db`, cloudinary, fs, i18n |
+| `application` | `domain`, `shared/errors` | express, `req`/`res`, `shared/db`, models, cloudinary |
+| `interface` | `shared/http`, `config/i18n` | `shared/db`, models, SQL |
+| `infrastructure` | `shared/db`, models, SDKs | interface |
 
 Use cases receive their dependencies (repository, image storage, clock…) as
 arguments. That is what makes them testable with in-memory fakes.
@@ -77,7 +77,7 @@ Move one feature at a time:
    codes, response shape) against the new controller using fake use cases.
 2. Extract domain rules and use cases test-first.
 3. Write the repository adapter — at first it may delegate to the old model
-   functions (see `mysql-branch.repository.js`), then absorb the SQL later.
+   functions (see `postgres-branch.repository.js`), then absorb the SQL later.
 4. Point the route file at the new controller; delete the old controller.
 5. Never change behaviour and structure in the same step.
 

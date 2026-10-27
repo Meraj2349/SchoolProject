@@ -1,4 +1,4 @@
-// The app's data layer against the real school server and MySQL. Run it with
+// The app's data layer against the real school server and PostgreSQL. Run it with
 // tool/live_api_test.sh, which starts the server and seeds a class teacher
 // (01711000007 / class5-secret, Class 5 Good: Rahim, Karim, Nadia). Without
 // LIVE_API_URL it is skipped, so `flutter test` stays offline.

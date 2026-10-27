@@ -59,7 +59,7 @@ function summarise(rows) {
  * Monthly invoices, payments, late fines and the reports built on them.
  *
  * @param {object} deps
- * @param {object} deps.feeRepository  see infrastructure/mysql-fee.repository.js
+ * @param {object} deps.feeRepository  see infrastructure/postgres-fee.repository.js
  * @param {() => string} deps.today    today's date as "YYYY-MM-DD" in the school's time zone
  */
 export function makeFeeBillingUseCases({ feeRepository: repo, today }) {

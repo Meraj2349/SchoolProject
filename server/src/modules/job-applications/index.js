@@ -2,7 +2,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { makeJobApplicationUseCases } from "./application/jobApplications.usecases.js";
 import { makeCvStore } from "./infrastructure/cvStore.js";
-import { mysqlJobApplicationRepository } from "./infrastructure/mysql-jobApplication.repository.js";
+import { postgresJobApplicationRepository } from "./infrastructure/postgres-jobApplication.repository.js";
 import { publishedCirculars } from "./infrastructure/publishedCirculars.js";
 import { makeJobApplicationController } from "./interface/jobApplication.controller.js";
 
@@ -17,5 +17,5 @@ export const JOB_APPLICATION_CV_ROOT = process.env.JOB_APPLICATION_CV_DIR
 export const jobApplicationCvs = makeCvStore({ root: JOB_APPLICATION_CV_ROOT });
 
 export const jobApplicationController = makeJobApplicationController({
-  useCases: makeJobApplicationUseCases({ repository: mysqlJobApplicationRepository, circulars: publishedCirculars, cvs: jobApplicationCvs }),
+  useCases: makeJobApplicationUseCases({ repository: postgresJobApplicationRepository, circulars: publishedCirculars, cvs: jobApplicationCvs }),
 });

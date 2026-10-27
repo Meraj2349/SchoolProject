@@ -1,5 +1,10 @@
 # Cutover runbook: MySQL → PostgreSQL
 
+> **After section 8** the MySQL service, the copy tool (`pgcopy`,
+> `server/scripts/mysql-to-postgres/`) and `server/Sql/` are no longer in the
+> code; sections 1–7 need the code from before that change (git history).
+> Section 3 (backups and restore) always applies.
+
 Phase 6 of [postgres-migration.md](postgres-migration.md). This covers moving
 the live school data from MySQL to PostgreSQL on the docker-compose server,
 the rollback, and the backups after the switch. Every command runs on the
@@ -37,6 +42,9 @@ docker compose --profile mysql up -d
 
 This also starts the empty `postgres` service and runs the `migrate`
 service, which builds the PostgreSQL schema. The app doesn't use PostgreSQL yet.
+The backend doesn't wait for MySQL, so right after `up` its log may show
+`Database connection failed` for the first seconds; it reconnects as soon as
+MySQL is ready.
 
 ## 1. A read-only MySQL user for the copy
 
@@ -197,6 +205,7 @@ for up to 48 hours.
    ```
 2. **Back up MySQL** as it is now; it's the rollback copy:
    ```bash
+   mkdir -p /var/backups/school
    docker compose exec -T db mysqldump -uroot -p"$MYSQL_ROOT_PASSWORD" --single-transaction --routines School_Management \
      | gzip > /var/backups/school/mysql-final-$(date +%Y%m%d-%H%M).sql.gz
    ```
@@ -210,17 +219,30 @@ for up to 48 hours.
    `copy` ends with `Copied and verified N tables` and `verify` ends with
    `All N tables match`. Anything else: stop and roll back (section 6),
    which at this point only means starting the backend again.
-4. **Switch the backend to PostgreSQL** in `.env`:
+4. **Switch the backend to PostgreSQL.** Keep the old `.env` for the
+   rollback, then change these four lines in `.env`:
+   ```bash
+   cp .env .env.before-cutover
+   ```
    ```bash
    DB_DIALECT=postgres
    DB_HOST=postgres
    DB_USER=school
-   DB_PASSWORD=          # empty: compose then uses POSTGRES_PASSWORD
+   DB_PASSWORD=
    ```
-   Then start it, keeping the MySQL service running for the rollback:
+   Leave `DB_PASSWORD` empty, and don't put a comment on its line: in
+   `.env` the comment would become the password. When it's empty, compose
+   uses `POSTGRES_PASSWORD`. Check before starting:
+   ```bash
+   docker compose config | grep -E 'DB_(DIALECT|HOST|USER):'   # postgres, postgres, school
+   ```
+   Then start the backend, keeping the MySQL service running for the
+   rollback, and note the time: from here on, new data goes to PostgreSQL
+   only.
    ```bash
    docker compose --profile mysql up -d
-   docker compose logs --tail=50 backend
+   date '+%Y-%m-%d %H:%M:%S%z' | tee /var/backups/school/switch-time.txt
+   docker compose logs --tail=50 backend      # "Connected to the database"
    ```
 5. **Smoke test** (section 7) against the live site.
 6. **Reopen:** tell the branch admins. Watch `docker compose logs -f backend`
@@ -237,19 +259,28 @@ again**, because it would replace the new data with MySQL's old data.
 Possible until the go/no-go, 48 hours after reopening. MySQL is untouched:
 the copy only read it.
 
-- **Before reopening (step 3–5 failed):** set `.env` back to the MySQL
-  settings of section 0 and run `docker compose --profile mysql up -d`. Nothing
-  is lost.
-- **After reopening:** the same switch, but anything saved since reopening
-  (attendance, fees, results) is only in PostgreSQL. List it before switching
-  and enter it again on MySQL. Per table, compare with `cutover-verify.txt`,
-  e.g. for attendance:
+The switch back is the same in both cases:
+
+```bash
+cp .env.before-cutover .env
+docker compose --profile mysql up -d
+docker compose exec -T backend sh -c 'echo $DB_DIALECT'   # mysql
+```
+
+- **Before reopening (step 3–5 failed):** nothing is lost, apart from what
+  the smoke test saved.
+- **After reopening:** anything saved since the switch (attendance, fees,
+  results) is only in PostgreSQL. List it before switching back and enter it
+  again on MySQL. For attendance, using the time in `switch-time.txt`:
   ```bash
   docker compose exec -T postgres psql -U school -d School_Management \
-    -c "SELECT * FROM \"Attendance\" WHERE \"UpdatedAt\" > '<reopening time>+06'"
+    -c "SELECT \"AttendanceID\", \"StudentID\", \"ClassDate\", \"Status\", \"MarkedByType\", \"UpdatedAt\"
+        FROM \"Attendance\" WHERE \"UpdatedAt\" > '$(cat /var/backups/school/switch-time.txt)' ORDER BY \"UpdatedAt\""
   ```
-  Attendance teachers took in the app since reopening is in that list
-  too; an admin enters it on the website after the switch.
+  This also lists the attendance teachers took in the app since then; an
+  admin enters it on the website after the switch. Do the same for other
+  tables with an `UpdatedAt`/`updated_at` or `created_at` column, and
+  compare row counts with `cutover-verify.txt`.
 
 **Go / no-go after 48 hours:** go if there are no unexplained 500s, the
 nightly backup ran and was copied off the server, and the branch admins
@@ -273,16 +304,23 @@ Each step uses data that existed before the copy:
 
 ## 8. After "go": retire MySQL
 
-Do this in a PR, once the go/no-go is passed:
+**In the code** (branch `feature/remove-mysql`; merge it only after the
+go/no-go): the `db` service, the `mysql_data` volume and the MySQL settings
+are gone from `docker-compose.yml` and the `.env` examples; the MySQL driver,
+`mysql2`, the unused `sequelize`, the MySQL CI jobs, the `*Migration.test.js`
+tests, `server/Sql/` and the copy tool are removed (all in git history), and
+CLAUDE.md asks only for a dbmate migration per schema change.
 
-- Remove the `db` service, the `mysql_data` volume entry and the MySQL
-  settings from `docker-compose.yml`, `.env.example` and `server/.env.example`.
-  Keep the last MySQL dump (step 5.2) with the other backups for a year.
-- Remove the MySQL driver (`server/src/shared/db/mysqlDriver.js`,
-  `server/config/db.config.js`), the `mysql2` and unused `sequelize`
-  dependencies, the MySQL CI job and the `*Migration.test.js` tests.
-- Remove `server/Sql/` (it stays in git history) and this copy tool
-  (`server/scripts/mysql-to-postgres/`, `tests/copy/`, the `server-copy` CI job).
-- In CLAUDE.md, schema changes then need only a dbmate migration.
-- On the server: `docker compose rm db` and, once the dump is safe
-  elsewhere, `docker volume rm <project>_mysql_data`.
+**On the server**, after merging and pulling:
+
+1. Make sure the last MySQL dump (step 5.2) is with the off-server backups;
+   keep it for a year.
+2. In `.env`, delete `DB_DIALECT` and `MYSQL_ROOT_PASSWORD`. A leftover
+   `DB_DIALECT=mysql` stops the backend with a clear message.
+3. Restart without the old MySQL container:
+   ```bash
+   docker compose up -d --remove-orphans
+   docker compose ps                     # no db service
+   ```
+4. Once the dump is safe elsewhere, delete MySQL's data:
+   `docker volume ls | grep mysql_data`, then `docker volume rm <that name>`.

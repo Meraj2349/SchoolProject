@@ -1,5 +1,9 @@
 # Moving the backend from MySQL 8 to PostgreSQL 18
 
+> **Status:** every phase below is done in the code, and MySQL support is
+> removed (runbook section 8, after the production cutover). This file is
+> kept as the record of how and why.
+
 ## Context
 The school system is moving from MySQL to PostgreSQL. Research before the
 move found that the hard part is not syntax but behaviour that changes

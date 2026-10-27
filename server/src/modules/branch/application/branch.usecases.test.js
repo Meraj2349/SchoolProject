@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it } from "@jest/globals";
 import { ConflictError, NotFoundError, ValidationError } from "../../../shared/errors/index.js";
 import { makeBranchUseCases } from "./branch.usecases.js";
 
-// In-memory fakes: use cases only depend on these ports, never on MySQL or Cloudinary.
+// In-memory fakes: use cases only depend on these ports, never on PostgreSQL or Cloudinary.
 const repoUsage = {};
 
 function makeFakeRepository(initial = []) {

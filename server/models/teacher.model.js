@@ -55,7 +55,7 @@ const EDITABLE_COLUMNS = [
   "Address",
 ];
 
-// Empty form fields become NULL (MySQL rejects '' for a DATE column).
+// Empty form fields become NULL (PostgreSQL rejects '' for a DATE column).
 const emptyToNull = (value) => (value === "" ? null : value);
 
 // Update a teacher (branch-scoped)

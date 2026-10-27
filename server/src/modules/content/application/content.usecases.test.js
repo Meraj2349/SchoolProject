@@ -3,7 +3,7 @@ import { ForbiddenError, NotFoundError, ValidationError } from "../../../shared/
 import { notice } from "../domain/contentKinds.js";
 import { makeContentUseCases } from "./content.usecases.js";
 
-// In-memory stand-in for the MySQL repository.
+// In-memory stand-in for the PostgreSQL repository.
 function fakeRepository(rows = []) {
   const store = new Map(rows.map((row) => [row.id, { ...row }]));
   let nextId = Math.max(0, ...store.keys()) + 1;
