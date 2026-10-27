@@ -47,7 +47,7 @@ cd frontend && npm test          # Vitest + Testing Library
 cd frontend && npm run lint
 cd frontend && npm run dev       # http://localhost:5173
 
-# public website in a real browser (Playwright; needs MySQL like the integration tests)
+# website + admin panel in a real browser (Playwright; needs MySQL like the integration tests)
 cd e2e && npm ci && npm test     # seeds school_e2e, starts API + frontend build
 
 # mobile app (Flutter 3.47)
@@ -65,7 +65,8 @@ recreated on every run — never point it at real data.
 CI (`.github/workflows/test.yml`) runs the unit tests, the integration tests
 against a MySQL 8 service, the browser tests (`e2e/`), and the frontend tests
 and lint on every push and PR. A new public page or form gets an `e2e/tests`
-case too.
+case too; a new admin page or workflow gets one in `e2e/tests/admin` (the menu
+in `frontend/src/components/admin/navigation.js` drives the page checks).
 `.github/workflows/mobile.yml` analyzes and tests the app, runs it against the
 real API, and builds the APK (artifact `teacher-app-apk`).
 

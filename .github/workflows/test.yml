@@ -51,9 +51,9 @@ jobs:
       - run: npm ci
       - run: npm run test:integration
 
-  # The public website in a real browser (e2e/): the API on a seeded MySQL
-  # database and a production build of the frontend, desktop and phone, in
-  # Bangla and English.
+  # The website and the admin panel in a real browser (e2e/): the API on a
+  # seeded MySQL database and a production build of the frontend, desktop and
+  # phone, in Bangla and English.
   e2e:
     runs-on: ubuntu-latest
     timeout-minutes: 30

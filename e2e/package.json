@@ -2,7 +2,7 @@
   "name": "school-e2e",
   "private": true,
   "type": "module",
-  "description": "Browser tests of the public website against the real server and a seeded database.",
+  "description": "Browser tests of the website and the admin panel against the real server and a seeded database.",
   "scripts": {
     "seed": "node seed.js",
     "test": "playwright test",

@@ -53,7 +53,6 @@ try {
     });
   await admin(E2E.admins.super, "super_admin");
   await admin(E2E.admins.branch, "branch_admin", BRANCH_A);
-  await admin(E2E.admins.settings, "branch_admin", BRANCH_A);
 
   // People and classes
   const teacher = await insert("Teachers", {
