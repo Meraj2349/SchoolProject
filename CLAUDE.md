@@ -40,6 +40,7 @@ docker compose up
 cd server && npm test                  # unit tests: Jest + Supertest (ESM), no DB
 cd server && npm run test:watch
 cd server && npm run test:integration  # real MySQL, see below
+cd server && npm run test:copy         # MySQL → PostgreSQL data copy (both servers: TEST_MYSQL_*, TEST_PG_*)
 cd server && npm run dev               # needs MySQL + server/.env
 
 # frontend
@@ -63,7 +64,7 @@ The database named by `TEST_DB_NAME` (default `school_test`) is dropped and
 recreated on every run — never point it at real data.
 
 CI (`.github/workflows/test.yml`) runs the unit tests, the integration tests
-against MySQL 8 and PostgreSQL 18 services, the browser tests (`e2e/`, on
+against MySQL 8 and PostgreSQL 18 services, the data copy tests (`server-copy`, both at once), the browser tests (`e2e/`, on
 PostgreSQL), and the frontend tests and lint on every push and PR. A new public page or form gets an `e2e/tests`
 case too; a new admin page or workflow gets one in `e2e/tests/admin` (the menu
 in `frontend/src/components/admin/navigation.js` drives the page checks).
@@ -91,9 +92,10 @@ real API, and builds the APK (artifact `teacher-app-apk`).
 
 ## Schema changes
 
-The database is moving from MySQL to PostgreSQL (branch
-`feature/postgresql-migration`; plan and runbook in `docs/`). Until the
-cutover, make every schema change on both:
+The database is moving from MySQL to PostgreSQL (plan in
+`docs/postgres-migration.md`, cutover runbook in `docs/postgres-cutover.md`,
+data copy in `server/scripts/mysql-to-postgres/`). Until the cutover, make
+every schema change on both:
 
 - **PostgreSQL:** a new dbmate migration in `server/db/migrations/`
   (`npm run db:new -- <name>`, applied with `npm run db:migrate`). Names keep

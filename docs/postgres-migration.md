@@ -91,15 +91,15 @@ Work happens on `feature/postgresql-migration`. MySQL stays in production until 
   - keep a `mysql` service under a profile until rollback is no longer needed
 - **Other files:** `.env.example` and `server/.env.example` get the new variables.
 - **Mobile.** `.github/workflows/mobile.yml` and `mobile/teacher_app/tool/live_api_test.sh` run the live API on Postgres.
-- **Backups.** A nightly `pg_dump -Fc` + `pg_dumpall --globals-only` script with retention, and documented restore steps.
+- **Backups.** A nightly `pg_dump -Fc` + `pg_dumpall --globals-only` script with retention (`scripts/backup-postgres.sh`), and documented restore steps (`docs/postgres-cutover.md`).
 
 ### Phase 6: Data copy, rehearsal and cutover (runbook in `docs/postgres-cutover.md`)
-1. **Copy script** `server/scripts/mysql-to-postgres/`: pgloader with `data only, reset sequences` into the Phase 1 schema. It uses a read-only MySQL user with `mysql_native_password`. A Node fallback copier exists in case pgloader cannot connect.
-2. **Before copying,** check for zero dates and for duplicate emails that differ only in case.
+1. **Copy tool** `server/scripts/mysql-to-postgres/` (`check`, `copy --replace`, `verify`), run with a read-only MySQL user. It is a Node copier rather than pgloader: no extra tool on the server, it runs in the backend image, and CI tests it against both databases (`npm run test:copy`, job `server-copy`). The copy reads one consistent MySQL snapshot and writes PostgreSQL in one transaction that commits only after every table verifies.
+2. **Before copying,** `check` finds what PostgreSQL would refuse: zero dates, empty ENUM values, rows that differ only in case under a case-insensitive PostgreSQL unique key, NUL characters, and tables or columns missing on either side.
 3. **After copying:**
-   - `setval` on every identity column
-   - compare row counts and per-table hashes of normalised rows on both sides
-   - run the smoke tests against the copied data
+   - every identity column continues after its highest id
+   - `verify` compares row counts and per-table hashes of normalised rows on both sides, naming the rows that differ
+   - run the smoke checklist against the copied data
 4. **Rehearse** on a copy of production and time it.
 5. **Cutover.** Friday evening, API offline (teachers' phones queue attendance offline). Run the final copy and verify it, switch `DB_DIALECT`, run the smoke test, then reopen.
 6. **Rollback.** Keep the MySQL volume and the last MySQL image untouched. Go/no-go is 48 hours after reopening; after that, delete the mysql2 path, the MySQL migration tests and the `mysql` compose service.
