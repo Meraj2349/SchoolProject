@@ -104,6 +104,26 @@ Work happens on `feature/postgresql-migration`. MySQL stays in production until 
 5. **Cutover.** Friday evening, API offline (teachers' phones queue attendance offline). Run the final copy and verify it, switch `DB_DIALECT`, run the smoke test, then reopen.
 6. **Rollback.** Keep the MySQL volume and the last MySQL image untouched. Go/no-go is 48 hours after reopening; after that, delete the mysql2 path, the MySQL migration tests and the `mysql` compose service.
 
+## Before cutover: PostgreSQL-only fixes
+Step 0 of the database plan. These restore MySQL behaviour that the first
+migration lost, so they have no MySQL twin.
+
+### Collations
+The first migration gave every text column `ci` (ICU level 1, ignoring case
+and accents) to copy MySQL's `utf8mb4_0900_ai_ci`. Level 1 also treats
+different Bangla letters as the same (য়/য, ড়/ড, চাঁদ/চাদ), lets a status CHECK
+accept `'PRESENT'`, and makes indexes larger. `20261028000000_column_collations.sql`
+gives each kind of text its own:
+- **`"C"` (exact)** for statuses, kinds, codes, ids, phone numbers, links and
+  password hashes. Code must send these in their canonical spelling (it
+  already does: the domain validates them).
+- **`ci2` (ICU level 2)** for names, titles, emails and free text: still
+  case-insensitive (`'karim'` finds `'Karim'`, emails sign in in any case), but
+  every letter counts.
+
+A new text column picks one of the two; `tests/integration/collations.test.js`
+fails if any column is left on `ci`.
+
 ## Files
 - **New:**
   - `server/config/db.js` (adapter) + tests
