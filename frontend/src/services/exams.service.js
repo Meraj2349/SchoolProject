@@ -6,11 +6,6 @@ export const examsService = {
   // Exam names for the public results search (no login needed)
   getPublicNames: () => httpClient.get("/exams/public/names").then((r) => r.data),
 
-  getById: (id) => httpClient.get(`/exams/${id}`).then((r) => r.data),
-
-  getByClass: (classId) =>
-    httpClient.get(`/exams/class/${classId}`).then((r) => r.data),
-
   create: (data) =>
     httpClient.post("/exams/by-class", data).then((r) => r.data),
 

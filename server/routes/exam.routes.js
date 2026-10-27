@@ -1,43 +1,19 @@
 import express from "express";
 import authMiddleware from "../middlewares/auth.middleware.js";
 import { requireWriteBranch } from "../src/shared/http/requireWriteBranch.js";
-import {
-  addExamByClassDetailsController,
-  createExamByClassNameAndSectionController,
-  deleteExamController,
-  getAllExamsController,
-  getDistinctExamNamesController,
-  getExamByIdController,
-  getExamsByClassController,
-  updateExamController,
-} from "../controllers/exam.controller.js";
+import { examController as exams } from "../src/modules/exams/index.js";
 
 const router = express.Router();
 
-// Public route — distinct exam names for autocomplete on the public results page
-router.get("/public/names", getDistinctExamNamesController);
+// Public: every exam name, for the public result page's exam picker.
+router.get("/public/names", exams.names);
 
 router.use(authMiddleware);
 
-// Route to get all exams
-router.get("/", getAllExamsController);
-
-// Route to add an exam using class details (names instead of IDs)
-router.post("/by-class", requireWriteBranch, addExamByClassDetailsController);
-
-// Route to create exam by class name and section (alternative endpoint)
-router.post("/create", requireWriteBranch, createExamByClassNameAndSectionController);
-
-// Route to get exams by class
-router.get("/class/:classId", getExamsByClassController);
-
-// Route to get a specific exam by ID
-router.get("/:id", getExamByIdController);
-
-// Route to update an exam
-router.put("/:id", updateExamController);
-
-// Route to delete an exam
-router.delete("/:id", deleteExamController);
+router.get("/", exams.list);
+// A new exam goes to the branch the admin works in (a super admin picks one).
+router.post("/by-class", requireWriteBranch, exams.create);
+router.put("/:id", exams.update);
+router.delete("/:id", exams.remove);
 
 export default router;
