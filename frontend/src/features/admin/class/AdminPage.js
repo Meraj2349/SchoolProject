@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { useState, useEffect, useId, useRef, useCallback, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
   useClasses,
@@ -11,7 +11,7 @@ import { teachersService } from "@/services/teachers.service";
 import { queryKeys } from "@/lib/queryKeys";
 import { useTranslations } from "@/store/languageStore";
 import { useBranchStore } from "@/store/branchStore";
-import { ChooseBranchNotice } from "@/components/admin/ui";
+import { ChooseBranchNotice, errorMessage } from "@/components/admin/ui";
 import { useWriteBranch } from "@/hooks/useWriteBranch";
 import { toast } from "react-toastify";
 import {
@@ -40,6 +40,7 @@ function Autocomplete({
 }) {
   const [open, setOpen] = useState(false);
   const containerRef = useRef(null);
+  const inputId = useId();
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -66,13 +67,14 @@ function Autocomplete({
 
   return (
     <div ref={containerRef} className="relative">
-      <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
+      <label htmlFor={inputId} className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
         {label}
         {required && <span className="text-red-400 ml-0.5">*</span>}
       </label>
       <div className="relative">
         <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs pointer-events-none" />
         <input
+          id={inputId}
           type="text"
           value={value}
           onChange={handleInputChange}
@@ -257,7 +259,7 @@ export default function AdminPage() {
       reset();
     } catch (err) {
       toast.error(
-        err?.response?.data?.error || err.message || t("operationFailed"),
+        errorMessage(err, t("operationFailed")),
       );
     }
   };
@@ -293,10 +295,7 @@ export default function AdminPage() {
         setConfirmDeleteId(null);
       },
       onError: (err) => {
-        const msg =
-          err?.response?.data?.error ||
-          err.message ||
-          "Failed to unassign teacher";
+        const msg = errorMessage(err, "Failed to unassign teacher");
         toast.error(msg);
         setConfirmDeleteId(null);
       },
@@ -401,11 +400,12 @@ export default function AdminPage() {
 
             {/* Class name — fixed shared list, same for all branches */}
             <div>
-              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
+              <label htmlFor="class-className" className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
                 {t("className") || "Class"}{" "}
                 <span className="text-red-400">*</span>
               </label>
               <select
+                id="class-className"
                 value={form.className}
                 onChange={(e) =>
                   setForm((p) => ({ ...p, className: e.target.value }))
@@ -426,11 +426,12 @@ export default function AdminPage() {
 
             {/* Section — existing sections for selected class in this branch */}
             <div>
-              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
+              <label htmlFor="class-section" className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
                 {t("section") || "Section"}{" "}
                 <span className="text-red-400">*</span>
               </label>
               <select
+                id="class-section"
                 value={form.section}
                 onChange={(e) =>
                   setForm((p) => ({ ...p, section: e.target.value }))

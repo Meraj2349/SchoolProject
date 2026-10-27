@@ -158,10 +158,11 @@ export default function AdminNewsPage() {
         </div>
         <div className="p-6 space-y-4">
           <div>
-            <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
+            <label htmlFor="news-titleBn" className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
               {t("titleBn")}
             </label>
             <input
+              id="news-titleBn"
               type="text"
               value={titleBn}
               onChange={(e) => setTitleBn(e.target.value)}
@@ -170,10 +171,11 @@ export default function AdminNewsPage() {
             />
           </div>
           <div>
-            <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
+            <label htmlFor="news-titleEn" className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
               {t("titleEn")}
             </label>
             <input
+              id="news-titleEn"
               type="text"
               value={titleEn}
               onChange={(e) => setTitleEn(e.target.value)}
@@ -183,10 +185,11 @@ export default function AdminNewsPage() {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
+              <label htmlFor="news-date" className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
                 {t("date")}
               </label>
               <input
+                id="news-date"
                 type="date"
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
@@ -194,10 +197,11 @@ export default function AdminNewsPage() {
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
+              <label htmlFor="news-link" className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
                 {t("link")}
               </label>
               <input
+                id="news-link"
                 type="text"
                 value={link}
                 onChange={(e) => setLink(e.target.value)}

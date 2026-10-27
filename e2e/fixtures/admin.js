@@ -43,13 +43,29 @@ export async function openAdminPage(page, path) {
   await expect(page.locator("main h1, main h2").first()).toBeVisible();
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
   expect(overflow, `${path} should not scroll sideways`).toBeLessThanOrEqual(1);
+  expect(await unnamedFields(page), `${path}: every field needs a label a screen reader can read`).toEqual([]);
+}
+
+/** Visible fields with no label, aria-label or title (a placeholder is not a label). */
+function unnamedFields(page) {
+  return page.locator("main").evaluate((main) =>
+    [...main.querySelectorAll("input, select, textarea")]
+      .filter((field) => field.type !== "hidden" && field.offsetParent !== null)
+      .filter((field) => !(field.labels?.length || field.getAttribute("aria-label") || field.getAttribute("aria-labelledby") || field.title))
+      .map((field) => `${field.tagName.toLowerCase()} ${field.name || field.placeholder || field.type}`),
+  );
 }
 
 /** The admin's own branch in the project's language. */
 export const branchLabel = (language, branch = E2E.branchA) => (language === "bn" ? branch.bn : branch.en);
 
-/** A name no other test or project uses: "<prefix> <project> <n>". */
-let counter = 0;
-export const unique = (testInfo, prefix) => `${prefix} ${testInfo.project.name} ${Date.now() % 100000}${++counter}`;
+/**
+ * Eight digits no other test, worker or project uses in a run, for the names,
+ * roll numbers and phone numbers a test creates (tests share one database).
+ */
+export const uniqueNumber = () => `${Date.now() % 1_000_000}`.padStart(6, "0") + `${Math.floor(Math.random() * 90) + 10}`;
+
+/** A success or error toast. */
+export const toast = (page, text) => page.locator(".Toastify").getByText(text);
 
 export { expect, tr };

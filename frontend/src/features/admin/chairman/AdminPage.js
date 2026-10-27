@@ -1,5 +1,6 @@
 "use client";
 
+import { errorMessage } from "@/components/admin/ui";
 import { useState, useRef } from "react";
 import Image from "next/image";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -54,7 +55,7 @@ export default function AdminPage() {
       setImageFile(null);
       setPreviewUrl(null);
     },
-    onError: (err) => flash(err.message || "Update failed", true),
+    onError: (err) => flash(errorMessage(err, "Update failed"), true),
   });
 
   const flash = (msg, isErr = false) => {
@@ -263,10 +264,14 @@ export default function AdminPage() {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {group.fields.map((f) => (
                       <div key={f.name}>
-                        <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
+                        <label
+                          htmlFor={`chairman-${f.name}`}
+                          className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5"
+                        >
                           {f.label}
                         </label>
                         <input
+                          id={`chairman-${f.name}`}
                           type="text"
                           name={f.name}
                           value={form[f.name]}

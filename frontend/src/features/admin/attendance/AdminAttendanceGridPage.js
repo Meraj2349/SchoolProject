@@ -722,10 +722,11 @@ export default function AdminAttendanceGridPage() {
           <div className="flex flex-wrap gap-3 items-end">
             {/* Class dropdown */}
             <div className="flex-1 min-w-36">
-              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
+              <label htmlFor="grid-class" className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
                 {t("class")}
               </label>
               <select
+                id="grid-class"
                 value={filter.className}
                 onChange={handleClassChange}
                 className="form-input"
@@ -741,10 +742,11 @@ export default function AdminAttendanceGridPage() {
 
             {/* Section dropdown */}
             <div className="flex-1 min-w-28">
-              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
+              <label htmlFor="grid-section" className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
                 {t("section")}
               </label>
               <select
+                id="grid-section"
                 value={filter.section}
                 onChange={handleSectionChange}
                 className="form-input"
@@ -865,7 +867,8 @@ export default function AdminAttendanceGridPage() {
           <div className="relative flex-1 min-w-48">
             <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm pointer-events-none" />
             <input
-              type="text"
+              type="search"
+              aria-label="Search by student name or roll number"
               value={nameSearch}
               onChange={(e) => setNameSearch(e.target.value)}
               placeholder="Search by student name or roll number…"

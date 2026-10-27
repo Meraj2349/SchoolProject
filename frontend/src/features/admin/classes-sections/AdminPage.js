@@ -10,9 +10,10 @@ import {
   useHardDeleteClass,
 } from "@/hooks/useClasses";
 import { useBranchStore } from "@/store/branchStore";
-import { ChooseBranchNotice } from "@/components/admin/ui";
+import { ChooseBranchNotice, errorMessage } from "@/components/admin/ui";
 import { useWriteBranch } from "@/hooks/useWriteBranch";
 import { useAuthStore } from "@/store/authStore";
+import { useTranslations } from "@/store/languageStore";
 import { toast } from "react-toastify";
 import { FiEdit2, FiPlusCircle, FiGrid, FiTrash2 } from "react-icons/fi";
 
@@ -29,6 +30,7 @@ export default function ClassesSectionsAdminPage() {
   const branchId = useBranchStore((s) => s.currentBranchId);
   const isSuperAdmin = useAuthStore((s) => s.role) === "super_admin";
   const { needsBranch } = useWriteBranch();
+  const t = useTranslations("admin.classesSections");
 
   const [form, setForm] = useState(EMPTY_FORM);
   const [editId, setEditId] = useState(null);
@@ -71,7 +73,7 @@ export default function ClassesSectionsAdminPage() {
       }
       reset();
     } catch (err) {
-      toast.error(err?.response?.data?.error || err.message || "Save failed");
+      toast.error(errorMessage(err, "Save failed"));
     }
   };
 
@@ -94,7 +96,7 @@ export default function ClassesSectionsAdminPage() {
         setConfirmDeleteId(null);
       },
       onError: (err) => {
-        toast.error(err?.response?.data?.error || "Delete failed");
+        toast.error(errorMessage(err, "Delete failed"));
         setConfirmDeleteId(null);
       },
     });
@@ -114,110 +116,130 @@ export default function ClassesSectionsAdminPage() {
 
       {needsBranch && <ChooseBranchNotice />}
 
-      <div
-        ref={formRef}
-        className={`bg-white rounded-2xl shadow-sm overflow-hidden transition-colors ${
-          editId ? "border-2 border-amber-400" : "border border-slate-200"
-        }`}
-      >
+      {/* Adding classes is the super admin's (the server refuses others); anyone may edit their branch's. */}
+      {!isSuperAdmin && !editId ? (
+        <p
+          role="note"
+          className="m-0 px-4 py-3 text-sm bg-slate-50 border border-slate-200 text-slate-600 rounded-sm"
+        >
+          {t("onlySuperAdminAdds")}
+        </p>
+      ) : (
         <div
-          className={`px-6 py-4 border-b flex items-center gap-3 ${editId ? "bg-amber-50 border-amber-100" : "border-slate-100"}`}
+          ref={formRef}
+          className={`bg-white rounded-2xl shadow-sm overflow-hidden transition-colors ${
+            editId ? "border-2 border-amber-400" : "border border-slate-200"
+          }`}
         >
           <div
-            className={`w-8 h-8 rounded-lg flex items-center justify-center ${editId ? "bg-amber-100" : "bg-indigo-50"}`}
+            className={`px-6 py-4 border-b flex items-center gap-3 ${editId ? "bg-amber-50 border-amber-100" : "border-slate-100"}`}
           >
-            <FiPlusCircle
-              className={`text-sm ${editId ? "text-amber-600" : "text-indigo-600"}`}
-            />
-          </div>
-          <h2 className="text-base font-semibold text-slate-800 flex-1">
-            {editId ? "Edit Class / Section" : "Add Class / Section"}
-          </h2>
-          {editId && (
-            <button
-              type="button"
-              onClick={reset}
-              className="text-xs text-slate-500 hover:text-slate-700 underline"
+            <div
+              className={`w-8 h-8 rounded-lg flex items-center justify-center ${editId ? "bg-amber-100" : "bg-indigo-50"}`}
             >
-              Cancel
-            </button>
-          )}
-        </div>
-
-        <form onSubmit={handleSave} className="p-6">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
-                Class <span className="text-red-400">*</span>
-              </label>
-              <input
-                list="cs-classname-list"
-                type="text"
-                value={form.className}
-                onChange={(e) =>
-                  setForm((p) => ({ ...p, className: e.target.value }))
-                }
-                placeholder="Select or type new class…"
-                required
-                autoComplete="off"
-                className="form-input"
+              <FiPlusCircle
+                className={`text-sm ${editId ? "text-amber-600" : "text-indigo-600"}`}
               />
-              <datalist id="cs-classname-list">
-                {classNameOptions.map((c) => (
-                  <option key={c} value={c} />
-                ))}
-              </datalist>
             </div>
-
-            <div>
-              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
-                Section <span className="text-red-400">*</span>
-              </label>
-              <input
-                list="cs-section-list"
-                type="text"
-                value={form.section}
-                onChange={(e) =>
-                  setForm((p) => ({ ...p, section: e.target.value }))
-                }
-                placeholder="e.g. A, B, Morning…"
-                required
-                autoComplete="off"
-                className="form-input"
-              />
-              <datalist id="cs-section-list">
-                {sectionOptions.map((s) => (
-                  <option key={s} value={s} />
-                ))}
-              </datalist>
-            </div>
-          </div>
-
-          <div className="flex gap-3 mt-6 pt-5 border-t border-slate-100">
-            <button
-              type="submit"
-              disabled={isBusy || needsBranch}
-              className="btn-primary disabled:opacity-60"
-            >
-              {isBusy ? (
-                <span className="flex items-center gap-2">
-                  <span className="w-3.5 h-3.5 border-2 border-white/40 border-t-white rounded-full animate-spin" />
-                  Saving…
-                </span>
-              ) : editId ? (
-                "Update Class"
-              ) : (
-                "Add Class"
-              )}
-            </button>
+            <h2 className="text-base font-semibold text-slate-800 flex-1">
+              {editId ? "Edit Class / Section" : "Add Class / Section"}
+            </h2>
             {editId && (
-              <button type="button" onClick={reset} className="btn-secondary">
+              <button
+                type="button"
+                onClick={reset}
+                className="text-xs text-slate-500 hover:text-slate-700 underline"
+              >
                 Cancel
               </button>
             )}
           </div>
-        </form>
-      </div>
+
+          <form onSubmit={handleSave} className="p-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label
+                  htmlFor="section-class"
+                  className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5"
+                >
+                  Class <span className="text-red-400">*</span>
+                </label>
+                <input
+                  id="section-class"
+                  list="cs-classname-list"
+                  type="text"
+                  value={form.className}
+                  onChange={(e) =>
+                    setForm((p) => ({ ...p, className: e.target.value }))
+                  }
+                  placeholder="Select or type new class…"
+                  maxLength={20}
+                  required
+                  autoComplete="off"
+                  className="form-input"
+                />
+                <datalist id="cs-classname-list">
+                  {classNameOptions.map((c) => (
+                    <option key={c} value={c} />
+                  ))}
+                </datalist>
+              </div>
+
+              <div>
+                <label
+                  htmlFor="section-section"
+                  className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5"
+                >
+                  Section <span className="text-red-400">*</span>
+                </label>
+                <input
+                  id="section-section"
+                  list="cs-section-list"
+                  type="text"
+                  value={form.section}
+                  onChange={(e) =>
+                    setForm((p) => ({ ...p, section: e.target.value }))
+                  }
+                  placeholder="e.g. A, B, Morning…"
+                  maxLength={10}
+                  required
+                  autoComplete="off"
+                  className="form-input"
+                />
+                <datalist id="cs-section-list">
+                  {sectionOptions.map((s) => (
+                    <option key={s} value={s} />
+                  ))}
+                </datalist>
+              </div>
+            </div>
+
+            <div className="flex gap-3 mt-6 pt-5 border-t border-slate-100">
+              <button
+                type="submit"
+                disabled={isBusy || needsBranch}
+                className="btn-primary disabled:opacity-60"
+              >
+                {isBusy ? (
+                  <span className="flex items-center gap-2">
+                    <span className="w-3.5 h-3.5 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+                    Saving…
+                  </span>
+                ) : editId ? (
+                  "Update Class"
+                ) : (
+                  "Add Class"
+                )}
+              </button>
+              {editId && (
+                <button type="button" onClick={reset} className="btn-secondary">
+                  Cancel
+                </button>
+              )}
+            </div>
+          </form>
+        </div>
+      )}
 
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
         <div className="px-6 py-4 border-b border-slate-100 flex items-center gap-3">

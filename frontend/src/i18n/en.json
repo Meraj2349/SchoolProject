@@ -1420,6 +1420,9 @@
       "chooseBranch": "Choose a branch first.",
       "showPassword": "Show password",
       "hidePassword": "Hide password"
+    },
+    "classesSections": {
+      "onlySuperAdminAdds": "Only the super admin can add classes and sections. You can change your branch's classes in the list below."
     }
   },
   "branches": {

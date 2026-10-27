@@ -1,5 +1,6 @@
 "use client";
 
+import { errorMessage } from "@/components/admin/ui";
 import { useState } from "react";
 import { authService } from "@/services/auth.service";
 import { useTranslations } from "@/store/languageStore";
@@ -34,7 +35,7 @@ export default function AdminPage() {
       setForm({ email: "", currentPassword: "", newPassword: "" });
     } catch (err) {
       setStatus({
-        error: err.response?.data?.error || err.message || t("errorMessage"),
+        error: errorMessage(err, t("errorMessage")),
         success: "",
       });
     } finally {
@@ -79,10 +80,14 @@ export default function AdminPage() {
         <form onSubmit={handleSubmit} className="p-6 space-y-5">
           {FIELDS.map(([name, label, type, placeholder]) => (
             <div key={name}>
-              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
+              <label
+                htmlFor={`settings-${name}`}
+                className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5"
+              >
                 {label}
               </label>
               <input
+                id={`settings-${name}`}
                 type={type}
                 name={name}
                 value={form[name]}

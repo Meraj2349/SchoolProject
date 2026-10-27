@@ -106,6 +106,7 @@ export default function AdminPage() {
         </div>
         <div className="p-6">
           <textarea
+            aria-label={editId ? t("editMessage") : t("addMessage")}
             value={form.Messages}
             onChange={(e) =>
               setForm((p) => ({ ...p, Messages: e.target.value }))

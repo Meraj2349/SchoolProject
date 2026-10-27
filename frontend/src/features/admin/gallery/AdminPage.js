@@ -107,10 +107,11 @@ export default function AdminPage() {
         <form onSubmit={handleUpload} className="p-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
+              <label htmlFor="gallery-file" className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
                 {t("file")}
               </label>
               <input
+                id="gallery-file"
                 type="file"
                 ref={fileRef}
                 accept="image/*"
@@ -119,10 +120,11 @@ export default function AdminPage() {
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
+              <label htmlFor="gallery-imageType" className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
                 {t("imageType")}
               </label>
               <select
+                id="gallery-imageType"
                 value={form.imageType}
                 onChange={(e) =>
                   setForm((p) => ({ ...p, imageType: e.target.value }))
@@ -137,10 +139,11 @@ export default function AdminPage() {
               </select>
             </div>
             <div>
-              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
+              <label htmlFor="gallery-description" className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
                 {t("description")}
               </label>
               <input
+                id="gallery-description"
                 type="text"
                 value={form.description}
                 onChange={(e) =>
@@ -151,10 +154,11 @@ export default function AdminPage() {
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
+              <label htmlFor="gallery-studentId" className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
                 {t("studentId")}
               </label>
               <input
+                id="gallery-studentId"
                 type="text"
                 value={form.studentId}
                 onChange={(e) =>

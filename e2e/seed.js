@@ -65,6 +65,8 @@ try {
   const class5 = await insert("Classes", { ClassName: "Class 5", Section: "Good", TeacherID: teacher, branch_id: BRANCH_A });
   const class6 = await insert("Classes", { ClassName: "Class 6", Section: "Good", branch_id: BRANCH_A });
   await insert("Classes", { ClassName: "Class 5", Section: "Good", branch_id: BRANCH_B });
+  // Empty, for the admin tests' new students (no other test bills or counts it).
+  await insert("Classes", { ClassName: "Class 8", Section: "Good", branch_id: BRANCH_A });
 
   const student = (first, roll, classId, branchId = BRANCH_A, gender = "Male") =>
     insert("Students", {
