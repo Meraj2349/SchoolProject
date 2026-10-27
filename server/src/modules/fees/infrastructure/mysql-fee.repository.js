@@ -1,5 +1,6 @@
 import db from "../../../../config/db.config.js";
 import { branchFilter } from "../../../../utils/branchFilter.js";
+import { withTransaction } from "../../../shared/infrastructure/withTransaction.js";
 
 // MySQL adapter for the fee repository port used by the fee use cases.
 // Money columns are DECIMAL, which mysql2 returns as strings: convert them to
@@ -143,21 +144,6 @@ function makeInvoiceQueries(conn) {
       ]);
     },
   };
-}
-
-async function withTransaction(work) {
-  const connection = await db.getConnection();
-  try {
-    await connection.beginTransaction();
-    const result = await work(connection);
-    await connection.commit();
-    return result;
-  } catch (error) {
-    await connection.rollback();
-    throw error;
-  } finally {
-    connection.release();
-  }
 }
 
 const INVOICE_FILTERS = [
