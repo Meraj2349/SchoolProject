@@ -1,5 +1,6 @@
 "use client";
 
+import { errorMessage } from "@/components/admin/ui";
 import { useState } from "react";
 import {
   useEvents,
@@ -58,7 +59,7 @@ export default function AdminPage() {
       flash(editId ? t("eventUpdated") : t("eventAdded"));
       reset();
     } catch (err) {
-      flash(err.message || t("operationFailed"), true);
+      flash(errorMessage(err, t("operationFailed")), true);
     }
   };
 
@@ -97,10 +98,14 @@ export default function AdminPage() {
         <form onSubmit={handleSave} className="p-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
+              <label
+                htmlFor="event-EventName"
+                className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5"
+              >
                 {t("eventName")}
               </label>
               <input
+                id="event-EventName"
                 type="text"
                 name="EventName"
                 value={form.EventName}
@@ -110,10 +115,14 @@ export default function AdminPage() {
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
+              <label
+                htmlFor="event-EventType"
+                className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5"
+              >
                 {t("type")}
               </label>
               <select
+                id="event-EventType"
                 name="EventType"
                 value={form.EventType}
                 onChange={handleChange}
@@ -127,10 +136,14 @@ export default function AdminPage() {
               </select>
             </div>
             <div>
-              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
+              <label
+                htmlFor="event-StartDate"
+                className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5"
+              >
                 {t("startDate")}
               </label>
               <input
+                id="event-StartDate"
                 type="date"
                 name="StartDate"
                 value={form.StartDate}
@@ -140,10 +153,14 @@ export default function AdminPage() {
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
+              <label
+                htmlFor="event-EndDate"
+                className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5"
+              >
                 {t("endDate")}
               </label>
               <input
+                id="event-EndDate"
                 type="date"
                 name="EndDate"
                 value={form.EndDate}
@@ -153,10 +170,14 @@ export default function AdminPage() {
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
+              <label
+                htmlFor="event-Venue"
+                className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5"
+              >
                 {t("venue")}
               </label>
               <input
+                id="event-Venue"
                 type="text"
                 name="Venue"
                 value={form.Venue}
@@ -165,10 +186,14 @@ export default function AdminPage() {
               />
             </div>
             <div className="sm:col-span-2">
-              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
+              <label
+                htmlFor="event-Description"
+                className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5"
+              >
                 {t("description")}
               </label>
               <textarea
+                id="event-Description"
                 name="Description"
                 value={form.Description}
                 onChange={handleChange}

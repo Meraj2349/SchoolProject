@@ -134,7 +134,7 @@ describe("authentication & authorization", () => {
       const attacker = await seedAdmin({ email: "b@school.test", role: "branch_admin", branchId: BRANCH_A });
 
       const res = await request(app)
-        .put(`/api/admin/update/${victim}`)
+        .put(`/api/admins/${victim}`)
         .set(bearer(branchAdminToken(BRANCH_A, attacker)))
         .send({ Email: "attacker@evil.test", Password: "owned" });
 
@@ -146,7 +146,7 @@ describe("authentication & authorization", () => {
       const attacker = await seedAdmin({ email: "b@school.test", role: "branch_admin", branchId: BRANCH_A });
 
       const res = await request(app)
-        .delete(`/api/admin/delete/${victim}`)
+        .delete(`/api/admins/${victim}`)
         .set(bearer(branchAdminToken(BRANCH_A, attacker)));
 
       expect(res.status).toBe(403);
@@ -158,7 +158,7 @@ describe("authentication & authorization", () => {
       const id = await seedAdmin({ email: "b@school.test", role: "branch_admin", branchId: BRANCH_A });
 
       await request(app)
-        .put(`/api/admin/update/${id}`)
+        .put(`/api/admins/${id}`)
         .set(bearer(superAdminToken(bossId)))
         .send({ Password: "newpass123" })
         .expect(200);
@@ -175,7 +175,7 @@ describe("authentication & authorization", () => {
       const id = await seedAdmin({ email: "b@school.test", role: "branch_admin", branchId: BRANCH_A });
 
       await request(app)
-        .put(`/api/admin/update/${id}`)
+        .put(`/api/admins/${id}`)
         .set(bearer(superAdminToken(bossId)))
         .send({ Password: "newpass123" });
 

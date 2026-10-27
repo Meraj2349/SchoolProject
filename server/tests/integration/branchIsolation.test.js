@@ -74,9 +74,10 @@ describe("a branch admin cannot touch another branch's data", () => {
       expect(await count("Results")).toBe(1);
     });
 
-    it("cannot wipe another branch's results for an exam", async () => {
-      await request(app).delete(`/api/results/exam/${b.examId}`).set(adminA);
+    it("cannot delete another branch's exam, or the results in it", async () => {
+      const res = await request(app).delete(`/api/exams/${b.examId}`).set(adminA);
 
+      expect(res.status).toBe(404);
       expect(await count("Results")).toBe(1);
     });
   });

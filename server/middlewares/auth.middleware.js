@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
 import { currentAdmin } from "../src/modules/admins/index.js";
+import { requireRole } from "../src/shared/http/requireRole.js";
 
 const bearerToken = (req) => {
   const [scheme, token] = (req.headers.authorization || "").split(" ");
@@ -118,20 +119,6 @@ export { optionalAuth };
 // Kept as an alias for routes that import `protect`.
 export const protect = authMiddleware;
 
-// Role-based authorization middleware — use after authMiddleware
-export const authorize = (...allowedRoles) => {
-  return (req, res, next) => {
-    const role = req.role || req.user?.role;
-    if (!role) {
-      return res.status(403).json({ error: "Role information missing" });
-    }
-
-    if (!allowedRoles.includes(role)) {
-      return res.status(403).json({
-        error: `Role ${role} is not authorized to access this resource`,
-      });
-    }
-
-    next();
-  };
-};
+// Role-based authorization — use after authMiddleware (which loads req.role).
+// The same guard as the modules use, with the translated 403.
+export const authorize = requireRole;

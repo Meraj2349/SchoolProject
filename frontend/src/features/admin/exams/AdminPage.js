@@ -7,7 +7,7 @@ import { classesService } from "@/services/classes.service";
 import { queryKeys } from "@/lib/queryKeys";
 import { useTranslations } from "@/store/languageStore";
 import { useBranchStore } from "@/store/branchStore";
-import { ChooseBranchNotice } from "@/components/admin/ui";
+import { ChooseBranchNotice, errorMessage } from "@/components/admin/ui";
 import { useWriteBranch } from "@/hooks/useWriteBranch";
 import { FiEdit2, FiTrash2, FiFileText, FiPlusCircle } from "react-icons/fi";
 
@@ -103,7 +103,7 @@ export default function AdminPage() {
       if (editId) await update.mutateAsync({ id: editId, data: form });
       else await create.mutateAsync(form);
     } catch (err) {
-      flash(err.message || t("operationFailed"), true);
+      flash(errorMessage(err, t("operationFailed")), true);
     }
   };
 
@@ -146,10 +146,14 @@ export default function AdminPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {/* Exam Type */}
               <div>
-                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
+                <label
+                  htmlFor="exam-ExamType"
+                  className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5"
+                >
                   {t("examType")}
                 </label>
                 <select
+                  id="exam-ExamType"
                   name="ExamType"
                   value={form.ExamType}
                   onChange={handleChange}
@@ -167,10 +171,14 @@ export default function AdminPage() {
 
               {/* Exam Name */}
               <div>
-                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
+                <label
+                  htmlFor="exam-ExamName"
+                  className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5"
+                >
                   {t("examName")}
                 </label>
                 <input
+                  id="exam-ExamName"
                   type="text"
                   name="ExamName"
                   value={form.ExamName}
@@ -182,10 +190,14 @@ export default function AdminPage() {
 
               {/* Class */}
               <div>
-                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
+                <label
+                  htmlFor="exam-ClassName"
+                  className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5"
+                >
                   {t("class")}
                 </label>
                 <select
+                  id="exam-ClassName"
                   name="ClassName"
                   value={form.ClassName}
                   onChange={(e) =>
@@ -209,10 +221,14 @@ export default function AdminPage() {
 
               {/* Section */}
               <div>
-                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
+                <label
+                  htmlFor="exam-SectionName"
+                  className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5"
+                >
                   {t("section")}
                 </label>
                 <select
+                  id="exam-SectionName"
                   name="SectionName"
                   value={form.SectionName}
                   onChange={handleChange}
@@ -230,10 +246,14 @@ export default function AdminPage() {
 
               {/* Exam Date */}
               <div>
-                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
+                <label
+                  htmlFor="exam-ExamDate"
+                  className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5"
+                >
                   {t("examDate")}
                 </label>
                 <input
+                  id="exam-ExamDate"
                   type="date"
                   name="ExamDate"
                   value={form.ExamDate}

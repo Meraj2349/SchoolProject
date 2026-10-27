@@ -9,7 +9,7 @@ import {
 } from "@/hooks/useRoutines";
 import { useClasses } from "@/hooks/useClasses";
 import { useTranslations } from "@/store/languageStore";
-import { ChooseBranchNotice } from "@/components/admin/ui";
+import { ChooseBranchNotice, errorMessage } from "@/components/admin/ui";
 import { useWriteBranch } from "@/hooks/useWriteBranch";
 import {
   FiEdit2,
@@ -63,7 +63,7 @@ export default function AdminPage() {
       flash(editId ? t("routineUpdated") : t("routineAdded"));
       reset();
     } catch (err) {
-      flash(err.message || t("operationFailed"), true);
+      flash(errorMessage(err, t("operationFailed")), true);
     }
   };
 
@@ -113,10 +113,14 @@ export default function AdminPage() {
           <form onSubmit={handleSave} className="p-6">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
+                <label
+                  htmlFor="routine-RoutineTitle"
+                  className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5"
+                >
                   {t("routineTitle")}
                 </label>
                 <input
+                  id="routine-RoutineTitle"
                   type="text"
                   name="RoutineTitle"
                   value={form.RoutineTitle}
@@ -126,10 +130,14 @@ export default function AdminPage() {
                 />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
+                <label
+                  htmlFor="routine-ClassID"
+                  className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5"
+                >
                   {t("class")}
                 </label>
                 <select
+                  id="routine-ClassID"
                   name="ClassID"
                   value={form.ClassID}
                   onChange={handleChange}
@@ -144,10 +152,14 @@ export default function AdminPage() {
                 </select>
               </div>
               <div>
-                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
+                <label
+                  htmlFor="routine-RoutineDate"
+                  className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5"
+                >
                   {t("date")}
                 </label>
                 <input
+                  id="routine-RoutineDate"
                   type="date"
                   name="RoutineDate"
                   value={form.RoutineDate}
@@ -157,10 +169,14 @@ export default function AdminPage() {
                 />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
+                <label
+                  htmlFor="routine-file"
+                  className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5"
+                >
                   {t("file")}
                 </label>
                 <input
+                  id="routine-file"
                   type="file"
                   ref={fileRef}
                   accept=".pdf,image/*"
@@ -168,10 +184,14 @@ export default function AdminPage() {
                 />
               </div>
               <div className="sm:col-span-2">
-                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
+                <label
+                  htmlFor="routine-Description"
+                  className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5"
+                >
                   {t("description")}
                 </label>
                 <textarea
+                  id="routine-Description"
                   name="Description"
                   value={form.Description}
                   onChange={handleChange}

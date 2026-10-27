@@ -221,10 +221,11 @@ export default function AdminPage() {
           {/* Row 1: Name fields */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
             <div>
-              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
+              <label htmlFor="branch-name_en" className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
                 {t("nameEn")} <span className="text-red-400">*</span>
               </label>
               <input
+                id="branch-name_en"
                 type="text"
                 name="name_en"
                 value={form.name_en}
@@ -234,10 +235,11 @@ export default function AdminPage() {
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
+              <label htmlFor="branch-name_bn" className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
                 {t("nameBn")} <span className="text-red-400">*</span>
               </label>
               <input
+                id="branch-name_bn"
                 type="text"
                 name="name_bn"
                 value={form.name_bn}
@@ -251,10 +253,11 @@ export default function AdminPage() {
           {/* Row 2: Address fields */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
             <div>
-              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
+              <label htmlFor="branch-address_en" className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
                 {t("addressEn")}
               </label>
               <input
+                id="branch-address_en"
                 type="text"
                 name="address_en"
                 value={form.address_en}
@@ -264,10 +267,11 @@ export default function AdminPage() {
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
+              <label htmlFor="branch-address_bn" className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
                 {t("addressBn")}
               </label>
               <input
+                id="branch-address_bn"
                 type="text"
                 name="address_bn"
                 value={form.address_bn}
@@ -281,10 +285,11 @@ export default function AdminPage() {
           {/* Row 3: Description fields */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
             <div>
-              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
+              <label htmlFor="branch-description_en" className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
                 {t("descriptionEn")}
               </label>
               <textarea
+                id="branch-description_en"
                 name="description_en"
                 value={form.description_en}
                 onChange={handleChange}
@@ -294,10 +299,11 @@ export default function AdminPage() {
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
+              <label htmlFor="branch-description_bn" className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
                 {t("descriptionBn")}
               </label>
               <textarea
+                id="branch-description_bn"
                 name="description_bn"
                 value={form.description_bn}
                 onChange={handleChange}
@@ -311,10 +317,11 @@ export default function AdminPage() {
           {/* Row 4: Date + proposed toggle */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
             <div>
-              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
+              <label htmlFor="branch-established_date" className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
                 {t("establishedDate")}
               </label>
               <input
+                id="branch-established_date"
                 type="date"
                 name="established_date"
                 value={form.established_date}

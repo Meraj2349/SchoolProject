@@ -584,8 +584,32 @@ const i18n = {
     bn: "পরীক্ষা আনতে ব্যর্থ হয়েছে।",
   },
   exam_required_fields: {
-    en: "ExamName, ClassName, and Date are required.",
-    bn: "পরীক্ষার নাম, শ্রেণির নাম এবং তারিখ আবশ্যক।",
+    en: "Exam type, name, class, section and date are required.",
+    bn: "পরীক্ষার ধরন, নাম, শ্রেণি, সেকশন ও তারিখ আবশ্যক।",
+  },
+  exam_invalid_type: {
+    en: "Choose the exam type: Monthly, Quarterly, Half-Yearly, Annual or Final.",
+    bn: "পরীক্ষার ধরন বেছে নিন: মাসিক, ত্রৈমাসিক, অর্ধবার্ষিক, বার্ষিক বা চূড়ান্ত।",
+  },
+  exam_name_too_long: {
+    en: "The exam name can have at most 50 characters.",
+    bn: "পরীক্ষার নাম সর্বোচ্চ ৫০ অক্ষরের হতে পারে।",
+  },
+  exam_date_invalid: {
+    en: "Enter the exam date as YYYY-MM-DD.",
+    bn: "পরীক্ষার তারিখ YYYY-MM-DD আকারে দিন।",
+  },
+  exam_date_past: {
+    en: "A new exam cannot be scheduled for a past date.",
+    bn: "নতুন পরীক্ষা অতীতের তারিখে রাখা যায় না।",
+  },
+  exam_class_not_found: {
+    en: "This class and section does not exist in this branch.",
+    bn: "এই শাখায় এই শ্রেণি ও সেকশন নেই।",
+  },
+  exam_nothing_to_change: {
+    en: "Nothing to change.",
+    bn: "পরিবর্তনের কিছু নেই।",
   },
   exam_class_required: {
     en: "Class name is required.",
@@ -614,8 +638,24 @@ const i18n = {
     bn: "ফলাফল আনতে ব্যর্থ হয়েছে।",
   },
   result_required_fields: {
-    en: "Student ID, Subject ID, Exam ID, Marks, and Total Marks are required.",
-    bn: "শিক্ষার্থী আইডি, বিষয় আইডি, পরীক্ষা আইডি, নম্বর এবং মোট নম্বর আবশ্যক।",
+    en: "Choose the student, exam and subject, and enter the marks.",
+    bn: "শিক্ষার্থী, পরীক্ষা ও বিষয় বেছে নিন এবং নম্বর দিন।",
+  },
+  result_marks_invalid: {
+    en: "Marks must be a whole number from 0 to 100.",
+    bn: "নম্বর ০ থেকে ১০০-এর মধ্যে একটি পূর্ণ সংখ্যা হতে হবে।",
+  },
+  result_student_not_in_class: {
+    en: "This student is not in that class.",
+    bn: "এই শিক্ষার্থী ওই শ্রেণিতে নেই।",
+  },
+  result_exam_not_for_class: {
+    en: "That exam is not for this student's class.",
+    bn: "এই পরীক্ষাটি এই শিক্ষার্থীর শ্রেণির নয়।",
+  },
+  result_subject_not_for_class: {
+    en: "That subject is not taught in this student's class.",
+    bn: "এই বিষয়টি এই শিক্ষার্থীর শ্রেণিতে পড়ানো হয় না।",
   },
   result_duplicate: {
     en: "A result for this student, subject, and exam already exists.",

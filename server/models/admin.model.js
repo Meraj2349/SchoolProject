@@ -63,7 +63,7 @@ export const updateAdmin = async (adminId, adminData) => {
   const params = [];
   for (const field of ["Email", "Password"]) {
     if (adminData[field] !== undefined && adminData[field] !== "") {
-      updates.push(`${field} = ?`);
+      updates.push(`${db.ident(field)} = ?`);
       params.push(adminData[field]);
     }
   }
