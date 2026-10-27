@@ -124,6 +124,14 @@ gives each kind of text its own:
 A new text column picks one of the two; `tests/integration/collations.test.js`
 fails if any column is left on `ci`.
 
+### Foreign-key indexes
+MySQL indexed every foreign-key column by itself; PostgreSQL never does, so 35
+foreign keys had none (deleting a parent, joins and branch filters then scan
+the child table). `20261028000100_foreign_key_indexes.sql` adds them, the hot
+paths as composites: `Students (branch_id, "ClassID")` and
+`Results ("ExamID", "SubjectID")`. `tests/integration/pgSchema.test.js` fails
+when a foreign key has no index starting with its columns.
+
 ## Files
 - **New:**
   - `server/config/db.js` (adapter) + tests
