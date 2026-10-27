@@ -21,9 +21,9 @@ const setStatus = (id, status, headers = adminA) =>
   request(app).put(`/api/applications/${id}/status`).set(headers).send({ status });
 
 const enrolled = async () => {
-  const [rows] = await db.query(
-    `SELECT s.FirstName, s.LastName, s.branch_id, c.ClassName, c.Section, c.branch_id AS classBranch
-       FROM Students s JOIN Classes c ON c.ClassID = s.ClassID`,
+  const { rows } = await db.query(
+    `SELECT s."FirstName", s."LastName", s.branch_id, c."ClassName", c."Section", c.branch_id AS "classBranch"
+       FROM "Students" s JOIN "Classes" c ON c."ClassID" = s."ClassID"`,
   );
   return rows;
 };
@@ -37,7 +37,7 @@ describe("admission applications", () => {
       const res = await request(app).post("/api/applications").send({ ...FORM, branch_id: BRANCH_B });
 
       expect(res.status).toBe(201);
-      const [[row]] = await db.query("SELECT branch_id, status FROM Applications");
+      const row = await db.one(`SELECT branch_id, status FROM "Applications"`);
       expect(row).toEqual({ branch_id: BRANCH_B, status: "pending" });
     });
 

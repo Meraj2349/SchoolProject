@@ -42,7 +42,7 @@ export function makeFakeTeacherAccountRepository(teachers = [], { branches = [] 
       if (signOut) account.tokenVersion += 1;
     },
 
-    // Atomic, like the single UPDATE of the MySQL adapter.
+    // Atomic, like the locked read-and-update of the database adapter.
     async reserveLoginAttempt(id, { max, lockedUntil, now }) {
       const account = byId(id);
       if (account.lockedUntil != null && account.lockedUntil > now) return { allowed: false };

@@ -183,15 +183,15 @@ const KINDS = [
 
 const listIds = (res, kind) => (res.body.data ?? res.body).map((row) => row[kind.id]).sort((a, b) => a - b);
 const branchOf = async (kind, id) => {
-  const [[row]] = await db.query(`SELECT branch_id FROM \`${kind.table}\` WHERE \`${kind.id}\` = ?`, [id]);
+  const row = await db.one(`SELECT branch_id FROM ${db.ident(kind.table)} WHERE ${db.ident(kind.id)} = ?`, [id]);
   return row?.branch_id;
 };
 const newestId = async (kind) => {
-  const [[row]] = await db.query(`SELECT MAX(\`${kind.id}\`) AS id FROM \`${kind.table}\``);
+  const row = await db.one(`SELECT MAX(${db.ident(kind.id)}) AS id FROM ${db.ident(kind.table)}`);
   return row.id;
 };
 const valueOf = async (kind, id) => {
-  const [[row]] = await db.query(`SELECT \`${kind.changed.column}\` AS v FROM \`${kind.table}\` WHERE \`${kind.id}\` = ?`, [id]);
+  const row = await db.one(`SELECT ${db.ident(kind.changed.column)} AS v FROM ${db.ident(kind.table)} WHERE ${db.ident(kind.id)} = ?`, [id]);
   return row?.v;
 };
 
@@ -336,7 +336,7 @@ describe("notice announcement images", () => {
       .send({ title_bn: "ক", title_en: "A's", category: "Notice", date: "2030-01-01", image_url: "/uploads/routines/b.png" })
       .expect(200);
 
-    const [[row]] = await db.query("SELECT image_url FROM NoticeAnnouncements WHERE id = ?", [own]);
+    const row = await db.one(`SELECT image_url FROM "NoticeAnnouncements" WHERE id = ?`, [own]);
     expect(row.image_url).toBe("/uploads/notice-announcements/a.png");
     expect(await count("NoticeAnnouncements", "id = ?", [victim])).toBe(1);
   });
@@ -365,7 +365,7 @@ describe("gallery photos of people", () => {
       .attach("image", PNG, "s.png");
 
     expect(res.status).toBe(201);
-    const [[row]] = await db.query("SELECT branch_id FROM Images");
+    const row = await db.one(`SELECT branch_id FROM "Images"`);
     expect(row.branch_id).toBe(BRANCH_B);
   });
 
@@ -389,7 +389,7 @@ describe("gallery photos of people", () => {
     const res = await request(app).put(`/api/images/${id}`).set(adminA).send({ imageType: "teacher", teacherId });
 
     expect(res.status).toBe(400);
-    const [[row]] = await db.query("SELECT TeacherID FROM Images");
+    const row = await db.one(`SELECT "TeacherID" FROM "Images"`);
     expect(row.TeacherID).toBeNull();
   });
 });

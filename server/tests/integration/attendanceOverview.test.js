@@ -43,7 +43,7 @@ describe("attendance overview", () => {
     mina = await seedStudent({ branchId: BRANCH_A, className: "KG", roll: "1", firstName: "Mina" });
     kg = mina.classId;
     northClass = (await seedStudent({ branchId: BRANCH_B, className: "Class 5", roll: "1", firstName: "Nadia" })).classId;
-    await db.query("UPDATE Classes SET TeacherID = ? WHERE ClassID = ?", [teacherId, class5]);
+    await db.query(`UPDATE "Classes" SET "TeacherID" = ? WHERE "ClassID" = ?`, [teacherId, class5]);
 
     const mark = (studentId, status, type, by, at, date = DAY) =>
       insert("Attendance", {

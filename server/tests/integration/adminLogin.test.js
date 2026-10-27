@@ -3,7 +3,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import request from "supertest";
 import app from "../../app.js";
-import { BRANCH_A, BRANCH_B, bearer, db, insert, resetDb, seedStudent, superAdminToken } from "./helpers.js";
+import { BRANCH_A, BRANCH_B, bearer, branchAdminToken, db, insert, resetDb, seedStudent, superAdminToken } from "./helpers.js";
 
 // The admin login page sends branch_id to say who is logging in:
 // none (or "super") for a super admin, a branch id for that branch's admin.
@@ -124,5 +124,23 @@ describe("the duplicate /api/admin account routes are gone (use /api/admins)", (
     const res = await request(app)[method](path).set(bearer(superAdminToken()));
 
     expect(res.status).toBe(404);
+  });
+});
+
+describe("an admin's own email and password (PUT /api/admin/updateEmailPassword)", () => {
+  beforeEach(resetDb);
+
+  it("changes them, and the admin signs in with the new ones", async () => {
+    const id = await seedAdmin({ email: "karim@school.test", role: "branch_admin", branchId: BRANCH_A });
+    const token = bearer(branchAdminToken(BRANCH_A, id));
+
+    const res = await request(app)
+      .put("/api/admin/updateEmailPassword")
+      .set(token)
+      .send({ email: "karim.new@school.test", currentPassword: "secret123", newPassword: "new-secret-456" });
+
+    expect(res.status).toBe(200);
+    expect((await login({ Email: "karim.new@school.test", Password: "new-secret-456", branch_id: BRANCH_A })).status).toBe(200);
+    expect((await login({ Email: "karim@school.test", Password: "secret123", branch_id: BRANCH_A })).status).toBe(401);
   });
 });

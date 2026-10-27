@@ -47,12 +47,12 @@ cd frontend && npm test          # Vitest + Testing Library
 cd frontend && npm run lint
 cd frontend && npm run dev       # http://localhost:5173
 
-# website + admin panel in a real browser (Playwright; needs MySQL like the integration tests)
-cd e2e && npm ci && npm test     # seeds school_e2e, starts API + frontend build
+# website + admin panel in a real browser (Playwright; PostgreSQL, or E2E_DB_DIALECT=mysql)
+cd e2e && npm ci && npm test     # seeds school_e2e (E2E_DB_*), starts API + frontend build
 
 # mobile app (Flutter 3.47)
 cd mobile/teacher_app && flutter analyze && flutter test
-cd mobile/teacher_app && tool/live_api_test.sh   # against the real API + MySQL
+cd mobile/teacher_app && tool/live_api_test.sh   # against the real API + PostgreSQL
 ```
 
 Integration tests (`server/tests/integration`) build a fresh database from
@@ -63,8 +63,8 @@ The database named by `TEST_DB_NAME` (default `school_test`) is dropped and
 recreated on every run — never point it at real data.
 
 CI (`.github/workflows/test.yml`) runs the unit tests, the integration tests
-against a MySQL 8 service, the browser tests (`e2e/`), and the frontend tests
-and lint on every push and PR. A new public page or form gets an `e2e/tests`
+against MySQL 8 and PostgreSQL 18 services, the browser tests (`e2e/`, on
+PostgreSQL), and the frontend tests and lint on every push and PR. A new public page or form gets an `e2e/tests`
 case too; a new admin page or workflow gets one in `e2e/tests/admin` (the menu
 in `frontend/src/components/admin/navigation.js` drives the page checks).
 `.github/workflows/mobile.yml` analyzes and tests the app, runs it against the
@@ -91,10 +91,19 @@ real API, and builds the APK (artifact `teacher-app-apk`).
 
 ## Schema changes
 
-`server/Sql/database.sql` is the full schema for a fresh install (docker-compose
-loads it). For every schema change also add an idempotent, MySQL-8-compatible
-migration in `server/Sql/` for existing databases (no `ADD COLUMN IF NOT EXISTS`
-— that is MariaDB-only; check `information_schema` instead).
+The database is moving from MySQL to PostgreSQL (branch
+`feature/postgresql-migration`; plan and runbook in `docs/`). Until the
+cutover, make every schema change on both:
+
+- **PostgreSQL:** a new dbmate migration in `server/db/migrations/`
+  (`npm run db:new -- <name>`, applied with `npm run db:migrate`). Names keep
+  MySQL's spelling and are quoted (`"Students"."StudentID"`). DDL is
+  transactional and `IF NOT EXISTS` works natively; never edit an applied
+  migration, add a new one.
+- **MySQL:** `server/Sql/database.sql` is the full schema for a fresh install
+  (docker-compose loads it). Also add an idempotent, MySQL-8-compatible
+  migration in `server/Sql/` for existing databases (no `ADD COLUMN IF NOT
+  EXISTS` — that is MariaDB-only; check `information_schema` instead).
 
 ## Conventions
 

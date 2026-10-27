@@ -1,80 +1,19 @@
 import express from "express";
 import authMiddleware, { optionalAuth } from "../middlewares/auth.middleware.js";
 import { requireWriteBranch } from "../src/shared/http/requireWriteBranch.js";
-import {
-  addMultipleResultsController,
-  addResultByStudentDetailsController,
-  addResultController,
-  advancedSearchResultsController,
-  checkResultExistsController,
-  deleteResultController,
-  deleteResultsByExamController,
-  getAllResultsController,
-  getResultByIdController,
-  getResultCountController,
-  getResultsByClassController,
-  getResultsByExamController,
-  getResultsByStudentController,
-  getResultsBySubjectController,
-  getStudentResultSummaryController,
-  searchResultsController,
-  updateResultController,
-} from "../controllers/result.controller.js";
+import { resultController as results } from "../src/modules/results/index.js";
 
 const router = express.Router();
 
-// Public route — students can search their own results without logging in
-// optionalAuth sets req.branchId from ?branch_id param so results are branch-scoped
-router.get("/search", optionalAuth, searchResultsController);
+// Public: students look up their results without signing in. optionalAuth
+// scopes the search to an admin's branch, or to the ?branch_id a visitor picked.
+router.get("/search", optionalAuth, results.search);
 
 router.use(authMiddleware);
 
-// Route to get all results with pagination
-router.get("/", getAllResultsController);
-
-// Route to add a new result by IDs
-router.post("/", requireWriteBranch, addResultController);
-
-// Route to add a result using student details (names, roll number, etc.)
-router.post("/add-by-details", requireWriteBranch, addResultByStudentDetailsController);
-
-// Route to add multiple results (batch insert)
-router.post("/batch", requireWriteBranch, addMultipleResultsController);
-
-// Route to get the total count of results
-router.get("/count", getResultCountController);
-
-// Route to advanced search with pagination and comprehensive filters
-router.get("/search/advanced", advancedSearchResultsController);
-
-// Route to check if a result exists
-router.get("/check-exists", checkResultExistsController);
-
-// Route to get results by student
-router.get("/student/:studentId", getResultsByStudentController);
-
-// Route to get results by exam
-router.get("/exam/:examId", getResultsByExamController);
-
-// Route to get results by class
-router.get("/class/:classId", getResultsByClassController);
-
-// Route to get results by subject
-router.get("/subject/:subjectId", getResultsBySubjectController);
-
-// Route to get student result summary for a specific exam
-router.get("/summary/:studentId/:examId", getStudentResultSummaryController);
-
-// Route to get a specific result by ID
-router.get("/:id", getResultByIdController);
-
-// Route to update a result
-router.put("/:id", updateResultController);
-
-// Route to delete a result
-router.delete("/:id", deleteResultController);
-
-// Route to delete all results for a specific exam
-router.delete("/exam/:examId", deleteResultsByExamController);
+// Marks are entered for the branch the admin works in (a super admin picks one).
+router.post("/", requireWriteBranch, results.create);
+router.put("/:id", results.update);
+router.delete("/:id", results.remove);
 
 export default router;

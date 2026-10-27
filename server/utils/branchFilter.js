@@ -4,7 +4,7 @@
  * Usage in a model:
  *   const { clause, params } = branchFilter(branchId);
  *   const sql = `SELECT * FROM Students WHERE 1=1 ${clause}`;
- *   const [rows] = await db.query(sql, [...params]);
+ *   const { rows } = await db.query(sql, [...params]);
  *
  * @param {number|null} branchId  null = super_admin (no filter), number = branch_admin
  * @param {string}      tableAlias  optional table alias prefix (e.g. "s" → "s.branch_id")

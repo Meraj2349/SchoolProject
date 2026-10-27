@@ -6,23 +6,19 @@
 // never point it at real data.
 import { createRequire } from "node:module";
 import { E2E } from "./fixtures/data.js";
+import { database, serverDbEnv } from "./fixtures/database.js";
 
 // The server's own password hashing, so the accounts sign in like real ones.
 const bcrypt = createRequire(new URL("../server/package.json", import.meta.url))("bcryptjs");
 
-const env = {
-  TEST_DB_HOST: process.env.E2E_DB_HOST || "127.0.0.1",
-  TEST_DB_PORT: process.env.E2E_DB_PORT || "3306",
-  TEST_DB_USER: process.env.E2E_DB_USER || "school_test",
-  TEST_DB_PASSWORD: process.env.E2E_DB_PASSWORD ?? "school_test",
-  TEST_DB_NAME: process.env.E2E_DB_NAME || "school_e2e",
-};
-Object.assign(process.env, env, {
-  DB_HOST: env.TEST_DB_HOST,
-  DB_PORT: env.TEST_DB_PORT,
-  DB_USER: env.TEST_DB_USER,
-  DB_PASSWORD: env.TEST_DB_PASSWORD,
-  DB_NAME: env.TEST_DB_NAME,
+// The integration-test setup reads TEST_DB_*, the app's db module DB_*.
+Object.assign(process.env, serverDbEnv, {
+  TEST_DB_DIALECT: database.dialect,
+  TEST_DB_HOST: database.host,
+  TEST_DB_PORT: database.port,
+  TEST_DB_USER: database.user,
+  TEST_DB_PASSWORD: database.password,
+  TEST_DB_NAME: database.name,
 });
 
 const { default: buildDatabase } = await import("../server/tests/integration/globalSetup.js");
@@ -38,10 +34,10 @@ const day = (offset) => {
 
 try {
   await resetDb();
-  await db.query("UPDATE Branches SET name_en = ?, name_bn = ?, address_en = ?, address_bn = ? WHERE id = ?", [
+  await db.query(`UPDATE "Branches" SET name_en = ?, name_bn = ?, address_en = ?, address_bn = ? WHERE id = ?`, [
     E2E.branchA.en, E2E.branchA.bn, "Natiapara, Delduar, Tangail", "নাটিয়াপাড়া, দেলদুয়ার, টাঙ্গাইল", BRANCH_A,
   ]);
-  await db.query("UPDATE Branches SET name_en = ?, name_bn = ?, address_en = ?, address_bn = ? WHERE id = ?", [
+  await db.query(`UPDATE "Branches" SET name_en = ?, name_bn = ?, address_en = ?, address_bn = ? WHERE id = ?`, [
     E2E.branchB.en, E2E.branchB.bn, "Bathuli, Delduar, Tangail", "বাথুলী, দেলদুয়ার, টাঙ্গাইল", BRANCH_B,
   ]);
 
@@ -124,7 +120,7 @@ try {
       CorrectAnswer: answer, Active: true,
     });
   }
-  console.log(`Seeded ${env.TEST_DB_NAME}`);
+  console.log(`Seeded ${database.name} (${database.dialect})`);
 } finally {
   await db.end();
 }

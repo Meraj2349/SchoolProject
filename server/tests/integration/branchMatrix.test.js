@@ -148,14 +148,14 @@ describe("branch ownership of new rows", () => {
     expect(one.status).toBeGreaterThanOrEqual(400);
     expect(bulk.status).toBeGreaterThanOrEqual(400);
     expect(ownClass.status).toBe(400);
-    expect(await count("Attendance", "StudentID = ?", [b.studentId])).toBe(0);
+    expect(await count("Attendance", `"StudentID" = ?`, [b.studentId])).toBe(0);
   });
 
   it("a branch admin cannot add a subject to another branch's class", async () => {
     const res = await request(app).post("/api/subjects/add").set(adminA).send({ subjectName: "Art", classId: b.classId });
 
     expect(res.status).toBeGreaterThanOrEqual(400);
-    expect(await count("Subjects", "SubjectName = 'Art'")).toBe(0);
+    expect(await count("Subjects", `"SubjectName" = 'Art'`)).toBe(0);
   });
 
   it("a branch admin cannot give their class another branch's teacher", async () => {
@@ -167,7 +167,7 @@ describe("branch ownership of new rows", () => {
       .send({ className: "Class 5", section: "Good", teacherId: teacherB });
 
     expect(res.status).toBeGreaterThanOrEqual(400);
-    const [[row]] = await db.query("SELECT TeacherID FROM Classes WHERE ClassID = ?", [a.classId]);
+    const row = await db.one(`SELECT "TeacherID" FROM "Classes" WHERE "ClassID" = ?`, [a.classId]);
     expect(row.TeacherID).toBeNull();
   });
 });

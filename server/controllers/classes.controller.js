@@ -1,4 +1,5 @@
 import { t } from "../config/i18n.js";
+import db from "../src/shared/db/index.js";
 import { ValidationError } from "../src/shared/errors/index.js";
 import {
   addClass,
@@ -32,7 +33,7 @@ export const addClassController = async (req, res) => {
       .json({ message: t("class_added", lang), ClassID: result.ClassID });
   } catch (error) {
     console.error("Error adding class:", error);
-    if (error?.code === "ER_DUP_ENTRY") {
+    if (db.isUniqueViolation(error)) {
       return res.status(409).json({
         error: `${className} - ${section} already exists in this branch`,
       });
@@ -96,7 +97,7 @@ export const editClassController = async (req, res) => {
       return res.status(400).json({ success: false, message: t(error.code, lang) });
     }
     console.error("Error editing class:", error);
-    if (error?.code === "ER_DUP_ENTRY") {
+    if (db.isUniqueViolation(error)) {
       return res.status(409).json({
         error: `${className} - ${section} already exists in this branch`,
       });

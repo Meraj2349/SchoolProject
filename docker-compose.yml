@@ -6,10 +6,16 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=3000
-      - DB_HOST=db
-      - DB_USER=root
-      - DB_PASSWORD=${MYSQL_ROOT_PASSWORD:?Set MYSQL_ROOT_PASSWORD in .env}
+      # PostgreSQL by default. Rollback to MySQL (until it is retired):
+      # DB_DIALECT=mysql DB_HOST=db DB_USER=root DB_PASSWORD=<mysql root password>
+      # and `docker compose --profile mysql up -d` — see docs/postgres-cutover.md.
+      - DB_DIALECT=${DB_DIALECT:-postgres}
+      - DB_HOST=${DB_HOST:-postgres}
+      - DB_PORT=${DB_PORT:-}
+      - DB_USER=${DB_USER:-school}
+      - DB_PASSWORD=${DB_PASSWORD:-${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}}
       - DB_NAME=${DB_NAME:-School_Management}
+      - DB_TIMEZONE=${DB_TIMEZONE:-Asia/Dhaka}
       - JWT_SECRET_KEY=${JWT_SECRET_KEY:?Set JWT_SECRET_KEY in .env}
       - JWT_EXPIRES_IN=${JWT_EXPIRES_IN:-30h}
       - CLOUDINARY_CLOUD_NAME=${CLOUDINARY_CLOUD_NAME:?Set CLOUDINARY_CLOUD_NAME in .env}
@@ -32,9 +38,26 @@ services:
       - uploads:/app/public/uploads
       - private_uploads:/app/private_uploads
     depends_on:
-      db:
-        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
     restart: unless-stopped
+    networks:
+      - school-network
+
+  # Applies pending database migrations (server/db/migrations), then exits.
+  # The backend starts only after it succeeded.
+  migrate:
+    build: ./server
+    command: ["node", "scripts/migrate.js"]
+    environment:
+      - DB_HOST=postgres
+      - DB_USER=school
+      - DB_PASSWORD=${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+      - DB_NAME=${DB_NAME:-School_Management}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"
     networks:
       - school-network
 
@@ -52,11 +75,37 @@ services:
     networks:
       - school-network
 
+  postgres:
+    image: postgres:18
+    environment:
+      POSTGRES_DB: ${DB_NAME:-School_Management}
+      POSTGRES_USER: school
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+      TZ: Asia/Dhaka
+      PGTZ: Asia/Dhaka
+    ports:
+      - "5433:5432"
+    volumes:
+      # PostgreSQL 18 images keep their data under /var/lib/postgresql.
+      - postgres_data:/var/lib/postgresql
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U school -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    networks:
+      - school-network
+
+  # The old MySQL database: kept, untouched, for the data copy and for
+  # rollback until PostgreSQL has been signed off (docs/postgres-cutover.md).
+  # Starts only with `docker compose --profile mysql ...`.
   db:
     image: mysql:8.0
+    profiles: ["mysql"]
     environment:
       MYSQL_DATABASE: ${DB_NAME:-School_Management}
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Set MYSQL_ROOT_PASSWORD in .env}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-}
       MYSQL_ROOT_HOST: "%"
     ports:
       - "3307:3306"
@@ -75,6 +124,7 @@ services:
       - school-network
 
 volumes:
+  postgres_data:
   mysql_data:
   uploads:
   private_uploads:

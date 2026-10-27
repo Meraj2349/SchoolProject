@@ -25,7 +25,7 @@ const runMigration = async () => {
 };
 
 const columnsOf = async (table) => {
-  const [rows] = await db.query(
+  const { rows } = await db.query(
     `SELECT COLUMN_NAME AS name, COLUMN_TYPE AS type, IS_NULLABLE AS nullable, COLUMN_DEFAULT AS def
        FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? ORDER BY COLUMN_NAME`,
     [table],
@@ -34,7 +34,7 @@ const columnsOf = async (table) => {
 };
 
 const uniqueKeysOf = async (table) => {
-  const [rows] = await db.query(
+  const { rows } = await db.query(
     `SELECT GROUP_CONCAT(COLUMN_NAME ORDER BY SEQ_IN_INDEX) AS cols
        FROM information_schema.STATISTICS
       WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? AND NON_UNIQUE = 0 AND INDEX_NAME <> 'PRIMARY'
@@ -45,7 +45,7 @@ const uniqueKeysOf = async (table) => {
 };
 
 const foreignKeysOf = async (table) => {
-  const [rows] = await db.query(
+  const { rows } = await db.query(
     `SELECT CONSTRAINT_NAME AS name FROM information_schema.TABLE_CONSTRAINTS
       WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? AND CONSTRAINT_TYPE = 'FOREIGN KEY' ORDER BY name`,
     [table],
@@ -107,7 +107,7 @@ describe("attendance_v2_migration.sql", () => {
     await runMigration();
 
     expect(await snapshot()).toEqual(fresh);
-    const [rows] = await db.query("SELECT ClassDate, Status FROM Attendance ORDER BY ClassDate");
+    const { rows } = await db.query("SELECT ClassDate, Status FROM Attendance ORDER BY ClassDate");
     expect(rows).toEqual([
       { ClassDate: "2026-01-05", Status: "Late" },
       { ClassDate: "2026-01-06", Status: "Absent" },

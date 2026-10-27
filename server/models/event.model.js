@@ -1,4 +1,4 @@
-import db from "../config/db.config.js";
+import db from "../src/shared/db/index.js";
 
 /**
  * Event Model for School Management System
@@ -44,21 +44,21 @@ const eventWriteClause = (branchId) => {
 const getAllEvents = async (branchId = null) => {
   const { clause, params } = eventBranchClause(branchId);
   try {
-    const [rows] = await db.query(`
+    const { rows } = await db.query(`
       SELECT
-        EventID,
-        EventName,
-        EventType,
-        StartDate,
-        EndDate,
-        Venue,
-        Description,
+        "EventID",
+        "EventName",
+        "EventType",
+        "StartDate",
+        "EndDate",
+        "Venue",
+        "Description",
         branch_id,
-        CreatedAt,
-        UpdatedAt
-      FROM Events
+        "CreatedAt",
+        "UpdatedAt"
+      FROM "Events"
       WHERE 1=1 ${clause}
-      ORDER BY StartDate ASC, CreatedAt DESC
+      ORDER BY "StartDate" ASC, "CreatedAt" DESC
     `, params);
     return rows;
   } catch (err) {
@@ -74,20 +74,20 @@ const getEventById = async (eventId, branchId = null) => {
       throw new Error("Event ID is required");
     }
 
-    const [rows] = await db.query(
+    const { rows } = await db.query(
       `SELECT
-        EventID,
-        EventName,
-        EventType,
-        StartDate,
-        EndDate,
-        Venue,
-        Description,
+        "EventID",
+        "EventName",
+        "EventType",
+        "StartDate",
+        "EndDate",
+        "Venue",
+        "Description",
         branch_id,
-        CreatedAt,
-        UpdatedAt
-      FROM Events
-      WHERE EventID = ? ${clause}`,
+        "CreatedAt",
+        "UpdatedAt"
+      FROM "Events"
+      WHERE "EventID" = ? ${clause}`,
       [eventId, ...params],
     );
 
@@ -136,7 +136,7 @@ const addEvent = async (eventData, branchId = null) => {
 
     let sql, values;
     if (branchId != null) {
-      sql = `INSERT INTO Events (EventName, EventType, StartDate, EndDate, Venue, Description, branch_id) VALUES (?, ?, ?, ?, ?, ?, ?)`;
+      sql = `INSERT INTO "Events" ("EventName", "EventType", "StartDate", "EndDate", "Venue", "Description", branch_id) VALUES (?, ?, ?, ?, ?, ?, ?)`;
       values = [
         eventName.trim(),
         eventType,
@@ -147,7 +147,7 @@ const addEvent = async (eventData, branchId = null) => {
         branchId,
       ];
     } else {
-      sql = `INSERT INTO Events (EventName, EventType, StartDate, EndDate, Venue, Description) VALUES (?, ?, ?, ?, ?, ?)`;
+      sql = `INSERT INTO "Events" ("EventName", "EventType", "StartDate", "EndDate", "Venue", "Description") VALUES (?, ?, ?, ?, ?, ?)`;
       values = [
         eventName.trim(),
         eventType,
@@ -158,14 +158,14 @@ const addEvent = async (eventData, branchId = null) => {
       ];
     }
 
-    const [result] = await db.query(sql, values);
+    const insertId = await db.insert(sql, values, "EventID");
 
     return {
       success: true,
-      eventId: result.insertId,
+      eventId: insertId,
       message: `Event '${eventName}' created successfully`,
       data: {
-        EventID: result.insertId,
+        EventID: insertId,
         EventName: eventName.trim(),
         EventType: eventType,
         StartDate: startDate,
@@ -188,8 +188,8 @@ const updateEvent = async (eventId, eventData, branchId = null) => {
       throw new Error("Event ID is required");
     }
 
-    const [existingEvent] = await db.query(
-      `SELECT * FROM Events WHERE EventID = ? ${branchScope}`,
+    const { rows: existingEvent } = await db.query(
+      `SELECT * FROM "Events" WHERE "EventID" = ? ${branchScope}`,
       [eventId, ...branchParams],
     );
 
@@ -209,7 +209,7 @@ const updateEvent = async (eventId, eventData, branchId = null) => {
       if (eventName.length > 100) {
         throw new Error("Event name cannot exceed 100 characters");
       }
-      updates.push("EventName = ?");
+      updates.push(`"EventName" = ?`);
       params.push(eventName.trim());
     }
 
@@ -219,7 +219,7 @@ const updateEvent = async (eventId, eventData, branchId = null) => {
           `Invalid event type. Must be one of: ${VALID_EVENT_TYPES.join(", ")}`,
         );
       }
-      updates.push("EventType = ?");
+      updates.push(`"EventType" = ?`);
       params.push(eventType);
     }
 
@@ -228,7 +228,7 @@ const updateEvent = async (eventId, eventData, branchId = null) => {
       if (isNaN(startDateObj.getTime())) {
         throw new Error("Invalid start date format. Use YYYY-MM-DD");
       }
-      updates.push("StartDate = ?");
+      updates.push(`"StartDate" = ?`);
       params.push(startDate);
     }
 
@@ -237,7 +237,7 @@ const updateEvent = async (eventId, eventData, branchId = null) => {
       if (isNaN(endDateObj.getTime())) {
         throw new Error("Invalid end date format. Use YYYY-MM-DD");
       }
-      updates.push("EndDate = ?");
+      updates.push(`"EndDate" = ?`);
       params.push(endDate);
     }
 
@@ -251,12 +251,12 @@ const updateEvent = async (eventId, eventData, branchId = null) => {
       if (venue && venue.length > 100) {
         throw new Error("Venue name cannot exceed 100 characters");
       }
-      updates.push("Venue = ?");
+      updates.push(`"Venue" = ?`);
       params.push(venue?.trim() || null);
     }
 
     if (description !== undefined) {
-      updates.push("Description = ?");
+      updates.push(`"Description" = ?`);
       params.push(description?.trim() || null);
     }
 
@@ -265,19 +265,19 @@ const updateEvent = async (eventId, eventData, branchId = null) => {
     }
 
     params.push(eventId);
-    const [result] = await db.query(
-      `UPDATE Events SET ${updates.join(", ")} WHERE EventID = ?`,
+    const result = await db.query(
+      `UPDATE "Events" SET ${updates.join(", ")} WHERE "EventID" = ?`,
       params,
     );
 
-    if (result.affectedRows === 0) {
+    if (result.rowCount === 0) {
       throw new Error("No rows were updated");
     }
 
     return {
       success: true,
       message: "Event updated successfully",
-      affectedRows: result.affectedRows,
+      affectedRows: result.rowCount,
     };
   } catch (err) {
     throw new Error("Error updating event: " + err.message);
@@ -292,20 +292,20 @@ const deleteEvent = async (eventId, branchId = null) => {
       throw new Error("Event ID is required");
     }
 
-    const [[eventInfo]] = await db.query(
-      `SELECT * FROM Events WHERE EventID = ? ${branchScope}`,
+    const eventInfo = await db.one(
+      `SELECT * FROM "Events" WHERE "EventID" = ? ${branchScope}`,
       [eventId, ...branchParams],
     );
     if (!eventInfo) {
       throw new Error("Event not found");
     }
 
-    const [result] = await db.query(
-      `DELETE FROM Events WHERE EventID = ? ${branchScope}`,
+    const result = await db.query(
+      `DELETE FROM "Events" WHERE "EventID" = ? ${branchScope}`,
       [eventId, ...branchParams],
     );
 
-    if (result.affectedRows === 0) {
+    if (result.rowCount === 0) {
       throw new Error("No event was deleted");
     }
 
@@ -331,21 +331,21 @@ const deleteEvent = async (eventId, branchId = null) => {
 const getEventsByDateRange = async (startDate, endDate, branchId = null) => {
   const { clause, params } = eventBranchClause(branchId);
   try {
-    const [rows] = await db.query(
+    const { rows } = await db.query(
       `SELECT
-        EventID,
-        EventName,
-        EventType,
-        StartDate,
-        EndDate,
-        Venue,
-        Description,
+        "EventID",
+        "EventName",
+        "EventType",
+        "StartDate",
+        "EndDate",
+        "Venue",
+        "Description",
         branch_id,
-        CreatedAt,
-        UpdatedAt
-      FROM Events
-      WHERE StartDate >= ? AND EndDate <= ? ${clause}
-      ORDER BY StartDate ASC`,
+        "CreatedAt",
+        "UpdatedAt"
+      FROM "Events"
+      WHERE "StartDate" >= ? AND "EndDate" <= ? ${clause}
+      ORDER BY "StartDate" ASC`,
       [startDate, endDate, ...params],
     );
 
@@ -365,21 +365,21 @@ const getEventsByType = async (eventType, branchId = null) => {
       );
     }
 
-    const [rows] = await db.query(
+    const { rows } = await db.query(
       `SELECT
-        EventID,
-        EventName,
-        EventType,
-        StartDate,
-        EndDate,
-        Venue,
-        Description,
+        "EventID",
+        "EventName",
+        "EventType",
+        "StartDate",
+        "EndDate",
+        "Venue",
+        "Description",
         branch_id,
-        CreatedAt,
-        UpdatedAt
-      FROM Events
-      WHERE EventType = ? ${clause}
-      ORDER BY StartDate ASC`,
+        "CreatedAt",
+        "UpdatedAt"
+      FROM "Events"
+      WHERE "EventType" = ? ${clause}
+      ORDER BY "StartDate" ASC`,
       [eventType, ...params],
     );
 

@@ -61,7 +61,7 @@ describe("a branch admin cannot touch another branch's data", () => {
       });
 
       expect(res.status).toBe(404);
-      const [[row]] = await db.query("SELECT FirstName FROM Students WHERE StudentID = ?", [b.studentId]);
+      const row = await db.one(`SELECT "FirstName" FROM "Students" WHERE "StudentID" = ?`, [b.studentId]);
       expect(row.FirstName).toBe("Rahim");
     });
   });
@@ -74,9 +74,10 @@ describe("a branch admin cannot touch another branch's data", () => {
       expect(await count("Results")).toBe(1);
     });
 
-    it("cannot wipe another branch's results for an exam", async () => {
-      await request(app).delete(`/api/results/exam/${b.examId}`).set(adminA);
+    it("cannot delete another branch's exam, or the results in it", async () => {
+      const res = await request(app).delete(`/api/exams/${b.examId}`).set(adminA);
 
+      expect(res.status).toBe(404);
       expect(await count("Results")).toBe(1);
     });
   });
@@ -86,7 +87,7 @@ describe("a branch admin cannot touch another branch's data", () => {
       const res = await request(app).put(`/api/attendance/${b.attendanceId}`).set(adminA).send({ status: "Absent" });
 
       expect(res.status).toBe(404);
-      const [[row]] = await db.query("SELECT Status FROM Attendance WHERE AttendanceID = ?", [b.attendanceId]);
+      const row = await db.one(`SELECT "Status" FROM "Attendance" WHERE "AttendanceID" = ?`, [b.attendanceId]);
       expect(row.Status).toBe("Present");
     });
 
@@ -104,7 +105,7 @@ describe("a branch admin cannot touch another branch's data", () => {
         .send({ studentId: b.studentId, classDate: "2026-01-06", status: "Absent" })
         .expect(200);
 
-      expect(await count("Attendance", "ClassDate = '2026-01-06' AND branch_id = ?", [BRANCH_B])).toBe(1);
+      expect(await count("Attendance", `"ClassDate" = '2026-01-06' AND branch_id = ?`, [BRANCH_B])).toBe(1);
     });
   });
 
@@ -113,7 +114,7 @@ describe("a branch admin cannot touch another branch's data", () => {
       const res = await request(app).put(`/api/routines/${b.routineId}`).set(adminA).send({ RoutineTitle: "Hacked" });
 
       expect(res.status).toBe(404);
-      const [[row]] = await db.query("SELECT RoutineTitle FROM Routines WHERE RoutineID = ?", [b.routineId]);
+      const row = await db.one(`SELECT "RoutineTitle" FROM "Routines" WHERE "RoutineID" = ?`, [b.routineId]);
       expect(row.RoutineTitle).toBe("Term 1");
     });
 
@@ -121,7 +122,7 @@ describe("a branch admin cannot touch another branch's data", () => {
       const res = await request(app).delete(`/api/routines/${b.routineId}`).set(adminA);
 
       expect(res.status).toBe(404);
-      expect(await count("Routines", "IsActive = TRUE")).toBe(1);
+      expect(await count("Routines", `"IsActive" = TRUE`)).toBe(1);
     });
   });
 
@@ -146,7 +147,7 @@ describe("a branch admin cannot touch another branch's data", () => {
         .send({ FirstName: "Nasrin", branch_id: BRANCH_B, "TeacherID = 999, LastName": "x" });
 
       expect(res.status).toBe(200);
-      const [[row]] = await db.query("SELECT * FROM Teachers WHERE TeacherID = ?", [teacherId]);
+      const row = await db.one(`SELECT * FROM "Teachers" WHERE "TeacherID" = ?`, [teacherId]);
       expect(row).toMatchObject({ FirstName: "Nasrin", LastName: "A", branch_id: BRANCH_A });
     });
   });
@@ -162,7 +163,7 @@ describe("a branch admin cannot touch another branch's data", () => {
 
       expect(edit.status).toBe(404);
       expect(del.status).toBe(404);
-      expect(await count("Events", "EventName = 'Sports Day'")).toBe(1);
+      expect(await count("Events", `"EventName" = 'Sports Day'`)).toBe(1);
     });
 
     it("can still edit its own branch's event", async () => {

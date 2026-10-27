@@ -27,7 +27,7 @@ async function runMigration() {
 
 /** Indexes of Attendance whose first column is ClassDate. */
 const dayIndexes = async () => {
-  const [rows] = await db.query(
+  const { rows } = await db.query(
     `SELECT INDEX_NAME AS name FROM information_schema.STATISTICS
       WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'Attendance' AND SEQ_IN_INDEX = 1 AND COLUMN_NAME = 'ClassDate'`,
   );

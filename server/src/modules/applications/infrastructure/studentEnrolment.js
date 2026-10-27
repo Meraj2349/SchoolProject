@@ -1,4 +1,4 @@
-import db from "../../../../config/db.config.js";
+import db from "../../../shared/db/index.js";
 import { STANDARD_SECTIONS } from "../../../../models/classes.model.js";
 import { addStudent } from "../../../../models/student.model.js";
 
@@ -8,10 +8,10 @@ const ADMISSION_SECTION = STANDARD_SECTIONS.includes("General") ? "General" : ST
 /** Enrols a student through the (legacy) students code, with the next roll number in their class. */
 export const studentEnrolment = {
   async enrol(student, branchId) {
-    const [[{ maxRoll }]] = await db.query(
-      `SELECT MAX(CAST(s.RollNumber AS UNSIGNED)) AS maxRoll
-         FROM Students s JOIN Classes c ON c.ClassID = s.ClassID
-        WHERE c.ClassName = ? AND c.Section = ? AND c.branch_id = ?`,
+    const { maxRoll } = await db.one(
+      `SELECT MAX(${db.sql.leadingNumber(`s."RollNumber"`)}) AS "maxRoll"
+         FROM "Students" s JOIN "Classes" c ON c."ClassID" = s."ClassID"
+        WHERE c."ClassName" = ? AND c."Section" = ? AND c.branch_id = ?`,
       [student.Class, ADMISSION_SECTION, branchId],
     );
     const { studentID } = await addStudent(

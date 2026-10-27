@@ -1,4 +1,4 @@
-import db from "../config/db.config.js";
+import db from "../src/shared/db/index.js";
 import { branchFilter } from "../utils/branchFilter.js";
 import { branchOf } from "../utils/branchOwnership.js";
 import { ValidationError } from "../src/shared/errors/index.js";
@@ -7,15 +7,15 @@ import { ValidationError } from "../src/shared/errors/index.js";
 export const addClass = async ({ className, section, teacherId }, branchId = null) => {
   let sql, values;
   if (branchId != null) {
-    sql = `INSERT INTO Classes (ClassName, Section, TeacherID, branch_id) VALUES (?, ?, ?, ?)`;
+    sql = `INSERT INTO "Classes" ("ClassName", "Section", "TeacherID", branch_id) VALUES (?, ?, ?, ?)`;
     values = [className, section, teacherId, branchId];
   } else {
-    sql = `INSERT INTO Classes (ClassName, Section, TeacherID) VALUES (?, ?, ?)`;
+    sql = `INSERT INTO "Classes" ("ClassName", "Section", "TeacherID") VALUES (?, ?, ?)`;
     values = [className, section, teacherId];
   }
   try {
-    const [result] = await db.query(sql, values);
-    return { ClassID: result.insertId };
+    const ClassID = await db.insert(sql, values, "ClassID");
+    return { ClassID };
   } catch (error) {
     console.error("Error adding class:", error);
     throw error;
@@ -29,11 +29,11 @@ export const addClass = async ({ className, section, teacherId }, branchId = nul
 export const deleteClass = async (classId, branchId = null) => {
   const { clause, params: branchParams } = branchFilter(branchId);
   try {
-    const [result] = await db.query(
-      `UPDATE Classes SET TeacherID = NULL WHERE ClassID = ? ${clause}`,
+    const result = await db.query(
+      `UPDATE "Classes" SET "TeacherID" = NULL WHERE "ClassID" = ? ${clause}`,
       [classId, ...branchParams],
     );
-    if (result.affectedRows === 0) {
+    if (result.rowCount === 0) {
       throw new Error("No class found with that ID");
     }
     return { success: true };
@@ -47,19 +47,19 @@ export const deleteClass = async (classId, branchId = null) => {
 export const getClasses = async (branchId = null) => {
   const { clause, params: branchParams } = branchFilter(branchId, "c");
   const sql = `
-    SELECT c.ClassID, c.ClassName, c.Section, c.TeacherID, c.branch_id,
-           t.FirstName AS TeacherFirstName, t.LastName AS TeacherLastName,
-           t.Subject AS TeacherSubject,
-           COUNT(s.StudentID) AS StudentCount
-    FROM Classes c
-    LEFT JOIN Teachers t ON c.TeacherID = t.TeacherID
-    LEFT JOIN Students s ON s.ClassID = c.ClassID
+    SELECT c."ClassID", c."ClassName", c."Section", c."TeacherID", c.branch_id,
+           t."FirstName" AS "TeacherFirstName", t."LastName" AS "TeacherLastName",
+           t."Subject" AS "TeacherSubject",
+           COUNT(s."StudentID") AS "StudentCount"
+    FROM "Classes" c
+    LEFT JOIN "Teachers" t ON c."TeacherID" = t."TeacherID"
+    LEFT JOIN "Students" s ON s."ClassID" = c."ClassID"
     WHERE 1=1 ${clause}
-    GROUP BY c.ClassID, c.ClassName, c.Section, c.TeacherID, c.branch_id,
-             t.FirstName, t.LastName, t.Subject
+    GROUP BY c."ClassID", c."ClassName", c."Section", c."TeacherID", c.branch_id,
+             t."FirstName", t."LastName", t."Subject"
   `;
   try {
-    const [rows] = await db.query(sql, branchParams);
+    const { rows } = await db.query(sql, branchParams);
     return rows;
   } catch (error) {
     console.error("Error fetching classes:", error);
@@ -78,13 +78,13 @@ export const editClass = async (classId, { className, section, teacherId }, bran
     }
   }
   const sql = `
-    UPDATE Classes
-    SET ClassName = ?, Section = ?, TeacherID = ?
-    WHERE ClassID = ? ${clause}
+    UPDATE "Classes"
+    SET "ClassName" = ?, "Section" = ?, "TeacherID" = ?
+    WHERE "ClassID" = ? ${clause}
   `;
   try {
-    const [result] = await db.query(sql, [className, section, teacherId, classId, ...branchParams]);
-    if (result.affectedRows === 0) {
+    const result = await db.query(sql, [className, section, teacherId, classId, ...branchParams]);
+    if (result.rowCount === 0) {
       throw new Error("No class found with that ID");
     }
     return { success: true };
@@ -98,14 +98,14 @@ export const editClass = async (classId, { className, section, teacherId }, bran
 export const getClasswiseStudentCount = async (branchId = null) => {
   const { clause, params: branchParams } = branchFilter(branchId, "c");
   const sql = `
-    SELECT c.ClassName, c.Section, COUNT(s.StudentID) AS StudentCount
-    FROM Classes c
-    LEFT JOIN Students s ON c.ClassID = s.ClassID
+    SELECT c."ClassName", c."Section", COUNT(s."StudentID") AS "StudentCount"
+    FROM "Classes" c
+    LEFT JOIN "Students" s ON c."ClassID" = s."ClassID"
     WHERE 1=1 ${clause}
-    GROUP BY c.ClassID
+    GROUP BY c."ClassID"
   `;
   try {
-    const [rows] = await db.query(sql, branchParams);
+    const { rows } = await db.query(sql, branchParams);
     return rows;
   } catch (error) {
     console.error("Error fetching classwise student count:", error);
@@ -116,11 +116,11 @@ export const getClasswiseStudentCount = async (branchId = null) => {
 // Hard-delete a class row entirely — super_admin only (irreversible)
 export const hardDeleteClass = async (classId) => {
   try {
-    const [result] = await db.query(
-      `DELETE FROM Classes WHERE ClassID = ?`,
+    const result = await db.query(
+      `DELETE FROM "Classes" WHERE "ClassID" = ?`,
       [classId],
     );
-    if (result.affectedRows === 0) {
+    if (result.rowCount === 0) {
       throw new Error("No class found with that ID");
     }
     return { success: true };
@@ -132,9 +132,9 @@ export const hardDeleteClass = async (classId) => {
 
 // Get all standard class names from the ClassNames reference table (global — not branch-scoped)
 export const getDistinctClassNames = async () => {
-  const sql = `SELECT name FROM ClassNames ORDER BY sort_order, name`;
+  const sql = `SELECT name FROM "ClassNames" ORDER BY sort_order, name`;
   try {
-    const [rows] = await db.query(sql);
+    const { rows } = await db.query(sql);
     return rows.map((r) => r.name);
   } catch (error) {
     console.error("Error fetching distinct class names:", error);
@@ -149,13 +149,13 @@ export const STANDARD_SECTIONS = ["Better", "Good", "General"];
 export const getDistinctClassesWithSections = async (branchId = null) => {
   const { clause, params: branchParams } = branchFilter(branchId);
   const sql = `
-    SELECT DISTINCT ClassName, Section
-    FROM Classes
+    SELECT DISTINCT "ClassName", "Section"
+    FROM "Classes"
     WHERE 1=1 ${clause}
-    ORDER BY ClassName, Section
+    ORDER BY "ClassName", "Section"
   `;
   try {
-    const [rows] = await db.query(sql, branchParams);
+    const { rows } = await db.query(sql, branchParams);
     return rows;
   } catch (error) {
     console.error("Error fetching distinct classes:", error);
@@ -167,13 +167,13 @@ export const getDistinctClassesWithSections = async (branchId = null) => {
 export const getTotalStudentsInClassByName = async (className, branchId = null) => {
   const { clause, params: branchParams } = branchFilter(branchId, "c");
   const sql = `
-    SELECT COUNT(s.StudentID) AS TotalStudents
-    FROM Students s
-    JOIN Classes c ON s.ClassID = c.ClassID
-    WHERE c.ClassName = ? ${clause}
+    SELECT COUNT(s."StudentID") AS "TotalStudents"
+    FROM "Students" s
+    JOIN "Classes" c ON s."ClassID" = c."ClassID"
+    WHERE c."ClassName" = ? ${clause}
   `;
   try {
-    const [rows] = await db.query(sql, [className, ...branchParams]);
+    const { rows } = await db.query(sql, [className, ...branchParams]);
     return rows[0] ? rows[0].TotalStudents : 0;
   } catch (error) {
     console.error("Error fetching total students in class:", error);

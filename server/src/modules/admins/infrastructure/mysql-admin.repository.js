@@ -1,13 +1,13 @@
-import db from "../../../../config/db.config.js";
+import db from "../../../shared/db/index.js";
 
 // MySQL adapter for the admin repository port. Maps Admin rows to
 // { id, username, email, role, branchId, branchName, password? }.
 
 const SELECT_ADMIN = `
-  SELECT a.AdminID, a.Username, a.Email, a.role, a.branch_id,
+  SELECT a."AdminID", a."Username", a."Email", a.role, a.branch_id,
          COALESCE(b.name_en, b.name_bn) AS branch_name
-  FROM Admin a
-  LEFT JOIN Branches b ON b.id = a.branch_id`;
+  FROM "Admin" a
+  LEFT JOIN "Branches" b ON b.id = a.branch_id`;
 
 const toAdmin = (row) => ({
   id: row.AdminID,
@@ -26,24 +26,24 @@ const COLUMNS = {
   branchId: "branch_id",
 };
 
-// `sql` is the pool, or one connection inside a transaction.
+// `sql` is the database, or a transaction on it.
 function makeRepository(sql) {
   const repository = {
     async findAll() {
-      const [rows] = await sql.query(
-        `${SELECT_ADMIN} ORDER BY a.role = 'super_admin' DESC, branch_name, a.Username, a.AdminID`,
+      const { rows } = await sql.query(
+        `${SELECT_ADMIN} ORDER BY a.role = 'super_admin' DESC, branch_name, a."Username", a."AdminID"`,
       );
       return rows.map(toAdmin);
     },
 
     async findById(id) {
-      const [rows] = await sql.query(`${SELECT_ADMIN} WHERE a.AdminID = ?`, [id]);
+      const { rows } = await sql.query(`${SELECT_ADMIN} WHERE a."AdminID" = ?`, [id]);
       return rows[0] ? toAdmin(rows[0]) : null;
     },
 
     // Same lookup the login uses: email + role + branch (NULL-safe).
     async findByLogin({ email, role, branchId }) {
-      const [rows] = await sql.query(`${SELECT_ADMIN} WHERE a.Email = ? AND a.role = ? AND a.branch_id <=> ?`, [
+      const { rows } = await sql.query(`${SELECT_ADMIN} WHERE a."Email" = ? AND a.role = ? AND ${db.sql.nullSafeEquals("a.branch_id", "?")}`, [
         email,
         role,
         branchId,
@@ -53,46 +53,34 @@ function makeRepository(sql) {
 
     // FOR UPDATE: inside a transaction this locks the super admin rows until commit.
     async countSuperAdmins() {
-      const [rows] = await sql.query("SELECT AdminID FROM Admin WHERE role = 'super_admin' FOR UPDATE");
+      const { rows } = await sql.query(`SELECT "AdminID" FROM "Admin" WHERE role = 'super_admin' FOR UPDATE`);
       return rows.length;
     },
 
     async create({ username, email, password, role, branchId }) {
-      const [result] = await sql.query(
-        "INSERT INTO Admin (Username, Email, Password, role, branch_id) VALUES (?, ?, ?, ?, ?)",
+      const id = await sql.insert(
+        `INSERT INTO "Admin" ("Username", "Email", "Password", role, branch_id) VALUES (?, ?, ?, ?, ?)`,
         [username, email, password, role, branchId],
+        "AdminID",
       );
-      return repository.findById(result.insertId);
+      return repository.findById(id);
     },
 
     async update(id, changes) {
       const fields = Object.keys(COLUMNS).filter((key) => changes[key] !== undefined);
       if (fields.length === 0) return;
-      await sql.query(`UPDATE Admin SET ${fields.map((key) => `${COLUMNS[key]} = ?`).join(", ")} WHERE AdminID = ?`, [
+      await sql.query(`UPDATE "Admin" SET ${fields.map((key) => `${db.ident(COLUMNS[key])} = ?`).join(", ")} WHERE "AdminID" = ?`, [
         ...fields.map((key) => changes[key]),
         id,
       ]);
     },
 
     async remove(id) {
-      await sql.query("DELETE FROM Admin WHERE AdminID = ?", [id]);
+      await sql.query(`DELETE FROM "Admin" WHERE "AdminID" = ?`, [id]);
     },
 
-    // Runs `work(repository)` on one connection in a transaction.
-    async transaction(work) {
-      const connection = await db.getConnection();
-      try {
-        await connection.beginTransaction();
-        const result = await work(makeRepository(connection));
-        await connection.commit();
-        return result;
-      } catch (error) {
-        await connection.rollback();
-        throw error;
-      } finally {
-        connection.release();
-      }
-    },
+    // Runs `work(repository)` in one transaction.
+    transaction: (work) => sql.withTransaction((tx) => work(makeRepository(tx))),
   };
   return repository;
 }

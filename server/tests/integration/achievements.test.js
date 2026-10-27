@@ -26,7 +26,7 @@ describe("achievements", () => {
   it("saves a board result with its numbers", async () => {
     await request(app).post("/api/achievements").set(adminA).send(SSC).expect(201);
 
-    const [[row]] = await db.query("SELECT exam_name, examinees, passed, gpa5, branch_id FROM Achievements");
+    const row = await db.one(`SELECT exam_name, examinees, passed, gpa5, branch_id FROM "Achievements"`);
     expect(row).toEqual({ exam_name: "SSC", examinees: 120, passed: 118, gpa5: 42, branch_id: BRANCH_A });
   });
 
@@ -46,7 +46,7 @@ describe("achievements", () => {
       .attach("image", PNG, "fair.png");
 
     expect(res.status).toBe(201);
-    const [[row]] = await db.query("SELECT image_url, is_featured FROM Achievements");
+    const row = await db.one(`SELECT image_url, is_featured FROM "Achievements"`);
     expect(row.image_url).toMatch(/^\/uploads\/achievements\/.+\.png$/);
     expect(row.is_featured).toBe(1);
     expect(fs.existsSync(path.join(PUBLIC_DIR, row.image_url))).toBe(true);

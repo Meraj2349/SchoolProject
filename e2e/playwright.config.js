@@ -1,4 +1,5 @@
 import { defineConfig, devices } from "@playwright/test";
+import { serverDbEnv } from "./fixtures/database.js";
 
 // The website in a real browser, against the real API and a seeded database
 // (seed.js). Public pages: every spec on desktop and phone, in Bangla (the
@@ -10,11 +11,7 @@ const CI = Boolean(process.env.CI);
 const backendEnv = {
   PORT: "3000",
   NODE_ENV: "test",
-  DB_HOST: process.env.E2E_DB_HOST || "127.0.0.1",
-  DB_PORT: process.env.E2E_DB_PORT || "3306",
-  DB_USER: process.env.E2E_DB_USER || "school_test",
-  DB_PASSWORD: process.env.E2E_DB_PASSWORD ?? "school_test",
-  DB_NAME: process.env.E2E_DB_NAME || "school_e2e",
+  ...serverDbEnv,
   JWT_SECRET_KEY: "e2e-secret",
   JWT_EXPIRES_IN: "1h",
   FRONTEND_URL: "http://localhost:5173",

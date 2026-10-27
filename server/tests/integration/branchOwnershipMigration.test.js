@@ -39,8 +39,8 @@ describe("branch_ownership_migration.sql", () => {
     await runMigration();
     await runMigration();
 
-    const [[exam]] = await db.query("SELECT branch_id FROM Exams");
-    const [[result]] = await db.query("SELECT branch_id FROM Results");
+    const exam = await db.one("SELECT branch_id FROM Exams");
+    const result = await db.one("SELECT branch_id FROM Results");
     expect([exam.branch_id, result.branch_id]).toEqual([BRANCH_B, BRANCH_B]);
   });
 });

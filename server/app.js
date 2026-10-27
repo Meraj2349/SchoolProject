@@ -4,7 +4,7 @@ import dotenv from "dotenv";
 import express from "express";
 import path from "path";
 import { fileURLToPath } from "url";
-import db from "./config/db.config.js";
+import db from "./src/shared/db/index.js";
 import { languageMiddleware } from "./middlewares/language.middleware.js";
 import adminRouter from "./routes/admin.routes.js";
 import attendanceRoutes from "./routes/attendance.route.js";

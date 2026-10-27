@@ -73,7 +73,7 @@ describe("managing admins (/api/admins)", () => {
 
     expect(res.status).toBe(201);
     expect(res.body.data).toMatchObject({ username: "Karim", branch_id: BRANCH_A, branch_name: "Main" });
-    const [[row]] = await db.query("SELECT Password FROM Admin WHERE AdminID = ?", [res.body.data.id]);
+    const row = await db.one(`SELECT "Password" FROM "Admin" WHERE "AdminID" = ?`, [res.body.data.id]);
     expect(row.Password).not.toBe("secret123");
     expect((await login("karim@school.test", BRANCH_A)).status).toBe(200);
     expect((await login("karim@school.test", BRANCH_B)).status).toBe(401);
@@ -144,7 +144,7 @@ describe("managing admins (/api/admins)", () => {
     const res = await asBoss(request(app).delete(`/api/admins/${id}`));
 
     expect(res.status).toBe(200);
-    expect(await count("Admin", "AdminID = ?", [id])).toBe(0);
+    expect(await count("Admin", `"AdminID" = ?`, [id])).toBe(0);
     expect((await login("karim@school.test", BRANCH_A)).status).toBe(401);
   });
 
@@ -193,7 +193,7 @@ describe("managing admins (/api/admins)", () => {
       const res = await request(app).delete(`/api/admins/${bossId}`).set(bearer(superAdminToken(exBoss)));
 
       expect(res.status).toBe(401);
-      expect(await count("Admin", "AdminID = ?", [bossId])).toBe(1);
+      expect(await count("Admin", `"AdminID" = ?`, [bossId])).toBe(1);
     });
 
     it("a removed branch admin is logged out of their branch at once", async () => {

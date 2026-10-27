@@ -51,28 +51,68 @@ jobs:
       - run: npm ci
       - run: npm run test:integration
 
+  # The same integration suite on PostgreSQL, the database the app is moving
+  # to (docs/postgres-migration.md). The *Migration tests (old MySQL scripts)
+  # run on MySQL only.
+  server-integration-postgres:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_USER: school_test
+          POSTGRES_PASSWORD: school_test
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U school_test"
+          --health-interval=5s --health-timeout=5s --health-retries=30
+    env:
+      TEST_DB_DIALECT: postgres
+      TEST_DB_HOST: 127.0.0.1
+      TEST_DB_PORT: 5432
+      TEST_DB_USER: school_test
+      TEST_DB_PASSWORD: school_test
+    defaults:
+      run:
+        working-directory: server
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: server/package-lock.json
+      - run: npm ci
+      - run: npm run test:integration
+
   # The website and the admin panel in a real browser (e2e/): the API on a
-  # seeded MySQL database and a production build of the frontend, desktop and
-  # phone, in Bangla and English.
+  # seeded PostgreSQL database and a production build of the frontend,
+  # desktop and phone, in Bangla and English.
   e2e:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     services:
-      mysql:
-        image: mysql:8.0
+      postgres:
+        image: postgres:18
         env:
-          MYSQL_ROOT_PASSWORD: root
+          POSTGRES_USER: school_test
+          POSTGRES_PASSWORD: school_test
+          POSTGRES_DB: postgres
         ports:
-          - 3306:3306
+          - 5432:5432
         options: >-
-          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -proot"
+          --health-cmd="pg_isready -U school_test"
           --health-interval=5s --health-timeout=5s --health-retries=30
     env:
       CI: true
+      E2E_DB_DIALECT: postgres
       E2E_DB_HOST: 127.0.0.1
-      E2E_DB_PORT: 3306
-      E2E_DB_USER: root
-      E2E_DB_PASSWORD: root
+      E2E_DB_PORT: 5432
+      E2E_DB_USER: school_test
+      E2E_DB_PASSWORD: school_test
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4

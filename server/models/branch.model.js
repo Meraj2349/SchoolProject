@@ -1,9 +1,9 @@
-import db from "../config/db.config.js";
+import db from "../src/shared/db/index.js";
 
 // Get all branches
 export const getAllBranches = async () => {
   try {
-    const [rows] = await db.query(`
+    const { rows } = await db.query(`
       SELECT
         id,
         name_bn,
@@ -19,7 +19,7 @@ export const getAllBranches = async () => {
         established_date,
         created_at,
         updated_at
-      FROM Branches
+      FROM "Branches"
       ORDER BY created_at DESC
     `);
     return rows;
@@ -35,7 +35,7 @@ export const getBranchById = async (id) => {
       throw new Error("Branch ID is required");
     }
 
-    const [rows] = await db.query(
+    const { rows } = await db.query(
       `
       SELECT
         id,
@@ -53,7 +53,7 @@ export const getBranchById = async (id) => {
         established_date,
         created_at,
         updated_at
-      FROM Branches
+      FROM "Branches"
       WHERE id = ?
       `,
       [id],
@@ -89,9 +89,9 @@ export const createBranch = async (data) => {
       );
     }
 
-    const [result] = await db.query(
+    const insertId = await db.insert(
       `
-      INSERT INTO Branches (
+      INSERT INTO "Branches" (
         name_bn, name_en, description_bn, description_en,
         image_url, image_public_id, latitude, longitude,
         address_bn, address_en, is_proposed, established_date
@@ -111,13 +111,14 @@ export const createBranch = async (data) => {
         is_proposed !== undefined ? is_proposed : false,
         established_date || null,
       ],
+      "id",
     );
 
     return {
       success: true,
-      id: result.insertId,
+      id: insertId,
       data: {
-        id: result.insertId,
+        id: insertId,
         name_bn: name_bn || null,
         name_en: name_en || null,
         description_bn: description_bn || null,
@@ -179,19 +180,19 @@ export const updateBranch = async (id, data) => {
     }
 
     params.push(id);
-    const [result] = await db.query(
-      `UPDATE Branches SET ${updates.join(", ")} WHERE id = ?`,
+    const result = await db.query(
+      `UPDATE "Branches" SET ${updates.join(", ")} WHERE id = ?`,
       params,
     );
 
-    if (result.affectedRows === 0) {
+    if (result.rowCount === 0) {
       throw new Error("No rows were updated");
     }
 
     return {
       success: true,
       message: "Branch updated successfully",
-      affectedRows: result.affectedRows,
+      affectedRows: result.rowCount,
     };
   } catch (err) {
     throw new Error("Error updating branch: " + err.message);
@@ -210,9 +211,9 @@ export const deleteBranch = async (id) => {
       throw new Error("Branch not found");
     }
 
-    const [result] = await db.query(`DELETE FROM Branches WHERE id = ?`, [id]);
+    const result = await db.query(`DELETE FROM "Branches" WHERE id = ?`, [id]);
 
-    if (result.affectedRows === 0) {
+    if (result.rowCount === 0) {
       throw new Error("No branch was deleted");
     }
 
@@ -230,34 +231,34 @@ export const deleteBranch = async (id) => {
 export const getBranchStats = async () => {
   try {
     // Fetch all branches
-    const [branches] = await db.query(`
+    const { rows: branches } = await db.query(`
       SELECT id, name_bn, name_en, is_proposed, established_date, image_url
-      FROM Branches
+      FROM "Branches"
       ORDER BY created_at DESC
     `);
 
     if (branches.length === 0) return [];
 
     // Student counts per branch
-    const [studentCounts] = await db.query(`
+    const { rows: studentCounts } = await db.query(`
       SELECT branch_id, COUNT(*) AS total
-      FROM Students
+      FROM "Students"
       WHERE branch_id IS NOT NULL
       GROUP BY branch_id
     `);
 
     // Teacher counts per branch
-    const [teacherCounts] = await db.query(`
+    const { rows: teacherCounts } = await db.query(`
       SELECT branch_id, COUNT(*) AS total
-      FROM Teachers
+      FROM "Teachers"
       WHERE branch_id IS NOT NULL
       GROUP BY branch_id
     `);
 
     // Class counts per branch
-    const [classCounts] = await db.query(`
+    const { rows: classCounts } = await db.query(`
       SELECT branch_id, COUNT(*) AS total
-      FROM Classes
+      FROM "Classes"
       WHERE branch_id IS NOT NULL
       GROUP BY branch_id
     `);

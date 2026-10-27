@@ -30,18 +30,20 @@ jobs:
       - run: flutter analyze
       - run: flutter test
 
-  # The app's data layer against the real API and MySQL (tool/live_api_test.sh).
+  # The app's data layer against the real API and PostgreSQL (tool/live_api_test.sh).
   live-api:
     runs-on: ubuntu-latest
     services:
-      mysql:
-        image: mysql:8.0
+      postgres:
+        image: postgres:18
         env:
-          MYSQL_ROOT_PASSWORD: root
+          POSTGRES_USER: school_test
+          POSTGRES_PASSWORD: school_test
+          POSTGRES_DB: postgres
         ports:
-          - 3306:3306
+          - 5432:5432
         options: >-
-          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -proot"
+          --health-cmd="pg_isready -U school_test"
           --health-interval=5s --health-timeout=5s --health-retries=30
     steps:
       - uses: actions/checkout@v4
@@ -62,9 +64,10 @@ jobs:
       - run: tool/live_api_test.sh
         working-directory: mobile/teacher_app
         env:
-          MYSQL_HOST: 127.0.0.1
-          MYSQL_USER: root
-          MYSQL_PASSWORD: root
+          LIVE_DB_DIALECT: postgres
+          LIVE_DB_HOST: 127.0.0.1
+          LIVE_DB_USER: school_test
+          LIVE_DB_PASSWORD: school_test
 
   apk:
     needs: test

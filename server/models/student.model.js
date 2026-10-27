@@ -1,29 +1,29 @@
-import db from "../config/db.config.js";
+import db from "../src/shared/db/index.js";
 import { branchFilter } from "../utils/branchFilter.js";
 
 // Get all students (scoped to branch when branchId provided)
 const getAllStudents = async (branchId = null) => {
   try {
     const { clause, params } = branchFilter(branchId, "s");
-    const [rows] = await db.query(
+    const { rows } = await db.query(
       `SELECT
-        s.StudentID,
-        s.FirstName,
-        s.LastName,
-        s.RollNumber,
-        s.DateOfBirth,
-        s.Gender,
-        s.ClassID,
-        s.AdmissionDate,
-        s.Address,
-        s.ParentContact,
+        s."StudentID",
+        s."FirstName",
+        s."LastName",
+        s."RollNumber",
+        s."DateOfBirth",
+        s."Gender",
+        s."ClassID",
+        s."AdmissionDate",
+        s."Address",
+        s."ParentContact",
         s.branch_id,
-        c.ClassName,
-        c.Section
-      FROM Students s
-      LEFT JOIN Classes c ON s.ClassID = c.ClassID
+        c."ClassName",
+        c."Section"
+      FROM "Students" s
+      LEFT JOIN "Classes" c ON s."ClassID" = c."ClassID"
       WHERE 1=1 ${clause}
-      ORDER BY s.StudentID DESC`,
+      ORDER BY s."StudentID" DESC`,
       params,
     );
     return rows;
@@ -38,8 +38,8 @@ const findOrCreateClass = async (className, section, branchId = null) => {
     const branchClause = branchId != null ? "AND branch_id = ?" : "";
     const branchParam = branchId != null ? [branchId] : [];
 
-    const [existingClass] = await db.query(
-      `SELECT ClassID FROM Classes WHERE ClassName = ? AND Section = ? ${branchClause}`,
+    const { rows: existingClass } = await db.query(
+      `SELECT "ClassID" FROM "Classes" WHERE "ClassName" = ? AND "Section" = ? ${branchClause}`,
       [className, section, ...branchParam],
     );
 
@@ -49,18 +49,14 @@ const findOrCreateClass = async (className, section, branchId = null) => {
 
     // If not found, create new class (with branch_id when provided)
     if (branchId != null) {
-      const [result] = await db.query(
-        "INSERT INTO Classes (ClassName, Section, branch_id) VALUES (?, ?, ?)",
+      return await db.insert(
+        `INSERT INTO "Classes" ("ClassName", "Section", branch_id) VALUES (?, ?, ?)`,
         [className, section, branchId],
+        "ClassID",
       );
-      return result.insertId;
     }
 
-    const [result] = await db.query(
-      "INSERT INTO Classes (ClassName, Section) VALUES (?, ?)",
-      [className, section],
-    );
-    return result.insertId;
+    return await db.insert(`INSERT INTO "Classes" ("ClassName", "Section") VALUES (?, ?)`, [className, section], "ClassID");
   } catch (err) {
     throw new Error("Error finding or creating class: " + err.message);
   }
@@ -86,19 +82,19 @@ const addStudent = async (studentData, branchId = null) => {
     let sql, values;
     if (branchId != null) {
       sql =
-        "INSERT INTO Students (FirstName, LastName, DateOfBirth, Gender, ClassID, AdmissionDate, Address, ParentContact, RollNumber, branch_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        `INSERT INTO "Students" ("FirstName", "LastName", "DateOfBirth", "Gender", "ClassID", "AdmissionDate", "Address", "ParentContact", "RollNumber", branch_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
       values = [FirstName, LastName, DateOfBirth, Gender, classId, AdmissionDate, Address, ParentContact, RollNumber, branchId];
     } else {
       sql =
-        "INSERT INTO Students (FirstName, LastName, DateOfBirth, Gender, ClassID, AdmissionDate, Address, ParentContact, RollNumber) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        `INSERT INTO "Students" ("FirstName", "LastName", "DateOfBirth", "Gender", "ClassID", "AdmissionDate", "Address", "ParentContact", "RollNumber") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`;
       values = [FirstName, LastName, DateOfBirth, Gender, classId, AdmissionDate, Address, ParentContact, RollNumber];
     }
 
-    const [result] = await db.query(sql, values);
+    const studentID = await db.insert(sql, values, "StudentID");
 
     return {
       message: "Student added successfully",
-      studentID: result.insertId,
+      studentID,
       roll_number: RollNumber,
     };
   } catch (err) {
@@ -112,34 +108,29 @@ const addStudent = async (studentData, branchId = null) => {
 // A student with fee invoices is never deleted: the fee history is a
 // financial record (FeeInvoices.student_id is ON DELETE RESTRICT).
 const BLOCKED_BY_FEE_RECORDS = { blocked: "student_has_fee_records" };
-const isReferencedRowError = (error) => error?.code === "ER_ROW_IS_REFERENCED_2";
 
 const deleteStudent = async (studentID, branchId = null) => {
   const student = await getStudentById(studentID, branchId);
   if (!student) return null;
 
-  const [[{ invoices }]] = await db.query(
-    "SELECT COUNT(*) AS invoices FROM FeeInvoices WHERE student_id = ?",
+  const { invoices } = await db.one(
+    `SELECT COUNT(*) AS invoices FROM "FeeInvoices" WHERE student_id = ?`,
     [studentID],
   );
   if (Number(invoices) > 0) return BLOCKED_BY_FEE_RECORDS;
 
-  const connection = await db.getConnection();
   try {
-    await connection.beginTransaction();
-    // Remove child records first (FK constraints, no CASCADE)
-    await connection.query("DELETE FROM Attendance WHERE StudentID = ?", [studentID]);
-    await connection.query("DELETE FROM Results WHERE StudentID = ?", [studentID]);
-    await connection.query("DELETE FROM Students WHERE StudentID = ?", [studentID]);
-    await connection.commit();
+    await db.withTransaction(async (tx) => {
+      // Remove child records first (FK constraints, no CASCADE)
+      await tx.query(`DELETE FROM "Attendance" WHERE "StudentID" = ?`, [studentID]);
+      await tx.query(`DELETE FROM "Results" WHERE "StudentID" = ?`, [studentID]);
+      await tx.query(`DELETE FROM "Students" WHERE "StudentID" = ?`, [studentID]);
+    });
     return { message: "Student deleted successfully" };
   } catch (error) {
-    await connection.rollback();
     // Invoices created between the check above and the delete.
-    if (isReferencedRowError(error)) return BLOCKED_BY_FEE_RECORDS;
+    if (db.isForeignKeyViolation(error)) return BLOCKED_BY_FEE_RECORDS;
     throw new Error("Error deleting student: " + error.message);
-  } finally {
-    connection.release();
   }
 };
 
@@ -165,19 +156,19 @@ const updateStudent = async (studentID, studentData, branchId = null) => {
     // Keep the student in their own branch's class namespace.
     const classId = await findOrCreateClass(Class, Section, existing.branch_id);
 
-    const sql = `UPDATE Students SET
-      FirstName = ?,
-      LastName = ?,
-      DateOfBirth = ?,
-      Gender = ?,
-      ClassID = ?,
-      AdmissionDate = ?,
-      Address = ?,
-      ParentContact = ?,
-      RollNumber = ?
-      WHERE StudentID = ?`;
+    const sql = `UPDATE "Students" SET
+      "FirstName" = ?,
+      "LastName" = ?,
+      "DateOfBirth" = ?,
+      "Gender" = ?,
+      "ClassID" = ?,
+      "AdmissionDate" = ?,
+      "Address" = ?,
+      "ParentContact" = ?,
+      "RollNumber" = ?
+      WHERE "StudentID" = ?`;
 
-    const [result] = await db.query(sql, [
+    const result = await db.query(sql, [
       FirstName,
       LastName,
       DateOfBirth,
@@ -199,11 +190,11 @@ const updateStudent = async (studentID, studentData, branchId = null) => {
 const getStudentCount = async (branchId = null) => {
   const { clause, params } = branchFilter(branchId);
   try {
-    const [result] = await db.query(
-      `SELECT COUNT(*) AS totalStudents FROM Students WHERE 1=1 ${clause}`,
+    const result = await db.query(
+      `SELECT COUNT(*) AS "totalStudents" FROM "Students" WHERE 1=1 ${clause}`,
       params,
     );
-    return { totalStudents: result[0].totalStudents };
+    return { totalStudents: result.rows[0].totalStudents };
   } catch (error) {
     throw new Error("Error fetching student count: " + error.message);
   }
@@ -212,24 +203,24 @@ const getStudentCount = async (branchId = null) => {
 const getStudentById = async (studentID, branchId = null) => {
   const { clause, params } = branchFilter(branchId, "s");
   try {
-    const [results] = await db.query(
+    const { rows: results } = await db.query(
       `SELECT
-        s.StudentID,
-        s.FirstName,
-        s.LastName,
-        s.RollNumber,
-        s.DateOfBirth,
-        s.Gender,
-        s.ClassID,
-        s.AdmissionDate,
-        s.Address,
-        s.ParentContact,
+        s."StudentID",
+        s."FirstName",
+        s."LastName",
+        s."RollNumber",
+        s."DateOfBirth",
+        s."Gender",
+        s."ClassID",
+        s."AdmissionDate",
+        s."Address",
+        s."ParentContact",
         s.branch_id,
-        c.ClassName,
-        c.Section
-      FROM Students s
-      LEFT JOIN Classes c ON s.ClassID = c.ClassID
-      WHERE s.StudentID = ? ${clause}`,
+        c."ClassName",
+        c."Section"
+      FROM "Students" s
+      LEFT JOIN "Classes" c ON s."ClassID" = c."ClassID"
+      WHERE s."StudentID" = ? ${clause}`,
       [studentID, ...params],
     );
 
@@ -242,25 +233,25 @@ const getStudentById = async (studentID, branchId = null) => {
 const getStudentsByClass = async (className, branchId = null) => {
   const { clause, params } = branchFilter(branchId, "s");
   try {
-    const [rows] = await db.query(
+    const { rows } = await db.query(
       `SELECT
-        s.StudentID,
-        s.FirstName,
-        s.LastName,
-        s.RollNumber,
-        s.DateOfBirth,
-        s.Gender,
-        s.ClassID,
-        s.AdmissionDate,
-        s.Address,
-        s.ParentContact,
+        s."StudentID",
+        s."FirstName",
+        s."LastName",
+        s."RollNumber",
+        s."DateOfBirth",
+        s."Gender",
+        s."ClassID",
+        s."AdmissionDate",
+        s."Address",
+        s."ParentContact",
         s.branch_id,
-        c.ClassName,
-        c.Section
-      FROM Students s
-      LEFT JOIN Classes c ON s.ClassID = c.ClassID
-      WHERE c.ClassName = ? ${clause}
-      ORDER BY c.Section, s.RollNumber`,
+        c."ClassName",
+        c."Section"
+      FROM "Students" s
+      LEFT JOIN "Classes" c ON s."ClassID" = c."ClassID"
+      WHERE c."ClassName" = ? ${clause}
+      ORDER BY c."Section", s."RollNumber"`,
       [className, ...params],
     );
     return rows;
@@ -274,8 +265,8 @@ const checkRollNumberExists = async (rollNumber, className, section, excludeStud
     const branchClause = branchId != null ? "AND c.branch_id = ?" : "";
     const branchParam = branchId != null ? [branchId] : [];
 
-    const [classResult] = await db.query(
-      `SELECT c.ClassID FROM Classes c WHERE c.ClassName = ? AND c.Section = ? ${branchClause}`,
+    const { rows: classResult } = await db.query(
+      `SELECT c."ClassID" FROM "Classes" c WHERE c."ClassName" = ? AND c."Section" = ? ${branchClause}`,
       [className, section, ...branchParam],
     );
 
@@ -283,15 +274,15 @@ const checkRollNumberExists = async (rollNumber, className, section, excludeStud
 
     const classID = classResult[0].ClassID;
 
-    let sql = "SELECT StudentID FROM Students WHERE RollNumber = ? AND ClassID = ?";
+    let sql = `SELECT "StudentID" FROM "Students" WHERE "RollNumber" = ? AND "ClassID" = ?`;
     const paramArr = [rollNumber, classID];
 
     if (excludeStudentID) {
-      sql += " AND StudentID != ?";
+      sql += ` AND "StudentID" != ?`;
       paramArr.push(excludeStudentID);
     }
 
-    const [rows] = await db.query(sql, paramArr);
+    const { rows } = await db.query(sql, paramArr);
     return rows.length > 0;
   } catch (error) {
     throw new Error("Error checking roll number: " + error.message);
@@ -301,12 +292,12 @@ const checkRollNumberExists = async (rollNumber, className, section, excludeStud
 const getStudentsByClassAndSection = async (className, section, branchId = null) => {
   const { clause, params } = branchFilter(branchId, "s");
   try {
-    const [rows] = await db.query(
-      `SELECT s.*, s.branch_id, c.ClassName, c.Section
-      FROM Students s
-      JOIN Classes c ON s.ClassID = c.ClassID
-      WHERE c.ClassName = ? AND c.Section = ? ${clause}
-      ORDER BY s.RollNumber`,
+    const { rows } = await db.query(
+      `SELECT s.*, s.branch_id, c."ClassName", c."Section"
+      FROM "Students" s
+      JOIN "Classes" c ON s."ClassID" = c."ClassID"
+      WHERE c."ClassName" = ? AND c."Section" = ? ${clause}
+      ORDER BY s."RollNumber"`,
       [className, section, ...params],
     );
     return rows;
@@ -321,50 +312,50 @@ const searchStudents = async (filters, branchId = null) => {
 
   let query = `
     SELECT
-      s.StudentID,
-      s.FirstName,
-      s.LastName,
-      s.RollNumber,
-      s.DateOfBirth,
-      s.Gender,
-      s.ClassID,
-      s.AdmissionDate,
-      s.Address,
-      s.ParentContact,
+      s."StudentID",
+      s."FirstName",
+      s."LastName",
+      s."RollNumber",
+      s."DateOfBirth",
+      s."Gender",
+      s."ClassID",
+      s."AdmissionDate",
+      s."Address",
+      s."ParentContact",
       s.branch_id,
-      c.ClassName,
-      c.Section
-    FROM Students s
-    LEFT JOIN Classes c ON s.ClassID = c.ClassID
+      c."ClassName",
+      c."Section"
+    FROM "Students" s
+    LEFT JOIN "Classes" c ON s."ClassID" = c."ClassID"
     WHERE 1=1 ${clause}
   `;
   const queryParams = [...params];
 
   if (FirstName) {
-    query += " AND s.FirstName LIKE ?";
+    query += ` AND s."FirstName" LIKE ?`;
     queryParams.push(`%${FirstName}%`);
   }
   if (LastName) {
-    query += " AND s.LastName LIKE ?";
+    query += ` AND s."LastName" LIKE ?`;
     queryParams.push(`%${LastName}%`);
   }
   if (RollNumber) {
-    query += " AND s.RollNumber = ?";
+    query += ` AND s."RollNumber" = ?`;
     queryParams.push(RollNumber);
   }
   if (Class) {
-    query += " AND c.ClassName = ?";
+    query += ` AND c."ClassName" = ?`;
     queryParams.push(Class);
   }
   if (Section) {
-    query += " AND c.Section = ?";
+    query += ` AND c."Section" = ?`;
     queryParams.push(Section);
   }
 
-  query += " ORDER BY s.StudentID DESC";
+  query += ` ORDER BY s."StudentID" DESC`;
 
   try {
-    const [rows] = await db.query(query, queryParams);
+    const { rows } = await db.query(query, queryParams);
     return rows;
   } catch (error) {
     throw new Error("Error searching students: " + error.message);
@@ -375,8 +366,8 @@ const searchStudents = async (filters, branchId = null) => {
 const getAllClasses = async (branchId = null) => {
   const { clause, params } = branchFilter(branchId);
   try {
-    const [rows] = await db.query(
-      `SELECT * FROM Classes WHERE 1=1 ${clause} ORDER BY ClassName, Section`,
+    const { rows } = await db.query(
+      `SELECT * FROM "Classes" WHERE 1=1 ${clause} ORDER BY "ClassName", "Section"`,
       params,
     );
     return rows;
