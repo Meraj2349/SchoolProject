@@ -15,7 +15,7 @@ import { useBranches } from "@/hooks/useBranches";
 import { branchName } from "@/lib/branches";
 import { useLanguageStore, useTranslations } from "@/store/languageStore";
 import { useBranchStore } from "@/store/branchStore";
-import { Badge, ChooseBranchNotice } from "@/components/admin/ui";
+import { Badge, ChooseBranchNotice, errorMessage } from "@/components/admin/ui";
 import AppAccessDrawer from "./AppAccessDrawer";
 import { useWriteBranch } from "@/hooks/useWriteBranch";
 import {
@@ -93,7 +93,7 @@ export default function AdminPage() {
       flash(editId ? t("teacherUpdated") : t("teacherAdded"));
       reset();
     } catch (err) {
-      flash(err.message || t("operationFailed"), true);
+      flash(errorMessage(err, t("operationFailed")), true);
     }
   };
 
@@ -211,10 +211,11 @@ export default function AdminPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {TEXT_FIELDS.map(([name, label, req]) => (
                 <div key={name}>
-                  <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
+                  <label htmlFor={`teacher-${name}`} className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
                     {label}
                   </label>
                   <input
+                    id={`teacher-${name}`}
                     type="text"
                     name={name}
                     value={form[name]}
@@ -225,10 +226,11 @@ export default function AdminPage() {
                 </div>
               ))}
               <div>
-                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
+                <label htmlFor="teacher-JoiningDate" className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
                   {t("joiningDate")}
                 </label>
                 <input
+                  id="teacher-JoiningDate"
                   type="date"
                   name="JoiningDate"
                   value={form.JoiningDate}
@@ -274,12 +276,13 @@ export default function AdminPage() {
           <div className="flex flex-wrap gap-3 items-end">
             {/* Search by name */}
             <div className="flex-1 min-w-48">
-              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
+              <label htmlFor="teacher-filter-search" className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
                 Search
               </label>
               <div className="relative">
                 <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs pointer-events-none" />
                 <input
+                  id="teacher-filter-search"
                   type="text"
                   name="search"
                   value={filters.search}
@@ -292,10 +295,11 @@ export default function AdminPage() {
 
             {/* Subject filter */}
             <div className="min-w-40">
-              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
+              <label htmlFor="teacher-filter-subject" className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
                 Subject
               </label>
               <select
+                id="teacher-filter-subject"
                 name="subject"
                 value={filters.subject}
                 onChange={handleFilterChange}
@@ -313,10 +317,11 @@ export default function AdminPage() {
             {/* Class filter */}
             {classOptions.length > 0 && (
               <div className="min-w-40">
-                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
+                <label htmlFor="teacher-filter-class" className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
                   Class
                 </label>
                 <select
+                  id="teacher-filter-class"
                   name="classId"
                   value={filters.classId}
                   onChange={handleFilterChange}

@@ -127,10 +127,11 @@ export default function AdminNoticesPage() {
         </div>
         <div className="p-6 space-y-4">
           <div>
-            <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
+            <label htmlFor="notice-titleLabel" className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
               {t("titleLabel")}
             </label>
             <input
+              id="notice-titleLabel"
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
@@ -139,10 +140,11 @@ export default function AdminNoticesPage() {
             />
           </div>
           <div>
-            <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
+            <label htmlFor="notice-descriptionLabel" className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
               {t("descriptionLabel")}
             </label>
             <textarea
+              id="notice-descriptionLabel"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder={t("descriptionPlaceholder")}
@@ -226,6 +228,7 @@ export default function AdminNoticesPage() {
                         onClick={() => handleToggleShow(n)}
                         disabled={!canManage(n)}
                         aria-label={t("show")}
+                        aria-pressed={n.Show === 1 || n.Show === true}
                         className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors border-none cursor-pointer disabled:cursor-not-allowed disabled:opacity-60 ${n.Show === 1 || n.Show === true ? "bg-indigo-600" : "bg-slate-300"}`}
                       >
                         <span

@@ -177,10 +177,11 @@ export default function AdminNoticeAnnouncementsPage() {
         </div>
         <div className="p-6 space-y-4">
           <div>
-            <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
+            <label htmlFor="announcement-titleBn" className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
               {t("titleBn")}
             </label>
             <input
+              id="announcement-titleBn"
               type="text"
               value={titleBn}
               onChange={(e) => setTitleBn(e.target.value)}
@@ -189,10 +190,11 @@ export default function AdminNoticeAnnouncementsPage() {
             />
           </div>
           <div>
-            <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
+            <label htmlFor="announcement-titleEn" className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
               {t("titleEn")}
             </label>
             <input
+              id="announcement-titleEn"
               type="text"
               value={titleEn}
               onChange={(e) => setTitleEn(e.target.value)}
@@ -202,10 +204,11 @@ export default function AdminNoticeAnnouncementsPage() {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
+              <label htmlFor="announcement-category" className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
                 {t("category")}
               </label>
               <select
+                id="announcement-category"
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
                 className="form-input"
@@ -219,10 +222,11 @@ export default function AdminNoticeAnnouncementsPage() {
               </select>
             </div>
             <div>
-              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
+              <label htmlFor="announcement-date" className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
                 {t("date")}
               </label>
               <input
+                id="announcement-date"
                 type="date"
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
@@ -231,10 +235,11 @@ export default function AdminNoticeAnnouncementsPage() {
             </div>
           </div>
           <div>
-            <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
+            <label htmlFor="announcement-image" className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
               {t("image")} {editId ? t("imageOptional") : ""}
             </label>
             <input
+              id="announcement-image"
               type="file"
               accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
               onChange={(e) => setImageFile(e.target.files[0] || null)}

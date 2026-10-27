@@ -149,6 +149,12 @@ export function findNavItem(pathname) {
   return best;
 }
 
+/** Whether a role may open a page: a super-admin-only page (or one under it) is the super admin's alone. */
+export function canOpen(pathname, role) {
+  const match = findNavItem(pathname);
+  return !match || canSee(match.item, role);
+}
+
 export function breadcrumbsFor(pathname) {
   const home = { key: "admin.shell.home", path: ADMIN_HOME };
   const match = findNavItem(pathname);

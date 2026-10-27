@@ -7,7 +7,7 @@ import { classesService } from "@/services/classes.service";
 import { queryKeys } from "@/lib/queryKeys";
 import { useTranslations } from "@/store/languageStore";
 import { useBranchStore } from "@/store/branchStore";
-import { ChooseBranchNotice } from "@/components/admin/ui";
+import { ChooseBranchNotice, errorMessage } from "@/components/admin/ui";
 import { useWriteBranch } from "@/hooks/useWriteBranch";
 import { FiEdit2, FiTrash2, FiBook, FiPlusCircle, FiX } from "react-icons/fi";
 
@@ -79,7 +79,7 @@ export default function AdminPage() {
       if (editId) await update.mutateAsync({ id: editId, data: form });
       else await create.mutateAsync(form);
     } catch (err) {
-      flash(err.message || t("operationFailed"), true);
+      flash(errorMessage(err, t("operationFailed")), true);
     }
   };
 
@@ -119,10 +119,14 @@ export default function AdminPage() {
           <form onSubmit={handleSave} className="p-6">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
+                <label
+                  htmlFor="subject-SubjectName"
+                  className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5"
+                >
                   {t("subjectName")}
                 </label>
                 <input
+                  id="subject-SubjectName"
                   type="text"
                   name="SubjectName"
                   value={form.SubjectName}
@@ -132,10 +136,14 @@ export default function AdminPage() {
                 />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
+                <label
+                  htmlFor="subject-ClassID"
+                  className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5"
+                >
                   {t("className")}
                 </label>
                 <select
+                  id="subject-ClassID"
                   name="ClassID"
                   value={form.ClassID}
                   onChange={handleChange}
@@ -188,10 +196,14 @@ export default function AdminPage() {
         <div className="px-6 py-4 border-b border-slate-100 bg-slate-50/60">
           <div className="flex flex-wrap gap-3 items-end">
             <div className="min-w-52">
-              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
+              <label
+                htmlFor="subject-filter-by-class"
+                className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5"
+              >
                 Filter by Class
               </label>
               <select
+                id="subject-filter-by-class"
                 value={filterClassId}
                 onChange={(e) => setFilterClassId(e.target.value)}
                 className="form-input"

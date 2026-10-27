@@ -10,7 +10,7 @@ import { studentsService } from "@/services/students.service";
 import { queryKeys } from "@/lib/queryKeys";
 import { useTranslations } from "@/store/languageStore";
 import { useBranchStore } from "@/store/branchStore";
-import { ChooseBranchNotice } from "@/components/admin/ui";
+import { ChooseBranchNotice, errorMessage } from "@/components/admin/ui";
 import { useWriteBranch } from "@/hooks/useWriteBranch";
 import {
   FiAward,
@@ -105,8 +105,7 @@ export default function AdminPage() {
         marksObtained: "",
       }));
     },
-    onError: (err) =>
-      flash(err?.response?.data?.message || err.message || t("failed"), true),
+    onError: (err) => flash(errorMessage(err, t("failed")), true),
   });
 
   const edit = useMutation({
@@ -119,7 +118,7 @@ export default function AdminPage() {
       flash(t("resultUpdated") || "Result updated");
       setEditRow(null);
     },
-    onError: (err) => flash(err.message || t("failed"), true),
+    onError: (err) => flash(errorMessage(err, t("failed")), true),
   });
 
   const remove = useMutation({
@@ -130,7 +129,7 @@ export default function AdminPage() {
       });
       flash(t("deleted") || "Result deleted");
     },
-    onError: (err) => flash(err.message || t("failed"), true),
+    onError: (err) => flash(errorMessage(err, t("failed")), true),
   });
 
   /* ── helpers ── */
@@ -262,10 +261,14 @@ export default function AdminPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {/* Class */}
               <div>
-                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
+                <label
+                  htmlFor="result-className"
+                  className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5"
+                >
                   {t("className")}
                 </label>
                 <select
+                  id="result-className"
                   name="className"
                   value={form.className}
                   onChange={(e) => {
@@ -295,10 +298,14 @@ export default function AdminPage() {
 
               {/* Section */}
               <div>
-                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
+                <label
+                  htmlFor="result-section"
+                  className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5"
+                >
                   {t("section")}
                 </label>
                 <select
+                  id="result-section"
                   name="section"
                   value={form.section}
                   onChange={(e) => {
@@ -334,7 +341,10 @@ export default function AdminPage() {
               {/* Student picker — shown once class+section are selected */}
               {canFetchStudents && (
                 <div className="sm:col-span-2">
-                  <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
+                  <label
+                    htmlFor="result-student"
+                    className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5"
+                  >
                     Student
                     {studentsLoading && (
                       <span className="ml-2 text-indigo-400 normal-case font-normal">
@@ -343,6 +353,7 @@ export default function AdminPage() {
                     )}
                   </label>
                   <select
+                    id="result-student"
                     value={form.studentId}
                     onChange={(e) => {
                       const sid = e.target.value;
@@ -389,10 +400,14 @@ export default function AdminPage() {
               {!canFetchStudents && (
                 <>
                   <div>
-                    <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
+                    <label
+                      htmlFor="result-firstName"
+                      className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5"
+                    >
                       {t("firstName")}
                     </label>
                     <input
+                      id="result-firstName"
                       type="text"
                       name="firstName"
                       value={form.firstName}
@@ -403,10 +418,14 @@ export default function AdminPage() {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
+                    <label
+                      htmlFor="result-rollNumber"
+                      className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5"
+                    >
                       {t("rollNumber")}
                     </label>
                     <input
+                      id="result-rollNumber"
                       type="text"
                       name="rollNumber"
                       value={form.rollNumber}
@@ -421,10 +440,14 @@ export default function AdminPage() {
 
               {/* Exam */}
               <div>
-                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
+                <label
+                  htmlFor="result-examId"
+                  className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5"
+                >
                   {t("exam")}
                 </label>
                 <select
+                  id="result-examId"
                   name="examId"
                   value={form.examId}
                   onChange={handleChange}
@@ -442,10 +465,14 @@ export default function AdminPage() {
 
               {/* Subject */}
               <div>
-                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
+                <label
+                  htmlFor="result-subjectId"
+                  className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5"
+                >
                   {t("subject")}
                 </label>
                 <select
+                  id="result-subjectId"
                   name="subjectId"
                   value={form.subjectId}
                   onChange={handleChange}
@@ -463,10 +490,14 @@ export default function AdminPage() {
 
               {/* Marks obtained */}
               <div>
-                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
+                <label
+                  htmlFor="result-marksObtained"
+                  className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5"
+                >
                   {t("marksObtained")}
                 </label>
                 <input
+                  id="result-marksObtained"
                   type="number"
                   name="marksObtained"
                   value={form.marksObtained}
@@ -480,10 +511,14 @@ export default function AdminPage() {
 
               {/* Total marks */}
               <div>
-                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
+                <label
+                  htmlFor="result-totalMarks"
+                  className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5"
+                >
                   {t("totalMarks")}
                 </label>
                 <input
+                  id="result-totalMarks"
                   type="number"
                   name="totalMarks"
                   value={form.totalMarks}
@@ -530,12 +565,16 @@ export default function AdminPage() {
         <div className="px-6 py-4 border-b border-slate-100 bg-slate-50/60">
           <div className="flex flex-wrap gap-3 items-end">
             <div className="flex-1 min-w-48">
-              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
+              <label
+                htmlFor="result-filter-search"
+                className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5"
+              >
                 Search
               </label>
               <div className="relative">
                 <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs pointer-events-none" />
                 <input
+                  id="result-filter-search"
                   type="text"
                   name="search"
                   value={resultFilters.search}
@@ -546,10 +585,14 @@ export default function AdminPage() {
               </div>
             </div>
             <div className="min-w-40">
-              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
+              <label
+                htmlFor="result-filter-className"
+                className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5"
+              >
                 Class
               </label>
               <select
+                id="result-filter-className"
                 name="className"
                 value={resultFilters.className}
                 onChange={handleFilterChange}
@@ -564,10 +607,14 @@ export default function AdminPage() {
               </select>
             </div>
             <div className="min-w-32">
-              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
+              <label
+                htmlFor="result-filter-section"
+                className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5"
+              >
                 Section
               </label>
               <select
+                id="result-filter-section"
                 name="section"
                 value={resultFilters.section}
                 onChange={handleFilterChange}
@@ -787,10 +834,14 @@ export default function AdminPage() {
 
             {/* Marks input */}
             <div className="px-6 py-5">
-              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
+              <label
+                htmlFor="result-marks-obtained"
+                className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5"
+              >
                 Marks Obtained
               </label>
               <input
+                id="result-marks-obtained"
                 type="number"
                 value={editMarks}
                 onChange={(e) => setEditMarks(e.target.value)}

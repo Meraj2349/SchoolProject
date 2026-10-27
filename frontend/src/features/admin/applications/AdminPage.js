@@ -185,6 +185,7 @@ export default function AdminApplicationsPage() {
                     <td className="table-cell">
                       <select
                         className="status-select"
+                        aria-label={`${t("updateStatus")}: ${app.applicant_name}`}
                         value={app.status}
                         onChange={(e) =>
                           handleStatusChange(app.id, e.target.value)
