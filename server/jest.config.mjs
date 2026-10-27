@@ -21,5 +21,12 @@ export default {
       globalSetup: "<rootDir>/tests/integration/globalSetup.js",
       setupFiles: ["<rootDir>/tests/integration/env.js"],
     },
+    {
+      // The MySQL → PostgreSQL data copy: needs both servers at once.
+      displayName: "copy",
+      testEnvironment: "node",
+      transform: {},
+      roots: ["<rootDir>/tests/copy"],
+    },
   ],
 };

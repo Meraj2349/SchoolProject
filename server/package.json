@@ -14,7 +14,9 @@
     "test:watch": "node --experimental-vm-modules node_modules/jest/bin/jest.js --selectProjects unit --watch",
     "test:coverage": "node --experimental-vm-modules node_modules/jest/bin/jest.js --selectProjects unit --coverage",
     "test:integration": "node --experimental-vm-modules node_modules/jest/bin/jest.js --selectProjects integration --runInBand",
+    "test:copy": "node --experimental-vm-modules node_modules/jest/bin/jest.js --selectProjects copy --runInBand",
     "db:migrate": "node scripts/migrate.js",
+    "db:copy-from-mysql": "node scripts/mysql-to-postgres/index.js",
     "db:new": "dbmate --migrations-dir db/migrations new",
     "test:all": "node --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand",
     "seed:quiz": "node scripts/seedQuizQuestions.js"
