@@ -37,6 +37,9 @@ docker compose --profile mysql up -d
 
 This also starts the empty `postgres` service and runs the `migrate`
 service, which builds the PostgreSQL schema. The app doesn't use PostgreSQL yet.
+The backend doesn't wait for MySQL, so right after `up` its log may show
+`Database connection failed` for the first seconds; it reconnects as soon as
+MySQL is ready.
 
 ## 1. A read-only MySQL user for the copy
 
@@ -197,6 +200,7 @@ for up to 48 hours.
    ```
 2. **Back up MySQL** as it is now; it's the rollback copy:
    ```bash
+   mkdir -p /var/backups/school
    docker compose exec -T db mysqldump -uroot -p"$MYSQL_ROOT_PASSWORD" --single-transaction --routines School_Management \
      | gzip > /var/backups/school/mysql-final-$(date +%Y%m%d-%H%M).sql.gz
    ```
@@ -210,17 +214,30 @@ for up to 48 hours.
    `copy` ends with `Copied and verified N tables` and `verify` ends with
    `All N tables match`. Anything else: stop and roll back (section 6),
    which at this point only means starting the backend again.
-4. **Switch the backend to PostgreSQL** in `.env`:
+4. **Switch the backend to PostgreSQL.** Keep the old `.env` for the
+   rollback, then change these four lines in `.env`:
+   ```bash
+   cp .env .env.before-cutover
+   ```
    ```bash
    DB_DIALECT=postgres
    DB_HOST=postgres
    DB_USER=school
-   DB_PASSWORD=          # empty: compose then uses POSTGRES_PASSWORD
+   DB_PASSWORD=
    ```
-   Then start it, keeping the MySQL service running for the rollback:
+   Leave `DB_PASSWORD` empty, and don't put a comment on its line: in
+   `.env` the comment would become the password. When it's empty, compose
+   uses `POSTGRES_PASSWORD`. Check before starting:
+   ```bash
+   docker compose config | grep -E 'DB_(DIALECT|HOST|USER):'   # postgres, postgres, school
+   ```
+   Then start the backend, keeping the MySQL service running for the
+   rollback, and note the time: from here on, new data goes to PostgreSQL
+   only.
    ```bash
    docker compose --profile mysql up -d
-   docker compose logs --tail=50 backend
+   date '+%Y-%m-%d %H:%M:%S%z' | tee /var/backups/school/switch-time.txt
+   docker compose logs --tail=50 backend      # "Connected to the database"
    ```
 5. **Smoke test** (section 7) against the live site.
 6. **Reopen:** tell the branch admins. Watch `docker compose logs -f backend`
@@ -237,19 +254,28 @@ again**, because it would replace the new data with MySQL's old data.
 Possible until the go/no-go, 48 hours after reopening. MySQL is untouched:
 the copy only read it.
 
-- **Before reopening (step 3–5 failed):** set `.env` back to the MySQL
-  settings of section 0 and run `docker compose --profile mysql up -d`. Nothing
-  is lost.
-- **After reopening:** the same switch, but anything saved since reopening
-  (attendance, fees, results) is only in PostgreSQL. List it before switching
-  and enter it again on MySQL. Per table, compare with `cutover-verify.txt`,
-  e.g. for attendance:
+The switch back is the same in both cases:
+
+```bash
+cp .env.before-cutover .env
+docker compose --profile mysql up -d
+docker compose exec -T backend sh -c 'echo $DB_DIALECT'   # mysql
+```
+
+- **Before reopening (step 3–5 failed):** nothing is lost, apart from what
+  the smoke test saved.
+- **After reopening:** anything saved since the switch (attendance, fees,
+  results) is only in PostgreSQL. List it before switching back and enter it
+  again on MySQL. For attendance, using the time in `switch-time.txt`:
   ```bash
   docker compose exec -T postgres psql -U school -d School_Management \
-    -c "SELECT * FROM \"Attendance\" WHERE \"UpdatedAt\" > '<reopening time>+06'"
+    -c "SELECT \"AttendanceID\", \"StudentID\", \"ClassDate\", \"Status\", \"MarkedByType\", \"UpdatedAt\"
+        FROM \"Attendance\" WHERE \"UpdatedAt\" > '$(cat /var/backups/school/switch-time.txt)' ORDER BY \"UpdatedAt\""
   ```
-  Attendance teachers took in the app since reopening is in that list
-  too; an admin enters it on the website after the switch.
+  This also lists the attendance teachers took in the app since then; an
+  admin enters it on the website after the switch. Do the same for other
+  tables with an `UpdatedAt`/`updated_at` or `created_at` column, and
+  compare row counts with `cutover-verify.txt`.
 
 **Go / no-go after 48 hours:** go if there are no unexplained 500s, the
 nightly backup ran and was copied off the server, and the branch admins
