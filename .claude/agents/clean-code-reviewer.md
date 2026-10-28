@@ -25,6 +25,7 @@ review those.
      change? Run `npm test` in each touched package and report the result.
    - Tests assert behaviour (outputs, state, HTTP responses), not internals.
    - No `.skip`, `.only`, commented-out or deleted tests.
+   - A new public page/form or admin page/workflow has an `e2e/tests` case.
 2. **Architecture**
    - Dependency rule: `domain/` and `application/` import nothing from express,
      `src/shared/db`, `models/`, Cloudinary, `fs`.
@@ -41,6 +42,9 @@ review those.
    - Responses never include `error.message` or stack traces.
    - No secrets committed (check `.env`, `docker-compose.yml`, config files).
 5. **i18n**: new user-facing messages exist in both `en` and `bn`.
+6. **Schema**: a schema change is a new file in `server/db/migrations` (no
+   edits to applied ones); new text columns have a collation (`"C"` / `ci2`);
+   new foreign keys have an index.
 
 ## Output
 

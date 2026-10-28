@@ -83,7 +83,7 @@ services:
       TZ: Asia/Dhaka
       PGTZ: Asia/Dhaka
     ports:
-      - "5433:5432"
+      - "${POSTGRES_PORT:-5433}:5432"
     volumes:
       # PostgreSQL 18 images keep their data under /var/lib/postgresql.
       - postgres_data:/var/lib/postgresql

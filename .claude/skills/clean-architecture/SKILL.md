@@ -15,8 +15,15 @@ copy its shape.
 server/src/
 ├── shared/
 │   ├── errors/              DomainError, ValidationError, NotFoundError
-│   ├── http/sendError.js    domain error → HTTP status + translated message
-│   └── infrastructure/      adapters shared by modules (e.g. cloudinaryImageStorage)
+│   ├── db/                  the PostgreSQL client: db.query/…, db.withTransaction(tx => …),
+│   │                        `?` → $n placeholders, sql helpers (inList, insertList, …), migrate
+│   ├── http/                sendError (domain error → status + translated message),
+│   │                        errorHandler, requireRole, requireWriteBranch, rateLimit
+│   ├── infrastructure/      adapters shared by modules (cloudinaryImageStorage)
+│   ├── branchScope.js       canSee / canManage / assertCanManage / newRowBranch
+│   ├── paging.js            toPage({ page, pageSize })
+│   ├── schoolDate.js        school time zone (Asia/Dhaka), schoolToday(), addDays()
+│   └── bdMobile.js          normalizeBdMobile() for Bangladeshi phone numbers
 └── modules/<feature>/
     ├── domain/              entities, value objects, pure business rules
     ├── application/         use cases: make<Feature>UseCases({ ...ports })
@@ -60,7 +67,9 @@ arguments. That is what makes them testable with in-memory fakes.
   writes `{ success, message?, data? }`. Errors go through `sendError` — never
   put `error.message` in a response.
 - **Infrastructure**: SQL with `?` placeholders only (never string-built
-  values), `branchFilter()` for branch scoping, SDK calls. No business rules.
+  values), `branchFilter()` (`server/utils/branchFilter.js`) for branch
+  scoping, SDK calls. Several writes that belong together go in
+  `db.withTransaction(async (tx) => …)`. No business rules.
 
 ### Error codes are i18n keys
 
@@ -80,6 +89,28 @@ Move one feature at a time:
    functions (see `postgres-branch.repository.js`), then absorb the SQL later.
 4. Point the route file at the new controller; delete the old controller.
 5. Never change behaviour and structure in the same step.
+
+**Where the migration stands (Oct 2026).** Already modules in
+`server/src/modules`: admins, applications, attendance, branch, content,
+dashboard, exams, fees, gallery, job-applications, notifications, quiz,
+results, teacher-app. Still legacy (`server/controllers` + `server/models`):
+admin (auth), chairman, classes, event, routine, student, subjects, teacher.
+Check `ls server/controllers` for the current list. A change to one of those
+features starts by moving it.
+
+## Schema changes (PostgreSQL 18, dbmate)
+
+- Every change is a **new** migration: `cd server && npm run db:new -- <name>`
+  creates `server/db/migrations/<timestamp>_<name>.sql`. Applied by
+  `npm run db:migrate` and by the docker-compose `migrate` service. Never edit
+  an applied migration. DDL is transactional; `IF NOT EXISTS` works.
+- Table and column names keep their MySQL-era spelling and are quoted:
+  `"Students"."StudentID"`. API responses use the same keys.
+- A new text column gets a collation: `"C"` for statuses, codes, ids, phone
+  numbers and links; `ci2` for names, titles, emails and free text.
+- A new foreign key gets an index that starts with its columns.
+- The integration tests check the last two (`collations.test.js`,
+  `pgSchema.test.js`).
 
 ## Frontend layout (Next.js App Router)
 

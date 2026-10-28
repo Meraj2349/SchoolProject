@@ -4,7 +4,7 @@ description: Real stack and directory layout — differs significantly from the 
 type: project
 ---
 
-The SchoolProject at /home/meraj/Desktop/SchoolProject has two frontends:
+The SchoolProject (repo root, e.g. /home/meraj/IdeaProjects/SchoolProject) has one web frontend (`frontend/`, website + admin panel) and a Flutter teacher app (`mobile/teacher_app/`):
 
 **Backend** (`server/`):
 - Node.js + Express (plain JavaScript, ES modules, `"type": "module"`)
@@ -14,12 +14,7 @@ The SchoolProject at /home/meraj/Desktop/SchoolProject has two frontends:
 - Entry point: `server/app.js`
 - CORS is set to `http://localhost:5173` (see `server/app.js`)
 
-**Old Frontend** (`client/`) — React 18 + Vite (being replaced):
-- React 18 + Vite, Tailwind CSS v4, React Router DOM, Ant Design
-- Runs on port 5173 (`npm run dev`)
-- NOT the primary frontend going forward
-
-**New Frontend** (`frontend/`) — Next.js migration (primary):
+**Frontend** (`frontend/`) — Next.js (the old Vite `client/` app was removed):
 - Next.js 16.2.3 + React 19, App Router
 - Tailwind CSS v4, @tanstack/react-query v5, Ant Design v6, Framer Motion, Zustand v5
 - Runs on port 5173 (`npm run dev` — set via `next dev --port 5173` in package.json)
@@ -42,13 +37,11 @@ The SchoolProject at /home/meraj/Desktop/SchoolProject has two frontends:
 **Database**:
 - PostgreSQL 18 (docker compose service `postgres`, host port 5433); schema from `server/db/migrations` (dbmate format)
 - Database name: `School_Management`; connection settings in server/.env (DB_*)
-- Tables: Admin, Attendance, Classes, Exams, Images, Messages, Notices, Results, Routines, Students, Subjects, Teachers
-
-**web_application/** — Python Flask AI assistant app (unrelated to main school app)
+- Tables include Admin, Attendance, Classes, Exams, Images, Messages, Notices, Results, Routines, Students, Subjects, Teachers (full list: `server/db/migrations/20261024000000_initial_schema.sql`)
 
 **No separate admin panel** — Admin is built into the same Next.js `frontend/` app under `/admin/*` routes with layout at `src/app/admin/layout.js` (includes Sidebar + AdminGuard).
 
-Why: Migration from Vite/React (client/) to Next.js (frontend/) was performed. Always use frontend/ for new development.
+Why: The old Vite/React `client/` app was replaced by Next.js (`frontend/`) and deleted.
 How to apply: When working on this project, use the frontend/ directory for UI work. Backend is plain JS Express with PostgreSQL.
 
 ## Public Pages Design System — Navy/Gold (completed 2026-04-16)
@@ -82,7 +75,7 @@ Approach: Tailwind v4 + PostCSS is via `@tailwindcss/postcss` in `postcss.config
 ## Attendance System (completed 2026-04-14)
 
 Full attendance CRUD system was built. Key facts:
-- Backend model: raw SQL in `server/models/attendance.model.js` — `Attendance` table with `AttendanceID, StudentID, ClassID, ClassDate, Status` columns
+- (History; attendance has since moved to `server/src/modules/attendance`, see CLAUDE.md "Attendance") Original model: raw SQL — `Attendance` table with `AttendanceID, StudentID, ClassID, ClassDate, Status` columns
 - Backend routes registered at `/api/attendance` in `server/app.js`
 - Two key admin pages: `AdminPage.js` (mark attendance for a class/date — uses `upsertCell` per student), `AdminAttendanceGridPage.js` (interactive month grid — uses `getGrid` API which returns `{students, dates}` matrix)
 - `upsertCell` endpoint (`POST /attendance/cell`) auto-resolves `classID` from `studentId` server-side — frontend never needs to pass `classID`
@@ -93,7 +86,7 @@ Full attendance CRUD system was built. Key facts:
 ## Branch Multi-tenancy (fully implemented 2026-04-14)
 
 All major models accept `branchId = null` as last param. Pattern follows `student.model.js`:
-- `branchFilter(branchId, tableAlias?)` from `server/utils/branchFilter.js`
+- `branchFilter(branchId, tableAlias?)` from `server/utils/branchFilter.js` (modules also use `server/src/shared/branchScope.js`)
 - null branchId = super_admin (no filter); number = branch_admin (scoped)
 - All controllers read `req.branchId` (set by `authMiddleware`) and pass to model functions
 - All protected routes use `router.use(authMiddleware)` or per-route middleware

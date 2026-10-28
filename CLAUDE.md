@@ -33,6 +33,9 @@ cp server/.env.example server/.env # only for running the server without Docker
 docker compose up
 ```
 
+Ports, the first admin, smoke checks and start-up problems:
+`.claude/skills/run-project/SKILL.md`.
+
 ## Commands
 
 ```bash

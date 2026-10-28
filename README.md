@@ -24,7 +24,7 @@ docker compose up -d
 
 - API: http://localhost:3000
 - Website and admin panel: http://localhost:5174
-- PostgreSQL: `localhost:5433`, user `school`, database `School_Management`
+- PostgreSQL: `localhost:5433` (`POSTGRES_PORT` in `.env`), user `school`, database `School_Management`
 
 The one-shot `migrate` service applies `server/db/migrations` before the
 backend starts, so an empty database gets the whole schema and the branches.
